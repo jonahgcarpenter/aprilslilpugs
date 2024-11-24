@@ -1,10 +1,11 @@
 /* Color Variables */
 :root {
-  --primary-color: #b0d7ff; /* Powder blue */
-  --primary-hover-color: #8bbfe8; /* Slightly darker powder blue for hover */
-  --secondary-color: #333333; /* Dark grey/black background */
-  --accent-color: #e0e0e0; /* Light grey accent */
-  --text-color: #ffffff; /* White text */
+  --primary-color: #a3cef1; /* Light blue from palette */
+  --primary-hover-color: #6096ba; /* Mid blue for hover */
+  --secondary-color: #274c77; /* Dark blue for backgrounds */
+  --accent-color: #e7ecef; /* Light grey-blue for accents */
+  --text-color: #ffffff; /* Dark grey text for better contrast */
+  --text-color2: #333;
   --white-color: #ffffff; /* Pure white for highlights */
 }
 
@@ -13,7 +14,7 @@
 body {
   margin: 0;
   font-family: "Arial", sans-serif;
-  color: var(--text-color);
+  color: var(--text-color2);
   background-color: var(--secondary-color);
   overflow-x: hidden;
 }
@@ -55,7 +56,7 @@ p {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  color: var(--white-color);
+  color: var(--text-color2);
 }
 
 .navbar-hamburger {
@@ -79,7 +80,7 @@ p {
 .navbar-links-mobile-open {
   display: flex;
   flex-direction: column;
-  background-color: #333;
+  background-color: var(--primary-color);
   position: absolute;
   top: 60px; /* Position below the navbar */
   left: 10px; /* Slight offset from the left to align with the hamburger icon */
@@ -97,12 +98,12 @@ p {
 }
 
 .navbar-links a {
-  color: var(--white-color);
+  color: var(--text-color2);
   font-size: 1.2rem;
 }
 
 .navbar-links a:hover {
-  color: var(--secondary-color);
+  color: var(--text-color);
 }
 
 /* Responsive Navbar */
@@ -128,7 +129,7 @@ p {
 .bio {
   text-align: center;
   padding: 4rem 1rem;
-  background: linear-gradient(135deg, var(--secondary-color), var(--white-color));
+  background-color: var(--secondary-color);
   color: var(--text-color);
 }
 
@@ -143,11 +144,6 @@ p {
   line-height: 1.8;
   max-width: 800px;
   margin: 0 auto;
-}
-
-.bio p:hover {
-  color: var(--primary-hover-color);
-  transition: color 0.3s;
 }
 
 /* Media Section */
@@ -190,7 +186,7 @@ p {
 
 .media-button {
   background-color: var(--accent-color);
-  color: var(--text-color);
+  color: var(--text-color2);
   border: none;
   padding: 0.8rem 1.5rem;
   font-size: 1rem;
@@ -208,7 +204,7 @@ p {
 /* Contact Section */
 .contact-me-container {
   padding: 4rem 1rem;
-  background: linear-gradient(135deg, var(--white-color), var(--secondary-color));
+  background-color: var(--secondary-color);
   text-align: center;
 }
 
