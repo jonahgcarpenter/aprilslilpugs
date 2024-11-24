@@ -1,7 +1,7 @@
 import React from "react";
 import NavBar from "./components/NavBar";
 import Bio from "./components/Bio";
-import Media from "./components/Media";
+import Media from "./components/Puppies";
 import ContactMe from "./components/ContactMe";
 
 const App: React.FC = () => {
