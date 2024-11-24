@@ -1,22 +1,28 @@
 /* Color Variables */
 :root {
-  --primary-color: #a3cef1; /* Light blue from palette */
-  --primary-hover-color: #6096ba; /* Mid blue for hover */
-  --secondary-color: #274c77; /* Dark blue for backgrounds */
-  --accent-color: #e7ecef; /* Light grey-blue for accents */
-  --text-color: #ffffff; /* Dark grey text for better contrast */
+  --primary-color: #a3cef1;
+  --primary-hover-color: #6096ba;
+  --secondary-color: #274c77;
+  --accent-color: #e7ecef;
+  --text-color: #ffffff;
   --text-color2: #333;
-  --white-color: #ffffff; /* Pure white for highlights */
+  --white-color: #ffffff;
 }
 
-
 /* Global Styles */
-body {
+body, html {
   margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
   font-family: "Arial", sans-serif;
   color: var(--text-color2);
   background-color: var(--secondary-color);
   overflow-x: hidden;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
 a {
@@ -37,7 +43,7 @@ p {
   padding: 0.5rem 0;
 }
 
-/* Navbar Styles */
+/* Navbar Component */
 .navbar {
   background-color: var(--primary-color);
   color: var(--white-color);
@@ -76,21 +82,20 @@ p {
   padding: 0;
 }
 
-/* Mobile Dropdown Styles (Small Box) */
 .navbar-links-mobile-open {
   display: flex;
   flex-direction: column;
   background-color: var(--primary-color);
   position: absolute;
-  top: 60px; /* Position below the navbar */
-  left: 10px; /* Slight offset from the left to align with the hamburger icon */
-  width: 200px; /* Small width for the dropdown box */
+  top: 60px;
+  left: 10px;
+  width: 200px;
   padding: 0.5rem;
-  gap: 0.5rem; /* Spacing between links */
-  border-radius: 5px; /* Rounded corners for a cleaner look */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Subtle shadow for better visibility */
-  text-align: left; /* Align text to the left inside the box */
-  z-index: 1000; /* Ensure the dropdown is above other elements */
+  gap: 0.5rem;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  text-align: left;
+  z-index: 1000;
 }
 
 .navbar-links li {
@@ -106,7 +111,6 @@ p {
   color: var(--text-color);
 }
 
-/* Responsive Navbar */
 @media (max-width: 768px) {
   .navbar-hamburger {
     display: block;
@@ -125,61 +129,62 @@ p {
   }
 }
 
-/* Bio Section */
-.bio {
+/* Bio Component */
+.bio-section {
   text-align: center;
   padding: 4rem 1rem;
   background-color: var(--secondary-color);
   color: var(--text-color);
+  width: 100%;
 }
 
-.bio h1 {
+.bio-title {
   font-size: 2.5rem;
   color: var(--primary-color);
   margin-bottom: 1rem;
 }
 
-.bio p {
+.bio-description {
   font-size: 1.2rem;
   line-height: 1.8;
   max-width: 800px;
   margin: 0 auto;
 }
 
-/* Styles for the Puppies Component */
-.puppy-container {
+/* Puppies Component */
+.puppies-container {
   text-align: center;
   padding: 2rem;
   font-family: Arial, sans-serif;
-  background-color: var(--accent-color);
+  background-color: #f9f9f9;
 }
 
-.puppy-title {
-  font-size: 2rem;
+.puppies-title {
+  font-size: 2.5rem;
   margin-bottom: 1rem;
-  color: var(--text-color2);
+  color: #333;
 }
 
-.puppy-content {
+.puppies-slideshow {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 1rem;
 }
 
-.puppy-info {
+.puppies-info {
   text-align: center;
   max-width: 400px;
 }
 
-.puppy-image {
+.puppies-image {
   width: 100%;
   max-width: 300px;
   border-radius: 10px;
   margin-bottom: 1rem;
 }
 
-.puppy-button {
+.puppies-button {
   padding: 1rem;
   font-size: 1.2rem;
   cursor: pointer;
@@ -190,16 +195,68 @@ p {
   transition: background-color 0.3s, transform 0.2s;
 }
 
-.puppy-button:hover {
+.puppies-button:hover {
+  background-color: var(--primary-hover-color);
+  transform: scale(1.05);
+}
+
+/* Family Component */
+.family-container {
+  text-align: center;
+  padding: 2rem;
+  font-family: Arial, sans-serif;
+  background-color: var(--accent-color);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.family-title {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: var(--text-color2);
+}
+
+.family-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+
+.family-info {
+  text-align: center;
+  max-width: 400px;
+}
+
+.family-image {
+  width: 100%;
+  max-width: 300px;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+}
+
+.family-button {
+  padding: 1rem;
+  font-size: 1.2rem;
+  cursor: pointer;
+  border-radius: 5px;
+  background-color: var(--primary-color);
+  border: none;
+  color: white;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.family-button:hover {
   background-color: var(--secondary-color);
   transform: scale(1.05);
 }
 
-/* Contact Section */
+/* Contact Component */
 .contact-me-container {
   padding: 4rem 1rem;
   background-color: var(--secondary-color);
   text-align: center;
+  width: 100%;
 }
 
 .contact-me-heading {
@@ -220,6 +277,7 @@ p {
 
 .contact-me-links a {
   color: var(--primary-color);
+  text-decoration: none;
 }
 
 .contact-me-links a:hover {
@@ -227,14 +285,12 @@ p {
   transition: color 0.3s;
 }
 
-/* Full Width for Desktop */
 @media (min-width: 768px) {
-  .bio, .media-container, .contact-me-container {
+  .bio-section, .family-container, .contact-me-container {
     padding: 4rem 5%;
   }
 
-  .media {
-    flex-direction: row;
+  .family-content {
     justify-content: space-between;
   }
 }
