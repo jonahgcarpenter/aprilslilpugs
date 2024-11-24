@@ -35,8 +35,14 @@ const NavBar: React.FC = () => {
           </a>
         </li>
       </ul>
+      <button
+        className="live-button"
+        onClick={() => window.open("https://www.youtube.com/your-livestream-url", "_blank")}
+      >
+        Live
+      </button>
     </nav>
-  );
+  );  
 };
 
 export default NavBar;

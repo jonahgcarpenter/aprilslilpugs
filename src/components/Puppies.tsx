@@ -1,18 +1,17 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
 
-interface Puppy {
-  id: number;
-  name: string;
-  age: string;
-  description: string;
-  image: string;
-  parentId1: number; // First parent
-  parentId2: number; // Second parent
-}
+// Lazy-loaded parent components
+const parentComponents = {
+  1: React.lazy(() => import("./Winston")),
+  2: React.lazy(() => import("./Elly")),
+  3: React.lazy(() => import("./Penny")),
+  4: React.lazy(() => import("./Mardi")),
+  5: React.lazy(() => import("./Millie")),
+  6: React.lazy(() => import("./Hallie")),
+};
 
 const Puppies: React.FC = () => {
-  const puppiesForSale: Puppy[] = [
+  const puppiesForSale = [
     {
       id: 1,
       name: "Max",
@@ -52,18 +51,32 @@ const Puppies: React.FC = () => {
   };
 
   const [currentPuppyIndex, setCurrentPuppyIndex] = useState(0);
+  const [openParentId, setOpenParentId] = useState<number | null>(null);
+
+  const handleOpenParentInfo = (parentId: number) => {
+    setOpenParentId(parentId);
+  };
+
+  const handleCloseModal = () => {
+    setOpenParentId(null);
+  };
 
   const handleNext = () => {
     setCurrentPuppyIndex((prevIndex) => (prevIndex + 1) % puppiesForSale.length);
+    setOpenParentId(null);
   };
 
   const handlePrevious = () => {
     setCurrentPuppyIndex((prevIndex) =>
       prevIndex === 0 ? puppiesForSale.length - 1 : prevIndex - 1
     );
+    setOpenParentId(null);
   };
 
   const currentPuppy = puppiesForSale[currentPuppyIndex];
+  const CurrentParentComponent = openParentId
+    ? parentComponents[openParentId]
+    : null;
 
   return (
     <div className="puppies-container">
@@ -85,24 +98,34 @@ const Puppies: React.FC = () => {
           <p>{currentPuppy.description}</p>
           <h3>Parents</h3>
           <div className="puppies-parents-links">
-            <Link
-              to={`/family/${currentPuppy.parentId1}`}
-              className="parent-link"
-            >
-              Meet {parentNames[currentPuppy.parentId1]}
-            </Link>
-            <Link
-              to={`/family/${currentPuppy.parentId2}`}
-              className="parent-link"
-            >
-              Meet {parentNames[currentPuppy.parentId2]}
-            </Link>
+            {[currentPuppy.parentId1, currentPuppy.parentId2].map((parentId) => (
+              <button
+                key={parentId}
+                className="parent-link"
+                onClick={() => handleOpenParentInfo(parentId)}
+              >
+                Meet {parentNames[parentId]}
+              </button>
+            ))}
           </div>
         </div>
         <button className="puppies-button" onClick={handleNext}>
           Next &gt;
         </button>
       </div>
+
+      {openParentId && CurrentParentComponent && (
+        <div className="modal">
+          <div className="modal-content">
+            <button className="modal-close" onClick={handleCloseModal}>
+              &times;
+            </button>
+            <React.Suspense fallback={<div>Loading parent details...</div>}>
+              {React.createElement(CurrentParentComponent)}
+            </React.Suspense>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

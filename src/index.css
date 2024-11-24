@@ -53,6 +53,7 @@ p {
   padding: 0 1rem;
   position: relative;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  justify-content: space-between; /* Ensure proper spacing for live button */
 }
 
 .navbar-header {
@@ -111,9 +112,35 @@ p {
   color: var(--text-color);
 }
 
+/* Live Button */
+.live-button {
+  background-color: red; /* Vivid red for visibility */
+  color: var(--text-color); /* Ensures contrast with text */
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+  margin-left: auto;
+}
+
+.live-button:hover {
+  background-color: darkred; /* Rich, slightly darker red for hover */
+  transform: scale(1.05); /* Slight zoom-in effect */
+}
+
 @media (max-width: 768px) {
   .navbar-hamburger {
     display: block;
+  }
+
+  .live-button {
+    display: none; /* Optional: Hide live button for mobile view */
+  }
+
+  .navbar-links-mobile-open {
+    display: flex;
   }
 }
 
@@ -175,6 +202,7 @@ p {
 .puppies-info {
   text-align: center;
   max-width: 400px;
+  margin: 0 auto;
 }
 
 .puppies-image {
@@ -200,6 +228,25 @@ p {
   transform: scale(1.05);
 }
 
+/* Links to Parents */
+.puppies-parents-links {
+  margin-top: 1rem;
+}
+
+.parent-link {
+  display: inline-block;
+  margin: 0.5rem 0;
+  text-decoration: none;
+  color: var(--primary-color);
+  font-weight: bold;
+  transition: color 0.3s;
+}
+
+.parent-link:hover {
+  color: var(--primary-hover-color);
+  text-decoration: underline;
+}
+
 /* Family Component */
 .family-container {
   text-align: center;
@@ -216,16 +263,18 @@ p {
   color: var(--text-color2);
 }
 
-.family-content {
+.family-navigation {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 1rem;
+  margin-bottom: 2rem;
 }
 
 .family-info {
   text-align: center;
   max-width: 400px;
+  margin: 0 auto;
 }
 
 .family-image {
@@ -249,6 +298,112 @@ p {
 .family-button:hover {
   background-color: var(--secondary-color);
   transform: scale(1.05);
+}
+
+/* Puppies List within Family Component */
+.family-puppies {
+  margin-top: 2rem;
+}
+
+.puppies-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.puppy-item {
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  padding: 1rem;
+  text-align: center;
+  width: 200px;
+  border-radius: 10px;
+}
+
+.puppy-image {
+  width: 100%;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+}
+
+.puppy-item h3 {
+  font-size: 1.2rem;
+  margin: 0.5rem 0;
+}
+
+.puppy-item p {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.puppy-item strong {
+  color: #333;
+}
+
+.puppies-parents-links {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+
+.parent-link {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  color: var(--primary-color);
+  background: none;
+  border: 1px solid var(--primary-color);
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.parent-link:hover {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: 10px;
+  max-width: 500px;
+  width: 90%;
+  position: relative;
+  text-align: center;
+}
+
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #333;
+  transition: color 0.3s;
+}
+
+.modal-close:hover {
+  color: #6096ba;
 }
 
 /* Contact Component */

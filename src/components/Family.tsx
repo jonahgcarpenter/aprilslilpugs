@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-// Dynamic import of dog components
+// Dynamic import of parent components
 const dogComponents = {
   1: React.lazy(() => import("./Winston")),
   2: React.lazy(() => import("./Elly")),
@@ -10,21 +10,16 @@ const dogComponents = {
   6: React.lazy(() => import("./Hallie")),
 };
 
-interface FamilyMember {
-  id: number;
-  name: string;
-}
+const familyMembers = [
+  { id: 1, name: "Winston" },
+  { id: 2, name: "Elly" },
+  { id: 3, name: "Penny" },
+  { id: 4, name: "Mardi" },
+  { id: 5, name: "Millie" },
+  { id: 6, name: "Hallie" },
+];
 
 const Family: React.FC = () => {
-  const familyMembers: FamilyMember[] = [
-    { id: 1, name: "Winston" },
-    { id: 2, name: "Elly" },
-    { id: 3, name: "Penny" },
-    { id: 4, name: "Mardi" },
-    { id: 5, name: "Millie" },
-    { id: 6, name: "Hallie" },
-  ];
-
   const [currentFamilyIndex, setCurrentFamilyIndex] = useState(0);
 
   const handleNext = () => {
@@ -43,13 +38,13 @@ const Family: React.FC = () => {
   return (
     <section className="family-section">
       <div className="family-container">
-        <h1 className="family-title">Meet Our Family!</h1>
+        <h1 className="family-title">Meet {currentFamilyMember.name}!</h1>
         <div className="family-navigation">
           <button className="family-button" onClick={handlePrevious}>
             &lt; Previous
           </button>
           <div className="family-info">
-            <React.Suspense fallback={<div>Loading...</div>}>
+            <React.Suspense fallback={<div>Loading parent details...</div>}>
               <CurrentDogComponent />
             </React.Suspense>
           </div>
