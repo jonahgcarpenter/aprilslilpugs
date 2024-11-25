@@ -229,19 +229,29 @@ h3 {
   margin-bottom: 2rem;
 }
 
-/* Shared Styles for Images */
+/* Normal Image Styles */
 .section-image {
   width: 100%;
   max-width: 350px;
   border-radius: 15px;
   margin-bottom: 1.8rem;
   box-shadow: 0 6px 10px var(--shadow-color);
-  transition: transform 0.4s, box-shadow 0.4s;
+  cursor: pointer; /* Indicates interactivity */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.section-image:hover {
-  transform: scale(1.1);
-  box-shadow: 0 12px 18px rgba(0, 0, 0, 0.3);
+/* Expanded Image Styles */
+.image-expanded {
+  position: fixed; /* Fix the image in the center of the viewport */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(1.5); /* Enlarges the image */
+  max-width: 60%;
+  max-height: 60%;
+  z-index: 1000; /* Brings it above other elements */
+  border-radius: 10px;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
+  cursor: pointer; /* Indicates it can shrink back */
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -356,16 +366,6 @@ h3 {
   margin: 1rem 0; /* Consistent spacing for headings and text */
 }
 
-/* Shared Styles for Images */
-.section-image {
-  width: 100%;
-  max-width: 350px;
-  border-radius: 15px;
-  margin-bottom: 1.8rem;
-  box-shadow: 0 6px 10px var(--shadow-color);
-  transition: transform 0.4s, box-shadow 0.4s;
-}
-
 /* Contact Component */
 .contact-me-container {
   padding: 2rem 1rem;
@@ -409,8 +409,8 @@ h3 {
 /* General Button Styles */
 button {
   border-radius: 8px;
-  font-size: 2rem;
-  padding: 0.5rem;
+  font-size: 1.5rem;
+  padding: 0.8rem;
   border: 2px solid var(--secondary-hover-color);
   color: var(--text-color);
   display: flex;

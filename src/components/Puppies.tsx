@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 
-// Lazy-loaded parent components
 const parentComponents: { [key: number]: React.LazyExoticComponent<React.FC<{}>> } = {
   1: React.lazy(() => import("./Winston")),
   2: React.lazy(() => import("./Elly")),
@@ -52,6 +51,7 @@ const Puppies: React.FC = () => {
 
   const [currentPuppyIndex, setCurrentPuppyIndex] = useState(0);
   const [openParentId, setOpenParentId] = useState<number | null>(null);
+  const [expandedImageId, setExpandedImageId] = useState<number | null>(null);
 
   const handleOpenParentInfo = (parentId: number) => {
     setOpenParentId(parentId);
@@ -64,6 +64,7 @@ const Puppies: React.FC = () => {
   const handleNext = () => {
     setCurrentPuppyIndex((prevIndex) => (prevIndex + 1) % puppiesForSale.length);
     setOpenParentId(null);
+    setExpandedImageId(null);
   };
 
   const handlePrevious = () => {
@@ -71,6 +72,17 @@ const Puppies: React.FC = () => {
       prevIndex === 0 ? puppiesForSale.length - 1 : prevIndex - 1
     );
     setOpenParentId(null);
+    setExpandedImageId(null);
+  };
+
+  const handleImageClick = (puppyId: number) => {
+    setExpandedImageId(expandedImageId === puppyId ? null : puppyId);
+  };
+
+  const handleOutsideClick = (event: React.MouseEvent) => {
+    if ((event.target as HTMLElement).classList.contains("image-expanded")) {
+      setExpandedImageId(null);
+    }
   };
 
   const currentPuppy = puppiesForSale[currentPuppyIndex];
@@ -78,56 +90,62 @@ const Puppies: React.FC = () => {
     ? parentComponents[openParentId]
     : null;
 
-    return (
-      <div className="section-container">
-        <h1 className="section-title">Puppies</h1>
-        <div className="section-slideshow">
-          <button className="puppies-button" onClick={handlePrevious}>
-            &lt;
-          </button>
-          <div className="section-info">
-            <img
-              src={currentPuppy.image}
-              alt={currentPuppy.name}
-              className="section-image"
-            />
-            <h2>{currentPuppy.name}</h2>
-            <p>
-              <strong>Age:</strong> {currentPuppy.age}
-            </p>
-            <p>{currentPuppy.description}</p>
-            <h3>Parents</h3>
-            <div className="section-parents-links">
-              {[currentPuppy.parentId1, currentPuppy.parentId2].map((parentId) => (
-                <button
-                  key={parentId}
-                  className="parent-link"
-                  onClick={() => handleOpenParentInfo(parentId)}
-                >
-                  Meet {parentNames[parentId as keyof typeof parentNames]}
-                </button>
-              ))}
-            </div>
-          </div>
-          <button className="puppies-button" onClick={handleNext}>
-            &gt;
-          </button>
-        </div>
-    
-        {openParentId && CurrentParentComponent && (
-          <div className="modal">
-            <div className="modal-content">
-              <button className="modal-close" onClick={handleCloseModal}>
-                &times;
+  return (
+    <div className="section-container" onClick={handleOutsideClick}>
+      <h1 className="section-title">Puppies</h1>
+      <div className="section-slideshow">
+        <button className="puppies-button" onClick={handlePrevious}>
+          &lt;
+        </button>
+        <div className="section-info">
+          <img
+            src={currentPuppy.image}
+            alt={currentPuppy.name}
+            className={`section-image ${
+              expandedImageId === currentPuppy.id ? "image-expanded" : ""
+            }`}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleImageClick(currentPuppy.id);
+            }}
+          />
+          <h2>{currentPuppy.name}</h2>
+          <p>
+            <strong>Age:</strong> {currentPuppy.age}
+          </p>
+          <p>{currentPuppy.description}</p>
+          <h3>Parents</h3>
+          <div className="section-parents-links">
+            {[currentPuppy.parentId1, currentPuppy.parentId2].map((parentId) => (
+              <button
+                key={parentId}
+                className="parent-link"
+                onClick={() => handleOpenParentInfo(parentId)}
+              >
+                Meet {parentNames[parentId as keyof typeof parentNames]}
               </button>
-              <React.Suspense fallback={<div>Loading parent details...</div>}>
-                {React.createElement(CurrentParentComponent)}
-              </React.Suspense>
-            </div>
+            ))}
           </div>
-        )}
+        </div>
+        <button className="puppies-button" onClick={handleNext}>
+          &gt;
+        </button>
       </div>
-    );    
+
+      {openParentId && CurrentParentComponent && (
+        <div className="modal">
+          <div className="modal-content">
+            <button className="modal-close" onClick={handleCloseModal}>
+              &times;
+            </button>
+            <React.Suspense fallback={<div>Loading parent details...</div>}>
+              {React.createElement(CurrentParentComponent)}
+            </React.Suspense>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default Puppies;
