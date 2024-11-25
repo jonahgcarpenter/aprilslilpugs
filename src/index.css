@@ -245,9 +245,11 @@ h3 {
   position: fixed; /* Fix the image in the center of the viewport */
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%) scale(1.5); /* Enlarges the image */
-  max-width: 60%;
-  max-height: 60%;
+  transform: translate(-50%, -50%) scale(1); /* Enlarges the image */
+  max-width: 60vw; /* Constrains the width to a percentage of the viewport */
+  max-height: 60vh; /* Constrains the height to a percentage of the viewport */
+  width: auto; /* Automatically adjusts width to preserve aspect ratio */
+  height: auto; /* Automatically adjusts height to preserve aspect ratio */
   z-index: 1000; /* Brings it above other elements */
   border-radius: 10px;
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
@@ -307,6 +309,32 @@ h3 {
     height: 250px; /* Adjusted for smaller screens */
     border: none;
   }
+  /* Normal Image Styles for Mobile */
+  .section-image {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 10px; /* Slightly smaller radius for mobile */
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 8px var(--shadow-color); /* Reduced shadow depth */
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .image-expanded {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(1.2); /* Slightly smaller scale for mobile */
+    max-width: 80vw; /* Constrain width to a percentage of the viewport */
+    max-height: 80vh; /* Constrain height to a percentage of the viewport */
+    width: auto; /* Automatically adjusts width to maintain aspect ratio */
+    height: auto; /* Automatically adjusts height to maintain aspect ratio */
+    z-index: 1000;
+    border-radius: 8px; /* Slightly reduced border radius */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5); /* Balanced shadow depth */
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
 }
 
 /* Parent Popup */
@@ -350,15 +378,6 @@ h3 {
 
 .modal-close:hover {
   color: var(--primary-hover-color); /* Hover color effect */
-}
-
-/* Padding between the close button and content */
-.modal-content img {
-  max-width: 100%;
-  height: auto;
-  border-radius: 8px; /* Rounded corners for the image */
-  margin-top: 2rem; /* Add spacing between the image and close button */
-  margin-bottom: 1rem; /* Spacing below the image */
 }
 
 .modal-content h1,
