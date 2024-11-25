@@ -4,4 +4,6 @@ Website for my moms pug breeding
 
 ## Known Issues
 
-fix mobile vs desktop and styles
+update dog details and picturs
+
+fix mobile styles

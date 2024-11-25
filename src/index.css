@@ -133,8 +133,8 @@ h3 {
   }
 }
 
-/* Styles for NavBar */
-.navbar {
+/* Styles for Navbar */
+.Navbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -146,7 +146,7 @@ h3 {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.navbar-hamburger {
+.Navbar-hamburger {
   background: none;
   border: none;
   font-size: 1.5rem;
@@ -155,11 +155,11 @@ h3 {
   display: none;
 }
 
-.navbar-hamburger:hover {
+.Navbar-hamburger:hover {
   color: var(--primary-hover-color);
 }
 
-.navbar-links {
+.Navbar-links {
   display: flex;
   list-style: none;
   margin: 0;
@@ -167,7 +167,7 @@ h3 {
   align-items: center; /* Ensures all elements align vertically */
 }
 
-.navbar-link {
+.Navbar-link {
   color: var(--text-color2);
   text-decoration: none;
   margin: 0 1rem;
@@ -179,13 +179,13 @@ h3 {
   height: 100%;
 }
 
-.navbar-link:hover {
+.Navbar-link:hover {
   color: var(--primary-hover-color);
 }
 
 /* Responsive Styles */
 @media (max-width: 768px) {
-  .navbar-hamburger {
+  .Navbar-hamburger {
     display: block;
     background-color: var(--primary-color);
     color: var(--text-color2);
@@ -195,7 +195,7 @@ h3 {
     font-size: 1.5rem;
   }
 
-  .navbar-links {
+  .Navbar-links {
     display: none;
     flex-direction: column;
     background-color: var(--primary-color); /* Background color */
@@ -210,26 +210,26 @@ h3 {
     border: 4px solid var(--secondary-color); /* Border using a color variable */
   }  
 
-  .navbar-links-mobile-open {
+  .Navbar-links-mobile-open {
     display: flex;
   }
 
-  .navbar-link {
+  .Navbar-link {
     margin: 0.5rem 0;
     text-align: center;
     padding: 0.5rem; /* Add padding for clickable area */
   }
 
-  .navbar-link:hover {
+  .Navbar-link:hover {
     background-color: var(--primary-hover-color);
     color: var(--text-color);
   }
 }
 
-.navbar-link.live-button {
-  color: var(--text-color2); /* Same color as regular navbar links */
+.Navbar-link.live-button {
+  color: var(--text-color2); /* Same color as regular Navbar links */
   text-decoration: none; /* Remove underline */
-  margin: 0 1rem; /* Same spacing as regular navbar links */
+  margin: 0 1rem; /* Same spacing as regular Navbar links */
   font-size: 1rem; /* Font size */
   font-weight: bold; /* Bold text */
   transition: color 0.3s ease; /* Smooth color transition on hover */
@@ -238,11 +238,11 @@ h3 {
   gap: 0.5rem; /* Space between the text and the icon */
 }
 
-.navbar-link.live-button:hover {
+.Navbar-link.live-button:hover {
   color: var(--primary-hover-color); /* Change text color on hover */
 }
 
-.navbar-link.live-button .live-icon {
+.Navbar-link.live-button .live-icon {
   width: 0.5rem; /* Small size for the icon */
   height: 0.5rem; /* Small size for the icon */
   background-color: red; /* Red color for the blinking icon */

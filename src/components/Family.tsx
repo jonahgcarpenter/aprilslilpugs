@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
 // Dynamic import of parent components
-const dogComponents = {
+const dogComponents: { [key: number]: React.LazyExoticComponent<React.FC<{}>> } = {
   1: React.lazy(() => import("./Winston")),
   2: React.lazy(() => import("./Elly")),
   3: React.lazy(() => import("./Penny")),

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
 // Lazy-loaded parent components
-const parentComponents = {
+const parentComponents: { [key: number]: React.LazyExoticComponent<React.FC<{}>> } = {
   1: React.lazy(() => import("./Winston")),
   2: React.lazy(() => import("./Elly")),
   3: React.lazy(() => import("./Penny")),
@@ -41,7 +41,7 @@ const Puppies: React.FC = () => {
     },
   ];
 
-  const parentNames = {
+  const parentNames: { [key: number]: string } = {
     1: "Winston",
     2: "Elly",
     3: "Penny",
@@ -103,7 +103,7 @@ const Puppies: React.FC = () => {
                 className="parent-link"
                 onClick={() => handleOpenParentInfo(parentId)}
               >
-                Meet {parentNames[parentId]}
+                Meet {parentNames[parentId as keyof typeof parentNames]}
               </button>
             ))}
           </div>

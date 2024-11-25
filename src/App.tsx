@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import NavBar from "./components/NavBar";
+import Navbar from "./components/Navbar";
 import Bio from "./components/Bio";
 import Puppies from "./components/Puppies";
 import Family from "./components/Family";
 import ContactMe from "./components/ContactMe";
-import Live from "./components/Live"; // Import the Live component
+import Live from "./components/Live";
 
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<string>("main"); // Track the current page ("main" or "live")
@@ -16,8 +16,8 @@ const App: React.FC = () => {
 
   return (
     <div>
-      {/* Pass the handler to NavBar */}
-      <NavBar onNavigate={handleNavigation} />
+      {/* Pass the handler to Navbar */}
+      <Navbar onNavigate={handleNavigation} />
       <main>
         {currentPage === "live" ? (
           <section id="live">

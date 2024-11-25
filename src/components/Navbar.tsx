@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 
-interface NavBarProps {
+interface NavbarProps {
   onNavigate: (page: string) => void; // Prop for handling navigation
 }
 
-const NavBar: React.FC<NavBarProps> = ({ onNavigate }) => {
+const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleMenu = () => {
@@ -12,15 +12,15 @@ const NavBar: React.FC<NavBarProps> = ({ onNavigate }) => {
   };
 
   return (
-    <nav className="navbar">
-      <button className="navbar-hamburger" onClick={toggleMenu}>
+    <nav className="Navbar">
+      <button className="Navbar-hamburger" onClick={toggleMenu}>
         ☰
       </button>
-      <ul className={`navbar-links ${isOpen ? "navbar-links-mobile-open" : ""}`}>
+      <ul className={`Navbar-links ${isOpen ? "Navbar-links-mobile-open" : ""}`}>
         <li>
           <a
             href="#bio"
-            className="navbar-link"
+            className="Navbar-link"
             onClick={() => onNavigate("main")}
           >
             Bio
@@ -29,7 +29,7 @@ const NavBar: React.FC<NavBarProps> = ({ onNavigate }) => {
         <li>
           <a
             href="#puppies"
-            className="navbar-link"
+            className="Navbar-link"
             onClick={() => onNavigate("main")}
           >
             Puppies
@@ -38,7 +38,7 @@ const NavBar: React.FC<NavBarProps> = ({ onNavigate }) => {
         <li>
           <a
             href="#family"
-            className="navbar-link"
+            className="Navbar-link"
             onClick={() => onNavigate("main")}
           >
             Family
@@ -47,7 +47,7 @@ const NavBar: React.FC<NavBarProps> = ({ onNavigate }) => {
         <li>
           <a
             href="#contact"
-            className="navbar-link"
+            className="Navbar-link"
             onClick={() => onNavigate("main")}
           >
             Contact Me
@@ -56,7 +56,7 @@ const NavBar: React.FC<NavBarProps> = ({ onNavigate }) => {
         <li>
           <button
             onClick={() => onNavigate("live")}
-            className="navbar-link live-button"
+            className="Navbar-link live-button"
           >
             Live
             <span className="live-icon"></span>
@@ -67,4 +67,4 @@ const NavBar: React.FC<NavBarProps> = ({ onNavigate }) => {
   );
 };
 
-export default NavBar;
+export default Navbar;
