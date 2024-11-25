@@ -30,6 +30,7 @@ const Live: React.FC = () => {
               allowFullScreen
             ></iframe>
           </div>
+          <h3>Parents</h3>
           <div className="section-parents-links">
             <button className="parent-link" onClick={() => handleOpenModal("millie")}>
               Meet Mom
