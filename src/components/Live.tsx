@@ -17,55 +17,49 @@ const Live: React.FC = () => {
   };
 
   return (
-    <div>
-      <main>
-        <section id="live">
-          <div className="live-page">
-            <div className="live-content">
-              <h1 className="live-title">April's Lil Pugs Live</h1>
-              <div className="live-container">
-                <div className="iframe-container">
-                  <iframe
-                    className="live-iframe"
-                    src="https://www.youtube.com/embed/live_stream?channel=UCGoYuWwpBLy4oVw1_c7P06Q"
-                    title="Puppies Live Stream"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  ></iframe>
-                </div>
-                <div className="puppies-parents-links">
-                  <button className="parent-link" onClick={() => handleOpenModal("millie")}>
-                    Meet Millie
-                  </button>
-                  <button className="parent-link" onClick={() => handleOpenModal("mardi")}>
-                    Meet Mardi
-                  </button>
-                </div>
+    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+      <main style={{ flex: "1 0 auto" }}>
+        <section id="live" className="section-container">
+          <h1 className="section-title">April's Lil Pugs Live</h1>
+          <div className="iframe-container">
+            <iframe
+              className="live-iframe"
+              src="https://www.youtube.com/embed/live_stream?channel=UCGoYuWwpBLy4oVw1_c7P06Q"
+              title="Puppies Live Stream"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            ></iframe>
+          </div>
+          <div className="section-parents-links">
+            <button className="parent-link" onClick={() => handleOpenModal("millie")}>
+              Meet Mom
+            </button>
+            <button className="parent-link" onClick={() => handleOpenModal("mardi")}>
+              Meet Dad
+            </button>
+          </div>
+  
+          {/* Modal */}
+          {activeModal && (
+            <div className="modal" onClick={handleCloseModal}>
+              <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                <button className="modal-close" onClick={handleCloseModal}>
+                  ✖
+                </button>
+                {activeModal === "millie" && <Millie />}
+                {activeModal === "mardi" && <Mardi />}
               </div>
             </div>
-
-            {/* Modal */}
-            {activeModal && (
-              <div className="modal" onClick={handleCloseModal}>
-                <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                  <button className="modal-close" onClick={handleCloseModal}>
-                    ✖
-                  </button>
-                  {activeModal === "millie" && <Millie />}
-                  {activeModal === "mardi" && <Mardi />}
-                </div>
-              </div>
-            )}
-          </div>
+          )}
         </section>
       </main>
-
+  
       {/* Footer */}
-      <footer className="live-footer">
+      <footer className="section-footer" style={{ flexShrink: 0 }}>
         <ContactMe />
       </footer>
     </div>
-  );
+  );  
 };
 
 export default Live;
