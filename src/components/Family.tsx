@@ -36,15 +36,15 @@ const Family: React.FC = () => {
   const CurrentDogComponent = dogComponents[currentFamilyMember.id];
 
   return (
-    <section className="family-section">
-      <div className="family-container">
-        <h1 className="family-title">Meet {currentFamilyMember.name}!</h1>
-        <div className="family-navigation">
+    <section className="section-container">
+      <div className="section-container">
+        <h1 className="section-title">Meet {currentFamilyMember.name}!</h1>
+        <div className="section-navigation">
           <button className="family-button" onClick={handlePrevious}>
             &lt;
           </button>
-          <React.Suspense fallback={<div>Loading parent details...</div>}>
-            <div className="family-info">
+          <React.Suspense fallback={<div>Loading family member details...</div>}>
+            <div className="section-info">
               <CurrentDogComponent />
             </div>
           </React.Suspense>

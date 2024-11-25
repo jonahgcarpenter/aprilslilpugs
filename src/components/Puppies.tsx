@@ -78,54 +78,56 @@ const Puppies: React.FC = () => {
     ? parentComponents[openParentId]
     : null;
 
-  return (
-    <div className="puppies-container">
-      <h1 className="puppies-title">Puppies</h1>
-      <div className="puppies-slideshow">
-        <button className="puppies-button" onClick={handlePrevious}>&lt;
-        </button>
-        <div className="puppies-info">
-          <img
-            src={currentPuppy.image}
-            alt={currentPuppy.name}
-            className="puppies-image"
-          />
-          <h2>{currentPuppy.name}</h2>
-          <p>
-            <strong>Age:</strong> {currentPuppy.age}
-          </p>
-          <p>{currentPuppy.description}</p>
-          <h3>Parents</h3>
-          <div className="puppies-parents-links">
-            {[currentPuppy.parentId1, currentPuppy.parentId2].map((parentId) => (
-              <button
-                key={parentId}
-                className="parent-link"
-                onClick={() => handleOpenParentInfo(parentId)}
-              >
-                Meet {parentNames[parentId as keyof typeof parentNames]}
+    return (
+      <div className="section-container">
+        <h1 className="section-title">Puppies</h1>
+        <div className="section-slideshow">
+          <button className="puppies-button" onClick={handlePrevious}>
+            &lt;
+          </button>
+          <div className="section-info">
+            <img
+              src={currentPuppy.image}
+              alt={currentPuppy.name}
+              className="section-image"
+            />
+            <h2>{currentPuppy.name}</h2>
+            <p>
+              <strong>Age:</strong> {currentPuppy.age}
+            </p>
+            <p>{currentPuppy.description}</p>
+            <h3>Parents</h3>
+            <div className="section-parents-links">
+              {[currentPuppy.parentId1, currentPuppy.parentId2].map((parentId) => (
+                <button
+                  key={parentId}
+                  className="parent-link"
+                  onClick={() => handleOpenParentInfo(parentId)}
+                >
+                  Meet {parentNames[parentId as keyof typeof parentNames]}
+                </button>
+              ))}
+            </div>
+          </div>
+          <button className="puppies-button" onClick={handleNext}>
+            &gt;
+          </button>
+        </div>
+    
+        {openParentId && CurrentParentComponent && (
+          <div className="modal">
+            <div className="modal-content">
+              <button className="modal-close" onClick={handleCloseModal}>
+                &times;
               </button>
-            ))}
+              <React.Suspense fallback={<div>Loading parent details...</div>}>
+                {React.createElement(CurrentParentComponent)}
+              </React.Suspense>
+            </div>
           </div>
-        </div>
-        <button className="puppies-button" onClick={handleNext}>&gt;
-        </button>
+        )}
       </div>
-
-      {openParentId && CurrentParentComponent && (
-        <div className="modal">
-          <div className="modal-content">
-            <button className="modal-close" onClick={handleCloseModal}>
-              &times;
-            </button>
-            <React.Suspense fallback={<div>Loading parent details...</div>}>
-              {React.createElement(CurrentParentComponent)}
-            </React.Suspense>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+    );    
 };
 
 export default Puppies;
