@@ -12,7 +12,6 @@ const NavBar: React.FC = () => {
       <button className="navbar-hamburger" onClick={toggleMenu}>
         ☰
       </button>
-      <h1 className="navbar-header">April's Lil Pugs</h1>
       <ul className={`navbar-links ${isOpen ? "navbar-links-mobile-open" : ""}`}>
         <li>
           <a href="#bio" className="navbar-link">
@@ -34,13 +33,20 @@ const NavBar: React.FC = () => {
             Contact Me
           </a>
         </li>
+        <li>
+          <button
+            className="live-button"
+            onClick={() =>
+              window.open(
+                "https://www.youtube.com/embed/live_stream?channel=UCGoYuWwpBLy4oVw1_c7P06Q",
+                "_blank"
+              )
+            }
+          >
+            Live
+          </button>
+        </li>
       </ul>
-      <button
-        className="live-button"
-        onClick={() => window.open("https://www.youtube.com/your-livestream-url", "_blank")}
-      >
-        Live
-      </button>
     </nav>
   );  
 };
