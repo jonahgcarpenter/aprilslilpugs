@@ -7,6 +7,15 @@
   --text-color: #ffffff;
   --text-color2: #333;
   --white-color: #ffffff;
+
+  /* New variables for additional styling flexibility */
+  --border-color: #c4c4c4; /* For borders */
+  --shadow-color: rgba(0, 0, 0, 0.1); /* For subtle shadows */
+  --link-color: #a3cef1; /* Dedicated link color */
+  --link-hover-color: #6096ba; /* Link hover color */
+
+  /* Updated background image variable */
+  --background-image: url('/images/background.jpg'); /* Correct path for React */
 }
 
 /* Global Styles */
@@ -17,8 +26,10 @@ body, html {
   height: 100%;
   font-family: "Arial", sans-serif;
   color: var(--text-color2);
-  background-color: var(--secondary-color);
+  background: var(--accent-color) var(--background-image) no-repeat center center;
+  background-size: cover; /* Ensures the image covers the entire background */
   overflow-x: hidden;
+  line-height: 1.6; /* Consistent line height for readability */
 }
 
 *, *::before, *::after {
@@ -27,20 +38,99 @@ body, html {
 
 a {
   text-decoration: none;
-  color: var(--primary-color);
+  color: var(--link-color); /* Dedicated link color */
+  transition: color 0.3s ease; /* Smooth transition for links */
 }
 
 a:hover {
   text-decoration: underline;
+  color: var(--link-hover-color); /* Use hover color for links */
 }
 
 h1, h2, h3 {
-  margin: 0;
+  margin: 0 0 1rem; /* Spacing below headings */
+  color: var(--secondary-color); /* Use secondary color for headings */
 }
 
 p {
-  margin: 0;
+  margin: 0 0 1rem; /* Consistent spacing for paragraphs */
+  color: var(--text-color2); /* Paragraphs use text color */
   padding: 0.5rem 0;
+}
+
+/* Utility Classes */
+.container {
+  max-width: 1200px; /* Define maximum width */
+  margin: 0 auto; /* Center the container */
+  padding: 0 1rem; /* Add horizontal padding */
+}
+
+.text-center {
+  text-align: center;
+}
+
+.shadow {
+  box-shadow: 0 4px 6px var(--shadow-color); /* Subtle shadow using shadow color */
+}
+
+.rounded {
+  border-radius: 10px; /* Consistent border radius */
+}
+
+.border {
+  border: 1px solid var(--border-color); /* Border uses border color */
+}
+
+.hidden {
+  display: none;
+}
+
+/* Buttons */
+button {
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  background-color: var(--primary-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+button:hover {
+  background-color: var(--primary-hover-color);
+  transform: translateY(-2px); /* Slight hover lift effect */
+}
+
+button:active {
+  transform: translateY(0); /* Reset lift on click */
+}
+
+/* Responsive Typography */
+h1 {
+  font-size: 2.5rem;
+}
+
+h2 {
+  font-size: 2rem;
+}
+
+h3 {
+  font-size: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  h1 {
+    font-size: 2rem;
+  }
+
+  h2 {
+    font-size: 1.75rem;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+  }
 }
 
 /* Styles for NavBar */
@@ -170,13 +260,11 @@ p {
   }
 }
 
-
 /* Bio Component */
 .bio-section {
   text-align: center;
   padding: 4rem 1rem;
   background-color: var(--secondary-color);
-  color: var(--text-color);
   width: 100%;
 }
 
@@ -191,246 +279,379 @@ p {
   line-height: 1.8;
   max-width: 800px;
   margin: 0 auto;
+  color: var(--text-color);
 }
 
 /* Puppies Component */
+.puppies-parents-links {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1rem;
+  margin-bottom: 2rem;
+}
+
 .puppies-container {
   text-align: center;
-  padding: 2rem;
+  padding: 3rem;
   font-family: Arial, sans-serif;
-  background-color: #f9f9f9;
+  background: linear-gradient(
+    135deg,
+    var(--primary-color),
+    var(--accent-color)
+  );
+  color: var(--text-color2);
+  border-radius: 20px;
+  box-shadow: 0 8px 12px var(--shadow-color);
+  margin: 2.5rem auto;
+  max-width: 900px;
 }
 
 .puppies-title {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
-  color: #333;
+  font-size: 2.8rem;
+  margin-bottom: 1.8rem;
+  color: var(--secondary-color);
+  text-transform: capitalize;
+  letter-spacing: 1.5px;
+  font-weight: bold;
 }
 
 .puppies-slideshow {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 1rem;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  flex-wrap: wrap;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  box-shadow: 0 4px 6px var(--shadow-color);
 }
 
 .puppies-info {
   text-align: center;
-  max-width: 400px;
+  max-width: 500px;
   margin: 0 auto;
+  color: var(--text-color2);
+  font-size: 1.2rem;
+  line-height: 1.8;
+  padding: 1.5rem 0;
 }
 
 .puppies-image {
   width: 100%;
-  max-width: 300px;
-  border-radius: 10px;
-  margin-bottom: 1rem;
+  max-width: 350px;
+  border-radius: 15px;
+  margin-bottom: 1.8rem;
+  box-shadow: 0 6px 10px var(--shadow-color);
+  transition: transform 0.4s, box-shadow 0.4s;
+}
+
+.puppies-image:hover {
+  transform: scale(1.07);
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
 }
 
 .puppies-button {
-  padding: 1rem;
-  font-size: 1.2rem;
+  padding: 0.6rem;
+  font-size: 1.8rem;
   cursor: pointer;
-  border-radius: 5px;
-  background-color: var(--primary-color);
-  border: none;
-  color: white;
-  transition: background-color 0.3s, transform 0.2s;
+  border-radius: 12px;
+  background-color: var(--accent-color);
+  border: 2px solid var(--primary-hover-color);
+  color: var(--white-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background-color 0.3s, transform 0.3s, border-color 0.3s;
+  width: 3.5rem;
+  height: 3.5rem;
+  box-shadow: 0 6px 10px var(--shadow-color);
 }
 
 .puppies-button:hover {
   background-color: var(--primary-hover-color);
-  transform: scale(1.05);
+  transform: scale(1.15);
+  border-color: var(--secondary-color);
 }
 
-/* Links to Parents */
-.puppies-parents-links {
-  margin-top: 1rem;
-}
+/* Puppies Component - Mobile Styles */
+@media (max-width: 768px) {
+  .puppies-container {
+    padding: 2rem;
+    margin: 1.5rem auto;
+    max-width: 100%; /* Full width for small screens */
+    border-radius: 15px;
+    box-shadow: 0 4px 8px var(--shadow-color);
+    overflow: hidden; /* Ensures buttons stay within the container */
+  }
 
-.parent-link {
-  display: inline-block;
-  margin: 0.5rem 0;
-  text-decoration: none;
-  color: var(--primary-color);
-  font-weight: bold;
-  transition: color 0.3s;
-}
+  .puppies-title {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    letter-spacing: 1px;
+  }
 
-.parent-link:hover {
-  color: var(--primary-hover-color);
-  text-decoration: underline;
+  .puppies-slideshow {
+    position: relative; /* Enables absolute positioning for buttons */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.5rem;
+  }
+
+  .puppies-image {
+    max-width: 250px;
+    margin: 0 auto;
+    display: block;
+  }
+
+  .puppies-button {
+    position: absolute;
+    top: 50%; /* Center vertically */
+    transform: translateY(-50%);
+    width: 3rem;
+    height: 3rem;
+    font-size: 1.5rem;
+    background-color: var(--accent-color);
+    border-radius: 50%;
+    border: 2px solid var(--primary-hover-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+    z-index: 10; /* Ensure buttons are above other content */
+  }
+
+  .puppies-button:hover {
+    background-color: var(--primary-hover-color);
+    transform: scale(1.15);
+  }
+
+  .puppies-button:first-of-type {
+    left: 1rem; /* Position the left button inside the container */
+  }
+
+  .puppies-button:last-of-type {
+    right: 1rem; /* Position the right button inside the container */
+  }
+
+  .puppies-info {
+    font-size: 1rem;
+    padding: 1rem;
+  }
 }
 
 /* Family Component */
 .family-container {
   text-align: center;
-  padding: 2rem;
+  padding: 3rem;
   font-family: Arial, sans-serif;
-  background-color: var(--accent-color);
-  width: 100%;
-  box-sizing: border-box;
+  background: linear-gradient(
+    135deg,
+    var(--primary-color),
+    var(--accent-color)
+  );
+  color: var(--text-color2);
+  border-radius: 20px;
+  box-shadow: 0 8px 12px var(--shadow-color);
+  margin: 2.5rem auto;
+  max-width: 850px;
 }
 
 .family-title {
-  font-size: 2rem;
-  margin-bottom: 1rem;
-  color: var(--text-color2);
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+  color: var(--secondary-color);
+  text-transform: capitalize;
+  letter-spacing: 1.5px;
+  font-weight: bold;
 }
 
 .family-navigation {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 1rem;
+  gap: 2rem;
   margin-bottom: 2rem;
+  padding: 1rem;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 10px;
+  box-shadow: 0 4px 6px var(--shadow-color);
 }
 
 .family-info {
   text-align: center;
-  max-width: 400px;
+  max-width: 500px;
   margin: 0 auto;
+  color: var(--text-color2);
+  font-size: 1.2rem;
+  line-height: 1.8;
+  padding: 1.5rem 0;
 }
 
 .family-image {
   width: 100%;
-  max-width: 300px;
-  border-radius: 10px;
-  margin-bottom: 1rem;
+  max-width: 350px;
+  border-radius: 15px;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 6px 10px var(--shadow-color);
+  transition: transform 0.4s, box-shadow 0.4s;
+}
+
+.family-image:hover {
+  transform: scale(1.07);
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
 }
 
 .family-button {
-  padding: 1rem;
-  font-size: 1.2rem;
+  padding: 0.6rem;
+  font-size: 1.8rem;
   cursor: pointer;
-  border-radius: 5px;
-  background-color: var(--primary-color);
-  border: none;
-  color: white;
-  transition: background-color 0.3s, transform 0.2s;
-}
-
-.family-button:hover {
-  background-color: var(--secondary-color);
-  transform: scale(1.05);
-}
-
-/* Puppies List within Family Component */
-.family-puppies {
-  margin-top: 2rem;
-}
-
-.puppies-list {
-  list-style: none;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  justify-content: center;
-}
-
-.puppy-item {
-  background-color: #ffffff;
-  border: 1px solid #e0e0e0;
-  padding: 1rem;
-  text-align: center;
-  width: 200px;
-  border-radius: 10px;
-}
-
-.puppy-image {
-  width: 100%;
-  border-radius: 10px;
-  margin-bottom: 1rem;
-}
-
-.puppy-item h3 {
-  font-size: 1.2rem;
-  margin: 0.5rem 0;
-}
-
-.puppy-item p {
-  font-size: 0.9rem;
-  color: #666;
-}
-
-.puppy-item strong {
-  color: #333;
-}
-
-.puppies-parents-links {
+  border-radius: 12px;
+  background-color: var(--accent-color);
+  border: 2px solid var(--primary-hover-color);
+  color: var(--white-color);
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 1rem;
+  transition: background-color 0.3s, transform 0.3s, border-color 0.3s;
+  width: 3.5rem;
+  height: 3.5rem;
+  box-shadow: 0 6px 10px var(--shadow-color);
 }
 
-.parent-link {
-  display: inline-block; /* Ensures consistent sizing */
-  background-color: var(--primary-color); /* Use your theme's primary color */
-  color: var(--text-color); /* Text color */
-  font-size: 1rem; /* Font size */
-  font-weight: bold; /* Bold text */
-  padding: 0.5rem 2rem; /* Padding inside the button */
-  border: 2px solid var(--primary-hover-color); /* Add a border with hover color */
-  border-radius: 8px; /* Rounded corners for a modern look */
-  cursor: pointer; /* Pointer cursor on hover */
-  transition: all 0.3s ease; /* Smooth transitions for hover effects */
-  text-transform: uppercase; /* Capitalize the text for emphasis */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+.family-button:hover {
+  background-color: var(--primary-hover-color);
+  transform: scale(1.15);
+  border-color: var(--secondary-color);
 }
 
-.parent-link:hover {
-  background-color: var(--primary-hover-color); /* Change background on hover */
-  color: var(--white-color); /* Change text color on hover */
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Enhance shadow on hover */
-  transform: scale(1.05); /* Slightly enlarge the button on hover */
+/* Family Component - Mobile Styles */
+@media (max-width: 768px) {
+  .family-container {
+    padding: 2rem;
+    margin: 1.5rem auto;
+    max-width: 100%; /* Full width for small screens */
+    border-radius: 15px;
+    box-shadow: 0 4px 8px var(--shadow-color);
+    overflow: hidden; /* Ensures buttons stay within the container */
+  }
+
+  .family-title {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    letter-spacing: 1px;
+  }
+
+  .family-navigation {
+    position: relative; /* Enables absolute positioning for buttons */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.5rem;
+  }
+
+  .family-image {
+    max-width: 250px;
+    margin: 0 auto;
+    display: block;
+  }
+
+  .family-button {
+    position: absolute;
+    top: 50%; /* Center vertically */
+    transform: translateY(-50%);
+    width: 3rem;
+    height: 3rem;
+    font-size: 1.5rem;
+    background-color: var(--accent-color);
+    border-radius: 50%;
+    border: 2px solid var(--primary-hover-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+    z-index: 10; /* Ensure buttons are above other content */
+  }
+
+  .family-button:hover {
+    background-color: var(--primary-hover-color);
+    transform: scale(1.15);
+  }
+
+  .family-button:first-of-type {
+    left: 1rem; /* Position the left button inside the container */
+  }
+
+  .family-button:last-of-type {
+    right: 1rem; /* Position the right button inside the container */
+  }
+
+  .family-info {
+    font-size: 1rem;
+    padding: 1rem;
+  }
 }
 
-.parent-link:active {
-  background-color: var(--secondary-color); /* Change background on click */
-  color: var(--white-color); /* Keep text visible on active state */
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2); /* Reduce shadow for active state */
-  transform: scale(0.95); /* Slightly shrink the button on active state */
-}
-
+/* Parent Popup */
 .modal {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.5); /* Background overlay */
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  padding: 2rem; /* Padding around the modal */
 }
 
 .modal-content {
-  background-color: #ffffff;
-  padding: 2rem;
-  border-radius: 10px;
+  background-color: var(--white-color); /* Use white color variable */
+  padding: 2.5rem 2rem; /* Added consistent padding */
+  border-radius: 12px; /* Rounded corners */
   max-width: 500px;
   width: 90%;
   position: relative;
   text-align: center;
+  box-shadow: 0 8px 12px var(--shadow-color); /* Subtle shadow for depth */
 }
 
 .modal-close {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 1rem; /* Position the close button */
+  right: 1rem; /* Add spacing from the right */
   background: none;
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: #333;
-  transition: color 0.3s;
+  color: var(--text-color2); /* Text color for close button */
+  transition: color 0.3s; /* Smooth transition effect */
 }
 
 .modal-close:hover {
-  color: #6096ba;
+  color: var(--primary-hover-color); /* Hover color effect */
+}
+
+/* Padding between the close button and content */
+.modal-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px; /* Rounded corners for the image */
+  margin-top: 2rem; /* Add spacing between the image and close button */
+  margin-bottom: 1rem; /* Spacing below the image */
+}
+
+.modal-content h1,
+.modal-content p {
+  margin: 1rem 0; /* Consistent spacing for headings and text */
 }
 
 /* Contact Component */
@@ -477,40 +698,61 @@ p {
   }
 }
 
-/* Main container styles */
+/* Live Page Styles */
 .live-page {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 50px; /* Significantly increased padding */
-  font-family: Arial, sans-serif;
-  background-color: var(--accent-color);
-  min-height: 50vh;
+  padding: 4rem; /* Reduced padding to minimize empty space */
+  min-height: 100vh;
 }
 
 .live-content {
   text-align: center;
-  max-width: 1200px; /* Increased max width for a larger container */
-  width: 100%;
-  margin-bottom: 40px; /* Increased margin */
-  padding: 50px; /* Significantly increased padding */
-  background-color: var(--primary-color);
-  border: none;
-  border-radius: 15px; /* Larger border-radius for smooth corners */
+  padding: 5rem; /* Increased padding for larger content space */
+  background: linear-gradient(
+    135deg,
+    var(--primary-color),
+    var(--accent-color)
+  );
+  color: var(--text-color2);
+  border-radius: 25px; /* Rounded corners */
+  box-shadow: 0 10px 15px var(--shadow-color); /* Stronger shadow */
+  margin: 3rem auto;
+  max-width: 1200px; /* Expanded width */
+  width: 95%; /* Ensure responsiveness */
 }
 
 .live-title {
-  font-size: 3.5rem; /* Significantly larger font size */
+  font-size: 3.5rem; /* Enlarged font for title */
   color: var(--secondary-color);
-  margin-bottom: 40px; /* Increased margin */
+  margin-bottom: 3rem; /* Increased spacing below title */
+  text-transform: capitalize;
+  letter-spacing: 1.8px;
+  font-weight: bold;
+}
+
+.live-container {
+  background: var(--accent-color);
+  padding: 2rem; /* Increased padding for a balanced layout */
+  border-radius: 25px; /* Smoother rounded corners */
+  box-shadow: 0 10px 15px var(--shadow-color); /* Subtle shadow for depth */
 }
 
 .iframe-container {
   position: relative;
   width: 100%;
-  padding-bottom: 56.25%; /* Maintained aspect ratio */
-  margin-bottom: 40px; /* Increased margin */
+  padding-bottom: 56.25%; /* Maintain 16:9 aspect ratio */
+  margin-bottom: 3rem; /* Increased spacing below iframe */
+  border-radius: 20px; /* Larger rounded corners */
+  overflow: hidden;
+  box-shadow: 0 8px 12px var(--shadow-color);
+  transition: transform 0.4s, box-shadow 0.4s;
+}
+
+.iframe-container:hover {
+  cursor: pointer;
 }
 
 .live-iframe {
@@ -520,49 +762,85 @@ p {
   width: 100%;
   height: 100%;
   border: none;
-  border-radius: 15px; /* Larger border-radius */
 }
 
-/* Responsive design for smaller screens */
+/* Buttons for Parent Links */
+.puppies-parents-links {
+  gap: 2rem;
+}
+
+.parent-link {
+  padding: 1rem 1.5rem;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.parent-link:hover {
+  background-color: var(--primary-hover-color);
+  transform: scale(1.1);
+  border-color: var(--secondary-color);
+}
+
+/* Mobile Styles for Live Page */
 @media (max-width: 768px) {
   .live-page {
-    padding: 20px; /* Reduced padding for smaller viewports */
+    padding: 2rem;
+    min-height: 100vh;
+    background: var(--accent-color);
   }
 
   .live-content {
-    padding: 20px; /* Further reduced padding for mobile */
-    margin-bottom: 20px; /* Consistent spacing */
-    background-color: var(--primary-color);
-    border-radius: 10px; /* Keep the rounded appearance */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Optional shadow for depth */
+    padding: 3rem;
+    margin: 2rem auto;
+    max-width: 95%;
+    width: 100%;
+    border-radius: 20px;
+    box-shadow: 0 6px 10px var(--shadow-color);
   }
 
   .live-title {
-    font-size: 2rem; /* Slightly smaller for better fit */
-    margin-bottom: 20px; /* Adjust spacing */
-    word-wrap: break-word; /* Ensure long text wraps */
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    letter-spacing: 1.5px;
   }
 
+  .live-container {
+    padding: 2rem;
+    border-radius: 20px;
+    background: var(--accent-color);
+    box-shadow: 0 6px 10px var(--shadow-color);
+  }
+
+  /* Iframe Container: Larger and Responsive */
   .iframe-container {
-    margin-bottom: 20px;
-    border-radius: 10px; /* Maintain aesthetic */
+    width: 100%; /* Full width of the parent container */
+    padding-bottom: 75%; /* Increased aspect ratio to make iframe taller */
+    margin-bottom: 2.5rem; /* Adjusted spacing below iframe */
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 12px var(--shadow-color);
+  }
+
+  .iframe-container:hover {
+    transform: none;
+  }
+
+  .live-iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
   }
 
   .parent-link {
-    font-size: 1rem; /* Better button text scaling */
-    padding: 10px 15px; /* Smaller padding for compact buttons */
-    margin: 10px 0; /* Add space between buttons */
-    width: 90%; /* Ensure buttons fit the viewport */
-    text-align: center;
+    padding: 0.8rem 1rem;
+    font-size: 1.2rem;
   }
 
-  .live-footer {
-    padding: 20px; /* Compact footer padding */
-    font-size: 0.9rem; /* Slightly smaller text */
-  }
-
-  .live-footer a {
-    font-size: 1rem; /* Adjust link size */
-    margin-top: 10px; /* Add spacing between links */
+  .puppies-parents-links {
+    flex-direction: column;
+    gap: 1rem;
   }
 }

@@ -14,30 +14,30 @@ const Puppies: React.FC = () => {
   const puppiesForSale = [
     {
       id: 1,
-      name: "Max",
-      age: "8 weeks",
+      name: "Reserved Male Puppy",
+      age: "3 weeks",
       description: "A playful and cuddly puppy ready for a loving home.",
-      image: "/images/max.jpg",
-      parentId1: 1,
-      parentId2: 2,
+      image: "/images/puppy1.jpg",
+      parentId1: 4,
+      parentId2: 5,
     },
     {
       id: 2,
-      name: "Luna",
-      age: "7 weeks",
+      name: "Available Female Puppy",
+      age: "3 weeks",
       description: "A curious and energetic puppy with a lovable personality.",
-      image: "/images/luna.jpg",
-      parentId1: 3,
-      parentId2: 4,
+      image: "/images/puppy2.jpg",
+      parentId1: 4,
+      parentId2: 5,
     },
     {
       id: 3,
-      name: "Bailey",
-      age: "6 weeks",
+      name: "Available Female Puppy",
+      age: "3 weeks",
       description: "A gentle and affectionate puppy looking for a forever family.",
-      image: "/images/bailey.jpg",
-      parentId1: 5,
-      parentId2: 6,
+      image: "/images/puppy3.jpg",
+      parentId1: 4,
+      parentId2: 5,
     },
   ];
 
@@ -80,10 +80,9 @@ const Puppies: React.FC = () => {
 
   return (
     <div className="puppies-container">
-      <h1 className="puppies-title">Puppies for Sale</h1>
+      <h1 className="puppies-title">Puppies</h1>
       <div className="puppies-slideshow">
-        <button className="puppies-button" onClick={handlePrevious}>
-          &lt; Previous
+        <button className="puppies-button" onClick={handlePrevious}>&lt;
         </button>
         <div className="puppies-info">
           <img
@@ -109,8 +108,7 @@ const Puppies: React.FC = () => {
             ))}
           </div>
         </div>
-        <button className="puppies-button" onClick={handleNext}>
-          Next &gt;
+        <button className="puppies-button" onClick={handleNext}>&gt;
         </button>
       </div>
 

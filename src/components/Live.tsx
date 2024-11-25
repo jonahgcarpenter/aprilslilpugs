@@ -19,25 +19,27 @@ const Live: React.FC = () => {
       <div className="live-page">
         <div className="live-content">
           <h1 className="live-title">April's Lil Pugs Live</h1>
-          <div className="iframe-container">
-            <iframe
-              className="live-iframe"
-              src="https://www.youtube.com/embed/live_stream?channel=UCGoYuWwpBLy4oVw1_c7P06Q"
-              title="Puppies Live Stream"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            ></iframe>
-          </div>
-          <div className="puppies-parents-links">
-            <button className="parent-link" onClick={() => handleOpenModal("millie")}>
-              Meet Millie
-            </button>
-            <button className="parent-link" onClick={() => handleOpenModal("mardi")}>
-              Meet Mardi
-            </button>
+          <div className="live-container">
+            <div className="iframe-container">
+              <iframe
+                className="live-iframe"
+                src="https://www.youtube.com/embed/live_stream?channel=UCGoYuWwpBLy4oVw1_c7P06Q"
+                title="Puppies Live Stream"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              ></iframe>
+            </div>
+            <div className="puppies-parents-links">
+              <button className="parent-link" onClick={() => handleOpenModal("millie")}>
+                Meet Millie
+              </button>
+              <button className="parent-link" onClick={() => handleOpenModal("mardi")}>
+                Meet Mardi
+              </button>
+            </div>
           </div>
         </div>
-  
+
         {/* Modal */}
         {activeModal && (
           <div className="modal" onClick={handleCloseModal}>
@@ -51,7 +53,7 @@ const Live: React.FC = () => {
           </div>
         )}
       </div>
-  
+
       {/* Footer outside the main container */}
       <footer className="live-footer">
         <ContactMe />
