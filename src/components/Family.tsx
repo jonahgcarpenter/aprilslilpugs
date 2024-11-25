@@ -37,7 +37,6 @@ const Family: React.FC = () => {
 
   return (
     <section className="section-container">
-      <div className="section-container">
         <h1 className="section-title">Meet {currentFamilyMember.name}!</h1>
         <div className="section-navigation">
           <button className="family-button" onClick={handlePrevious}>
@@ -52,7 +51,6 @@ const Family: React.FC = () => {
             &gt;
           </button>
         </div>
-      </div>
     </section>
   );  
 };

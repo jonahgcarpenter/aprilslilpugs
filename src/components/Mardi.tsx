@@ -6,7 +6,7 @@ const Mardi: React.FC = () => {
       <img
         src="/images/mardi.jpg"
         alt="Mardi"
-        className="family-image"
+        className="section-image"
       />
       <h2>Mardi</h2>
       <p>
