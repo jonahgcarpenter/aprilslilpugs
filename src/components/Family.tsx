@@ -40,19 +40,21 @@ const Family: React.FC = () => {
       <div className="family-container">
         <h1 className="family-title">Meet {currentFamilyMember.name}!</h1>
         <div className="family-navigation">
-          <button className="family-button" onClick={handlePrevious}>&lt;
+          <button className="family-button" onClick={handlePrevious}>
+            &lt;
           </button>
-          <div className="family-info">
-            <React.Suspense fallback={<div>Loading parent details...</div>}>
+          <React.Suspense fallback={<div>Loading parent details...</div>}>
+            <div className="family-info">
               <CurrentDogComponent />
-            </React.Suspense>
-          </div>
-          <button className="family-button" onClick={handleNext}>&gt;
+            </div>
+          </React.Suspense>
+          <button className="family-button" onClick={handleNext}>
+            &gt;
           </button>
         </div>
       </div>
     </section>
-  );
+  );  
 };
 
 export default Family;

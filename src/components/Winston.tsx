@@ -6,7 +6,7 @@ const Winston: React.FC = () => {
       <img
         src="/images/winston.jpg"
         alt="Winston"
-        style={{ width: "100%", borderRadius: "10px" }}
+        className="family-image"
       />
       <h2>Winston</h2>
       <p>
