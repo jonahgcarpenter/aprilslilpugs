@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { collection, doc, getDoc, getDocs } from "firebase/firestore";
-import { db } from "../secrets/firebase.js"; // Adjust path to your Firebase config
+import { db } from "../secrets/firebase.js";
 
 const Puppies: React.FC = () => {
   const [puppies, setPuppies] = useState<any[]>([]);
   const [currentPuppyIndex, setCurrentPuppyIndex] = useState(0);
-  const [openParentId, setOpenParentId] = useState<string | null>(null);
-  const [parentDetails, setParentDetails] = useState<any | null>(null);
+  const [activeModal, setActiveModal] = useState<"mom" | "dad" | null>(null); // Modal state
+  const [mom, setMom] = useState<any | null>(null); // Mom's data
+  const [dad, setDad] = useState<any | null>(null); // Dad's data
   const [expandedImageId, setExpandedImageId] = useState<string | null>(null);
 
   // Fetch puppies data from Firestore
@@ -24,26 +25,34 @@ const Puppies: React.FC = () => {
     fetchPuppies();
   }, []);
 
-  // Fetch parent details dynamically
-  const fetchParentDetails = async (parentId: string) => {
-    try {
-      const parentDoc = await getDoc(doc(db, "family", parentId));
-      if (parentDoc.exists()) {
-        setParentDetails(parentDoc.data());
-        setOpenParentId(parentId);
-      }
-    } catch (error) {
-      console.error("Error fetching parent details: ", error);
-    }
-  };
+  // Fetch parent details when opening modal
+  useEffect(() => {
+    const fetchParents = async () => {
+      try {
+        const momDoc = await getDoc(doc(db, "family", "U0zC1dbHPibdoC1vlIEk")); // Replace with actual mom document ID
+        const dadDoc = await getDoc(doc(db, "family", "xNtokSGQEtUjIoJ3bsz7")); // Replace with actual dad document ID
 
-  const handleOpenParentModal = (parentId: string) => {
-    fetchParentDetails(parentId);
+        if (momDoc.exists()) {
+          setMom(momDoc.data());
+        }
+        if (dadDoc.exists()) {
+          setDad(dadDoc.data());
+        }
+      } catch (error) {
+        console.error("Error fetching parent data:", error);
+      }
+    };
+
+    fetchParents();
+  }, []);
+
+  const handleOpenModal = (modalType: "mom" | "dad") => {
+    setActiveModal(modalType);
   };
 
   const handleCloseModal = () => {
-    setOpenParentId(null);
-    setParentDetails(null);
+    setActiveModal(null);
+    setExpandedImageId(null);
   };
 
   const handleNext = () => {
@@ -100,20 +109,14 @@ const Puppies: React.FC = () => {
           <p>{currentPuppy.description}</p>
           <h3>Parents</h3>
           <div className="section-parents-links">
-            {currentPuppy.dad && (
-              <button
-                className="parent-link"
-                onClick={() => handleOpenParentModal(currentPuppy.dad.id)}
-              >
-                Meet Dad
+            {mom && (
+              <button className="parent-link" onClick={() => handleOpenModal("mom")}>
+                Meet Mom
               </button>
             )}
-            {currentPuppy.mom && (
-              <button
-                className="parent-link"
-                onClick={() => handleOpenParentModal(currentPuppy.mom.id)}
-              >
-                Meet Mom
+            {dad && (
+              <button className="parent-link" onClick={() => handleOpenModal("dad")}>
+                Meet Dad
               </button>
             )}
           </div>
@@ -123,35 +126,53 @@ const Puppies: React.FC = () => {
         </button>
       </div>
 
-      {/* Modal for parent details */}
-      {openParentId && (
-        <div className="modal">
-          <div className="modal-content">
+      {/* Modal */}
+      {activeModal && (
+        <div className="modal" onClick={handleCloseModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <button className="modal-close" onClick={handleCloseModal}>
-              &times;
+              ✖
             </button>
-            <React.Suspense fallback={<div>Loading parent details...</div>}>
-              {parentDetails && (
-                <>
-                  <img
-                    src={parentDetails.image}
-                    alt={parentDetails.name}
-                    className={`section-image ${
-                      expandedImageId === openParentId ? "image-expanded" : ""
-                    }`}
-                    onClick={(e) => {
-                      e.stopPropagation(); // Prevent click from bubbling
-                      handleImageClick(openParentId);
-                    }}
-                  />
-                  <h2>{parentDetails.name}</h2>
-                  <p>
-                    <strong>Age:</strong> {parentDetails.age} years
-                  </p>
-                  <p>{parentDetails.description}</p>
-                </>
-              )}
-            </React.Suspense>
+            {activeModal === "mom" && mom && (
+              <div>
+                <h2>{mom.name}</h2>
+                <img
+                  src={mom.image}
+                  alt={mom.name}
+                  className={`section-image ${
+                    expandedImageId === "mom" ? "image-expanded" : ""
+                  }`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleImageClick("mom");
+                  }}
+                />
+                <p>
+                  <strong>Age:</strong> {mom.age} years
+                </p>
+                <p>{mom.description}</p>
+              </div>
+            )}
+            {activeModal === "dad" && dad && (
+              <div>
+                <h2>{dad.name}</h2>
+                <img
+                  src={dad.image}
+                  alt={dad.name}
+                  className={`section-image ${
+                    expandedImageId === "dad" ? "image-expanded" : ""
+                  }`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleImageClick("dad");
+                  }}
+                />
+                <p>
+                  <strong>Age:</strong> {dad.age} years
+                </p>
+                <p>{dad.description}</p>
+              </div>
+            )}
           </div>
         </div>
       )}

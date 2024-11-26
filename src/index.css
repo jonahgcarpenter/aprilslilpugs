@@ -463,6 +463,23 @@ button:hover {
   box-shadow: 0 6px 10px var(--shadow-color);
 }
 
+/* Adjustments for screens smaller than 768px */
+@media (max-width: 768px) {
+  .puppies-button, .family-button {
+    width: 3rem; /* Adjust button size for mobile */
+    height: 2rem; /* Keep width and height equal for perfect circles */
+    font-size: 1rem; /* Slightly smaller font size */
+    padding: 0.3rem; /* Reduce padding for smaller screens */
+  }
+
+  /* Parent link buttons */
+  .parent-link {
+    font-size: 0.9rem; /* Smaller font size */
+    padding: .5rem .5rem; /* Adjust padding for smaller buttons */
+    border-radius: 6px; /* Slightly smaller rounding */
+  }
+}
+
 /* Live Button Specific Styles */
 .Navbar-link.live-button {
   gap: 0.5rem; /* Space between the text and the icon */
