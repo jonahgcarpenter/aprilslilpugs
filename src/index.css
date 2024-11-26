@@ -15,7 +15,7 @@
   --link-hover-color: #6096ba; /* Link hover color */
 
   /* Updated background image variable */
-  --background-image: url('/images/background.jpg'); /* Correct path for React */
+  --background-image: url('/images/backdrop.jpg'); /* Correct path for React */
 }
 
 /* Global Styles */

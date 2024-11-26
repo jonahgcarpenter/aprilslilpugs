@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { collection, doc, getDoc, getDocs } from "firebase/firestore";
-import { db } from "../secrets/firebase.js";
+import { db } from "../secrets/firebase";
+
 
 const Puppies: React.FC = () => {
   const [puppies, setPuppies] = useState<any[]>([]);
@@ -109,14 +110,14 @@ const Puppies: React.FC = () => {
           <p>{currentPuppy.description}</p>
           <h3>Parents</h3>
           <div className="section-parents-links">
-            {mom && (
-              <button className="parent-link" onClick={() => handleOpenModal("mom")}>
-                Meet Mom
-              </button>
-            )}
             {dad && (
               <button className="parent-link" onClick={() => handleOpenModal("dad")}>
                 Meet Dad
+              </button>
+            )}
+            {mom && (
+              <button className="parent-link" onClick={() => handleOpenModal("mom")}>
+                Meet Mom
               </button>
             )}
           </div>

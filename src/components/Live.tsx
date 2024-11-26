@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import ContactMe from "./ContactMe";
 import { doc, getDoc } from "firebase/firestore";
-import { db } from "../secrets/firebase.js"; // Adjust path to your Firebase config
+import { db } from "../secrets/firebase";
 
 const Live: React.FC = () => {
   const [activeModal, setActiveModal] = useState<"mom" | "dad" | null>(null); // Modal state
@@ -47,8 +47,16 @@ const Live: React.FC = () => {
   };
 
   const handleOutsideClick = (event: React.MouseEvent) => {
-    if ((event.target as HTMLElement).classList.contains("image-expanded")) {
-      setExpandedImageId(null); // Close expanded image
+    const target = event.target as HTMLElement;
+
+    // Close modal if click is outside the modal content
+    if (target.classList.contains("modal")) {
+      handleCloseModal();
+    }
+
+    // Close expanded image if click is outside
+    if (target.classList.contains("image-expanded")) {
+      setExpandedImageId(null);
     }
   };
 
@@ -82,7 +90,7 @@ const Live: React.FC = () => {
   
           {/* Modal */}
           {activeModal && (
-            <div className="modal" onClick={handleCloseModal}>
+            <div className="modal" onClick={handleOutsideClick}>
               <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                 <button className="modal-close" onClick={handleCloseModal}>
                   ✖

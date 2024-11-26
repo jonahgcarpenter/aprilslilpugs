@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { collection, getDocs } from "firebase/firestore";
-import { db } from "../secrets/firebase.js"; // Adjust path to your Firebase config
+import { db } from "../secrets/firebase";
 
 const Family: React.FC = () => {
   const [familyMembers, setFamilyMembers] = useState<any[]>([]);
