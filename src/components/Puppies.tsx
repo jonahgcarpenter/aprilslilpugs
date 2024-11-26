@@ -1,59 +1,49 @@
-import React, { useState } from "react";
-
-const parentComponents: { [key: number]: React.LazyExoticComponent<React.FC<{}>> } = {
-  1: React.lazy(() => import("./Winston")),
-  2: React.lazy(() => import("./Elly")),
-  3: React.lazy(() => import("./Penny")),
-  4: React.lazy(() => import("./Mardi")),
-  5: React.lazy(() => import("./Millie")),
-  6: React.lazy(() => import("./Hallie")),
-};
+import React, { useState, useEffect } from "react";
+import { collection, getDocs, doc, getDoc } from "firebase/firestore";
+import { db } from "../secrets/firebase.js";
 
 const Puppies: React.FC = () => {
-  const puppiesForSale = [
-    {
-      id: 1,
-      name: "Reserved Male Puppy",
-      age: "3 weeks",
-      description: "A playful and cuddly puppy ready for a loving home.",
-      image: "/images/puppy1.jpg",
-      parentId1: 4,
-      parentId2: 5,
-    },
-    {
-      id: 2,
-      name: "Available Female Puppy",
-      age: "3 weeks",
-      description: "A curious and energetic puppy with a lovable personality.",
-      image: "/images/puppy2.jpg",
-      parentId1: 4,
-      parentId2: 5,
-    },
-    {
-      id: 3,
-      name: "Available Female Puppy",
-      age: "3 weeks",
-      description: "A gentle and affectionate puppy looking for a forever family.",
-      image: "/images/puppy3.jpg",
-      parentId1: 4,
-      parentId2: 5,
-    },
-  ];
-
-  const parentNames: { [key: number]: string } = {
-    1: "Winston",
-    2: "Elly",
-    3: "Penny",
-    4: "Mardi",
-    5: "Millie",
-    6: "Hallie",
-  };
-
+  const [puppiesForSale, setPuppiesForSale] = useState<any[]>([]);
+  const [parentNames, setParentNames] = useState<{ [key: string]: string }>({});
   const [currentPuppyIndex, setCurrentPuppyIndex] = useState(0);
-  const [openParentId, setOpenParentId] = useState<number | null>(null);
+  const [openParentId, setOpenParentId] = useState<string | null>(null);
   const [expandedImageId, setExpandedImageId] = useState<number | null>(null);
 
-  const handleOpenParentInfo = (parentId: number) => {
+  useEffect(() => {
+    // Fetch puppies and parents data from Firestore
+    const fetchData = async () => {
+      // Fetch puppies
+      const puppiesSnapshot = await getDocs(collection(db, "puppies"));
+      const puppies = puppiesSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      // Fetch parent names
+      const parentSet = new Set<string>();
+      puppies.forEach((puppy) => {
+        if (puppy.dad) parentSet.add(puppy.dad.id);
+        if (puppy.mom) parentSet.add(puppy.mom.id);
+      });
+
+      const parentNames: { [key: string]: string } = {};
+      await Promise.all(
+        Array.from(parentSet).map(async (parentId) => {
+          const parentDoc = await getDoc(doc(db, "family", parentId));
+          if (parentDoc.exists()) {
+            parentNames[parentId] = parentDoc.data().name;
+          }
+        })
+      );
+
+      setPuppiesForSale(puppies);
+      setParentNames(parentNames);
+    };
+
+    fetchData();
+  }, []);
+
+  const handleOpenParentInfo = (parentId: string) => {
     setOpenParentId(parentId);
   };
 
@@ -85,10 +75,11 @@ const Puppies: React.FC = () => {
     }
   };
 
+  if (puppiesForSale.length === 0) {
+    return <div>Loading puppies...</div>;
+  }
+
   const currentPuppy = puppiesForSale[currentPuppyIndex];
-  const CurrentParentComponent = openParentId
-    ? parentComponents[openParentId]
-    : null;
 
   return (
     <div className="section-container" onClick={handleOutsideClick}>
@@ -116,13 +107,13 @@ const Puppies: React.FC = () => {
           <p>{currentPuppy.description}</p>
           <h3>Parents</h3>
           <div className="section-parents-links">
-            {[currentPuppy.parentId1, currentPuppy.parentId2].map((parentId) => (
+            {[currentPuppy.dad, currentPuppy.mom].map((parentRef) => (
               <button
-                key={parentId}
+                key={parentRef?.id}
                 className="parent-link"
-                onClick={() => handleOpenParentInfo(parentId)}
+                onClick={() => handleOpenParentInfo(parentRef.id)}
               >
-                Meet {parentNames[parentId as keyof typeof parentNames]}
+                Meet {parentNames[parentRef?.id] || "Unknown"}
               </button>
             ))}
           </div>
@@ -132,14 +123,15 @@ const Puppies: React.FC = () => {
         </button>
       </div>
 
-      {openParentId && CurrentParentComponent && (
+      {openParentId && (
         <div className="modal">
           <div className="modal-content">
             <button className="modal-close" onClick={handleCloseModal}>
               &times;
             </button>
             <React.Suspense fallback={<div>Loading parent details...</div>}>
-              {React.createElement(CurrentParentComponent)}
+              <h2>{parentNames[openParentId]}</h2>
+              {/* Add additional parent details here */}
             </React.Suspense>
           </div>
         </div>
