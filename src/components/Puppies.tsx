@@ -1,89 +1,82 @@
 import React, { useState, useEffect } from "react";
-import { collection, getDocs, doc, getDoc } from "firebase/firestore";
-import { db } from "../secrets/firebase.js";
+import { collection, doc, getDoc, getDocs } from "firebase/firestore";
+import { db } from "../secrets/firebase.js"; // Adjust path to your Firebase config
 
 const Puppies: React.FC = () => {
-  const [puppiesForSale, setPuppiesForSale] = useState<any[]>([]);
-  const [parentNames, setParentNames] = useState<{ [key: string]: string }>({});
+  const [puppies, setPuppies] = useState<any[]>([]);
   const [currentPuppyIndex, setCurrentPuppyIndex] = useState(0);
   const [openParentId, setOpenParentId] = useState<string | null>(null);
-  const [expandedImageId, setExpandedImageId] = useState<number | null>(null);
+  const [parentDetails, setParentDetails] = useState<any | null>(null);
+  const [expandedImageId, setExpandedImageId] = useState<string | null>(null);
 
+  // Fetch puppies data from Firestore
   useEffect(() => {
-    // Fetch puppies and parents data from Firestore
-    const fetchData = async () => {
-      // Fetch puppies
-      const puppiesSnapshot = await getDocs(collection(db, "puppies"));
-      const puppies = puppiesSnapshot.docs.map((doc) => ({
+    const fetchPuppies = async () => {
+      const puppiesCollection = collection(db, "puppies");
+      const puppiesSnapshot = await getDocs(puppiesCollection);
+      const puppiesList = puppiesSnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
-
-      // Fetch parent names
-      const parentSet = new Set<string>();
-      puppies.forEach((puppy) => {
-        if (puppy.dad) parentSet.add(puppy.dad.id);
-        if (puppy.mom) parentSet.add(puppy.mom.id);
-      });
-
-      const parentNames: { [key: string]: string } = {};
-      await Promise.all(
-        Array.from(parentSet).map(async (parentId) => {
-          const parentDoc = await getDoc(doc(db, "family", parentId));
-          if (parentDoc.exists()) {
-            parentNames[parentId] = parentDoc.data().name;
-          }
-        })
-      );
-
-      setPuppiesForSale(puppies);
-      setParentNames(parentNames);
+      setPuppies(puppiesList);
     };
 
-    fetchData();
+    fetchPuppies();
   }, []);
 
-  const handleOpenParentInfo = (parentId: string) => {
-    setOpenParentId(parentId);
+  // Fetch parent details dynamically
+  const fetchParentDetails = async (parentId: string) => {
+    try {
+      const parentDoc = await getDoc(doc(db, "family", parentId));
+      if (parentDoc.exists()) {
+        setParentDetails(parentDoc.data());
+        setOpenParentId(parentId);
+      }
+    } catch (error) {
+      console.error("Error fetching parent details: ", error);
+    }
+  };
+
+  const handleOpenParentModal = (parentId: string) => {
+    fetchParentDetails(parentId);
   };
 
   const handleCloseModal = () => {
     setOpenParentId(null);
+    setParentDetails(null);
   };
 
   const handleNext = () => {
-    setCurrentPuppyIndex((prevIndex) => (prevIndex + 1) % puppiesForSale.length);
-    setOpenParentId(null);
-    setExpandedImageId(null);
+    setCurrentPuppyIndex((prevIndex) => (prevIndex + 1) % puppies.length);
+    setExpandedImageId(null); // Reset expanded image
   };
 
   const handlePrevious = () => {
     setCurrentPuppyIndex((prevIndex) =>
-      prevIndex === 0 ? puppiesForSale.length - 1 : prevIndex - 1
+      prevIndex === 0 ? puppies.length - 1 : prevIndex - 1
     );
-    setOpenParentId(null);
-    setExpandedImageId(null);
+    setExpandedImageId(null); // Reset expanded image
   };
 
-  const handleImageClick = (puppyId: number) => {
-    setExpandedImageId(expandedImageId === puppyId ? null : puppyId);
+  const handleImageClick = (imageId: string) => {
+    setExpandedImageId(expandedImageId === imageId ? null : imageId);
   };
 
   const handleOutsideClick = (event: React.MouseEvent) => {
     if ((event.target as HTMLElement).classList.contains("image-expanded")) {
-      setExpandedImageId(null);
+      setExpandedImageId(null); // Close expanded image
     }
   };
 
-  if (puppiesForSale.length === 0) {
+  if (puppies.length === 0) {
     return <div>Loading puppies...</div>;
   }
 
-  const currentPuppy = puppiesForSale[currentPuppyIndex];
+  const currentPuppy = puppies[currentPuppyIndex];
 
   return (
     <div className="section-container" onClick={handleOutsideClick}>
-      <h1 className="section-title">Puppies</h1>
+      <h1 className="section-title">Meet the Puppies</h1>
       <div className="section-slideshow">
         <button className="puppies-button" onClick={handlePrevious}>
           &lt;
@@ -96,7 +89,7 @@ const Puppies: React.FC = () => {
               expandedImageId === currentPuppy.id ? "image-expanded" : ""
             }`}
             onClick={(e) => {
-              e.stopPropagation();
+              e.stopPropagation(); // Prevent click from bubbling
               handleImageClick(currentPuppy.id);
             }}
           />
@@ -107,15 +100,22 @@ const Puppies: React.FC = () => {
           <p>{currentPuppy.description}</p>
           <h3>Parents</h3>
           <div className="section-parents-links">
-            {[currentPuppy.dad, currentPuppy.mom].map((parentRef) => (
+            {currentPuppy.dad && (
               <button
-                key={parentRef?.id}
                 className="parent-link"
-                onClick={() => handleOpenParentInfo(parentRef.id)}
+                onClick={() => handleOpenParentModal(currentPuppy.dad.id)}
               >
-                Meet {parentNames[parentRef?.id] || "Unknown"}
+                Meet Dad
               </button>
-            ))}
+            )}
+            {currentPuppy.mom && (
+              <button
+                className="parent-link"
+                onClick={() => handleOpenParentModal(currentPuppy.mom.id)}
+              >
+                Meet Mom
+              </button>
+            )}
           </div>
         </div>
         <button className="puppies-button" onClick={handleNext}>
@@ -123,6 +123,7 @@ const Puppies: React.FC = () => {
         </button>
       </div>
 
+      {/* Modal for parent details */}
       {openParentId && (
         <div className="modal">
           <div className="modal-content">
@@ -130,8 +131,26 @@ const Puppies: React.FC = () => {
               &times;
             </button>
             <React.Suspense fallback={<div>Loading parent details...</div>}>
-              <h2>{parentNames[openParentId]}</h2>
-              {/* Add additional parent details here */}
+              {parentDetails && (
+                <>
+                  <img
+                    src={parentDetails.image}
+                    alt={parentDetails.name}
+                    className={`section-image ${
+                      expandedImageId === openParentId ? "image-expanded" : ""
+                    }`}
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent click from bubbling
+                      handleImageClick(openParentId);
+                    }}
+                  />
+                  <h2>{parentDetails.name}</h2>
+                  <p>
+                    <strong>Age:</strong> {parentDetails.age} years
+                  </p>
+                  <p>{parentDetails.description}</p>
+                </>
+              )}
             </React.Suspense>
           </div>
         </div>

@@ -1,58 +1,91 @@
-import React, { useState } from "react";
-
-// Dynamic import of parent components
-const dogComponents: { [key: number]: React.LazyExoticComponent<React.FC<{}>> } = {
-  1: React.lazy(() => import("./Winston")),
-  2: React.lazy(() => import("./Elly")),
-  3: React.lazy(() => import("./Penny")),
-  4: React.lazy(() => import("./Mardi")),
-  5: React.lazy(() => import("./Millie")),
-  6: React.lazy(() => import("./Hallie")),
-};
-
-const familyMembers = [
-  { id: 1, name: "Winston" },
-  { id: 2, name: "Elly" },
-  { id: 3, name: "Penny" },
-  { id: 4, name: "Mardi" },
-  { id: 5, name: "Millie" },
-  { id: 6, name: "Hallie" },
-];
+import React, { useState, useEffect } from "react";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../secrets/firebase.js"; // Adjust path to your Firebase config
 
 const Family: React.FC = () => {
+  const [familyMembers, setFamilyMembers] = useState<any[]>([]);
   const [currentFamilyIndex, setCurrentFamilyIndex] = useState(0);
+  const [expandedImageId, setExpandedImageId] = useState<string | null>(null);
+
+  // Fetch family members from Firestore
+  useEffect(() => {
+    const fetchFamilyData = async () => {
+      try {
+        const familyCollection = collection(db, "family");
+        const familySnapshot = await getDocs(familyCollection);
+        const familyList = familySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setFamilyMembers(familyList);
+      } catch (error) {
+        console.error("Error fetching family data: ", error);
+      }
+    };
+
+    fetchFamilyData();
+  }, []);
 
   const handleNext = () => {
-    setCurrentFamilyIndex((prevIndex) => (prevIndex + 1) % familyMembers.length);
-  };
-
-  const handlePrevious = () => {
-    setCurrentFamilyIndex((prevIndex) =>
-      prevIndex === 0 ? familyMembers.length - 1 : prevIndex - 1
+    setCurrentFamilyIndex(
+      (prevIndex) => (prevIndex + 1) % familyMembers.length
     );
   };
 
+  const handlePrevious = () => {
+    setCurrentFamilyIndex(
+      (prevIndex) =>
+        prevIndex === 0 ? familyMembers.length - 1 : prevIndex - 1
+    );
+  };
+
+  const handleImageClick = (familyId: string) => {
+    setExpandedImageId(expandedImageId === familyId ? null : familyId);
+  };
+
+  const handleOutsideClick = (event: React.MouseEvent) => {
+    if ((event.target as HTMLElement).classList.contains("image-expanded")) {
+      setExpandedImageId(null);
+    }
+  };
+
+  if (familyMembers.length === 0) {
+    return <div>Loading family members...</div>;
+  }
+
   const currentFamilyMember = familyMembers[currentFamilyIndex];
-  const CurrentDogComponent = dogComponents[currentFamilyMember.id];
 
   return (
-    <section className="section-container">
-        <h1 className="section-title">Meet {currentFamilyMember.name}!</h1>
-        <div className="section-navigation">
-          <button className="family-button" onClick={handlePrevious}>
-            &lt;
-          </button>
-          <React.Suspense fallback={<div>Loading family member details...</div>}>
-            <div className="section-info">
-              <CurrentDogComponent />
-            </div>
-          </React.Suspense>
-          <button className="family-button" onClick={handleNext}>
-            &gt;
-          </button>
+    <section className="section-container" onClick={handleOutsideClick}>
+      <h1 className="section-title">Meet {currentFamilyMember.name}!</h1>
+      <div className="section-navigation">
+        <button className="family-button" onClick={handlePrevious}>
+          &lt;
+        </button>
+        <div className="section-info">
+          <img
+            src={currentFamilyMember.image}
+            alt={currentFamilyMember.name}
+            className={`section-image ${
+              expandedImageId === currentFamilyMember.id ? "image-expanded" : ""
+            }`}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleImageClick(currentFamilyMember.id);
+            }}
+          />
+          <h2>{currentFamilyMember.name}</h2>
+          <p>
+            <strong>Age:</strong> {currentFamilyMember.age} years
+          </p>
+          <p>{currentFamilyMember.description}</p>
         </div>
+        <button className="family-button" onClick={handleNext}>
+          &gt;
+        </button>
+      </div>
     </section>
-  );  
+  );
 };
 
 export default Family;

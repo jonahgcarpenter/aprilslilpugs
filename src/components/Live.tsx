@@ -1,19 +1,55 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ContactMe from "./ContactMe";
-import Millie from "./Millie";
-import Mardi from "./Mardi";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../secrets/firebase.js"; // Adjust path to your Firebase config
 
 const Live: React.FC = () => {
-  const [activeModal, setActiveModal] = useState<"millie" | "mardi" | null>(null); // Modal state
+  const [activeModal, setActiveModal] = useState<"mom" | "dad" | null>(null); // Modal state
+  const [mom, setMom] = useState<any | null>(null); // Mom's data
+  const [dad, setDad] = useState<any | null>(null); // Dad's data
+  const [expandedImageId, setExpandedImageId] = useState<string | null>(null); // Image expansion state
 
-  // Handler to open modal
-  const handleOpenModal = (modalType: "millie" | "mardi") => {
+  // Fetch mom and dad data from Firestore
+  useEffect(() => {
+    const fetchParents = async () => {
+      try {
+        const momDoc = await getDoc(doc(db, "family", "U0zC1dbHPibdoC1vlIEk")); // Replace with actual mom's document ID
+        const dadDoc = await getDoc(doc(db, "family", "xNtokSGQEtUjIoJ3bsz7")); // Replace with actual dad's document ID
+
+        if (momDoc.exists()) {
+          setMom(momDoc.data());
+        }
+
+        if (dadDoc.exists()) {
+          setDad(dadDoc.data());
+        }
+      } catch (error) {
+        console.error("Error fetching parent data:", error);
+      }
+    };
+
+    fetchParents();
+  }, []);
+
+  // Handlers for modal
+  const handleOpenModal = (modalType: "mom" | "dad") => {
     setActiveModal(modalType);
   };
 
-  // Handler to close modal
   const handleCloseModal = () => {
     setActiveModal(null);
+    setExpandedImageId(null); // Close any expanded image
+  };
+
+  // Handlers for image expansion
+  const handleImageClick = (imageId: string) => {
+    setExpandedImageId(expandedImageId === imageId ? null : imageId);
+  };
+
+  const handleOutsideClick = (event: React.MouseEvent) => {
+    if ((event.target as HTMLElement).classList.contains("image-expanded")) {
+      setExpandedImageId(null); // Close expanded image
+    }
   };
 
   return (
@@ -32,12 +68,16 @@ const Live: React.FC = () => {
           </div>
           <h3>Parents</h3>
           <div className="section-parents-links">
-            <button className="parent-link" onClick={() => handleOpenModal("millie")}>
-              Meet Mom
-            </button>
-            <button className="parent-link" onClick={() => handleOpenModal("mardi")}>
-              Meet Dad
-            </button>
+            {dad && (
+              <button className="parent-link" onClick={() => handleOpenModal("dad")}>
+                Meet Dad
+              </button>
+            )}
+            {mom && (
+              <button className="parent-link" onClick={() => handleOpenModal("mom")}>
+                Meet Mom
+              </button>
+            )}
           </div>
   
           {/* Modal */}
@@ -47,8 +87,46 @@ const Live: React.FC = () => {
                 <button className="modal-close" onClick={handleCloseModal}>
                   ✖
                 </button>
-                {activeModal === "millie" && <Millie />}
-                {activeModal === "mardi" && <Mardi />}
+                {activeModal === "mom" && mom && (
+                  <div>
+                    <h2>{mom.name}</h2>
+                    <img
+                      src={mom.image}
+                      alt={mom.name}
+                      className={`section-image ${
+                        expandedImageId === "mom" ? "image-expanded" : ""
+                      }`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleImageClick("mom");
+                      }}
+                    />
+                    <p>
+                      <strong>Age:</strong> {mom.age} years
+                    </p>
+                    <p>{mom.description}</p>
+                  </div>
+                )}
+                {activeModal === "dad" && dad && (
+                  <div>
+                    <h2>{dad.name}</h2>
+                    <img
+                      src={dad.image}
+                      alt={dad.name}
+                      className={`section-image ${
+                        expandedImageId === "dad" ? "image-expanded" : ""
+                      }`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleImageClick("dad");
+                      }}
+                    />
+                    <p>
+                      <strong>Age:</strong> {dad.age} years
+                    </p>
+                    <p>{dad.description}</p>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -60,7 +138,7 @@ const Live: React.FC = () => {
         <ContactMe />
       </footer>
     </div>
-  );  
+  );
 };
 
 export default Live;
