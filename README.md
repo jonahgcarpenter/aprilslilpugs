@@ -1,9 +1,9 @@
 # April's Lil Pugs
 
-Website for my moms pug breeding built with Vite React
+Website for my moms pug breeding built with React, and a Firebase Database
 
 ## Known Issues
 
-update dog info
+update dog info within firebase UI
 
-change size of meet buttons on mobile
+add about me section
