@@ -4,6 +4,4 @@ Website for my moms pug breeding built with React, and a Firebase Database
 
 ## Known Issues
 
-update dog info within firebase UI
-
-add about me section
+- add previous litters button under meet the puppies, and include a new nav header
