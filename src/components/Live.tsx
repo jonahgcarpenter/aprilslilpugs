@@ -9,6 +9,15 @@ const Live: React.FC = () => {
   const [dad, setDad] = useState<any | null>(null); // Dad's data
   const [expandedImageId, setExpandedImageId] = useState<string | null>(null); // Image expansion state
 
+  // Scroll to top on component mount
+  useEffect(() => {
+    // Find the section container and scroll to it
+    const sectionElement = document.querySelector('.section-container');
+    if (sectionElement) {
+      sectionElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, []);
+
   // Fetch mom and dad data from Firestore
   useEffect(() => {
     const fetchParents = async () => {

@@ -91,7 +91,7 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
           <button
             onClick={() => {
               onNavigate("live");
-              closeMenu(); // Close the menu on button click
+              closeMenu();
             }}
             className="Navbar-link live-button"
           >
