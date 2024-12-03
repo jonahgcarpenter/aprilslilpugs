@@ -1,0 +1,80 @@
+.meet-breeder {
+  width: 100%;
+  padding: 4rem 2rem;
+  background-color: var(--background-color-light);
+}
+
+.meet-breeder h2 {
+  color: var(--secondary-color);
+  text-align: center;
+  margin: 2rem 0;
+  font-size: 2.5rem;
+  font-weight: var(--font-weight-semi);
+}
+
+.meet-breeder p {
+  color: var(--text-color-dark);
+  line-height: 1.8;
+  font-size: 1.2rem;
+  margin-bottom: 1.5rem;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.breeder-content {
+  display: flex;
+  gap: 4rem;
+  align-items: flex-start;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.breeder-image {
+  flex: 0 0 400px;
+}
+
+.breeder-image img {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.breeder-text {
+  flex: 1;
+}
+
+@media (max-width: 768px) {
+  .meet-breeder {
+    padding: 2rem 1rem;
+  }
+  
+  .meet-breeder h2 {
+    font-size: 2rem;
+  }
+  
+  .meet-breeder p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+  }
+
+  .breeder-content {
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    gap: 2rem;
+  }
+
+  .breeder-image {
+    flex: 0 0 250px;
+    width: 250px;
+    margin-bottom: 1.5rem;
+  }
+
+  .breeder-image img {
+    height: 250px;
+  }
+}
