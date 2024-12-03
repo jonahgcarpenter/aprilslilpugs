@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import '../styles/main.css';
-import { collection, doc, getDoc, getDocs } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
 import { db } from "../secrets/firebase";
 import Footer from "../components/Footer";
 import Live from "../components/Live";
@@ -24,6 +24,8 @@ const Puppies: React.FC = () => {
   const [dad, setDad] = useState<any | null>(null); // Dad's data
   const [expandedImageId, setExpandedImageId] = useState<string | null>(null);
   const [imageModal, setImageModal] = useState<{ image: string; description: string } | null>(null);
+  const [millie, setMillie] = useState<any>(null);
+  const [mardis, setMardis] = useState<any>(null);
 
   // Fetch puppies data from Firestore
   useEffect(() => {
@@ -44,15 +46,33 @@ const Puppies: React.FC = () => {
   useEffect(() => {
     const fetchParents = async () => {
       try {
-        const momDoc = await getDoc(doc(db, "family", "U0zC1dbHPibdoC1vlIEk")); // Replace with actual mom document ID
-        const dadDoc = await getDoc(doc(db, "family", "xNtokSGQEtUjIoJ3bsz7")); // Replace with actual dad document ID
-
-        if (momDoc.exists()) {
-          setMom(momDoc.data());
-        }
-        if (dadDoc.exists()) {
-          setDad(dadDoc.data());
-        }
+        console.log("Starting to fetch parents...");
+        const familyRef = collection(db, "family"); // Changed from "pets" to "family"
+        const querySnapshot = await getDocs(familyRef);
+        
+        console.log("Total documents found:", querySnapshot.size);
+        
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          console.log("Found document:", doc.id, data);
+          
+          // Updated to match exact database names
+          if (data.name === "Millie") {
+            console.log("Setting Millie data:", data);
+            setMillie({
+              ...data,
+              imageUrl: data.imageUrl || data.image, // Handle both property names
+              isActive: true // Force isActive if not present
+            });
+          } else if (data.name === "Mardi") { // Changed from "Mardis" to "Mardi"
+            console.log("Setting Mardi data:", data);
+            setMardis({
+              ...data,
+              imageUrl: data.imageUrl || data.image, // Handle both property names
+              isActive: true // Force isActive if not present
+            });
+          }
+        });
       } catch (error) {
         console.error("Error fetching parent data:", error);
       }
@@ -119,8 +139,8 @@ const Puppies: React.FC = () => {
         
         <Section title="Meet The Parents" defaultExpanded={sectionDefaults.meetParents}>
           <Parents
-            mom={mom}
-            dad={dad}
+            millie={millie}
+            mardis={mardis}
             onImageClick={handleImageClick}
           />
         </Section>

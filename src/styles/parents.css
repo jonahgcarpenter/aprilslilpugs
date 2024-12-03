@@ -1,0 +1,53 @@
+.pets-container {
+  padding: 20px;
+}
+
+.pets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  justify-items: center;
+  align-items: start;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.pet-card {
+  width: 100%;
+  max-width: 400px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.pet-card img {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  display: block;
+}
+
+.pet-info {
+  padding: 1rem;
+}
+
+.pet-name {
+  margin: 0 0 0.5rem;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.pet-age,
+.pet-gender,
+.pet-description {
+  margin: 0.5rem 0;
+  line-height: 1.4;
+  color: #666;
+}
+
+.pet-description {
+  font-size: 0.95rem;
+  overflow-wrap: break-word;
+}

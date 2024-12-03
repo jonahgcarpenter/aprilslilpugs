@@ -23,18 +23,20 @@
   background: var(--primary-color);
   color: var(--text-color);
   border: none;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  font-size: 1.5rem;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: 1rem;
   cursor: pointer;
   opacity: 0.8;
   transition: opacity 0.3s ease;
   flex-shrink: 0;
+  border-radius: var(--border-radius-sm);
+  width: auto;
+  height: auto;
 }
 
 .prev-button:hover, .next-button:hover {
   opacity: 1;
+  background: var(--primary-hover-color);
 }
 
 .position-message {
@@ -103,25 +105,24 @@
 
 .modal-close {
   position: absolute;
-  top: 0.75rem;
-  right: 0.75rem;
-  background: rgba(0, 0, 0, 0.1);
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+  background: var(--primary-color);
+  color: var(--text-color);
   border: none;
-  border-radius: 50%;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.25rem;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: 1rem;
   cursor: pointer;
-  color: #333;
-  transition: all 0.2s ease;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+  border-radius: var(--border-radius-sm);
+  width: auto;
+  height: auto;
 }
 
 .modal-close:hover {
-  background: rgba(0, 0, 0, 0.2);
-  color: #000;
+  opacity: 1;
+  background: var(--primary-hover-color);
 }
 
 .modal-header {

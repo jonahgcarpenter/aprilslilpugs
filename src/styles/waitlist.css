@@ -1,8 +1,8 @@
 .waitlist-forms {
-  padding: 1rem 2rem;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  max-width: var(--container-max-width);
   background: white;
   border-bottom: 1px solid var(--border-color);
-  max-width: 1200px;
   margin: 0 auto;
   display: grid;
   grid-template-columns: 1fr;
@@ -16,8 +16,8 @@
 }
 
 .form-container {
+  padding: var(--spacing-lg);
   background: white;
-  padding: 2rem;
   position: relative;
   width: 100%;
   text-align: center;
@@ -57,11 +57,11 @@
 
 .form-input,
 .form-select {
+  padding: var(--input-padding);
+  border: var(--input-border);
+  border-radius: var(--border-radius-sm);
   width: 100%;
   max-width: 100%;
-  padding: 0.8rem 1rem;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
   font-size: 1rem;
   transition: border-color 0.2s ease;
   box-sizing: border-box;

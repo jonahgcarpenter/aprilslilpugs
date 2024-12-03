@@ -8,6 +8,7 @@
 }
 
 .footer-heading {
+  color: var(--text-color);
   font-size: 1.5rem;
   font-weight: var(--font-weight-semi);
   margin-bottom: 1rem;

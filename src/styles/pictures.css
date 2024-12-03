@@ -2,21 +2,23 @@
 .explorer-controls {
   display: flex;
   justify-content: space-between;
-  padding: 1rem 2rem;
+  padding: var(--spacing-sm) var(--spacing-lg);
   background: white;
   border-bottom: 1px solid var(--border-color);
 }
 
 .view-controls button {
-  padding: 0.5rem 1rem;
+  padding: var(--spacing-xs) var(--spacing-sm);
   background: none;
   border: 1px solid var(--border-color);
   cursor: pointer;
+  color: var(--text-color-dark);
+  border-radius: var(--border-radius-sm);
 }
 
 .view-controls button.active {
   background: var(--secondary-color);
-  color: var(--text-color);
+  color: white;
 }
 
 .breadcrumb {
@@ -36,7 +38,7 @@
 }
 
 .folder-container {
-  padding: 1rem;
+  padding: var(--spacing-sm);
 }
 
 .folder-container.list-view {
@@ -258,25 +260,24 @@
 
 .modal-close {
   position: absolute;
-  top: 0.75rem;
-  right: 0.75rem;
-  background: var(--shadow-color);
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+  background: var(--primary-color);
+  color: var(--text-color);
   border: none;
-  border-radius: 50%;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.25rem;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: 1rem;
   cursor: pointer;
-  color: var(--text-color-dark);
-  transition: all 0.2s ease;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+  border-radius: var(--border-radius-sm);
+  width: auto;
+  height: auto;
 }
 
 .modal-close:hover {
-  background: var(--shadow-color-darker);
-  color: var(--text-color-dark);
+  opacity: 1;
+  background: var(--primary-hover-color);
 }
 
 .modal-header {
