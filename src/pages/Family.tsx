@@ -1,100 +1,104 @@
 import React, { useState, useEffect } from "react";
 import '../styles/main.css';
-import '../styles/family_puppies.css';
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../secrets/firebase";
 import Footer from "../components/Footer";
+import FamilySlideshow from '../components/familyslideshow';
+
+interface SectionProps {
+  title: string;
+  children: React.ReactNode;
+  defaultExpanded?: boolean;
+}
+
+const Section: React.FC<SectionProps> = ({ title, children, defaultExpanded = true }) => {
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
+
+  return (
+    <div className="explorer-section">
+      <div className="explorer-header" onClick={() => setIsExpanded(!isExpanded)}>
+        <span className={`explorer-arrow ${isExpanded ? 'expanded' : ''}`}>▶</span>
+        <h2 className="explorer-title">{title}</h2>
+      </div>
+      {isExpanded && <div className="explorer-content">{children}</div>}
+    </div>
+  );
+};
+
+const sectionDefaults = {
+  meetFamily: true,
+};
 
 const Family: React.FC = () => {
   const [familyMembers, setFamilyMembers] = useState<any[]>([]);
-  const [currentFamilyIndex, setCurrentFamilyIndex] = useState(0);
-  const [expandedImageId, setExpandedImageId] = useState<string | null>(null);
+  const [currentMemberIndex, setCurrentMemberIndex] = useState(0);
+  const [imageModal, setImageModal] = useState<{ image: string; description: string } | null>(null);
 
-  // Fetch family members from Firestore
   useEffect(() => {
-    const fetchFamilyData = async () => {
-      try {
-        const familyCollection = collection(db, "family");
-        const familySnapshot = await getDocs(familyCollection);
-        const familyList = familySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setFamilyMembers(familyList);
-      } catch (error) {
-        console.error("Error fetching family data: ", error);
-      }
+    const fetchFamilyMembers = async () => {
+      const familyCollection = collection(db, "family");
+      const familySnapshot = await getDocs(familyCollection);
+      const familyList = familySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setFamilyMembers(familyList);
     };
 
-    fetchFamilyData();
+    fetchFamilyMembers();
   }, []);
 
   const handleNext = () => {
-    setCurrentFamilyIndex(
-      (prevIndex) => (prevIndex + 1) % familyMembers.length
-    );
+    setCurrentMemberIndex((prevIndex) => (prevIndex + 1) % familyMembers.length);
   };
 
   const handlePrevious = () => {
-    setCurrentFamilyIndex(
-      (prevIndex) =>
-        prevIndex === 0 ? familyMembers.length - 1 : prevIndex - 1
+    setCurrentMemberIndex((prevIndex) =>
+      prevIndex === 0 ? familyMembers.length - 1 : prevIndex - 1
     );
   };
 
-  const handleImageClick = (familyId: string) => {
-    setExpandedImageId(expandedImageId === familyId ? null : familyId);
+  const handleImageClick = (image: string, description: string) => {
+    setImageModal({ image, description, name: currentMember.name });
   };
 
-  const handleOutsideClick = (event: React.MouseEvent) => {
-    if ((event.target as HTMLElement).classList.contains("image-expanded")) {
-      setExpandedImageId(null);
-    }
+  const handleCloseImageModal = () => {
+    setImageModal(null);
   };
 
   if (familyMembers.length === 0) {
     return <div>Loading family members...</div>;
   }
 
-  const currentFamilyMember = familyMembers[currentFamilyIndex];
+  const currentMember = familyMembers[currentMemberIndex];
 
   return (
     <>
       <div className="page-container">
-        <section className="content-section" onClick={handleOutsideClick}>
-          <h1 className="section-title">Meet Our Family</h1>
-          <div className="slideshow-container">
-            <div className="content-card">
-              <img
-                src={currentFamilyMember.image}
-                alt={currentFamilyMember.name}
-                className={`content-image ${
-                  expandedImageId === currentFamilyMember.id ? "image-expanded" : ""
-                }`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleImageClick(currentFamilyMember.id);
-                }}
+        <Section title="Meet My Family" defaultExpanded={sectionDefaults.meetFamily}>
+          <FamilySlideshow
+            currentFamilyMember={currentMember}
+            onPrevious={handlePrevious}
+            onNext={handleNext}
+            onImageClick={handleImageClick}
+            isExpanded={!!imageModal}
+          />
+        </Section>
+
+        {/* Image Modal */}
+        {imageModal && (
+          <div className="image-modal" onClick={handleCloseImageModal}>
+            <div className="modal-content" onClick={e => e.stopPropagation()}>
+              <button className="modal-close" onClick={handleCloseImageModal}>×</button>
+              <div className="modal-header">{currentMember.name}</div>
+              <img 
+                src={imageModal.image} 
+                alt={imageModal.description} 
+                className="modal-image"
               />
-              
-              <div className="navigation-controls">
-                <button className="prev-button" onClick={handlePrevious}>
-                  &lt;
-                </button>
-                <div className="puppy-info">
-                  <h2 className="content-subtitle">{currentFamilyMember.name}</h2>
-                  <p className="content-detail">
-                    <strong>Age:</strong> {currentFamilyMember.age} years
-                  </p>
-                  <p className="content-description">{currentFamilyMember.description}</p>
-                </div>
-                <button className="next-button" onClick={handleNext}>
-                  &gt;
-                </button>
-              </div>
             </div>
           </div>
-        </section>
+        )}
       </div>
       <Footer />
     </>

@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
 import '../styles/main.css';
-import '../styles/family_puppies.css';
 import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import { db } from "../secrets/firebase";
 import Footer from "../components/Footer";
 import Live from "../components/Live";
 import Waitlist from "../components/Waitlist";
-import Slideshow from '../components/slideshow';
+import Slideshow from '../components/puppyslideshow';
 import Parents from '../components/Parents';
 
 interface SectionProps {
