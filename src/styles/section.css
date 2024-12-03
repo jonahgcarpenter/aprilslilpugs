@@ -1,0 +1,72 @@
+.explorer-section {
+  margin-bottom: 2rem;
+  background: var(--background-white);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px var(--shadow-color);
+  overflow: hidden;
+}
+
+.explorer-header {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  background: var(--background-light);
+  cursor: pointer;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.explorer-arrow {
+  margin-right: 0.5rem;
+  transition: transform 0.3s ease;
+}
+
+.explorer-arrow.expanded {
+  transform: rotate(90deg);
+}
+
+.explorer-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--text-color-dark);
+}
+
+.explorer-content {
+  padding: 2rem;
+}
+
+/* Explorer Content */
+.explorer-container {
+  background: var(--background-white);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px var(--shadow-color);
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.explorer-tabs {
+  display: flex;
+  background: var(--background-light);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.explorer-tab {
+  padding: 1rem 2rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.explorer-tab:hover {
+  background: var(--background-hover);
+}
+
+.explorer-tab.active {
+  background: var(--background-white);
+  border-bottom: 2px solid var(--primary-color);
+}
+
+.explorer-content .content-section {
+  box-shadow: none;
+  padding: 0;
+  margin: 0;
+}

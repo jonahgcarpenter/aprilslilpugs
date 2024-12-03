@@ -3,6 +3,8 @@ import '../styles/main.css';
 import '../styles/login.css';
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
+import Section from "../components/Section";
+import Footer from "../components/Footer";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -55,38 +57,40 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="page-container">
-      <section className="content-section">
-        <h2 className="section-title">Admin Login</h2>
-        {error && <p className="error-message">{error}</p>}
-        <form className="form-container" onSubmit={handleSubmit}>
-          <input
-            className="form-input"
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <div className="password-container">
+    <>
+      <div className="page-container">
+        <Section title="Admin Login">
+          {error && <p className="error-message">{error}</p>}
+          <form className="form-container" onSubmit={handleSubmit}>
             <input
               className="form-input"
-              type={showPassword ? "text" : "password"}
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
-            <button
-              type="button"
-              className="password-toggle"
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? "Hide" : "Show"}
-            </button>
-          </div>
-          <button className="action-button" type="submit">Login</button>
-        </form>
-      </section>
-    </div>
+            <div className="password-container">
+              <input
+                className="form-input"
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
+            </div>
+            <button className="action-button" type="submit">Login</button>
+          </form>
+        </Section>
+      </div>
+      <Footer />
+    </>
   );
 };
 

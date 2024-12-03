@@ -74,7 +74,7 @@
   justify-content: flex-end;
 }
 
-.logout-button {
+.auth-button {
   background: transparent;
   border: 2px solid var(--text-color);
   cursor: pointer;
@@ -85,9 +85,10 @@
   letter-spacing: 0.5px;
   transition: var(--link-transition);
   font-size: 0.95rem;
+  text-decoration: none;
 }
 
-.logout-button:hover {
+.auth-button:hover {
   background: var(--text-color);
   color: var(--secondary-color);
   transform: translateY(-1px);

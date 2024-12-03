@@ -4,6 +4,7 @@ import '../styles/main.css';
 import Footer from '../components/Footer';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../secrets/firebase';
+import Section from "../components/Section";
 
 interface ImageData {
   description: string;
@@ -83,71 +84,73 @@ const Pictures: React.FC<PicturesProps> = ({ altText = 'Image' }) => {
   return (
     <>
       <div className="page-container">
-        <div className="explorer-controls">
-          <div className="view-controls">
-            <button onClick={() => setViewMode('grid')} className={viewMode === 'grid' ? 'active' : ''}>
-              Grid
-            </button>
-            <button onClick={() => setViewMode('list')} className={viewMode === 'list' ? 'active' : ''}>
-              List
-            </button>
+        <Section title="Picture Gallery">
+          <div className="explorer-controls">
+            <div className="view-controls">
+              <button onClick={() => setViewMode('grid')} className={viewMode === 'grid' ? 'active' : ''}>
+                Grid
+              </button>
+              <button onClick={() => setViewMode('list')} className={viewMode === 'list' ? 'active' : ''}>
+                List
+              </button>
+            </div>
           </div>
-        </div>
 
-        {!currentFolder ? (
-          <section className={`content-section ${viewMode}-view`}>
-            <div className="breadcrumb">
-              <span>Pictures</span>
-            </div>
-            <div className={`folder-container ${viewMode}-view`}>
-              {folders.map((folder, index) => (
-                <div 
-                  key={index}
-                  className={`folder-item ${viewMode}-view`}
-                  onClick={() => handleFolderClick(folder)}
-                >
-                  <div className="folder-icon">📁</div>
-                  <div className="folder-details">
-                    <span className="folder-name">{folder}</span>
-                    <span className="folder-meta">
-                      {getFolderItemCount(folder)} items
-                    </span>
+          {!currentFolder ? (
+            <section className={`content-section ${viewMode}-view`}>
+              <div className="breadcrumb">
+                <span>Pictures</span>
+              </div>
+              <div className={`folder-container ${viewMode}-view`}>
+                {folders.map((folder, index) => (
+                  <div 
+                    key={index}
+                    className={`folder-item ${viewMode}-view`}
+                    onClick={() => handleFolderClick(folder)}
+                  >
+                    <div className="folder-icon">📁</div>
+                    <div className="folder-details">
+                      <span className="folder-name">{folder}</span>
+                      <span className="folder-meta">
+                        {getFolderItemCount(folder)} items
+                      </span>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        ) : (
-          <section className={`content-section ${viewMode}-view`}>
-            <div className="breadcrumb">
-              <span className="clickable" onClick={handleBackClick}>Pictures</span>
-              <span className="separator">›</span>
-              <span>{currentFolder}</span>
-            </div>
-            <div className={`image-container ${viewMode}-view`}>
-              {filteredImages.map((imageData, index) => (
-                <div 
-                  key={index} 
-                  className={`image-item ${viewMode}-view ${selectedImage === index ? 'selected' : ''}`}
-                  onClick={() => handleImageClick(index)}
-                  onDoubleClick={() => handleImageDoubleClick(imageData)}
-                >
-                  <div className="image-details">
-                    <span className="image-name">{imageData.description}</span>
-                    <span className="image-meta">Image</span>
+                ))}
+              </div>
+            </section>
+          ) : (
+            <section className={`content-section ${viewMode}-view`}>
+              <div className="breadcrumb">
+                <span className="clickable" onClick={handleBackClick}>Pictures</span>
+                <span className="separator">›</span>
+                <span>{currentFolder}</span>
+              </div>
+              <div className={`image-container ${viewMode}-view`}>
+                {filteredImages.map((imageData, index) => (
+                  <div 
+                    key={index} 
+                    className={`image-item ${viewMode}-view ${selectedImage === index ? 'selected' : ''}`}
+                    onClick={() => handleImageClick(index)}
+                    onDoubleClick={() => handleImageDoubleClick(imageData)}
+                  >
+                    <div className="image-details">
+                      <span className="image-name">{imageData.description}</span>
+                      <span className="image-meta">Image</span>
+                    </div>
+                    <div className="image-preview">
+                      <img 
+                        src={imageData.image} 
+                        alt={imageData.description || `${altText} ${index + 1}`}
+                        className="thumbnail"
+                      />
+                    </div>
                   </div>
-                  <div className="image-preview">
-                    <img 
-                      src={imageData.image} 
-                      alt={imageData.description || `${altText} ${index + 1}`}
-                      className="thumbnail"
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
+                ))}
+              </div>
+            </section>
+          )}
+        </Section>
       </div>
 
       {modalImage && (

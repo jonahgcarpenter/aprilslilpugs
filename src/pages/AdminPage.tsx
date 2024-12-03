@@ -3,6 +3,8 @@ import '../styles/adminpage.css';
 import React, { useState, useEffect } from 'react';
 import { addDoc, collection, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../secrets/firebase';
+import Section from "../components/Section";
+import Footer from "../components/Footer";
 
 const AdminPage = () => {
   const [puppyData, setPuppyData] = useState({
@@ -145,238 +147,249 @@ const AdminPage = () => {
   };
 
   return (
-    <div id="adminMain">
-      <h1>Database Management</h1>
-      
-      <div className="admin-section">
-        <div>
-          <h2>Add Puppy</h2>
-          <form id="puppyForm" onSubmit={handlePuppySubmit}>
-            <input
-              type="text"
-              placeholder="Name"
-              value={puppyData.name}
-              onChange={(e) => setPuppyData({...puppyData, name: e.target.value})}
-            />
-            <input
-              type="text"
-              placeholder="Age"
-              value={puppyData.age}
-              onChange={(e) => setPuppyData({...puppyData, age: e.target.value})}
-            />
-            <textarea
-              placeholder="Description"
-              value={puppyData.description}
-              onChange={(e) => setPuppyData({...puppyData, description: e.target.value})}
-            />
-            <select
-              value={puppyData.mom}
-              onChange={(e) => setPuppyData({...puppyData, mom: e.target.value})}
-            >
-              <option value="">Select Mom</option>
-              {families.map(family => (
-                <option key={family.id} value={`/family/${family.id}`}>
-                  {family.name}
-                </option>
-              ))}
-            </select>
-            <select
-              value={puppyData.dad}
-              onChange={(e) => setPuppyData({...puppyData, dad: e.target.value})}
-            >
-              <option value="">Select Dad</option>
-              {families.map(family => (
-                <option key={family.id} value={`/family/${family.id}`}>
-                  {family.name}
-                </option>
-              ))}
-            </select>
-            <button type="submit">Add Puppy</button>
-          </form>
-        </div>
-
-        <div>
-          <h2>Add Family</h2>
-          <form id="familyForm" onSubmit={handleFamilySubmit}>
-            <input
-              type="text"
-              placeholder="Name"
-              value={familyData.name}
-              onChange={(e) => setFamilyData({...familyData, name: e.target.value})}
-            />
-            <input
-              type="number"
-              placeholder="Age"
-              value={familyData.age}
-              onChange={(e) => setFamilyData({...familyData, age: e.target.value})}
-            />
-            <textarea
-              placeholder="Description"
-              value={familyData.description}
-              onChange={(e) => setFamilyData({...familyData, description: e.target.value})}
-            />
-            <button type="submit">Add Family</button>
-          </form>
-        </div>
-      </div>
-
-      <div className="admin-section">
-        <h2>Existing Puppies</h2>
-        <div id="puppyGrid">
-          {puppies.map(puppy => (
-            <div key={puppy.id} className="admin-card">
-              {editingPuppy?.id === puppy.id ? (
-                <form id="editPuppyForm" onSubmit={handleEditPuppy}>
+    <>
+      <div className="page-container">
+        <Section title="Add New Items">
+          <div id="adminMain">
+            <h1>Database Management</h1>
+            
+            <div className="admin-section">
+              <div>
+                <h2>Add Puppy</h2>
+                <form id="puppyForm" onSubmit={handlePuppySubmit}>
                   <input
                     type="text"
-                    value={editingPuppy.name}
-                    onChange={e => setEditingPuppy({...editingPuppy, name: e.target.value})}
                     placeholder="Name"
+                    value={puppyData.name}
+                    onChange={(e) => setPuppyData({...puppyData, name: e.target.value})}
                   />
                   <input
                     type="text"
-                    value={editingPuppy.age}
-                    onChange={e => setEditingPuppy({...editingPuppy, age: e.target.value})}
                     placeholder="Age"
+                    value={puppyData.age}
+                    onChange={(e) => setPuppyData({...puppyData, age: e.target.value})}
                   />
                   <textarea
-                    value={editingPuppy.description}
-                    onChange={e => setEditingPuppy({...editingPuppy, description: e.target.value})}
                     placeholder="Description"
-                  />
-                  <input
-                    type="text"
-                    value={editingPuppy.image}
-                    onChange={e => setEditingPuppy({...editingPuppy, image: e.target.value})}
-                    placeholder="Image path"
+                    value={puppyData.description}
+                    onChange={(e) => setPuppyData({...puppyData, description: e.target.value})}
                   />
                   <select
-                    value={editingPuppy.mom}
-                    onChange={e => setEditingPuppy({...editingPuppy, mom: e.target.value})}
+                    value={puppyData.mom}
+                    onChange={(e) => setPuppyData({...puppyData, mom: e.target.value})}
                   >
-                    <option value={editingPuppy.mom}>
-                      {getFamilyNameFromRef(editingPuppy.mom)}
-                    </option>
+                    <option value="">Select Mom</option>
                     {families.map(family => (
-                      <option 
-                        key={family.id} 
-                        value={`/family/${family.id}`}
-                      >
+                      <option key={family.id} value={`/family/${family.id}`}>
                         {family.name}
                       </option>
-                    )).filter(option => option.props.value !== editingPuppy.mom)}
+                    ))}
                   </select>
                   <select
-                    value={editingPuppy.dad}
-                    onChange={e => setEditingPuppy({...editingPuppy, dad: e.target.value})}
+                    value={puppyData.dad}
+                    onChange={(e) => setPuppyData({...puppyData, dad: e.target.value})}
                   >
-                    <option value={editingPuppy.dad}>
-                      {getFamilyNameFromRef(editingPuppy.dad)}
-                    </option>
+                    <option value="">Select Dad</option>
                     {families.map(family => (
-                      <option 
-                        key={family.id} 
-                        value={`/family/${family.id}`}
-                      >
+                      <option key={family.id} value={`/family/${family.id}`}>
                         {family.name}
                       </option>
-                    )).filter(option => option.props.value !== editingPuppy.dad)}
+                    ))}
                   </select>
-                  <div className="card-buttons">
-                    <button type="submit" className="save-button">Save</button>
-                    <button 
-                      type="button"
-                      className="cancel-button"
-                      onClick={() => setEditingPuppy(null)}
-                    >
-                      Cancel
-                    </button>
-                  </div>
+                  <button type="submit">Add Puppy</button>
                 </form>
-              ) : (
-                <>
-                  <h3>{puppy.name}</h3>
-                  <p>Age: {puppy.age}</p>
-                  <p>{puppy.description}</p>
-                  <img 
-                    src={puppy.image} 
-                    alt={puppy.name}
-                  />
-                  <p>Mom: {getFamilyNameFromRef(puppy.mom)}</p>
-                  <p>Dad: {getFamilyNameFromRef(puppy.dad)}</p>
-                  <button 
-                    className="edit-button"
-                    onClick={() => setEditingPuppy(puppy)}
-                  >
-                    Edit
-                  </button>
-                </>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="admin-section">
-        <h2>Existing Family</h2>
-        <div id="familyGrid">
-          {families.map(family => (
-            <div key={family.id} className="admin-card">
-              {editingFamily?.id === family.id ? (
-                <form id="editFamilyForm" onSubmit={handleEditFamily}>
+              </div>
+      
+              <div>
+                <h2>Add Family</h2>
+                <form id="familyForm" onSubmit={handleFamilySubmit}>
                   <input
                     type="text"
-                    value={editingFamily.name}
-                    onChange={e => setEditingFamily({...editingFamily, name: e.target.value})}
+                    placeholder="Name"
+                    value={familyData.name}
+                    onChange={(e) => setFamilyData({...familyData, name: e.target.value})}
                   />
                   <input
                     type="number"
-                    value={editingFamily.age}
-                    onChange={e => setEditingFamily({...editingFamily, age: e.target.value})}
+                    placeholder="Age"
+                    value={familyData.age}
+                    onChange={(e) => setFamilyData({...familyData, age: e.target.value})}
                   />
                   <textarea
-                    value={editingFamily.description}
-                    onChange={e => setEditingFamily({...editingFamily, description: e.target.value})}
+                    placeholder="Description"
+                    value={familyData.description}
+                    onChange={(e) => setFamilyData({...familyData, description: e.target.value})}
                   />
-                  <input
-                    type="text"
-                    value={editingFamily.image}
-                    onChange={e => setEditingFamily({...editingFamily, image: e.target.value})}
-                    placeholder="Image path"
-                  />
-                  <div className="card-buttons">
-                    <button type="submit" className="save-button">Save</button>
-                    <button 
-                      type="button"
-                      className="cancel-button"
-                      onClick={() => setEditingFamily(null)}
-                    >
-                      Cancel
-                    </button>
-                  </div>
+                  <button type="submit">Add Family</button>
                 </form>
-              ) : (
-                <>
-                  <h3>{family.name}</h3>
-                  <p>Age: {family.age}</p>
-                  <p>{family.description}</p>
-                  <img 
-                    src={family.image} 
-                    alt={family.name}
-                  />
-                  <button 
-                    className="edit-button"
-                    onClick={() => setEditingFamily(family)}
-                  >
-                    Edit
-                  </button>
-                </>
-              )}
+              </div>
             </div>
-          ))}
-        </div>
+          </div>
+        </Section>
+
+        <Section title="Existing Puppies">
+          <div className="admin-section">
+            <h2>Existing Puppies</h2>
+            <div id="puppyGrid">
+              {puppies.map(puppy => (
+                <div key={puppy.id} className="admin-card">
+                  {editingPuppy?.id === puppy.id ? (
+                    <form id="editPuppyForm" onSubmit={handleEditPuppy}>
+                      <input
+                        type="text"
+                        value={editingPuppy.name}
+                        onChange={e => setEditingPuppy({...editingPuppy, name: e.target.value})}
+                        placeholder="Name"
+                      />
+                      <input
+                        type="text"
+                        value={editingPuppy.age}
+                        onChange={e => setEditingPuppy({...editingPuppy, age: e.target.value})}
+                        placeholder="Age"
+                      />
+                      <textarea
+                        value={editingPuppy.description}
+                        onChange={e => setEditingPuppy({...editingPuppy, description: e.target.value})}
+                        placeholder="Description"
+                      />
+                      <input
+                        type="text"
+                        value={editingPuppy.image}
+                        onChange={e => setEditingPuppy({...editingPuppy, image: e.target.value})}
+                        placeholder="Image path"
+                      />
+                      <select
+                        value={editingPuppy.mom}
+                        onChange={e => setEditingPuppy({...editingPuppy, mom: e.target.value})}
+                      >
+                        <option value={editingPuppy.mom}>
+                          {getFamilyNameFromRef(editingPuppy.mom)}
+                        </option>
+                        {families.map(family => (
+                          <option 
+                            key={family.id} 
+                            value={`/family/${family.id}`}
+                          >
+                            {family.name}
+                          </option>
+                        )).filter(option => option.props.value !== editingPuppy.mom)}
+                      </select>
+                      <select
+                        value={editingPuppy.dad}
+                        onChange={e => setEditingPuppy({...editingPuppy, dad: e.target.value})}
+                      >
+                        <option value={editingPuppy.dad}>
+                          {getFamilyNameFromRef(editingPuppy.dad)}
+                        </option>
+                        {families.map(family => (
+                          <option 
+                            key={family.id} 
+                            value={`/family/${family.id}`}
+                          >
+                            {family.name}
+                          </option>
+                        )).filter(option => option.props.value !== editingPuppy.dad)}
+                      </select>
+                      <div className="card-buttons">
+                        <button type="submit" className="save-button">Save</button>
+                        <button 
+                          type="button"
+                          className="cancel-button"
+                          onClick={() => setEditingPuppy(null)}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  ) : (
+                    <>
+                      <h3>{puppy.name}</h3>
+                      <p>Age: {puppy.age}</p>
+                      <p>{puppy.description}</p>
+                      <img 
+                        src={puppy.image} 
+                        alt={puppy.name}
+                      />
+                      <p>Mom: {getFamilyNameFromRef(puppy.mom)}</p>
+                      <p>Dad: {getFamilyNameFromRef(puppy.dad)}</p>
+                      <button 
+                        className="edit-button"
+                        onClick={() => setEditingPuppy(puppy)}
+                      >
+                        Edit
+                      </button>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </Section>
+
+        <Section title="Existing Family">
+          <div className="admin-section">
+            <h2>Existing Family</h2>
+            <div id="familyGrid">
+              {families.map(family => (
+                <div key={family.id} className="admin-card">
+                  {editingFamily?.id === family.id ? (
+                    <form id="editFamilyForm" onSubmit={handleEditFamily}>
+                      <input
+                        type="text"
+                        value={editingFamily.name}
+                        onChange={e => setEditingFamily({...editingFamily, name: e.target.value})}
+                      />
+                      <input
+                        type="number"
+                        value={editingFamily.age}
+                        onChange={e => setEditingFamily({...editingFamily, age: e.target.value})}
+                      />
+                      <textarea
+                        value={editingFamily.description}
+                        onChange={e => setEditingFamily({...editingFamily, description: e.target.value})}
+                      />
+                      <input
+                        type="text"
+                        value={editingFamily.image}
+                        onChange={e => setEditingFamily({...editingFamily, image: e.target.value})}
+                        placeholder="Image path"
+                      />
+                      <div className="card-buttons">
+                        <button type="submit" className="save-button">Save</button>
+                        <button 
+                          type="button"
+                          className="cancel-button"
+                          onClick={() => setEditingFamily(null)}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  ) : (
+                    <>
+                      <h3>{family.name}</h3>
+                      <p>Age: {family.age}</p>
+                      <p>{family.description}</p>
+                      <img 
+                        src={family.image} 
+                        alt={family.name}
+                      />
+                      <button 
+                        className="edit-button"
+                        onClick={() => setEditingFamily(family)}
+                      >
+                        Edit
+                      </button>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </Section>
       </div>
-    </div>
+      <Footer />
+    </>
   );
 };
 

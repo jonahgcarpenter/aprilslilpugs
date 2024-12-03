@@ -78,20 +78,30 @@ const Navbar: React.FC = () => {
               Pictures
             </Link>
           </li>
-          <li>
-            <Link to="/login" className="Navbar-link" onClick={() => setIsOpen(false)}>
-              {isLoggedIn ? "Edit" : "Login"}
-            </Link>
-          </li>
+          {isLoggedIn && (
+            <li>
+              <Link to="/login" className="Navbar-link" onClick={() => setIsOpen(false)}>
+                Edit
+              </Link>
+            </li>
+          )}
         </ul>
         <div className="Navbar-right">
-          {isLoggedIn && (
+          {isLoggedIn ? (
             <button 
               onClick={handleLogout}
-              className="Navbar-link logout-button"
+              className="auth-button"
             >
               Logout
             </button>
+          ) : (
+            <Link 
+              to="/login" 
+              className="auth-button"
+              onClick={() => setIsOpen(false)}
+            >
+              Login
+            </Link>
           )}
         </div>
       </div>
