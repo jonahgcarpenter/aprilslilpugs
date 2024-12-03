@@ -1,4 +1,5 @@
 import React from 'react';
+import '../styles/slideshow.css';
 
 interface SlideshowProps {
   currentPuppy: {
@@ -21,16 +22,16 @@ const Slideshow: React.FC<SlideshowProps> = ({ currentPuppy, onPrevious, onNext,
         className="content-image"
         onClick={(e) => onImageClick(e, currentPuppy.image, currentPuppy.name)}
       />
-      <h2 className="content-subtitle">{currentPuppy.name}</h2>
       <div className="navigation-controls">
         <button className="prev-button" onClick={onPrevious}>&lt;</button>
-        <div className="puppy-info">
-          <p className="content-detail">
-            <strong>Age:</strong> {currentPuppy.age}
-          </p>
-          <p className="content-description">{currentPuppy.description}</p>
-        </div>
         <button className="next-button" onClick={onNext}>&gt;</button>
+      </div>
+      <h2 className="content-subtitle">{currentPuppy.name}</h2>
+      <div className="puppy-info">
+        <p className="content-detail">
+          <strong>Age:</strong> {currentPuppy.age}
+        </p>
+        <p className="content-description content-center">{currentPuppy.description}</p>
       </div>
     </div>
   );
