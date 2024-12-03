@@ -6,6 +6,28 @@ import { db } from "../secrets/firebase";
 import Footer from "../components/Footer";
 import Live from "../components/Live";
 import Waitlist from "../components/Waitlist";
+import Slideshow from '../components/slideshow';
+import Parents from '../components/Parents';
+
+interface SectionProps {
+  title: string;
+  children: React.ReactNode;
+  defaultExpanded?: boolean;
+}
+
+const Section: React.FC<SectionProps> = ({ title, children, defaultExpanded = true }) => {
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
+
+  return (
+    <div className="explorer-section">
+      <div className="explorer-header" onClick={() => setIsExpanded(!isExpanded)}>
+        <span className={`explorer-arrow ${isExpanded ? 'expanded' : ''}`}>▶</span>
+        <h2 className="explorer-title">{title}</h2>
+      </div>
+      {isExpanded && <div className="explorer-content">{children}</div>}
+    </div>
+  );
+};
 
 const Puppies: React.FC = () => {
   const [puppies, setPuppies] = useState<any[]>([]);
@@ -14,6 +36,7 @@ const Puppies: React.FC = () => {
   const [mom, setMom] = useState<any | null>(null); // Mom's data
   const [dad, setDad] = useState<any | null>(null); // Dad's data
   const [expandedImageId, setExpandedImageId] = useState<string | null>(null);
+  const [imageModal, setImageModal] = useState<{ image: string; description: string } | null>(null);
 
   // Fetch puppies data from Firestore
   useEffect(() => {
@@ -72,14 +95,13 @@ const Puppies: React.FC = () => {
     setExpandedImageId(null); // Reset expanded image
   };
 
-  const handleImageClick = (imageId: string) => {
-    setExpandedImageId(expandedImageId === imageId ? null : imageId);
+  const handleImageClick = (event: React.MouseEvent, image: string, description: string) => {
+    event.stopPropagation();
+    setImageModal({ image, description });
   };
 
-  const handleOutsideClick = (event: React.MouseEvent) => {
-    if ((event.target as HTMLElement).classList.contains("image-expanded")) {
-      setExpandedImageId(null); // Close expanded image
-    }
+  const handleCloseImageModal = () => {
+    setImageModal(null);
   };
 
   if (puppies.length === 0) {
@@ -91,60 +113,30 @@ const Puppies: React.FC = () => {
   return (
     <>
       <div className="page-container">
-        <Live />
-        <section className="content-section" onClick={handleOutsideClick}>
-          <h1 className="section-title">Meet the Puppies</h1>
-          <div className="slideshow-container">
-            <div className="content-card">
-              <img
-                src={currentPuppy.image}
-                alt={currentPuppy.name}
-                className={`content-image ${
-                  expandedImageId === currentPuppy.id ? "image-expanded" : ""
-                }`}
-                onClick={(e) => {
-                  e.stopPropagation(); // Prevent click from bubbling
-                  handleImageClick(currentPuppy.id);
-                }}
-              />
-              
-              <div className="navigation-controls">
-                <button className="prev-button" onClick={handlePrevious}>
-                  &lt;
-                </button>
-                <div className="puppy-info">
-                  <h2 className="content-subtitle">{currentPuppy.name}</h2>
-                  <p className="content-detail">
-                    <strong>Age:</strong> {currentPuppy.age}
-                  </p>
-                  <p className="content-description">{currentPuppy.description}</p>
-                </div>
-                <button className="next-button" onClick={handleNext}>
-                  &gt;
-                </button>
-              </div>
-              
-              <div className="parents-section">
-                <h3 className="parents-title">Meet The Parents</h3>
-                <div className="button-container">
-                  {dad && (
-                    <button className="action-button" onClick={() => handleOpenModal("dad")}>
-                      Meet Dad
-                    </button>
-                  )}
-                  {mom && (
-                    <button className="action-button" onClick={() => handleOpenModal("mom")}>
-                      Meet Mom
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="waitlist-section">
-            <Waitlist />
-          </div>
-        </section>
+        <Section title="Meet the Puppies">
+          <Slideshow
+            currentPuppy={currentPuppy}
+            onPrevious={handlePrevious}
+            onNext={handleNext}
+            onImageClick={handleImageClick}
+          />
+        </Section>
+        
+        <Section title="Live Puppy Cam">
+          <Live />
+        </Section>
+        
+        <Section title="Meet The Parents">
+          <Parents
+            mom={mom}
+            dad={dad}
+            onImageClick={handleImageClick}
+          />
+        </Section>
+        
+        <Section title="Waitlist">
+          <Waitlist />
+        </Section>
 
         {/* Modal */}
         {activeModal && (
@@ -152,41 +144,60 @@ const Puppies: React.FC = () => {
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
               <button className="modal-close" onClick={handleCloseModal}>×</button>
               {activeModal === "mom" && mom && (
-                <div>
-                  <h2 className="section-title">{mom.name}</h2>
+                <>
+                  <div className="modal-header">{mom.name}</div>
                   <img
                     src={mom.image}
                     alt={mom.name}
                     className="content-image"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleImageClick("mom");
+                      handleImageClick(e, mom.image, mom.name);
                     }}
                   />
-                  <p className="content-detail">
-                    <strong>Age:</strong> {mom.age} years
-                  </p>
-                  <p className="content-description">{mom.description}</p>
-                </div>
+                  <div className="modal-details">
+                    <p className="content-detail">
+                      <strong>Age:</strong> {mom.age} years
+                    </p>
+                    <p className="content-description">{mom.description}</p>
+                  </div>
+                </>
               )}
               {activeModal === "dad" && dad && (
-                <div>
-                  <h2 className="section-title">{dad.name}</h2>
+                <>
+                  <div className="modal-header">{dad.name}</div>
                   <img
                     src={dad.image}
                     alt={dad.name}
                     className="content-image"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleImageClick("dad");
+                      handleImageClick(e, dad.image, dad.name);
                     }}
                   />
-                  <p className="content-detail">
-                    <strong>Age:</strong> {dad.age} years
-                  </p>
-                  <p className="content-description">{dad.description}</p>
-                </div>
+                  <div className="modal-details">
+                    <p className="content-detail">
+                      <strong>Age:</strong> {dad.age} years
+                    </p>
+                    <p className="content-description">{dad.description}</p>
+                  </div>
+                </>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* Image Modal */}
+        {imageModal && (
+          <div className="image-modal" onClick={handleCloseImageModal}>
+            <div className="modal-content" onClick={e => e.stopPropagation()}>
+              <button className="modal-close" onClick={handleCloseImageModal}>×</button>
+              <div className="modal-header">{imageModal.description}</div>
+              <img 
+                src={imageModal.image} 
+                alt={imageModal.description} 
+                className="modal-image"
+              />
             </div>
           </div>
         )}

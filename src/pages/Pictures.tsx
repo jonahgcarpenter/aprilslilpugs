@@ -22,6 +22,7 @@ const Pictures: React.FC<PicturesProps> = ({ altText = 'Image' }) => {
   const [currentFolder, setCurrentFolder] = useState<string | null>(null);
   const [folders, setFolders] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [modalImage, setModalImage] = useState<ImageData | null>(null);
 
   useEffect(() => {
     const fetchImages = async () => {
@@ -52,7 +53,12 @@ const Pictures: React.FC<PicturesProps> = ({ altText = 'Image' }) => {
     setSelectedImage(selectedImage === index ? null : index);
   };
 
+  const handleImageDoubleClick = (image: ImageData) => {
+    setModalImage(image);
+  };
+
   const handleCloseModal = () => {
+    setModalImage(null);
     setSelectedImage(null);
   };
 
@@ -124,7 +130,12 @@ const Pictures: React.FC<PicturesProps> = ({ altText = 'Image' }) => {
                   key={index} 
                   className={`image-item ${viewMode}-view ${selectedImage === index ? 'selected' : ''}`}
                   onClick={() => handleImageClick(index)}
+                  onDoubleClick={() => handleImageDoubleClick(imageData)}
                 >
+                  <div className="image-details">
+                    <span className="image-name">{imageData.description}</span>
+                    <span className="image-meta">Image</span>
+                  </div>
                   <div className="image-preview">
                     <img 
                       src={imageData.image} 
@@ -132,16 +143,26 @@ const Pictures: React.FC<PicturesProps> = ({ altText = 'Image' }) => {
                       className="thumbnail"
                     />
                   </div>
-                  <div className="image-details">
-                    <span className="image-name">{imageData.description}</span>
-                    <span className="image-meta">Image</span>
-                  </div>
                 </div>
               ))}
             </div>
           </section>
         )}
       </div>
+
+      {modalImage && (
+        <div className="image-modal" onClick={handleCloseModal}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <button className="modal-close" onClick={handleCloseModal}>×</button>
+            <div className="modal-header">{modalImage.description}</div>
+            <img 
+              src={modalImage.image} 
+              alt={modalImage.description} 
+              className="modal-image"
+            />
+          </div>
+        </div>
+      )}
       <Footer />
     </>
   );

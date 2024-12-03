@@ -104,8 +104,9 @@
 
 .image-container.grid-view {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.5rem;
+  padding: 1.5rem;
 }
 
 .image-item {
@@ -124,6 +125,68 @@
 .image-item.selected {
   background: var(--primary-color);
   color: white;
+}
+
+.image-item.list-view {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+}
+
+.image-item.list-view .image-preview {
+  width: 40px;
+  height: 40px;
+  order: 2;
+}
+
+.image-item.list-view .thumbnail {
+  width: 100%;
+  height: 100%;
+  margin-bottom: 0;
+}
+
+.image-item.list-view .image-details {
+  flex: 1;
+  margin-right: 1rem;
+  order: 1;
+}
+
+.image-item.grid-view {
+  display: flex;
+  flex-direction: column;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  overflow: hidden;
+  padding: 0;
+  height: 100%;
+}
+
+.image-item.grid-view .image-preview {
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+}
+
+.image-item.grid-view .thumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  margin: 0;
+}
+
+.image-item.grid-view .image-details {
+  padding: 1rem;
+}
+
+.image-item.grid-view .image-name {
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.image-item.grid-view .image-meta {
+  font-size: 0.85rem;
 }
 
 .thumbnail {
@@ -148,4 +211,65 @@
 .image-meta {
   font-size: 0.9rem;
   color: #666;
+}
+
+.image-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1100;
+}
+
+.modal-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  max-width: 90%;
+  width: auto;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.modal-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: rgba(0, 0, 0, 0.1);
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  cursor: pointer;
+  color: #333;
+  transition: all 0.2s ease;
+}
+
+.modal-close:hover {
+  background: rgba(0, 0, 0, 0.2);
+  color: #000;
+}
+
+.modal-header {
+  color: var(--secondary-color);
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  font-weight: var(--font-weight-semi);
+  text-align: center;
+}
+
+.modal-image {
+  max-width: 100%;
+  max-height: calc(90vh - 150px);
+  object-fit: contain;
 }
