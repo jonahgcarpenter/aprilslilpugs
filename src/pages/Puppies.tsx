@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import '../styles/main.css';
-import { collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
 import { db } from "../secrets/firebase";
 import Footer from "../components/Footer";
 import Live from "../components/Live";
@@ -19,10 +19,7 @@ const sectionDefaults = {
 const Puppies: React.FC = () => {
   const [puppies, setPuppies] = useState<any[]>([]);
   const [currentPuppyIndex, setCurrentPuppyIndex] = useState(0);
-  const [activeModal, setActiveModal] = useState<"mom" | "dad" | null>(null); // Modal state
-  const [mom, setMom] = useState<any | null>(null); // Mom's data
-  const [dad, setDad] = useState<any | null>(null); // Dad's data
-  const [expandedImageId, setExpandedImageId] = useState<string | null>(null);
+  const [activeModal, setActiveModal] = useState<"mom" | "dad" | null>(null);
   const [imageModal, setImageModal] = useState<{ image: string; description: string } | null>(null);
   const [millie, setMillie] = useState<any>(null);
   const [mardis, setMardis] = useState<any>(null);
@@ -81,25 +78,18 @@ const Puppies: React.FC = () => {
     fetchParents();
   }, []);
 
-  const handleOpenModal = (modalType: "mom" | "dad") => {
-    setActiveModal(modalType);
-  };
-
   const handleCloseModal = () => {
     setActiveModal(null);
-    setExpandedImageId(null);
   };
 
   const handleNext = () => {
     setCurrentPuppyIndex((prevIndex) => (prevIndex + 1) % puppies.length);
-    setExpandedImageId(null); // Reset expanded image
   };
 
   const handlePrevious = () => {
     setCurrentPuppyIndex((prevIndex) =>
       prevIndex === 0 ? puppies.length - 1 : prevIndex - 1
     );
-    setExpandedImageId(null); // Reset expanded image
   };
 
   const handleImageClick = (event: React.MouseEvent, image: string, description: string) => {
@@ -150,43 +140,43 @@ const Puppies: React.FC = () => {
           <div className="modal" onClick={handleCloseModal}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
               <button className="modal-close" onClick={handleCloseModal}>×</button>
-              {activeModal === "mom" && mom && (
+              {activeModal === "mom" && millie && (
                 <>
-                  <div className="modal-header">{mom.name}</div>
+                  <div className="modal-header">{millie.name}</div>
                   <img
-                    src={mom.image}
-                    alt={mom.name}
+                    src={millie.image}
+                    alt={millie.name}
                     className="content-image"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleImageClick(e, mom.image, mom.name);
+                      handleImageClick(e, millie.image, millie.name);
                     }}
                   />
                   <div className="modal-details">
                     <p className="content-detail">
-                      <strong>Age:</strong> {mom.age} years
+                      <strong>Age:</strong> {millie.age} years
                     </p>
-                    <p className="content-description">{mom.description}</p>
+                    <p className="content-description">{millie.description}</p>
                   </div>
                 </>
               )}
-              {activeModal === "dad" && dad && (
+              {activeModal === "dad" && mardis && (
                 <>
-                  <div className="modal-header">{dad.name}</div>
+                  <div className="modal-header">{mardis.name}</div>
                   <img
-                    src={dad.image}
-                    alt={dad.name}
+                    src={mardis.image}
+                    alt={mardis.name}
                     className="content-image"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleImageClick(e, dad.image, dad.name);
+                      handleImageClick(e, mardis.image, mardis.name);
                     }}
                   />
                   <div className="modal-details">
                     <p className="content-detail">
-                      <strong>Age:</strong> {dad.age} years
+                      <strong>Age:</strong> {mardis.age} years
                     </p>
-                    <p className="content-description">{dad.description}</p>
+                    <p className="content-description">{mardis.description}</p>
                   </div>
                 </>
               )}

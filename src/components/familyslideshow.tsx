@@ -16,7 +16,6 @@ interface FamilySlideshowProps {
   onPrevious: () => void;
   onNext: () => void;
   onImageClick: (image: string, description: string) => void;
-  isExpanded: boolean;
 }
 
 const FamilySlideshow: React.FC<FamilySlideshowProps> = ({
@@ -24,7 +23,6 @@ const FamilySlideshow: React.FC<FamilySlideshowProps> = ({
   onPrevious,
   onNext,
   onImageClick,
-  isExpanded,
 }) => {
   if (!currentFamilyMember || !currentFamilyMember.isActive) return null;
 

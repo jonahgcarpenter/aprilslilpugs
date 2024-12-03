@@ -12,7 +12,6 @@ const Waitlist = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<string>('');
-  const [isExpanded, setIsExpanded] = useState(false);
   const [checkData, setCheckData] = useState({
     phone: ''
   });

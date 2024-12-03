@@ -40,7 +40,7 @@ const Family: React.FC = () => {
   };
 
   const handleImageClick = (image: string, description: string) => {
-    setImageModal({ image, description, name: currentMember.name });
+    setImageModal({ image, description });
   };
 
   const handleCloseImageModal = () => {
@@ -62,7 +62,6 @@ const Family: React.FC = () => {
             onPrevious={handlePrevious}
             onNext={handleNext}
             onImageClick={handleImageClick}
-            isExpanded={!!imageModal}
           />
         </Section>
 
