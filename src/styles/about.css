@@ -5,15 +5,15 @@
 }
 
 .content-section {
-  background: white;
+  background: var(--background-white);
   padding: 2rem;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px var(--shadow-color);
   margin-bottom: 2rem;
 }
 
 .content-section h2 {
-  color: #333;
+  color: var(--text-color-dark);
   margin-bottom: 1.5rem;
 }
 
@@ -29,6 +29,6 @@
 }
 
 .page-banner h1 {
-  color: #333;
+  color: var(--text-color-dark);
   font-size: 2.5rem;
 }

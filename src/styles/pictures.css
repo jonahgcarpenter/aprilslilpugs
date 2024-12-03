@@ -16,7 +16,7 @@
 
 .view-controls button.active {
   background: var(--secondary-color);
-  color: white;
+  color: var(--text-color);
 }
 
 .breadcrumb {
@@ -52,7 +52,7 @@
 }
 
 .folder-item {
-  background: white;
+  background: var(--background-white);
   border: 1px solid transparent;
   padding: 1rem;
   cursor: pointer;
@@ -155,9 +155,9 @@
 .image-item.grid-view {
   display: flex;
   flex-direction: column;
-  background: white;
+  background: var(--background-white);
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px var(--shadow-color);
   overflow: hidden;
   padding: 0;
   height: 100%;
@@ -210,7 +210,7 @@
 
 .image-meta {
   font-size: 0.9rem;
-  color: #666;
+  color: var(--text-muted);
 }
 
 .image-modal {
@@ -241,7 +241,7 @@
   position: absolute;
   top: 0.75rem;
   right: 0.75rem;
-  background: rgba(0, 0, 0, 0.1);
+  background: var(--shadow-color);
   border: none;
   border-radius: 50%;
   width: 32px;
@@ -251,13 +251,13 @@
   justify-content: center;
   font-size: 1.25rem;
   cursor: pointer;
-  color: #333;
+  color: var(--text-color-dark);
   transition: all 0.2s ease;
 }
 
 .modal-close:hover {
-  background: rgba(0, 0, 0, 0.2);
-  color: #000;
+  background: var(--shadow-color-darker);
+  color: var(--text-color-dark);
 }
 
 .modal-header {

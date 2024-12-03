@@ -1,5 +1,5 @@
 .content-section {
-  background-color: white;
+  background-color: var(--background-white);
   padding: 2rem;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -15,7 +15,7 @@
 
 .form-input {
   padding: 12px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   font-size: 1rem;
   transition: border-color 0.3s;
@@ -59,7 +59,7 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #f5f5f5;
+  background-color: var(--background-light);
 }
 
 .login-form {
@@ -80,10 +80,10 @@
   background: none;
   border: none;
   cursor: pointer;
-  color: #666;
+  color: var(--text-muted);
   padding: 4px;
 }
 
 .password-toggle:hover {
-  color: #333;
+  color: var(--text-color-dark);
 }
