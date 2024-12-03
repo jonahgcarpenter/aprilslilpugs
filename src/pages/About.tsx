@@ -6,9 +6,12 @@ import Footer from "../components/Footer";
 const About: React.FC = () => {
   return (
     <>
+      <div className="page-banner">
+        <h1>About Us</h1>
+      </div>
       <main className="about-content">
-        <section className="meet-breeder">
-          <h1>Meet the Breeder</h1>
+        <section className="meet-breeder content-section">
+          <h2>Meet the Breeder</h2>
           <p>
             Hi, I'm Sarah Johnson! With over 15 years of experience breeding Australian 
             Labradoodles, I'm committed to producing exceptional puppies that bring joy 
@@ -22,7 +25,7 @@ const About: React.FC = () => {
           </p>
         </section>
         
-        <section className="about-us">
+        <section className="about-us content-section">
           <h2>About Our Program</h2>
           <p>
             Welcome to our Australian Labradoodle family! We are dedicated to raising healthy, 
