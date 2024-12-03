@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../secrets/firebase';
+import '../styles/waitlist.css';
 
 const Waitlist = () => {
   const [formData, setFormData] = useState({
@@ -127,136 +128,146 @@ const Waitlist = () => {
   };
 
   return (
-    <div className="waitlist-forms">
-      <form className="form-container" onSubmit={handleSubmit}>
-        <h3 className="form-title">Join our Waitlist</h3>
-        <div className="form-group">
-          <input
-            className="form-input"
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            placeholder="Full Name"
-            maxLength={50}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <input
-            className="form-input"
-            type="tel"
-            name="phone"
-            value={formData.phone}
-            onChange={handleChange}
-            placeholder="Phone Number"
-            maxLength={12}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <select
-            className="form-select"
-            name="pref_color"
-            value={formData.pref_color}
-            onChange={handleChange}
-            required
-          >
-            <option value="">Prefered Color</option>
-            <option value="black">Black</option>
-            <option value="apricot">Apricot</option>
-            <option value="fawn">Fawn</option>
-          </select>
-        </div>
-        <div className="form-group">
-          <select
-            className="form-select"
-            name="pref_sec"
-            value={formData.pref_sec}
-            onChange={handleChange}
-            required
-          >
-            <option value="">Prefered Sex</option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-          </select>
-        </div>
-        <div className="form-note">
-          * At least one preference (color or sex) is required
-        </div>
-        <button
-          className="action-button"
-          type="submit"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? 'Submitting...' : 'Join Waitlist'}
-        </button>
-        {submitStatus && (
-          <p className={submitStatus.includes('Success') ? 'success-message' : 'error-message'}>
-            {submitStatus}
-          </p>
-        )}
-      </form>
+    <div className="live-section">
+      <h2 className="content-subtitle">Waitlist Management</h2>
+      <p className="live-description">
+        Join our waitlist for upcoming litters or check your current position below.
+      </p>
+      <section className="waitlist-forms">
+        <form className="form-container" onSubmit={handleSubmit}>
+          <h3 className="form-title">Join our Waitlist</h3>
+          <div className="form-content">
+            <div className="form-group">
+              <input
+                className="form-input"
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="Full Name"
+                maxLength={50}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <input
+                className="form-input"
+                type="tel"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                placeholder="Phone Number"
+                maxLength={12}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <select
+                className="form-select"
+                name="pref_color"
+                value={formData.pref_color}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Prefered Color</option>
+                <option value="black">Black</option>
+                <option value="apricot">Apricot</option>
+                <option value="fawn">Fawn</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <select
+                className="form-select"
+                name="pref_sec"
+                value={formData.pref_sec}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Prefered Sex</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
+            </div>
+            <div className="form-note">
+              * At least one preference (color or sex) is required
+            </div>
+            <button
+              className="action-button"
+              type="submit"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Submitting...' : 'Join Waitlist'}
+            </button>
+            {submitStatus && (
+              <p className={submitStatus.includes('Success') ? 'success-message' : 'error-message'}>
+                {submitStatus}
+              </p>
+            )}
+          </div>
+        </form>
 
-      <form className="form-container position-check" onSubmit={handleCheckPosition}>
-        <h3 className="form-title">Check Your Position on the Waitlist</h3>
-        <div className="form-group">
-          <input
-            className="form-input"
-            type="tel"
-            name="phone"
-            value={checkData.phone}
-            onChange={(e) => setCheckData({
-              ...checkData,
-              phone: formatPhoneNumber(e.target.value)
-            })}
-            placeholder="Phone Number"
-            maxLength={12}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <select
-            className="form-select"
-            value={checkData.checkColor}
-            onChange={(e) => setCheckData({
-              ...checkData,
-              checkColor: e.target.value
-            })}
-          >
-            <option value="">Any Color</option>
-            <option value="black">Black</option>
-            <option value="apricot">Apricot</option>
-            <option value="fawn">Fawn</option>
-          </select>
-        </div>
-        <div className="form-group">
-          <select
-            className="form-select"
-            value={checkData.checkSex}
-            onChange={(e) => setCheckData({
-              ...checkData,
-              checkSex: e.target.value
-            })}
-          >
-            <option value="">Any Sex</option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-          </select>
-        </div>
-        <button
-          className="action-button"
-          type="submit"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? 'Checking...' : 'Check Position'}
-        </button>
-        {position && (
-          <p className="position-message">
-            {position}
-          </p>
-        )}
-      </form>
+        <form className="form-container" onSubmit={handleCheckPosition}>
+          <h3 className="form-title">Check Your Position on the Waitlist</h3>
+          <div className="form-content">
+            <div className="form-group">
+              <input
+                className="form-input"
+                type="tel"
+                name="phone"
+                value={checkData.phone}
+                onChange={(e) => setCheckData({
+                  ...checkData,
+                  phone: formatPhoneNumber(e.target.value)
+                })}
+                placeholder="Phone Number"
+                maxLength={12}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <select
+                className="form-select"
+                value={checkData.checkColor}
+                onChange={(e) => setCheckData({
+                  ...checkData,
+                  checkColor: e.target.value
+                })}
+              >
+                <option value="">Any Color</option>
+                <option value="black">Black</option>
+                <option value="apricot">Apricot</option>
+                <option value="fawn">Fawn</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <select
+                className="form-select"
+                value={checkData.checkSex}
+                onChange={(e) => setCheckData({
+                  ...checkData,
+                  checkSex: e.target.value
+                })}
+              >
+                <option value="">Any Sex</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
+            </div>
+            <button
+              className="action-button"
+              type="submit"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Checking...' : 'Check Position'}
+            </button>
+            {position && (
+              <p className="position-message">
+                {position}
+              </p>
+            )}
+          </div>
+        </form>
+      </section>
     </div>
   );
 };
