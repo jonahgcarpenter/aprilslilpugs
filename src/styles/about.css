@@ -1,0 +1,10 @@
+.about-content {
+  max-width: 1000px;
+  margin: 2rem auto 4rem;
+  padding: 0 2rem;
+}
+
+.meet-breeder, 
+.about-us {
+  margin-bottom: 3rem;
+}

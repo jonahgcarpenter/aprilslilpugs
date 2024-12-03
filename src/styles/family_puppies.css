@@ -1,0 +1,191 @@
+.content-card {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px var(--shadow-color);
+  text-align: center;
+}
+
+.content-image {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.image-expanded {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 90vw;
+  max-height: 90vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  z-index: 1000;
+  cursor: zoom-out;
+}
+
+/* Puppies Page Styles */
+.page-container {
+  padding-top: var(--navbar-height);
+  min-height: 100vh;
+}
+
+.content-section {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 2rem;
+}
+
+.section-title {
+  color: var(--secondary-color);
+  text-align: center;
+  margin: 2rem 0;
+  font-size: 2.5rem;
+  font-weight: var(--font-weight-semi);
+}
+
+.slideshow-container {
+  position: relative;
+  margin: 2rem auto;
+  max-width: 800px;
+}
+
+.content-subtitle {
+  color: var(--secondary-color);
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+}
+
+.content-detail {
+  font-size: 1.1rem;
+  color: var(--text-color-dark);
+  margin-bottom: 1rem;
+}
+
+.content-description {
+  color: var(--text-color-dark);
+  line-height: 1.6;
+  font-size: 1.1rem;
+}
+
+.button-container {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin: 2rem 0;
+}
+
+.action-button {
+  background: var(--secondary-color);
+  color: white;
+  border: none;
+  padding: 0.8rem 2rem;
+  border-radius: 25px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.action-button:hover {
+  background: var(--primary-hover-color);
+  transform: translateY(-2px);
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1100;
+}
+
+.modal-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--text-color-dark);
+}
+
+.parents-section {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.parents-title {
+  color: var(--secondary-color);
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  font-weight: var(--font-weight-semi);
+}
+
+.navigation-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 1rem 0;
+  gap: 1rem;
+}
+
+.puppy-info {
+  flex: 1;
+}
+
+.prev-button, .next-button {
+  background: var(--secondary-color);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 1.5rem;
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+  flex-shrink: 0;
+}
+
+.prev-button:hover, .next-button:hover {
+  opacity: 1;
+}
+
+.waitlist-section {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+/* Remove the old navigation-buttons styles */
+.navigation-buttons {
+  display: none;
+}
