@@ -29,6 +29,13 @@ const Section: React.FC<SectionProps> = ({ title, children, defaultExpanded = tr
   );
 };
 
+const sectionDefaults = {
+  waitlist: false,
+  puppyCam: true,
+  meetPuppies: true,
+  meetParents: true
+};
+
 const Puppies: React.FC = () => {
   const [puppies, setPuppies] = useState<any[]>([]);
   const [currentPuppyIndex, setCurrentPuppyIndex] = useState(0);
@@ -113,7 +120,15 @@ const Puppies: React.FC = () => {
   return (
     <>
       <div className="page-container">
-        <Section title="Meet the Puppies">
+        <Section title="Waitlist" defaultExpanded={sectionDefaults.waitlist}>
+          <Waitlist />
+        </Section>
+
+        <Section title="Live Puppy Cam" defaultExpanded={sectionDefaults.puppyCam}>
+          <Live />
+        </Section>
+
+        <Section title="Meet the Puppies" defaultExpanded={sectionDefaults.meetPuppies}>
           <Slideshow
             currentPuppy={currentPuppy}
             onPrevious={handlePrevious}
@@ -122,20 +137,12 @@ const Puppies: React.FC = () => {
           />
         </Section>
         
-        <Section title="Live Puppy Cam">
-          <Live />
-        </Section>
-        
-        <Section title="Meet The Parents">
+        <Section title="Meet The Parents" defaultExpanded={sectionDefaults.meetParents}>
           <Parents
             mom={mom}
             dad={dad}
             onImageClick={handleImageClick}
           />
-        </Section>
-        
-        <Section title="Waitlist">
-          <Waitlist />
         </Section>
 
         {/* Modal */}

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
+import { collection, addDoc, query, where, getDocs, orderBy } from 'firebase/firestore';
 import { db } from '../secrets/firebase';
 import '../styles/waitlist.css';
 
@@ -14,9 +14,7 @@ const Waitlist = () => {
   const [submitStatus, setSubmitStatus] = useState<string>('');
   const [isExpanded, setIsExpanded] = useState(false);
   const [checkData, setCheckData] = useState({
-    phone: '',
-    checkColor: '',
-    checkSex: '',
+    phone: ''
   });
   const [position, setPosition] = useState<string | null>(null);
 
@@ -46,22 +44,42 @@ const Waitlist = () => {
   };
 
   const validateForm = (data: typeof formData) => {
-    return data.name && data.phone && (data.pref_color || data.pref_sec);
+    return data.name && data.phone && data.pref_sec; // Only require name, phone, and gender
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm(formData)) {
-      setSubmitStatus('Please fill out your name, phone, and at least one preference.');
+      setSubmitStatus('Please fill out your name, phone, and gender preference.');
       return;
     }
     setIsSubmitting(true);
     
     try {
-      await addDoc(collection(db, 'waitlist'), {
-        ...formData,
-        'joined-timestamp': new Date().toISOString(),
+      const collectionName = `waitlist_${formData.pref_sec}`;
+      
+      // Check if combination already exists
+      const existingQuery = query(
+        collection(db, collectionName),
+        where('phone', '==', formData.phone),
+        where('color_preference', '==', formData.pref_color || 'any')
+      );
+      const existingDocs = await getDocs(existingQuery);
+      
+      if (!existingDocs.empty) {
+        setSubmitStatus(`You are already on the waitlist for ${formData.pref_color || 'any'} ${formData.pref_sec}.`);
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Add to waitlist
+      await addDoc(collection(db, collectionName), {
+        name: formData.name,
+        phone: formData.phone,
+        color_preference: formData.pref_color || 'any',
+        timestamp: new Date().toISOString(),
       });
+
       setSubmitStatus('Success! You have been added to the waitlist.');
       setFormData({ name: '', phone: '', pref_color: '', pref_sec: '' });
     } catch (error) {
@@ -77,51 +95,54 @@ const Waitlist = () => {
     setPosition(null);
 
     try {
-      let q = query(
-        collection(db, 'waitlist'),
-        where('phone', '==', checkData.phone)
-      );
-      
-      const querySnapshot = await getDocs(q);
-      if (querySnapshot.empty) {
-        setPosition('No registration found for this phone number.');
-        return;
+      const positions: { male: string[], female: string[] } = {
+        male: [],
+        female: []
+      };
+      const collections = ['waitlist_male', 'waitlist_female'];
+
+      for (const collectionName of collections) {
+        const gender = collectionName.split('_')[1];
+        
+        // Get all entries ordered by timestamp
+        const allEntriesQuery = query(
+          collection(db, collectionName),
+          orderBy('timestamp', 'asc')
+        );
+        
+        const allEntries = await getDocs(allEntriesQuery);
+        const userEntries = allEntries.docs.filter(doc => 
+          doc.data().phone === checkData.phone
+        );
+        
+        userEntries.forEach(doc => {
+          const userData = doc.data();
+          const position = allEntries.docs.findIndex(d => d.id === doc.id) + 1;
+          
+          const positionText = userData.color_preference !== 'any'
+            ? `#${position} (${userData.color_preference})`
+            : `#${position} (any color)`;
+          
+          positions[gender as 'male' | 'female'].push(positionText);
+        });
       }
 
-      const userDoc = querySnapshot.docs[0];
-      const userData = userDoc.data();
-      const userTimestamp = new Date(userData['joined-timestamp']);
-
-      const conditions = [];
-      if (checkData.checkColor) {
-        conditions.push(where('pref_color', '==', checkData.checkColor));
+      if (positions.male.length === 0 && positions.female.length === 0) {
+        setPosition('No registrations found for this phone number.');
+      } else {
+        const output = [];
+        if (positions.male.length > 0) {
+          output.push('Male Waitlist:', ...positions.male.map(p => `  ${p}`));
+        }
+        if (positions.female.length > 0) {
+          if (output.length > 0) output.push(''); // Add spacing between sections
+          output.push('Female Waitlist:', ...positions.female.map(p => `  ${p}`));
+        }
+        setPosition(output.join('\n'));
       }
-      if (checkData.checkSex) {
-        conditions.push(where('pref_sec', '==', checkData.checkSex));
-      }
-
-      const aheadQuery = query(
-        collection(db, 'waitlist'),
-        ...conditions,
-        where('joined-timestamp', '<', userData['joined-timestamp'])
-      );
-
-      const aheadSnapshot = await getDocs(aheadQuery);
-      const position = aheadSnapshot.size + 1;
-
-      let positionText = `You are #${position} in line`;
-      if (checkData.checkColor && checkData.checkSex) {
-        positionText += ` for ${checkData.checkColor} ${checkData.checkSex} puppies`;
-      } else if (checkData.checkColor) {
-        positionText += ` for ${checkData.checkColor} puppies`;
-      } else if (checkData.checkSex) {
-        positionText += ` for ${checkData.checkSex} puppies`;
-      }
-      positionText += '.';
-      
-      setPosition(positionText);
     } catch (error) {
-      setPosition('Error checking position. Please try again.');
+      console.error('Position checking error:', error);
+      setPosition('Error checking positions. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -164,32 +185,31 @@ const Waitlist = () => {
             <div className="form-group">
               <select
                 className="form-select"
-                name="pref_color"
-                value={formData.pref_color}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Prefered Color</option>
-                <option value="black">Black</option>
-                <option value="apricot">Apricot</option>
-                <option value="fawn">Fawn</option>
-              </select>
-            </div>
-            <div className="form-group">
-              <select
-                className="form-select"
                 name="pref_sec"
                 value={formData.pref_sec}
                 onChange={handleChange}
                 required
               >
-                <option value="">Prefered Sex</option>
+                <option value="">Select Gender (Required)</option>
                 <option value="male">Male</option>
                 <option value="female">Female</option>
               </select>
             </div>
+            <div className="form-group">
+              <select
+                className="form-select"
+                name="pref_color"
+                value={formData.pref_color}
+                onChange={handleChange}
+              >
+                <option value="">Any Color</option>
+                <option value="black">Black</option>
+                <option value="apricot">Apricot</option>
+                <option value="fawn">Fawn</option>
+              </select>
+            </div>
             <div className="form-note">
-              * At least one preference (color or sex) is required
+              * Gender selection is required, color preference is optional
             </div>
             <button
               className="action-button"
@@ -224,46 +244,19 @@ const Waitlist = () => {
                 required
               />
             </div>
-            <div className="form-group">
-              <select
-                className="form-select"
-                value={checkData.checkColor}
-                onChange={(e) => setCheckData({
-                  ...checkData,
-                  checkColor: e.target.value
-                })}
-              >
-                <option value="">Any Color</option>
-                <option value="black">Black</option>
-                <option value="apricot">Apricot</option>
-                <option value="fawn">Fawn</option>
-              </select>
-            </div>
-            <div className="form-group">
-              <select
-                className="form-select"
-                value={checkData.checkSex}
-                onChange={(e) => setCheckData({
-                  ...checkData,
-                  checkSex: e.target.value
-                })}
-              >
-                <option value="">Any Sex</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-              </select>
-            </div>
             <button
               className="action-button"
               type="submit"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Checking...' : 'Check Position'}
+              {isSubmitting ? 'Checking...' : 'Check Positions'}
             </button>
             {position && (
-              <p className="position-message">
-                {position}
-              </p>
+              <div className="position-message">
+                {position.split('\n').map((pos, index) => (
+                  <p key={index}>{pos}</p>
+                ))}
+              </div>
             )}
           </div>
         </form>
