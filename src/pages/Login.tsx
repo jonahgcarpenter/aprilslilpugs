@@ -5,6 +5,7 @@ import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from 'firebas
 import { useNavigate } from 'react-router-dom';
 import Section from "../components/Section";
 import Footer from "../components/Footer";
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -62,6 +63,7 @@ const Login: React.FC = () => {
         <Section title="Admin Login">
           {error && <p className="error-message">{error}</p>}
           <form className="form-container" onSubmit={handleSubmit}>
+            <h2 className="form-header">Login</h2>
             <input
               className="form-input"
               type="email"
@@ -81,8 +83,9 @@ const Login: React.FC = () => {
                 type="button"
                 className="password-toggle"
                 onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
               >
-                {showPassword ? "Hide" : "Show"}
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
               </button>
             </div>
             <button className="action-button" type="submit">Login</button>

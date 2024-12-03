@@ -31,6 +31,9 @@
   --link-color: #a3cef1;
   --link-hover-color: #6096ba;
   
+  /* Background Image */
+  --background-image: url('/images/backdrop.jpg');
+  
   /* Navbar Colors */
   --navbar-bg: rgba(39, 76, 119, 0.95);
   --navbar-gradient: linear-gradient(to right, rgba(39, 76, 119, 0.95), rgba(96, 150, 186, 0.95));
@@ -53,11 +56,15 @@
 .page-container {
   padding-top: var(--navbar-height);
   min-height: 100vh;
+  background-color: var(--background-light);
   background-image: var(--background-image);
   background-size: cover;
-  background-position: center;
+  background-position: center center;
   background-attachment: fixed;
   background-repeat: no-repeat;
+  will-change: transform;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 .content-section {
