@@ -1,24 +1,21 @@
 import React, { useState, useEffect } from "react";
+import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
+import { Link, useNavigate } from 'react-router-dom';
+import '../styles/navbar.css';
 
-interface NavbarProps {
-  onNavigate: (page: string) => void; // Prop for handling navigation
-}
-
-const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
+const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigate = useNavigate();
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
 
-  const closeMenu = () => {
-    setIsOpen(false);
-  };
-
   const handleClickOutside = (event: MouseEvent) => {
     const target = event.target as HTMLElement;
     if (!target.closest(".Navbar")) {
-      closeMenu(); // Close the menu if the click is outside the navbar
+      setIsOpen(false);
     }
   };
 
@@ -29,77 +26,85 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
       document.removeEventListener("click", handleClickOutside);
     }
     return () => {
-      document.removeEventListener("click", handleClickOutside); // Cleanup
+      document.removeEventListener("click", handleClickOutside);
     };
   }, [isOpen]);
 
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsLoggedIn(!!user);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    const auth = getAuth();
+    try {
+      await signOut(auth);
+      navigate('/');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
+
   return (
     <nav className="Navbar">
-      <button className="Navbar-hamburger" onClick={toggleMenu}>
-        ☰
-      </button>
-      <ul className={`Navbar-links ${isOpen ? "Navbar-links-mobile-open" : ""}`}>
-        <li>
-          <a
-            href="#bio"
-            className="Navbar-link"
-            onClick={() => {
-              onNavigate("main");
-              closeMenu(); // Close the menu on link click
-            }}
-          >
-            Bio
-          </a>
-        </li>
-        <li>
-          <a
-            href="#puppies"
-            className="Navbar-link"
-            onClick={() => {
-              onNavigate("main");
-              closeMenu(); // Close the menu on link click
-            }}
-          >
-            Puppies
-          </a>
-        </li>
-        <li>
-          <a
-            href="#family"
-            className="Navbar-link"
-            onClick={() => {
-              onNavigate("main");
-              closeMenu(); // Close the menu on link click
-            }}
-          >
-            Family
-          </a>
-        </li>
-        <li>
-          <a
-            href="#contact"
-            className="Navbar-link"
-            onClick={() => {
-              onNavigate("main");
-              closeMenu(); // Close the menu on link click
-            }}
-          >
-            Contact Me
-          </a>
-        </li>
-        <li>
-          <button
-            onClick={() => {
-              onNavigate("live");
-              closeMenu();
-            }}
-            className="Navbar-link live-button"
-          >
-            Live
-            <span className="live-icon"></span>
-          </button>
-        </li>
-      </ul>
+      <div className="Navbar-container">
+        <button className="hamburger-menu" onClick={toggleMenu} aria-label="Menu">
+          <span className={`hamburger-line ${isOpen ? 'open' : ''}`}></span>
+          <span className={`hamburger-line ${isOpen ? 'open' : ''}`}></span>
+          <span className={`hamburger-line ${isOpen ? 'open' : ''}`}></span>
+        </button>
+        <ul className={`Navbar-links ${isOpen ? "Navbar-links-mobile-open" : ""}`}>
+          <li>
+            <Link to="/about" className="Navbar-link" onClick={() => setIsOpen(false)}>
+              About Us
+            </Link>
+          </li>
+          <li>
+            <Link to="/puppies" className="Navbar-link" onClick={() => setIsOpen(false)}>
+              Puppies
+            </Link>
+          </li>
+          <li>
+            <Link to="/family" className="Navbar-link" onClick={() => setIsOpen(false)}>
+              My Family
+            </Link>
+          </li>
+          <li>
+            <Link to="/pictures" className="Navbar-link" onClick={() => setIsOpen(false)}>
+              Pictures
+            </Link>
+          </li>
+          {isLoggedIn && (
+            <li>
+              <Link to="/login" className="Navbar-link" onClick={() => setIsOpen(false)}>
+                Edit
+              </Link>
+            </li>
+          )}
+        </ul>
+        <div className="Navbar-right">
+          {isLoggedIn ? (
+            <button 
+              onClick={handleLogout}
+              className="auth-button"
+            >
+              Logout
+            </button>
+          ) : (
+            <Link 
+              to="/login" 
+              className="auth-button"
+              onClick={() => setIsOpen(false)}
+            >
+              Login
+            </Link>
+          )}
+        </div>
+      </div>
     </nav>
   );
 };

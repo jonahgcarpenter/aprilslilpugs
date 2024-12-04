@@ -1,0 +1,108 @@
+.waitlist-forms {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  max-width: var(--container-max-width);
+  background: white;
+  border-bottom: 1px solid var(--border-color);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .waitlist-forms {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.form-container {
+  padding: var(--spacing-lg);
+  background: white;
+  position: relative;
+  width: 100%;
+  text-align: center;
+  border-bottom: none;
+  box-shadow: none;
+  margin: 0;
+  max-width: none;
+  flex: none;
+  min-width: auto;
+}
+
+/* Remove these properties as they're no longer needed */
+.form-container:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+@media (min-width: 1024px) {
+  .form-container {
+    min-width: 450px;
+    flex: 1 1 45%;
+  }
+}
+
+.form-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.form-group {
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: 1.5rem;
+}
+
+.form-input,
+.form-select {
+  padding: var(--input-padding);
+  border: var(--input-border);
+  border-radius: var(--border-radius-sm);
+  width: 100%;
+  max-width: 100%;
+  font-size: 1rem;
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+}
+
+.form-input:focus,
+.form-select:focus {
+  outline: none;
+  border-color: var(--primary-hover-color);
+}
+
+.form-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1em;
+}
+
+.form-title {
+  color: var(--secondary-color);
+  margin-bottom: 2rem;
+  font-size: 1.8rem;
+  font-weight: var(--font-weight-semi);
+}
+
+.form-note {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: var(--text-color-dark);
+  font-size: 0.9rem;
+}
+
+.position-message {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+@media (max-width: 1023px) {
+  .form-container:first-child {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 3rem;
+  }
+}

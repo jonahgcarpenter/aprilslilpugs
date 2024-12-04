@@ -1,13 +1,14 @@
 import React from "react";
+import "../styles/footer.css";
 
-const ContactMe: React.FC = () => {
+const Footer: React.FC = () => {
   return (
-    <section id="contact-me" className="contact-me-container">
-      <h1 className="contact-me-heading">Contact Me</h1>
-      <p className="contact-me-email">
+    <section id="footer" className="footer-container">
+      <h1 className="footer-heading">Contact Me</h1>
+      <p className="footer-email">
         Email: <a href="mailto:aprilslilpugs@gmail.com">aprilslilpugs@gmail.com</a>
       </p>
-      <p className="contact-me-links">
+      <p className="footer-links">
         <a href="https://www.facebook.com/AprilsLilPugs" target="_blank" rel="noopener noreferrer">
           Facebook
         </a>
@@ -20,4 +21,4 @@ const ContactMe: React.FC = () => {
   );
 };
 
-export default ContactMe;
+export default Footer;

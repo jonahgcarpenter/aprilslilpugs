@@ -1,0 +1,138 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+/* Color Variables */
+:root {
+  /* Base Colors */
+  --primary-color: #4a90e2;
+  --primary-hover-color: #357abd;
+  --secondary-color: #2c3e50;
+  --accent-color: #e7ecef;
+  
+  /* Text Colors */
+  --text-color: #ffffff;
+  --text-color-dark: #333333;
+  --text-muted: #666666;
+  
+  /* Border & Background Colors */
+  --border-color: #dddddd;
+  --background-light: #f5f5f5;
+  --background-white: #ffffff;
+  
+  /* Shadow Colors */
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --shadow-color-darker: rgba(0, 0, 0, 0.15);
+  --modal-overlay: rgba(0, 0, 0, 0.7);
+  
+  /* Status Colors */
+  --error-color: #dc3545;
+  --success-color: #28a745;
+  
+  /* Link Colors */
+  --link-color: #a3cef1;
+  --link-hover-color: #6096ba;
+  
+  /* Background Image */
+  --background-image: url('/images/backdrop.jpg');
+  
+  /* Navbar Colors */
+  --navbar-bg: rgba(39, 76, 119, 0.95);
+  --navbar-gradient: linear-gradient(to right, rgba(39, 76, 119, 0.95), rgba(96, 150, 186, 0.95));
+  
+  --navbar-height: 60px;
+  --navbar-padding: 0 2rem;
+  --navbar-link-gap: 2rem;
+  --link-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --navbar-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semi: 600;
+  --hamburger-color: var(--text-color);
+  --hamburger-width: 24px;
+  --hamburger-height: 2px;
+
+  /* Spacing */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 3rem;
+  
+  /* Border Radius */
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+  --border-radius-full: 50%;
+  
+  /* Card Styles */
+  --card-padding: var(--spacing-lg);
+  --card-shadow: 0 2px 4px var(--shadow-color);
+  
+  /* Form Styles */
+  --input-height: 40px;
+  --input-padding: 0.8rem 1rem;
+  --input-border: 1px solid var(--border-color);
+  
+  /* Component Sizes */
+  --container-max-width: 1200px;
+  --form-max-width: 400px;
+}
+
+/* Global Styles */
+.page-container {
+  padding-top: var(--navbar-height);
+  min-height: 100vh;
+  background-color: var(--background-light);
+  background-image: var(--background-image);
+  background-size: cover;
+  background-position: center center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  will-change: transform;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.content-section {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 2rem;
+}
+
+.section-title {
+  color: var(--secondary-color);
+  text-align: center;
+  margin: 2rem 0;
+  font-size: 2.5rem;
+  font-weight: var(--font-weight-semi);
+}
+
+.action-button {
+  background: var(--primary-color);
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  width: auto;
+  min-width: 150px;
+  margin: 0 auto;
+  display: inline-block;
+}
+
+.error-message {
+  color: #dc3545;
+  text-align: center;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+/* Root element styles */
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-primary);
+}

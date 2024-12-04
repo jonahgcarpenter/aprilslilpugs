@@ -1,0 +1,359 @@
+/* Camera Roll Style Updates */
+.image-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.image-container.drag-over {
+  background: rgba(var(--primary-color-rgb), 0.1);
+  border: 2px dashed var(--primary-color);
+}
+
+.image-item {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  background: var(--background-color-light);
+}
+
+.image-item:hover {
+  transform: scale(1.02);
+}
+
+.image-item.selected {
+  outline: 3px solid var(--primary-color);
+}
+
+.thumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.video.thumbnail {
+  object-fit: contain;
+  background: black;
+}
+
+.image-details {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1rem;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+  color: white;
+}
+
+.image-name {
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+}
+
+.image-meta {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+.image-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1100;
+}
+
+.modal-content {
+  background: white;
+  padding: 0;
+  border-radius: 12px;
+  max-width: 800px;
+  width: 90%;
+  max-height: 90vh;
+  overflow: hidden;
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.view-modal .modal-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  max-width: 90%;
+  width: auto;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: block;
+  grid-template-columns: none;
+}
+
+.view-modal .modal-image {
+  max-width: 100%;
+  max-height: calc(90vh - 150px);
+  object-fit: contain;
+}
+
+.edit-modal .modal-content {
+  padding: 0;
+  grid-template-columns: 3fr 2fr;
+  max-width: 1000px;
+  width: 90%;
+}
+
+.edit-modal .modal-image-container {
+  background: #000;
+}
+
+.edit-modal .modal-form-container {
+  background: var(--background-color-light);
+}
+
+#media-edit-modal .modal-content,
+#media-upload-modal .modal-content {
+  max-width: 1000px;
+  grid-template-columns: 3fr 2fr;
+}
+
+.modal-image-container {
+  background: #f5f5f5;
+  padding: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#media-edit-modal .modal-image-container,
+#media-upload-modal .modal-image-container {
+  background: #000;
+}
+
+.modal-form-container {
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+#media-edit-modal .modal-form-container,
+#media-upload-modal .modal-form-container {
+  background: var(--background-color-light);
+}
+
+.modal-image {
+  max-width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+}
+
+.modal-close {
+  position: absolute;
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+  background: var(--primary-color);
+  color: var(--text-color);
+  border: none;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: 1rem;
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+  border-radius: var(--border-radius-sm);
+  width: auto;
+  height: auto;
+}
+
+.modal-close:hover {
+  opacity: 1;
+  background: var(--primary-hover-color);
+}
+
+.modal-header {
+  color: var(--secondary-color);
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+  font-weight: var(--font-weight-semi);
+  text-align: center;
+  padding-right: 2rem;
+}
+
+.modal-image {
+  max-width: 100%;
+  max-height: calc(90vh - 150px);
+  object-fit: contain;
+}
+
+.content-section {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  font-size: 1rem;
+}
+
+.form-group textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 0;
+}
+
+.drag-drop-zone {
+  border: 2px dashed var(--border-color);
+  padding: 2rem;
+  text-align: center;
+  background: var(--background-color-light);
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.upload-icon {
+  font-size: 2.5rem;
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+}
+
+.upload-text {
+  color: var(--text-color);
+  font-size: 0.9rem;
+}
+
+.drag-drop-zone:hover {
+  border-color: var(--primary-color);
+  background: rgba(var(--primary-color-rgb), 0.05);
+  transform: scale(1.01);
+}
+
+.drag-drop-zone.drag-over {
+  border-color: var(--primary-color);
+  background: rgba(var(--primary-color-rgb), 0.1);
+  transform: scale(1.02);
+}
+
+.button-group {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.button-group button {
+  flex: 1;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: var(--border-radius-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.button-group.single-button {
+  justify-content: center;
+}
+
+.button-group.single-button button {
+  flex: 0 1 200px;
+}
+
+.button-group.edit-actions {
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.button-group.edit-actions button {
+  flex: 0 1 200px;
+}
+
+.button-primary {
+  background: var(--primary-color);
+  color: white;
+}
+
+.button-primary:hover {
+  background: var(--primary-hover-color);
+}
+
+.button-secondary {
+  background: var(--background-color-light);
+  color: var(--text-color);
+  border: 1px solid var(--border-color) !important;
+}
+
+.button-secondary:hover {
+  background: var(--border-color);
+}
+
+.delete-button {
+  background: var(--error-color, #dc3545);
+  color: white;
+}
+
+.delete-button:hover {
+  background: var(--error-hover-color, #c82333);
+}
+
+.confirmation-modal {
+  text-align: center;
+}
+
+.confirmation-modal p {
+  margin: 1rem 0;
+  color: var(--text-color);
+}
+
+@media (max-width: 768px) {
+  .modal-content {
+    grid-template-columns: 1fr;
+    width: 95%;
+  }
+  
+  .modal-image-container {
+    max-height: 40vh;
+  }
+  
+  #media-edit-modal .modal-content,
+  #media-upload-modal .modal-content {
+    grid-template-columns: 1fr;
+  }
+
+  .edit-modal .modal-content {
+    grid-template-columns: 1fr;
+  }
+}
