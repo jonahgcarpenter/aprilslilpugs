@@ -14,10 +14,10 @@ interface PetData {
 interface ParentsProps {
   millie: PetData | null;
   mardis: PetData | null; // Note: We keep this as 'mardis' for prop naming consistency
-  onImageClick: (event: React.MouseEvent, image: string, description: string) => void;
+  // Remove onImageClick from props
 }
 
-const Parents: React.FC<ParentsProps> = ({ millie, mardis, onImageClick }) => {
+const Parents: React.FC<ParentsProps> = ({ millie, mardis }) => {
   const [imgErrors, setImgErrors] = useState<{ [key: string]: boolean }>({});
   const [modalImage, setModalImage] = useState<{ url: string, description: string } | null>(null);
 

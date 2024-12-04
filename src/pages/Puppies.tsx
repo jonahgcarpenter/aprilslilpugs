@@ -123,7 +123,6 @@ const Puppies: React.FC = () => {
             currentPuppy={currentPuppy}
             onPrevious={handlePrevious}
             onNext={handleNext}
-            onImageClick={handleImageClick}
           />
         </Section>
         
@@ -131,7 +130,6 @@ const Puppies: React.FC = () => {
           <Parents
             millie={millie}
             mardis={mardis}
-            onImageClick={handleImageClick}
           />
         </Section>
 

@@ -39,10 +39,6 @@ const Family: React.FC = () => {
     );
   };
 
-  const handleImageClick = (image: string, description: string) => {
-    setImageModal({ image, description });
-  };
-
   const handleCloseImageModal = () => {
     setImageModal(null);
   };
@@ -61,7 +57,6 @@ const Family: React.FC = () => {
             currentFamilyMember={currentMember}
             onPrevious={handlePrevious}
             onNext={handleNext}
-            onImageClick={handleImageClick}
           />
         </Section>
 

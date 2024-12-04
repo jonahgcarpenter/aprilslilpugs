@@ -5,7 +5,7 @@ import Section from "../components/Section";
 import NewItems from "../components/newitems";
 import EditItems from "../components/edititems";
 import { NewPicture } from "../components/newpictures";
-import ProfilePicture from "../components/profilepicture";
+import ProfilePicture from "../components/ProfilePicture";
 
 const AdminPage: React.FC = () => {
   return (

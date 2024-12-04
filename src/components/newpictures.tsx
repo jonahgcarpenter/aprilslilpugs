@@ -19,7 +19,6 @@ export const NewPicture: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [dragOver, setDragOver] = useState(false);
   const [editingImage, setEditingImage] = useState<ImageData | null>(null);
-  const [selectedImage, setSelectedImage] = useState<number | null>(null);
   const [uploadData, setUploadData] = useState<UploadData | null>(null);
   const [deleteConfirmation, setDeleteConfirmation] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -43,10 +42,6 @@ export const NewPicture: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleImageClick = (index: number) => {
-    setSelectedImage(selectedImage === index ? null : index);
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -176,7 +171,7 @@ export const NewPicture: React.FC = () => {
         {images.map((imageData, index) => (
           <div 
             key={index} 
-            className={`image-item ${selectedImage === index ? 'selected' : ''}`}
+            className="image-item"
             onClick={() => handleEdit(imageData)}
           >
             {imageData.media.startsWith('data:video') ? (
