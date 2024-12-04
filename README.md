@@ -19,5 +19,5 @@ Modern, responsive website built to showcase and manage a dog breeding business.
 ## Known Issues
 
 - add my family component for old puppies
-- fix the pictures page for new database
-- add an admin component for editing the pictures page
+- mobile styles and fix overlapping
+- fix login alerts
