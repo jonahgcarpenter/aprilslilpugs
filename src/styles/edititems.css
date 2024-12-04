@@ -1,111 +1,105 @@
-.edit-items-container {
+/* Edit Items Component */
+.EditItems-container {
     display: flex;
     gap: 2rem;
     padding: 2rem;
-}
-
-.entries-list {
+  }
+  
+  .EditItems-entriesList {
     flex: 1;
     max-width: 300px;
-}
-
-.entry-item {
+  }
+  
+  .EditItems-entryItem {
     padding: 0.5rem;
     margin-bottom: 0.5rem;
     border: 1px solid #ccc;
     border-radius: 4px;
     cursor: pointer;
-}
-
-.entry-item:hover {
+  }
+  
+  .EditItems-entryItem:hover {
     background-color: #f0f0f0;
-}
-
-.entry-item.selected {
+  }
+  
+  .EditItems-entryItem--selected {
     background-color: #007bff;
     color: white;
-}
-
-.edit-form {
+  }
+  
+  .EditItems-form {
     flex: 2;
     display: flex;
     flex-direction: column;
     gap: 1rem;
-}
-
-.edit-form input,
-.edit-form select,
-.edit-form textarea {
+  }
+  
+  .EditItems-input,
+  .EditItems-select,
+  .EditItems-textarea {
     padding: 0.5rem;
     border: 1px solid #ccc;
     border-radius: 4px;
-}
-
-.edit-form textarea {
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .EditItems-textarea {
     min-height: 100px;
-}
-
-.edit-form button {
+  }
+  
+  .EditItems-button {
     padding: 0.5rem 1rem;
     background-color: #007bff;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-}
-
-.edit-form button:hover {
+  }
+  
+  .EditItems-button:hover {
     background-color: #0056b3;
-}
-
-.button-group {
+  }
+  
+  .EditItems-buttonGroup {
     display: flex;
     gap: 1rem;
-}
-
-.delete-button {
-    background-color: #dc3545 !important;
-}
-
-.delete-button:hover {
-    background-color: #c82333 !important;
-}
-
-label {
+  }
+  
+  .EditItems-deleteButton {
+    background-color: #dc3545;
+  }
+  
+  .EditItems-deleteButton:hover {
+    background-color: #c82333;
+  }
+  
+  .EditItems-label {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-}
-
-input[type="checkbox"] {
-    width: auto;
-}
-
-input[type="number"] {
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.toggle-container {
+  }
+  
+  .EditItems-toggleContainer {
     display: flex;
     align-items: center;
     gap: 1rem;
-}
-
-.toggle-switch {
+  }
+  
+  .EditItems-toggleSwitch {
     position: relative;
     display: inline-block;
     width: 60px;
     height: 34px;
-}
-
-.toggle-switch input {
+  }
+  
+  .EditItems-toggleSwitch input {
     opacity: 0;
     width: 0;
     height: 0;
-}
-
-.slider {
+  }
+  
+  .EditItems-slider {
     position: absolute;
     cursor: pointer;
     top: 0;
@@ -114,9 +108,9 @@ input[type="number"] {
     bottom: 0;
     background-color: #ccc;
     transition: .4s;
-}
-
-.slider:before {
+  }
+  
+  .EditItems-slider:before {
     position: absolute;
     content: "";
     height: 26px;
@@ -125,54 +119,54 @@ input[type="number"] {
     bottom: 4px;
     background-color: white;
     transition: .4s;
-}
-
-input:checked + .slider {
+  }
+  
+  .EditItems-toggleSwitch input:checked + .EditItems-slider {
     background-color: #2196F3;
-}
-
-input:checked + .slider:before {
+  }
+  
+  .EditItems-toggleSwitch input:checked + .EditItems-slider:before {
     transform: translateX(26px);
-}
-
-.slider.round {
+  }
+  
+  .EditItems-slider--round {
     border-radius: 34px;
-}
-
-.slider.round:before {
+  }
+  
+  .EditItems-slider--round:before {
     border-radius: 50%;
-}
-
-.toggle-label {
+  }
+  
+  .EditItems-toggleLabel {
     font-size: 14px;
-}
-
-.image-upload-box {
+  }
+  
+  .EditItems-imageUploadBox {
     border: 2px dashed #ccc;
     border-radius: 4px;
     padding: 2rem;
     text-align: center;
     cursor: pointer;
     transition: all 0.3s ease;
-}
-
-.image-upload-box.drag-active {
+  }
+  
+  .EditItems-imageUploadBox--dragActive {
     border-color: #007bff;
     background-color: rgba(0, 123, 255, 0.1);
-}
-
-.image-preview {
+  }
+  
+  .EditItems-imagePreview {
     position: relative;
     display: inline-block;
-}
-
-.image-preview img {
+  }
+  
+  .EditItems-imagePreview img {
     max-width: 100%;
     max-height: 200px;
     object-fit: contain;
-}
-
-.remove-image {
+  }
+  
+  .EditItems-removeImage {
     position: absolute;
     top: -10px;
     right: -10px;
@@ -186,9 +180,9 @@ input:checked + .slider:before {
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-.upload-icon {
+  }
+  
+  .EditItems-uploadIcon {
     font-size: 2rem;
     margin-bottom: 1rem;
-}
+  }

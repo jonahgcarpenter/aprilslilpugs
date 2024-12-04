@@ -1,8 +1,8 @@
 import React from "react";
 import '../styles/main.css';
-import Footer from "../components/Footer";
+import Footer from "../components/footer";
 import MeetTheBreeder from "../components/meetthebreeder";
-import Section from "../components/Section";
+import Section from "../components/section";
 
 const About: React.FC = () => {
   return (

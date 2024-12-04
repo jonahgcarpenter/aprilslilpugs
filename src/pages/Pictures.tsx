@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/pictures.css';
 import '../styles/main.css';
-import Footer from '../components/Footer';
+import Footer from '../components/footer';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../secrets/firebase';
-import Section from "../components/Section";
+import Section from "../components/section";
 
 interface MediaData {
   description: string;
@@ -59,25 +59,25 @@ const Pictures: React.FC<PicturesProps> = ({ altText = 'Media' }) => {
     <>
       <div className="page-container">
         <Section title="Camera Roll">
-          <div className="image-container">
+          <div className="camerarollimage-container">
             {mediaItems.map((mediaItem, index) => (
               <div 
                 key={index} 
-                className={`image-item ${selectedMedia === index ? 'selected' : ''}`}
+                className={`camerarollimage-item ${selectedMedia === index ? 'selected' : ''}`}
                 onClick={() => handleItemClick(index)}
                 onDoubleClick={() => handleItemDoubleClick(mediaItem)}
               >
                 {mediaItem.media.startsWith('data:video') ? (
-                  <video src={mediaItem.media} className="thumbnail" />
+                  <video src={mediaItem.media} className="camerarollthumbnail" />
                 ) : (
                   <img 
                     src={mediaItem.media} 
                     alt={mediaItem.description || `${altText} ${index + 1}`}
-                    className="thumbnail"
+                    className="camerarollthumbnail"
                   />
                 )}
-                <div className="image-details">
-                  <div className="image-name">{mediaItem.description || 'Untitled'}</div>
+                <div className="camerarollimage-details">
+                  <div className="camerarollimage-name">{mediaItem.description || 'Untitled'}</div>
                 </div>
               </div>
             ))}
@@ -86,17 +86,17 @@ const Pictures: React.FC<PicturesProps> = ({ altText = 'Media' }) => {
       </div>
 
       {modalItem && (
-        <div className="image-modal view-modal" onClick={handleCloseModal}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <button className="modal-close" onClick={handleCloseModal}>×</button>
-            <div className="modal-header">{modalItem.description || 'Untitled'}</div>
+        <div className="camerarollimage-modal" onClick={handleCloseModal}>
+          <div className="camerarollmodal-content" onClick={e => e.stopPropagation()}>
+            <button className="camerarollmodal-close" onClick={handleCloseModal}>×</button>
+            <div className="camerarollmodal-header">{modalItem.description || 'Untitled'}</div>
             {modalItem.media.startsWith('data:video') ? (
-              <video src={modalItem.media} className="modal-image" controls />
+              <video src={modalItem.media} className="camerarollmodal-image" controls />
             ) : (
               <img 
                 src={modalItem.media} 
                 alt={modalItem.description} 
-                className="modal-image"
+                className="camerarollmodal-image"
               />
             )}
           </div>

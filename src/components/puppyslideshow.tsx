@@ -25,43 +25,43 @@ const Slideshow: React.FC<SlideshowProps> = ({ currentPuppy, onPrevious, onNext 
 
   return (
     <>
-      <div className="slideshow-container">
+      <div className="puppyslideshow-container">
         <img
           src={currentPuppy.imageUrl || ''}
           alt={currentPuppy.name}
-          className="content-image"
+          className="puppyslideshow-image"
           onClick={() => setModalImage({ url: currentPuppy.imageUrl, description: currentPuppy.name })}
         />
-        <div className="navigation-controls">
-          <button className="prev-button" onClick={onPrevious}>&lt;</button>
-          <button className="next-button" onClick={onNext}>&gt;</button>
+        <div className="puppyslideshow-controls">
+          <button className="puppyslideshowprev-button" onClick={onPrevious}>&lt;</button>
+          <button className="puppyslideshownext-button" onClick={onNext}>&gt;</button>
         </div>
-        <h2 className="content-subtitle">{currentPuppy.name}</h2>
-        <div className="puppy-info">
-          <p className="content-detail">
+        <h2 className="puppyslideshow-subtitle">{currentPuppy.name}</h2>
+        <div className="puppyslideshow-info">
+          <p className="puppyslideshow-detail">
             <strong>Age:</strong> {currentPuppy.age || 'N/A'}
           </p>
-          <p className="content-detail">
+          <p className="puppyslideshow-detail">
             <strong>Gender:</strong> {currentPuppy.gender.charAt(0).toUpperCase() + currentPuppy.gender.slice(1) || 'N/A'}
           </p>
           {(currentPuppy.mom || currentPuppy.dad) && (
-            <p className="content-detail">
+            <p className="puppyslideshow-detail">
               <strong>Parents:</strong> {[currentPuppy.mom, currentPuppy.dad].filter(Boolean).join(' & ') || 'N/A'}
             </p>
           )}
-          <p className="content-description content-center">{currentPuppy.description}</p>
+          <p className="puppyslideshow-description">{currentPuppy.description}</p>
         </div>
       </div>
 
       {modalImage && (
-        <div className="image-modal view-modal" onClick={() => setModalImage(null)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setModalImage(null)}>×</button>
-            <div className="modal-header">{modalImage.description}</div>
+        <div className="puppyslideshow-modal" onClick={() => setModalImage(null)}>
+          <div className="puppyslideshowmodal-content" onClick={e => e.stopPropagation()}>
+            <button className="puppyslideshowmodal-close" onClick={() => setModalImage(null)}>×</button>
+            <div className="puppyslideshowmodal-header">{modalImage.description}</div>
             <img 
               src={modalImage.url} 
               alt={modalImage.description} 
-              className="modal-image"
+              className="puppyslideshowmodal-image"
             />
           </div>
         </div>

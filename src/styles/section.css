@@ -1,3 +1,4 @@
+/* Section Component */
 .explorer-section {
   background: var(--background-white);
   padding: 1rem 2rem;
@@ -35,44 +36,4 @@
 
 .explorer-content {
   padding: 2rem;
-}
-
-/* Explorer Content */
-.explorer-container {
-  background: var(--background-white);
-  border-radius: 8px;
-  box-shadow: 0 2px 4px var(--shadow-color);
-  overflow: hidden;
-  margin-bottom: 2rem;
-}
-
-.explorer-tabs {
-  display: flex;
-  background: var(--background-light);
-  border-bottom: 1px solid var(--border-color);
-}
-
-.explorer-tab {
-  padding: 1rem 2rem;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.explorer-tab:hover {
-  background: var(--background-hover);
-}
-
-.explorer-tab.active {
-  background: var(--background-white);
-  border-bottom: 2px solid var(--primary-color);
-}
-
-.explorer-content .content-section {
-  box-shadow: none;
-  padding: 0;
-  margin: 0;
-}
-
-.content-subtitle {
-  text-align: center;
 }

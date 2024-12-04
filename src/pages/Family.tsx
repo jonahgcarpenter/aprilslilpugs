@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import '../styles/main.css';
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../secrets/firebase";
-import Footer from "../components/Footer";
+import Footer from "../components/footer";
 import FamilySlideshow from '../components/familyslideshow';
-import Section from "../components/Section";
+import Section from "../components/section";
 
 const sectionDefaults = {
   meetFamily: true,

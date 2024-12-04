@@ -1,4 +1,4 @@
-import '../styles/pictures.css';
+import '../styles/newpictures.css';
 import React, { useState, useEffect, useRef } from 'react';
 import { collection, getDocs, addDoc, updateDoc, doc, deleteDoc } from 'firebase/firestore';
 import { db } from '../secrets/firebase';
@@ -13,6 +13,106 @@ interface UploadData {
   media: string;
   file: File;
 }
+
+const UploadModal: React.FC<{
+  uploadData: UploadData;
+  onClose: () => void;
+  onSubmit: (description: string) => Promise<void>;
+  loading: boolean;
+}> = ({ uploadData, onClose, onSubmit, loading }) => (
+  <div className="upload-modal">
+    <div className="uploadmodal-content">
+      <button className="uploadmodal-close" onClick={onClose}>×</button>
+      <div className="uploadmodal-image-container">
+        {uploadData.media.startsWith('data:video') ? (
+          <video src={uploadData.media} className="uploadmodal-image" controls />
+        ) : (
+          <img src={uploadData.media} alt="upload preview" className="uploadmodal-image" />
+        )}
+      </div>
+      <div className="uploadmodal-form-container">
+        <h2 className="uploadmodal-header">Add New Media</h2>
+        <form className="uploadform" onSubmit={(e) => {
+          e.preventDefault();
+          const description = new FormData(e.currentTarget).get('description') as string;
+          onSubmit(description);
+        }}>
+          <div className="uploadform-group">
+            <input type="text" name="description" placeholder="Enter description" required />
+          </div>
+          <button type="submit" className="uploadbutton" disabled={loading}>
+            {loading ? 'Uploading...' : 'Upload'}
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+);
+
+const EditModal: React.FC<{
+  image: ImageData;
+  onClose: () => void;
+  onUpdate: (e: React.FormEvent) => Promise<void>;
+  onDelete: () => void;
+  onChange: (value: string) => void;
+  loading: boolean;
+}> = ({ image, onClose, onUpdate, onDelete, onChange, loading }) => (
+  <div className="edit-modal">
+    <div className="editmodal-content">
+      <button className="editmodal-close" onClick={onClose}>×</button>
+      <div className="editmodal-image-container">
+        {image.media.startsWith('data:video') ? (
+          <video src={image.media} className="editmodal-image" controls />
+        ) : (
+          <img src={image.media} alt={image.description} className="editmodal-image" />
+        )}
+      </div>
+      <div className="editmodal-form-container">
+        <h2 className="editmodal-header">Edit Media</h2>
+        <form className="editform" onSubmit={onUpdate}>
+          <div className="editform-group">
+            <input
+              type="text"
+              value={image.description}
+              onChange={(e) => onChange(e.target.value)}
+              placeholder="Description"
+              required
+            />
+          </div>
+          <div className="editform-group">
+            <button type="submit" className="editbutton" disabled={loading}>
+              {loading ? 'Saving...' : 'Save Changes'}
+            </button>
+            <button type="button" className="deletebutton" onClick={onDelete} disabled={loading}>
+              Delete
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+);
+
+const DeleteModal: React.FC<{
+  onConfirm: () => Promise<void>;
+  onCancel: () => void;
+  loading: boolean;
+}> = ({ onConfirm, onCancel, loading }) => (
+  <div className="delete-modal">
+    <div className="deletemodal-content">
+      <h2 className="deletemodal-header">Confirm Delete</h2>
+      <p>Are you sure you want to delete this media?</p>
+      <div className="deleteform-group">
+        <button className="deletebutton" onClick={onConfirm} disabled={loading}>
+          {loading ? 'Deleting...' : 'Yes, Delete'}
+        </button>
+        <button className="cancelbutton" onClick={onCancel} disabled={loading}>
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+);
 
 export const NewPicture: React.FC = () => {
   const [images, setImages] = useState<ImageData[]>([]);
@@ -148,13 +248,13 @@ export const NewPicture: React.FC = () => {
   return (
     <>
       <div 
-        className={`image-container ${dragOver ? 'drag-over' : ''}`}
+        className={`newpicture-container ${dragOver ? 'drag-over' : ''}`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
         <div 
-          className="drag-drop-zone"
+          className="newpicturedrag-drop-zone"
           onClick={() => fileInputRef.current?.click()}
         >
           <p>Drag and drop or click to select images/videos</p>
@@ -171,123 +271,47 @@ export const NewPicture: React.FC = () => {
         {images.map((imageData, index) => (
           <div 
             key={index} 
-            className="image-item"
+            className="newpicture-item"
             onClick={() => handleEdit(imageData)}
           >
             {imageData.media.startsWith('data:video') ? (
-              <video src={imageData.media} className="thumbnail" />
+              <video src={imageData.media} className="newpicturethumbnail" />
             ) : (
-              <img src={imageData.media} alt={imageData.description} className="thumbnail" />
+              <img src={imageData.media} alt={imageData.description} className="newpicturethumbnail" />
             )}
-            <div className="image-details">
-              <div className="image-name">{imageData.description || 'Untitled'}</div>
+            <div className="newpicture-details">
+              <div className="newpicture-name">{imageData.description || 'Untitled'}</div>
             </div>
           </div>
         ))}
       </div>
 
       {uploadData && (
-        <div className="image-modal edit-modal" id="media-upload-modal">
-          <div className="modal-content">
-            <button className="modal-close" onClick={() => setUploadData(null)}>×</button>
-            <div className="modal-image-container">
-              {uploadData.media.startsWith('data:video') ? (
-                <video src={uploadData.media} className="modal-image" controls />
-              ) : (
-                <img src={uploadData.media} alt="upload preview" className="modal-image" />
-              )}
-            </div>
-            <div className="modal-form-container">
-              <h2 className="modal-header">Add New Media</h2>
-              <form className="edit-form" onSubmit={(e) => {
-                e.preventDefault();
-                const description = new FormData(e.currentTarget).get('description') as string;
-                handleUploadComplete(description);
-              }}>
-                <div className="form-group">
-                  <input
-                    type="text"
-                    name="description"
-                    placeholder="Enter description"
-                    required
-                  />
-                </div>
-                <div className="button-group single-button">
-                  <button type="submit" className="button-primary" disabled={operationLoading}>
-                    {operationLoading ? 'Uploading...' : 'Upload'}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
+        <UploadModal
+          uploadData={uploadData}
+          onClose={() => setUploadData(null)}
+          onSubmit={handleUploadComplete}
+          loading={operationLoading}
+        />
       )}
 
       {editingImage && (
-        <div className="image-modal edit-modal" id="media-edit-modal">
-          <div className="modal-content">
-            <button className="modal-close" onClick={() => setEditingImage(null)}>×</button>
-            <div className="modal-image-container">
-              {editingImage.media.startsWith('data:video') ? (
-                <video src={editingImage.media} className="modal-image" controls />
-              ) : (
-                <img src={editingImage.media} alt={editingImage.description} className="modal-image" />
-              )}
-            </div>
-            <div className="modal-form-container">
-              <h2 className="modal-header">Edit Media</h2>
-              <form className="edit-form" onSubmit={handleUpdateImage}>
-                <div className="form-group">
-                  <input
-                    type="text"
-                    value={editingImage.description}
-                    onChange={(e) => setEditingImage({...editingImage, description: e.target.value})}
-                    placeholder="Description"
-                    required
-                  />
-                </div>
-                <div className="button-group edit-actions">
-                  <button type="submit" className="button-primary" disabled={operationLoading}>
-                    {operationLoading ? 'Saving...' : 'Save Changes'}
-                  </button>
-                  <button 
-                    type="button" 
-                    className="delete-button"
-                    onClick={() => setDeleteConfirmation(editingImage.id!)}
-                    disabled={operationLoading}
-                  >
-                    Delete
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
+        <EditModal
+          image={editingImage}
+          onClose={() => setEditingImage(null)}
+          onUpdate={handleUpdateImage}
+          onDelete={() => setDeleteConfirmation(editingImage.id!)}
+          onChange={(value) => setEditingImage({...editingImage, description: value})}
+          loading={operationLoading}
+        />
       )}
 
       {deleteConfirmation && (
-        <div className="image-modal">
-          <div className="modal-content confirmation-modal">
-            <h2 className="modal-header">Confirm Delete</h2>
-            <p>Are you sure you want to delete this media?</p>
-            <div className="button-group">
-              <button 
-                className="delete-button" 
-                onClick={() => handleDelete(deleteConfirmation)}
-                disabled={operationLoading}
-              >
-                {operationLoading ? 'Deleting...' : 'Yes, Delete'}
-              </button>
-              <button 
-                className="button-secondary" 
-                onClick={() => setDeleteConfirmation(null)}
-                disabled={operationLoading}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
+        <DeleteModal
+          onConfirm={() => handleDelete(deleteConfirmation)}
+          onCancel={() => setDeleteConfirmation(null)}
+          loading={operationLoading}
+        />
       )}
     </>
   );

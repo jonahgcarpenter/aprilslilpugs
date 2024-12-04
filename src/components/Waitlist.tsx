@@ -148,18 +148,18 @@ const Waitlist = () => {
   };
 
   return (
-    <div className="live-section">
-      <h2 className="content-subtitle">Waitlist Management</h2>
-      <p className="live-description">
+    <div className="waitlist-section">
+      <h2 className="waitlist-subtitle">Waitlist Management</h2>
+      <p className="waitlist-description">
         Join our waitlist for upcoming litters or check your current position below.
       </p>
       <section className="waitlist-forms">
-        <form className="form-container" onSubmit={handleSubmit}>
-          <h3 className="form-title">Join our Waitlist</h3>
-          <div className="form-content">
-            <div className="form-group">
+        <form className="waitlistform-container" onSubmit={handleSubmit}>
+          <h3 className="waitlistform-title">Join our Waitlist</h3>
+          <div className="waitlistform-content">
+            <div className="waitlistform-group">
               <input
-                className="form-input"
+                className="waitlistform-input"
                 type="text"
                 name="name"
                 value={formData.name}
@@ -169,9 +169,9 @@ const Waitlist = () => {
                 required
               />
             </div>
-            <div className="form-group">
+            <div className="waitlistform-group">
               <input
-                className="form-input"
+                className="waitlistform-input"
                 type="tel"
                 name="phone"
                 value={formData.phone}
@@ -181,9 +181,9 @@ const Waitlist = () => {
                 required
               />
             </div>
-            <div className="form-group">
+            <div className="waitlistform-group">
               <select
-                className="form-select"
+                className="waitlistform-select"
                 name="pref_sec"
                 value={formData.pref_sec}
                 onChange={handleChange}
@@ -194,9 +194,9 @@ const Waitlist = () => {
                 <option value="female">Female</option>
               </select>
             </div>
-            <div className="form-group">
+            <div className="waitlistform-group">
               <select
-                className="form-select"
+                className="waitlistform-select"
                 name="pref_color"
                 value={formData.pref_color}
                 onChange={handleChange}
@@ -207,11 +207,11 @@ const Waitlist = () => {
                 <option value="fawn">Fawn</option>
               </select>
             </div>
-            <div className="form-note">
+            <div className="waitlistform-note">
               * Gender selection is required, color preference is optional
             </div>
             <button
-              className="action-button"
+              className="joinwaitlist-button"
               type="submit"
               disabled={isSubmitting}
             >
@@ -225,12 +225,12 @@ const Waitlist = () => {
           </div>
         </form>
 
-        <form className="form-container" onSubmit={handleCheckPosition}>
-          <h3 className="form-title">Check Your Position on the Waitlist</h3>
-          <div className="form-content">
-            <div className="form-group">
+        <form className="checkposition-container" onSubmit={handleCheckPosition}>
+          <h3 className="checkposition-title">Check Your Position on the Waitlist</h3>
+          <div className="checkposition-content">
+            <div className="checkposition-group">
               <input
-                className="form-input"
+                className="checkposition-input"
                 type="tel"
                 name="phone"
                 value={checkData.phone}
@@ -244,14 +244,14 @@ const Waitlist = () => {
               />
             </div>
             <button
-              className="action-button"
+              className="checkposition-button"
               type="submit"
               disabled={isSubmitting}
             >
               {isSubmitting ? 'Checking...' : 'Check Positions'}
             </button>
             {position && (
-              <div className="position-message">
+              <div className="checkposition-message">
                 {position.split('\n').map((pos, index) => (
                   <p key={index}>{pos}</p>
                 ))}

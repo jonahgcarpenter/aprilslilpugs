@@ -1,5 +1,6 @@
-/* Slideshow Styles */
-.slideshow-container {
+/* Slideshow Component */
+.puppyslideshow-container,
+.familyslideshow-container {
   position: relative;
   margin: 0;
   padding: 1rem 2rem;
@@ -7,19 +8,30 @@
   border-bottom: 1px solid var(--border-color);
 }
 
-.navigation-controls {
+/* Image Styles */
+.puppyslideshow-image,
+.familyslideshow-image {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.puppyslideshow-controls,
+.familyslideshow-controls {
   display: flex;
   justify-content: space-between;
   margin: 1rem 0;
   gap: 1rem;
 }
 
-.puppy-info {
-  flex: 1;
-  margin-top: 1rem;
-}
-
-.prev-button, .next-button {
+.puppyslideshowprev-button,
+.puppyslideshownext-button,
+.familyslideshowprev-button,
+.familyslideshownext-button {
   background: var(--primary-color);
   color: var(--text-color);
   border: none;
@@ -34,47 +46,33 @@
   height: auto;
 }
 
-.prev-button:hover, .next-button:hover {
+.puppyslideshowprev-button:hover,
+.puppyslideshownext-button:hover,
+.familyslideshowprev-button:hover,
+.familyslideshownext-button:hover {
   opacity: 1;
   background: var(--primary-hover-color);
 }
 
-.position-message {
-  text-align: center;
+.puppyslideshow-info,
+.familyslideshow-info {
+  flex: 1;
   margin-top: 1rem;
 }
 
-.content-description {
+.puppyslideshow-detail,
+.familyslideshow-detail {
+  padding-top: .5rem;
+}
+
+.puppyslideshow-description,
+.familyslideshow-description {
   text-align: center;
 }
 
-/* Image Styles */
-.content-image {
-  width: 100%;
-  height: 400px;
-  object-fit: cover;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-  cursor: pointer;
-  transition: transform 0.3s ease;
-}
-
-.image-expanded {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  max-width: 90vw;
-  max-height: 90vh;
-  width: auto;
-  height: auto;
-  object-fit: contain;
-  z-index: 1000;
-  cursor: zoom-out;
-}
-
 /* Modal Styles */
-.image-modal {
+.puppyslideshow-modal,
+.familyslideshow-modal {
   position: fixed;
   top: 0;
   left: 0;
@@ -87,23 +85,20 @@
   z-index: 1100;
 }
 
-.modal-content {
-  background: white;
-  padding: 1rem 2rem;
-  border-radius: 0;
-  box-shadow: none;
-  border-bottom: 1px solid var(--border-color);
+.puppyslideshowmodal-content,
+.familyslideshowmodal-content {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 12px;
   max-width: 90%;
   width: auto;
   max-height: 90vh;
   overflow-y: auto;
   position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
 }
 
-.modal-close {
+.puppyslideshowmodal-close,
+.familyslideshowmodal-close {
   position: absolute;
   top: var(--spacing-sm);
   right: var(--spacing-sm);
@@ -120,70 +115,25 @@
   height: auto;
 }
 
-.modal-close:hover {
+.puppyslideshowmodal-close:hover,
+.familyslideshowmodal-close:hover {
   opacity: 1;
   background: var(--primary-hover-color);
 }
 
-.modal-header {
+.puppyslideshowmodal-header,
+.familyslideshowmodal-header {
   color: var(--secondary-color);
   font-size: 1.5rem;
-  padding-bottom: 0.5rem;
-  margin: 0;
-  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 2rem;
   font-weight: var(--font-weight-semi);
   text-align: center;
+  padding-right: 2rem;
 }
 
-.modal-image {
+.puppyslideshowmodal-image,
+.familyslideshowmodal-image {
   max-width: 100%;
   max-height: calc(90vh - 150px);
   object-fit: contain;
-}
-
-.modal-details {
-  padding-top: 1rem;
-  border-top: 1px solid var(--border-color);
-}
-
-/* Parents Section Styles */
-.parents-section {
-  padding: 1rem 2rem;
-  border-bottom: 1px solid var(--border-color);
-  background: white;
-}
-
-.parents-title {
-  color: var(--secondary-color);
-  font-size: 1.5rem;
-  margin: 0 0 1rem 0;
-  font-weight: var(--font-weight-semi);
-}
-
-.parents-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 2rem;
-  padding: 1rem 0;
-}
-
-.parent-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-}
-
-.parent-card img {
-  width: 100%;
-  height: 300px;
-  object-fit: cover;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-  cursor: pointer;
-}
-
-.parent-card h3 {
-  color: var(--secondary-color);
-  margin: 0.5rem 0;
 }

@@ -28,43 +28,43 @@ const FamilySlideshow: React.FC<FamilySlideshowProps> = ({
 
   return (
     <>
-      <div className="slideshow-container">
+      <div className="familyslideshow-container">
         <img
           src={currentFamilyMember.imageUrl || ''}
           alt={currentFamilyMember.name}
-          className="content-image"
+          className="familyslideshow-image"
           onClick={() => setModalImage({ 
             url: currentFamilyMember.imageUrl, 
             description: currentFamilyMember.name 
           })}
         />
-        <div className="navigation-controls">
-          <button className="prev-button" onClick={onPrevious}>&lt;</button>
-          <button className="next-button" onClick={onNext}>&gt;</button>
+        <div className="familyslideshow-controls">
+          <button className="familyslideshowprev-button" onClick={onPrevious}>&lt;</button>
+          <button className="familyslideshownext-button" onClick={onNext}>&gt;</button>
         </div>
-        <h2 className="content-subtitle">{currentFamilyMember.name}</h2>
-        <div className="puppy-info">
-          <p className="content-detail">
+        <h2 className="familyslideshow-subtitle">{currentFamilyMember.name}</h2>
+        <div className="familyslideshow-info">
+          <p className="familyslideshow-detail">
             <strong>Age:</strong> {currentFamilyMember.age || 'N/A'}
           </p>
           {currentFamilyMember.gender && (
-            <p className="content-detail">
+            <p className="familyslideshow-detail">
               <strong>Gender:</strong> {currentFamilyMember.gender.charAt(0).toUpperCase() + currentFamilyMember.gender.slice(1)}
             </p>
           )}
-          <p className="content-description content-center">{currentFamilyMember.description}</p>
+          <p className="familyslideshow-description">{currentFamilyMember.description}</p>
         </div>
       </div>
 
       {modalImage && (
-        <div className="image-modal view-modal" onClick={() => setModalImage(null)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setModalImage(null)}>×</button>
-            <div className="modal-header">{modalImage.description}</div>
+        <div className="familyslideshow-modal" onClick={() => setModalImage(null)}>
+          <div className="familyslideshowmodal-content" onClick={e => e.stopPropagation()}>
+            <button className="familyslideshowmodal-close" onClick={() => setModalImage(null)}>×</button>
+            <div className="familyslideshowmodal-header">{modalImage.description}</div>
             <img 
               src={modalImage.url} 
               alt={modalImage.description} 
-              className="modal-image"
+              className="familyslideshowmodal-image"
             />
           </div>
         </div>

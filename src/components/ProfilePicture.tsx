@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { collection, getDocs, updateDoc, doc, setDoc } from 'firebase/firestore';
 import { db } from '../secrets/firebase';
+import '../styles/profilepicture.css';
 
 const ProfilePicture: React.FC = () => {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -66,19 +67,32 @@ const ProfilePicture: React.FC = () => {
   };
 
   return (
-    <div>
+    <div className="profile-picture-container">
       {previewUrl && (
-        <div style={{ marginBottom: '1rem' }}>
+        <div className="profile-picture-preview-wrapper">
           <img 
             src={previewUrl} 
             alt="Profile preview" 
-            style={{ maxWidth: '200px', maxHeight: '200px' }}
+            className="profile-picture-image"
           />
         </div>
       )}
-      <input type="file" accept="image/*" onChange={handleImageUpload} />
+      <input 
+        type="file" 
+        id="profile-picture-input"
+        accept="image/*" 
+        onChange={handleImageUpload} 
+        className="profile-picture-input" 
+      />
+      <label htmlFor="profile-picture-input" className="profile-picture-input-label">
+        Choose File
+      </label>
       {selectedImage && (
-        <button onClick={handleSubmit} disabled={uploading}>
+        <button 
+          onClick={handleSubmit} 
+          disabled={uploading}
+          className="profile-picture-button"
+        >
           {uploading ? 'Uploading...' : 'Update Profile Picture'}
         </button>
       )}

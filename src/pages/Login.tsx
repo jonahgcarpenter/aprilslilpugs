@@ -3,8 +3,8 @@ import '../styles/main.css';
 import '../styles/login.css';
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
-import Section from "../components/Section";
-import Footer from "../components/Footer";
+import Section from "../components/section";
+import Footer from "../components/footer";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -60,19 +60,19 @@ const Login: React.FC = () => {
     <>
       <div className="page-container">
         <Section title="Admin Login">
-          {error && <p className="error-message">{error}</p>}
-          <form className="form-container" onSubmit={handleSubmit}>
-            <h2 className="form-header">Login</h2>
+          {error && <p className="login-error-message">{error}</p>}
+          <form className="login-form-container" onSubmit={handleSubmit}>
+            <h2 className="login-form-header">Login</h2>
             <input
-              className="form-input"
+              className="login-form-input"
               type="email"
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
-            <div className="password-container">
+            <div className="login-password-container">
               <input
-                className="form-input"
+                className="login-form-input"
                 type={showPassword ? "text" : "password"}
                 placeholder="Password"
                 value={password}
@@ -80,14 +80,14 @@ const Login: React.FC = () => {
               />
               <button
                 type="button"
-                className="password-toggle"
+                className="login-password-toggle"
                 onClick={() => setShowPassword(!showPassword)}
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? "Hide" : "Show"}
               </button>
             </div>
-            <button className="action-button" type="submit">Login</button>
+            <button className="login-action-button" type="submit">Login</button>
           </form>
         </Section>
       </div>

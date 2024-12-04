@@ -131,42 +131,43 @@ const NewItems = () => {
 
   return (
     <div className="new-items-container">
-      <h2 className="form-header">
+      <h2 className="new-items-header">
         {isAddingPuppy ? 'Add New Puppy' : 'Add New Family'}
       </h2>
-      <div className="form-toggle">
+      <div className="new-items-form-toggle">
         <button 
           type="button" 
           onClick={() => setIsAddingPuppy(true)}
-          className={isAddingPuppy ? 'active' : ''}
+          className={`new-items-toggle-btn ${isAddingPuppy ? 'new-items-toggle-btn-active' : ''}`}
         >
           Add Puppy
         </button>
         <button 
           type="button" 
           onClick={() => setIsAddingPuppy(false)}
-          className={!isAddingPuppy ? 'active' : ''}
+          className={`new-items-toggle-btn ${!isAddingPuppy ? 'new-items-toggle-btn-active' : ''}`}
         >
           Add Family Dog
         </button>
       </div>
 
-      <form onSubmit={handleSubmit}>
-        <div className="toggle-container">
-          <label className="toggle-switch">
+      <form onSubmit={handleSubmit} className="new-items-form">
+        <div className="new-items-toggle-container">
+          <label className="new-items-toggle-switch">
             <input
               type="checkbox"
               checked={isActive}
               onChange={(e) => setIsActive(e.target.checked)}
             />
-            <span className="slider round"></span>
+            <span className="new-items-slider new-items-round"></span>
           </label>
-          <span className="toggle-label">
+          <span className="new-items-toggle-label">
             {isActive ? 'Currently Active' : 'Archived'}
           </span>
         </div>
 
         <input
+          className="new-items-input"
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -175,6 +176,7 @@ const NewItems = () => {
         />
         
         <input
+          className="new-items-input"
           type="text"
           value={age}
           onChange={(e) => setAge(e.target.value)}
@@ -183,7 +185,7 @@ const NewItems = () => {
         />
 
         {!isAddingPuppy && (
-          <select value={gender} onChange={(e) => setGender(e.target.value)} required>
+          <select value={gender} onChange={(e) => setGender(e.target.value)} required className="new-items-select">
             <option value="">Select Gender</option>
             <option value="female">Female</option>
             <option value="male">Male</option>
@@ -192,12 +194,12 @@ const NewItems = () => {
 
         {isAddingPuppy && (
           <>
-            <select value={gender} onChange={(e) => setGender(e.target.value)} required>
+            <select value={gender} onChange={(e) => setGender(e.target.value)} required className="new-items-select">
               <option value="">Select Gender</option>
               <option value="female">Female</option>
               <option value="male">Male</option>
             </select>
-            <select value={mom} onChange={(e) => setMom(e.target.value)} required>
+            <select value={mom} onChange={(e) => setMom(e.target.value)} required className="new-items-select">
               <option value="">Select Mom</option>
               {familyDogs
                 .filter(dog => dog.gender === 'female')
@@ -205,7 +207,7 @@ const NewItems = () => {
                   <option key={dog.id} value={dog.id}>{dog.name}</option>
                 ))}
             </select>
-            <select value={dad} onChange={(e) => setDad(e.target.value)} required>
+            <select value={dad} onChange={(e) => setDad(e.target.value)} required className="new-items-select">
               <option value="">Select Dad</option>
               {familyDogs
                 .filter(dog => dog.gender === 'male')
@@ -217,6 +219,7 @@ const NewItems = () => {
         )}
 
         <textarea
+          className="new-items-input"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Description"
@@ -224,7 +227,7 @@ const NewItems = () => {
         />
         
         <div
-          className={`image-upload-box ${dragActive ? 'drag-active' : ''}`}
+          className={`new-items-upload-box ${dragActive ? 'new-items-upload-box-active' : ''}`}
           onClick={onButtonClick}
           onDragEnter={handleDrag}
           onDragLeave={handleDrag}
@@ -241,11 +244,11 @@ const NewItems = () => {
           />
           
           {preview ? (
-            <div className="image-preview">
+            <div className="new-items-image-preview">
               <img src={preview} alt="Preview" />
               <button 
                 type="button" 
-                className="remove-image"
+                className="new-items-remove-image"
                 onClick={(e) => {
                   e.stopPropagation();
                   setImage(null);
@@ -256,14 +259,14 @@ const NewItems = () => {
               </button>
             </div>
           ) : (
-            <div className="upload-prompt">
-              <i className="upload-icon">📁</i>
+            <div className="new-items-upload-prompt">
+              <i className="new-items-upload-icon">📁</i>
               <p>Drag and drop an image here, or click to select</p>
             </div>
           )}
         </div>
         
-        <button type="submit" disabled={loading}>
+        <button type="submit" disabled={loading} className="new-items-button">
           {loading ? 'Adding...' : `Add New ${isAddingPuppy ? 'Puppy' : 'Family Dog'}`}
         </button>
       </form>

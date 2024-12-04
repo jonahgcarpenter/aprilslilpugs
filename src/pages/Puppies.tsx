@@ -2,12 +2,12 @@ import React, { useState, useEffect } from "react";
 import '../styles/main.css';
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../secrets/firebase";
-import Footer from "../components/Footer";
-import Live from "../components/Live";
-import Waitlist from "../components/Waitlist";
+import Footer from "../components/footer";
+import Live from "../components/live";
+import Waitlist from "../components/waitlist";
 import Slideshow from '../components/puppyslideshow';
-import Parents from '../components/Parents';
-import Section from "../components/Section";
+import Parents from '../components/parents';
+import Section from "../components/section";
 
 const sectionDefaults = {
   waitlist: false,

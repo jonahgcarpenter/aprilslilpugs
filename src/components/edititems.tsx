@@ -200,12 +200,12 @@ const EditItems = () => {
     };
 
     return (
-        <div className="edit-items-container">
-            <div className="entries-list">
+        <div className="EditItems-container">
+            <div className="EditItems-entriesList">
                 {entries.map(entry => (
                     <div 
                         key={entry.id} 
-                        className={`entry-item ${selectedEntry?.id === entry.id ? 'selected' : ''}`}
+                        className={`EditItems-entryItem ${selectedEntry?.id === entry.id ? 'EditItems-entryItem--selected' : ''}`}
                         onClick={() => handleSelect(entry)}
                     >
                         {entry.name} ({entry.type})
@@ -213,25 +213,27 @@ const EditItems = () => {
                 ))}
             </div>
             {selectedEntry && (
-                <form onSubmit={handleSubmit} className="edit-form">
-                    <div className="toggle-container">
-                        <label className="toggle-switch">
+                <form onSubmit={handleSubmit} className="EditItems-form">
+                    <div className="EditItems-toggleContainer">
+                        <label className="EditItems-toggleSwitch">
                             <input
                                 type="checkbox"
+                                className="EditItems-toggleInput"
                                 checked={formData.isActive}
                                 onChange={(e) => setFormData(prev => ({
                                     ...prev,
                                     isActive: e.target.checked
                                 }))}
                             />
-                            <span className="slider round"></span>
+                            <span className="EditItems-slider EditItems-slider--round"></span>
                         </label>
-                        <span className="toggle-label">
+                        <span className="EditItems-toggleLabel">
                             {formData.isActive ? 'Currently Active' : 'Archived'}
                         </span>
                     </div>
 
                     <input
+                        className="EditItems-input"
                         type="text"
                         value={formData.name}
                         onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
@@ -240,6 +242,7 @@ const EditItems = () => {
                     />
                     
                     <input
+                        className="EditItems-input"
                         type="text"
                         value={formData.age}
                         onChange={(e) => setFormData(prev => ({ ...prev, age: e.target.value }))}
@@ -248,6 +251,7 @@ const EditItems = () => {
                     />
 
                     <select 
+                        className="EditItems-select"
                         value={formData.gender} 
                         onChange={(e) => setFormData(prev => ({ ...prev, gender: e.target.value }))}
                         required
@@ -260,6 +264,7 @@ const EditItems = () => {
                     {selectedEntry.type === 'puppy' && (
                         <>
                             <select 
+                                className="EditItems-select"
                                 value={formData.mom} 
                                 onChange={(e) => setFormData(prev => ({ ...prev, mom: e.target.value }))}
                                 required
@@ -272,6 +277,7 @@ const EditItems = () => {
                                     ))}
                             </select>
                             <select 
+                                className="EditItems-select"
                                 value={formData.dad} 
                                 onChange={(e) => setFormData(prev => ({ ...prev, dad: e.target.value }))}
                                 required
@@ -287,6 +293,7 @@ const EditItems = () => {
                     )}
 
                     <textarea
+                        className="EditItems-textarea"
                         value={formData.description}
                         onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                         placeholder="Description"
@@ -294,7 +301,7 @@ const EditItems = () => {
                     />
 
                     <div
-                        className={`image-upload-box ${dragActive ? 'drag-active' : ''}`}
+                        className={`EditItems-imageUploadBox ${dragActive ? 'EditItems-imageUploadBox--dragActive' : ''}`}
                         onClick={onButtonClick}
                         onDragEnter={handleDrag}
                         onDragLeave={handleDrag}
@@ -310,11 +317,11 @@ const EditItems = () => {
                         />
                         
                         {preview ? (
-                            <div className="image-preview">
+                            <div className="EditItems-imagePreview">
                                 <img src={preview} alt="Preview" />
                                 <button 
                                     type="button" 
-                                    className="remove-image"
+                                    className="EditItems-removeImage"
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         setImage(null);
@@ -325,21 +332,25 @@ const EditItems = () => {
                                 </button>
                             </div>
                         ) : (
-                            <div className="upload-prompt">
-                                <i className="upload-icon">📁</i>
+                            <div className="EditItems-uploadPrompt">
+                                <i className="EditItems-uploadIcon">📁</i>
                                 <p>Drag and drop an image here, or click to select</p>
                             </div>
                         )}
                     </div>
 
-                    <div className="button-group">
-                        <button type="submit" disabled={loading}>
+                    <div className="EditItems-buttonGroup">
+                        <button 
+                            type="submit" 
+                            className="EditItems-button"
+                            disabled={loading}
+                        >
                             {loading ? 'Updating...' : 'Update Entry'}
                         </button>
                         <button 
                             type="button" 
+                            className="EditItems-button EditItems-deleteButton"
                             onClick={handleDelete} 
-                            className="delete-button"
                             disabled={loading}
                         >
                             {loading ? 'Deleting...' : 'Delete Entry'}

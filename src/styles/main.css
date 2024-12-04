@@ -1,3 +1,4 @@
+/* Font */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 
 /* Color Variables */
@@ -93,43 +94,6 @@
   backface-visibility: hidden;
 }
 
-.content-section {
-  max-width: 1200px;
-  margin: 2rem auto;
-  padding: 0 2rem;
-}
-
-.section-title {
-  color: var(--secondary-color);
-  text-align: center;
-  margin: 2rem 0;
-  font-size: 2.5rem;
-  font-weight: var(--font-weight-semi);
-}
-
-.action-button {
-  background: var(--primary-color);
-  color: white;
-  padding: 12px 24px;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  width: auto;
-  min-width: 150px;
-  margin: 0 auto;
-  display: inline-block;
-}
-
-.error-message {
-  color: #dc3545;
-  text-align: center;
-  margin-bottom: 1rem;
-  font-size: 0.9rem;
-}
-
-/* Root element styles */
 #root {
   min-height: 100vh;
   display: flex;

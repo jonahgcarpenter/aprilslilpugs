@@ -48,8 +48,8 @@ const Parents: React.FC<ParentsProps> = ({ millie, mardis }) => {
 
   return (
     <>
-      <div className="pets-container">
-        <div className="pets-grid">
+      <div className="parents-container">
+        <div className="parents-grid">
           {/* Add debug message if no pets */}
           {!millie && !mardis && (
             <div className="no-pets-message">
@@ -60,41 +60,41 @@ const Parents: React.FC<ParentsProps> = ({ millie, mardis }) => {
           
           {/* Add debug info to each pet card */}
           {millie && millie.isActive && (
-            <div className="pet-card" data-testid="millie-card">
-              <div className="image-container">
+            <div className="parent-card" data-testid="millie-card">
+              <div className="parentimage-container">
                 <img
                   src={imgErrors['millie'] ? getFallbackImage() : millie.imageUrl}
                   alt={`${millie.name} - ${millie.gender === 'female' ? 'Female' : 'Male'} Dog`}
                   onClick={() => !imgErrors['millie'] && handleImageClick(millie.imageUrl, millie.name)}
-                  className={`pet-image ${imgErrors['millie'] ? 'image-error' : ''}`}
+                  className={`parent-image ${imgErrors['millie'] ? 'image-error' : ''}`}
                   onError={() => handleImageError('millie')}
                 />
               </div>
-              <div className="pet-info">
-                <h3 className="pet-name">{millie.name}</h3>
-                <p className="pet-age">Age: {millie.age} {millie.age === 1 ? 'year' : 'years'}</p>
-                <p className="pet-gender">Gender: {millie.gender.charAt(0).toUpperCase() + millie.gender.slice(1)}</p>
-                <p className="pet-description">{millie.description}</p>
+              <div className="parent-info">
+                <h3 className="parent-name">{millie.name}</h3>
+                <p className="parent-age">Age: {millie.age} {millie.age === 1 ? 'year' : 'years'}</p>
+                <p className="parent-gender">Gender: {millie.gender.charAt(0).toUpperCase() + millie.gender.slice(1)}</p>
+                <p className="parent-description">{millie.description}</p>
               </div>
             </div>
           )}
           
           {mardis && mardis.isActive && (
-            <div className="pet-card" data-testid="mardis-card">
-              <div className="image-container">
+            <div className="parent-card" data-testid="mardis-card">
+              <div className="parentimage-container">
                 <img
                   src={imgErrors['mardis'] ? getFallbackImage() : mardis.imageUrl}
                   alt={`${mardis.name} - ${mardis.gender === 'female' ? 'Female' : 'Male'} Dog`}
                   onClick={() => !imgErrors['mardis'] && handleImageClick(mardis.imageUrl, mardis.name)}
-                  className={`pet-image ${imgErrors['mardis'] ? 'image-error' : ''}`}
+                  className={`parent-image ${imgErrors['mardis'] ? 'image-error' : ''}`}
                   onError={() => handleImageError('mardis')}
                 />
               </div>
-              <div className="pet-info">
-                <h3 className="pet-name">{mardis.name}</h3>
-                <p className="pet-age">Age: {mardis.age} {mardis.age === 1 ? 'year' : 'years'}</p>
-                <p className="pet-gender">Gender: {mardis.gender.charAt(0).toUpperCase() + mardis.gender.slice(1)}</p>
-                <p className="pet-description">{mardis.description}</p>
+              <div className="parent-info">
+                <h3 className="parent-name">{mardis.name}</h3>
+                <p className="parent-age">Age: {mardis.age} {mardis.age === 1 ? 'year' : 'years'}</p>
+                <p className="parent-gender">Gender: {mardis.gender.charAt(0).toUpperCase() + mardis.gender.slice(1)}</p>
+                <p className="parent-description">{mardis.description}</p>
               </div>
             </div>
           )}
@@ -102,14 +102,14 @@ const Parents: React.FC<ParentsProps> = ({ millie, mardis }) => {
       </div>
 
       {modalImage && (
-        <div className="image-modal view-modal" onClick={handleCloseModal}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <button className="modal-close" onClick={handleCloseModal}>×</button>
-            <div className="modal-header">{modalImage.description}</div>
+        <div className="parentimage-modal" onClick={handleCloseModal}>
+          <div className="parentmodal-content" onClick={e => e.stopPropagation()}>
+            <button className="parentmodal-close" onClick={handleCloseModal}>×</button>
+            <div className="parentmodal-header">{modalImage.description}</div>
             <img 
               src={modalImage.url} 
               alt={modalImage.description} 
-              className="modal-image"
+              className="parentmodal-image"
             />
           </div>
         </div>

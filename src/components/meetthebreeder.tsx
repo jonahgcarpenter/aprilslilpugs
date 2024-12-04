@@ -24,11 +24,11 @@ const MeetTheBreeder: React.FC = () => {
 
   return (
     <div className="breeder-section">
-      <h2 className="content-subtitle">Meet the Breeder</h2>
+      <h2 className="breeder-subtitle">Meet the Breeder</h2>
       <p className="breeder-description">
         Pug Breeder in Tupelo, Mississippi
       </p>
-      <div className="profilepic-container">
+      <div className="breeder-profilepic">
         <img src={profileUrl} alt="April Carpenter - Pug Breeder" />
       </div>
       <p className="breeder-description">
