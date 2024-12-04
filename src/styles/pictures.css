@@ -1,10 +1,12 @@
 /* Camera Roll Style Updates */
 .image-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 0.5rem;
-  padding: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  padding: 1.5rem;
   width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
 }
 
 .image-container.drag-over {
@@ -14,11 +16,14 @@
 
 .image-item {
   position: relative;
-  aspect-ratio: 1;
   overflow: hidden;
   border-radius: 8px;
   cursor: pointer;
   transition: transform 0.2s ease;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  background: var(--background-color-light);
 }
 
 .image-item:hover {
@@ -33,6 +38,12 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
+}
+
+.video.thumbnail {
+  object-fit: contain;
+  background: black;
 }
 
 .image-details {
@@ -211,12 +222,6 @@
   resize: vertical;
 }
 
-button[type="submit"] {
-  display: block;
-  width: 100%;
-  margin-top: 1rem;
-}
-
 .edit-form {
   display: flex;
   flex-direction: column;
@@ -231,11 +236,36 @@ button[type="submit"] {
   background: var(--background-color-light);
   border-radius: var(--border-radius-sm);
   cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.upload-icon {
+  font-size: 2.5rem;
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+}
+
+.upload-text {
+  color: var(--text-color);
+  font-size: 0.9rem;
+}
+
+.drag-drop-zone:hover {
+  border-color: var(--primary-color);
+  background: rgba(var(--primary-color-rgb), 0.05);
+  transform: scale(1.01);
 }
 
 .drag-drop-zone.drag-over {
   border-color: var(--primary-color);
   background: rgba(var(--primary-color-rgb), 0.1);
+  transform: scale(1.02);
 }
 
 .button-group {

@@ -23,6 +23,7 @@ export const NewPicture: React.FC = () => {
   const [uploadData, setUploadData] = useState<UploadData | null>(null);
   const [deleteConfirmation, setDeleteConfirmation] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [operationLoading, setOperationLoading] = useState(false);
 
   useEffect(() => {
     fetchImages();
@@ -32,7 +33,10 @@ export const NewPicture: React.FC = () => {
     try {
       const mediaCollection = collection(db, 'media');  // Changed from 'pictures'
       const mediaSnapshot = await getDocs(mediaCollection);
-      const mediaList = mediaSnapshot.docs.map(doc => doc.data() as ImageData);
+      const mediaList = mediaSnapshot.docs.map(doc => ({
+        ...doc.data() as ImageData,
+        id: doc.id
+      }));
       setImages(mediaList);
     } catch (error) {
       console.error('Error fetching media:', error);  // Updated error message
@@ -57,7 +61,7 @@ export const NewPicture: React.FC = () => {
 
   const handleUploadComplete = async (description: string) => {
     if (!uploadData) return;
-    
+    setOperationLoading(true);
     try {
       await addDoc(collection(db, 'media'), {
         media: uploadData.media,
@@ -67,6 +71,7 @@ export const NewPicture: React.FC = () => {
     } catch (error) {
       console.error('Error uploading file:', error);
     }
+    setOperationLoading(false);
     setUploadData(null);
   };
 
@@ -104,34 +109,41 @@ export const NewPicture: React.FC = () => {
   };
 
   const handleEdit = (image: ImageData) => {
+    if (!image.id) return;
     setEditingImage(image);
   };
 
   const handleUpdateImage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingImage?.id) return;
-
+    setOperationLoading(true);
     try {
       const docRef = doc(db, 'media', editingImage.id);  // Changed from 'pictures'
       await updateDoc(docRef, {
-        description: editingImage.description
+        description: editingImage.description,
+        media: editingImage.media
       });
       setEditingImage(null);
       await fetchImages();
     } catch (error) {
       console.error('Error updating image:', error);
     }
+    setOperationLoading(false);
   };
 
   const handleDelete = async (id: string) => {
+    if (!id) return;
+    setOperationLoading(true);
     try {
-      await deleteDoc(doc(db, 'media', id));
+      const docRef = doc(db, 'media', id);
+      await deleteDoc(docRef);
       setDeleteConfirmation(null);
       setEditingImage(null);
       await fetchImages();
     } catch (error) {
       console.error('Error deleting media:', error);
     }
+    setOperationLoading(false);
   };
 
   if (loading) {
@@ -206,7 +218,9 @@ export const NewPicture: React.FC = () => {
                   />
                 </div>
                 <div className="button-group single-button">
-                  <button type="submit" className="button-primary">Upload</button>
+                  <button type="submit" className="button-primary" disabled={operationLoading}>
+                    {operationLoading ? 'Uploading...' : 'Upload'}
+                  </button>
                 </div>
               </form>
             </div>
@@ -238,11 +252,14 @@ export const NewPicture: React.FC = () => {
                   />
                 </div>
                 <div className="button-group edit-actions">
-                  <button type="submit" className="button-primary">Save Changes</button>
+                  <button type="submit" className="button-primary" disabled={operationLoading}>
+                    {operationLoading ? 'Saving...' : 'Save Changes'}
+                  </button>
                   <button 
                     type="button" 
                     className="delete-button"
                     onClick={() => setDeleteConfirmation(editingImage.id!)}
+                    disabled={operationLoading}
                   >
                     Delete
                   </button>
@@ -259,8 +276,20 @@ export const NewPicture: React.FC = () => {
             <h2 className="modal-header">Confirm Delete</h2>
             <p>Are you sure you want to delete this media?</p>
             <div className="button-group">
-              <button className="delete-button" onClick={() => handleDelete(deleteConfirmation)}>Yes, Delete</button>
-              <button className="button-secondary" onClick={() => setDeleteConfirmation(null)}>Cancel</button>
+              <button 
+                className="delete-button" 
+                onClick={() => handleDelete(deleteConfirmation)}
+                disabled={operationLoading}
+              >
+                {operationLoading ? 'Deleting...' : 'Yes, Delete'}
+              </button>
+              <button 
+                className="button-secondary" 
+                onClick={() => setDeleteConfirmation(null)}
+                disabled={operationLoading}
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>
