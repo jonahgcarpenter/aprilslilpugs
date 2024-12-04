@@ -136,23 +136,3 @@
   flex-direction: column;
   font-family: var(--font-primary);
 }
-
-
-
-
-/* Add additional global styles */
-.section-container {
-  background: var(--background-white);
-  padding: 1rem 2rem;
-  border-bottom: 1px solid var(--border-color);
-  margin-bottom: 2rem;
-}
-
-.content-wrapper {
-  max-width: 1200px;
-  margin: 0 auto;
-  background: var(--background-white);
-  border-radius: 8px;
-  box-shadow: 0 2px 4px var(--shadow-color);
-  overflow: hidden;
-}
