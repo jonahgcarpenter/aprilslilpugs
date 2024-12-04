@@ -5,7 +5,6 @@ import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from 'firebas
 import { useNavigate } from 'react-router-dom';
 import Section from "../components/Section";
 import Footer from "../components/Footer";
-import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -85,7 +84,7 @@ const Login: React.FC = () => {
                 onClick={() => setShowPassword(!showPassword)}
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
+                {showPassword ? "Hide" : "Show"}
               </button>
             </div>
             <button className="action-button" type="submit">Login</button>
