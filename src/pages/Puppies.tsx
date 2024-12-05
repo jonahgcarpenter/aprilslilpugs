@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import '../styles/main.css';
 import Footer from "../components/footer";
 import Live from "../components/live";
@@ -16,6 +16,8 @@ const sectionDefaults = {
 };
 
 const Puppies: React.FC = () => {
+  const [hasPastLitters, setHasPastLitters] = useState(true);
+
   return (
     <>
       <div className="page-container">
@@ -35,9 +37,11 @@ const Puppies: React.FC = () => {
           <Parents momName="Millie" dadName="Mardi" />
         </Section>
 
-        <Section title="Past Litters" defaultExpanded={sectionDefaults.meetPuppies}>
-          <PastLittersSlideshow />
-        </Section>
+        {hasPastLitters && (
+          <Section title="Past Litters" defaultExpanded={sectionDefaults.meetPuppies}>
+            <PastLittersSlideshow onEmpty={() => setHasPastLitters(false)} />
+          </Section>
+        )}
       </div>
       <Footer />
     </>

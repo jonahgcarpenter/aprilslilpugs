@@ -14,7 +14,11 @@ interface LitterData {
   gender: string;
 }
 
-const PastLittersSlideshow: React.FC = () => {
+interface PastLittersSlideshowProps {
+  onEmpty?: () => void;
+}
+
+const PastLittersSlideshow: React.FC<PastLittersSlideshowProps> = ({ onEmpty }) => {
   const [litters, setLitters] = useState<LitterData[]>([]);
   const [currentLitterIndex, setCurrentLitterIndex] = useState(0);
   const [modalImage, setModalImage] = useState<{ url: string, description: string } | null>(null);
@@ -27,12 +31,16 @@ const PastLittersSlideshow: React.FC = () => {
         .map((doc) => ({ id: doc.id, ...doc.data() }))
         .filter(litter => !litter.isActive);
       setLitters(littersList);
+      
+      if (littersList.length === 0 && onEmpty) {
+        onEmpty();
+      }
     };
 
     fetchLitters();
-  }, []);
+  }, [onEmpty]);
 
-  if (litters.length === 0) return <div>No past litters available</div>;
+  if (litters.length === 0) return null;
 
   const currentLitter = litters[currentLitterIndex];
   const handlePrevious = () => {

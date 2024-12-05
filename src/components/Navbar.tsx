@@ -81,7 +81,7 @@ const Navbar: React.FC = () => {
           {isLoggedIn && (
             <li>
               <Link to="/login" className="Navbar-link" onClick={() => setIsOpen(false)}>
-                Edit
+                Admin Page
               </Link>
             </li>
           )}
