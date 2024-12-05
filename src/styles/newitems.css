@@ -17,6 +17,11 @@
   border-radius: 4px;
 }
 
+.new-items-form .new-items-input[type="text"] {
+  width: auto;
+  /* or any specific width you want */
+}
+
 .new-items-textarea {
   min-height: 100px;
 }
