@@ -5,14 +5,14 @@ import Section from "../components/section";
 import FamilySlideshow from '../components/familyslideshow';
 
 const sectionDefaults = {
-  pastLitters: true
+  FamilySlideshow: true
 };
 
 const Family: React.FC = () => {
   return (
     <>
       <div className="page-container">
-        <Section title="Meet My Family" defaultExpanded={sectionDefaults.pastLitters}>
+        <Section title="Meet My Family" defaultExpanded={sectionDefaults.FamilySlideshow}>
           <FamilySlideshow />
         </Section>
       </div>
