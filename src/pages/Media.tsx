@@ -9,7 +9,7 @@ const sectionDefaults = {
   cameraRoll: true
 };
 
-const Pictures: React.FC = () => {
+const Media: React.FC = () => {
   return (
     <>
       <div className="page-container">
@@ -22,4 +22,4 @@ const Pictures: React.FC = () => {
   );
 };
 
-export default Pictures;
+export default Media;

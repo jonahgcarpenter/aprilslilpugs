@@ -2,7 +2,7 @@ import { JoinWaitlist } from './joinwaitlist';
 import { CheckWaitlist } from './checkwaitlist';
 import '../styles/waitlist.css';
 
-const Waitlist = () => {
+const ComboWaitlist = () => {
   return (
     <div className="waitlist-section">
       <h2 className="waitlist-subtitle">Waitlist Management</h2>
@@ -17,4 +17,4 @@ const Waitlist = () => {
   );
 };
 
-export default Waitlist;
+export default ComboWaitlist;

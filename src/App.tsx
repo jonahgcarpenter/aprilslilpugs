@@ -7,7 +7,7 @@ import Puppies from "./pages/Puppies";
 import Family from "./pages/Family";
 import AdminPage from './pages/AdminPage';
 import Login from "./pages/Login";
-import Pictures from "./pages/Pictures";
+import Media from "./pages/Media";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const auth = getAuth();
@@ -32,7 +32,7 @@ const App: React.FC = () => {
           <Route path="/about" element={<About />} />
           <Route path="/puppies" element={<Puppies />} />
           <Route path="/family" element={<Family />} />
-          <Route path="/pictures" element={<Pictures />} />
+          <Route path="/media" element={<Media />} />
           <Route path="/" element={<Navigate to="/about" />} />
         </Routes>
       </main>

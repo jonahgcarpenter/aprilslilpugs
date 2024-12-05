@@ -74,8 +74,8 @@ const Navbar: React.FC = () => {
             </Link>
           </li>
           <li>
-            <Link to="/pictures" className="Navbar-link" onClick={() => setIsOpen(false)}>
-              Pictures
+            <Link to="/media" className="Navbar-link" onClick={() => setIsOpen(false)}>
+              Media
             </Link>
           </li>
           {isLoggedIn && (
