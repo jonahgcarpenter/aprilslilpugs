@@ -22,7 +22,6 @@
 
 .waitlistform-container,
 .checkposition-container {
-  padding: var(--spacing-lg);
   background: white;
   position: relative;
   width: 100%;
