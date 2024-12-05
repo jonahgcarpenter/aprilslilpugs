@@ -129,38 +129,43 @@
 /* Edit Modal Specific Styles */
 .edit-modal {
   position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.75);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1100;
-  opacity: 0;
-  animation: fadeIn 0.2s ease forwards;
 }
 
 .editmodal-content {
-  background: var(--background-color);
+  background: #fff;
   padding: 2rem;
-  border-radius: var(--border-radius-lg);
-  position: relative;
+  border-radius: 12px;
+  max-width: 90%;
   max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-  transform: translateY(20px);
-  animation: slideUp 0.3s ease forwards;
-  width: 600px;
+  position: relative;
 }
 
 .editmodal-image-container {
   background: var(--background-color-dark);
   padding: 1.5rem;
   border-radius: var(--border-radius-md);
-  margin-bottom: 1.5rem;
-  display: flex;
   align-items: center;
   justify-content: center;
-  height: 300px;
+  max-height: 60vh;
+  width: 100%;
+  overflow: hidden;
+}
+
+.editmodal-image {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
 }
 
 /* Delete Modal Specific Styles */
@@ -194,29 +199,45 @@
 .uploadmodal-close,
 .editmodal-close {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: transparent;
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+  background: var(--primary-color);
+  color: var(--text-color);
   border: none;
-  color: var(--text-color-light);
-  font-size: 1.5rem;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: 1rem;
   cursor: pointer;
-  padding: 0.5rem;
-  line-height: 1;
-  transition: color 0.2s;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+  border-radius: var(--border-radius-sm);
+  width: auto;
+  height: auto;
 }
 
 .uploadmodal-close:hover,
 .editmodal-close:hover {
-  color: var(--text-color);
+  opacity: 1;
+  background: var(--primary-hover-color);
 }
 
 .uploadmodal-image,
 .editmodal-image {
   max-width: 100%;
+  height: auto;
   max-height: 400px;
   object-fit: contain;
-  border-radius: var(--border-radius-sm);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.uploadmodal-form-container,
+.editmodal-form-container {
+  padding: 2rem;
+  overflow-y: auto;
+  max-height: calc(90vh - 4rem);
+  width: 100%;
 }
 
 .uploadmodal-form-container,
@@ -228,11 +249,12 @@
 .uploadmodal-header,
 .editmodal-header,
 .deletemodal-header {
+  color: var(--secondary-color);
   font-size: 1.5rem;
-  font-weight: 600;
-  color: var(--text-color);
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
+  font-weight: var(--font-weight-semi);
   text-align: center;
+  padding-right: 15%;
 }
 
 .uploadform,
@@ -240,7 +262,7 @@
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-  margin-top: 0;
+  text-align: column;
 }
 
 .uploadform-group,
@@ -260,7 +282,6 @@ input[type="text"] {
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius-sm);
   font-size: 1rem;
-  width: 100%;
   transition: border-color 0.2s;
 }
 
@@ -292,7 +313,7 @@ input[type="text"]:focus {
 }
 
 .deletebutton {
-  background: var(--danger-color);
+  background: red;
   color: white;
 }
 
