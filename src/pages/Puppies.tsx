@@ -7,6 +7,8 @@ import Slideshow from '../components/puppyslideshow';
 import Parents from '../components/parents';
 import Section from "../components/section";
 import PastLittersSlideshow from "../components/pastlittersslideshow";
+import NewItems from "../components/newitems";
+import EditItems from "../components/edititems";
 
 const sectionDefaults = {
   comboWaitlist: false,
@@ -29,7 +31,18 @@ const Puppies: React.FC = () => {
           <Live />
         </Section>
 
-        <Section title="Meet the Puppies" defaultExpanded={sectionDefaults.meetPuppies}>
+        <Section 
+          title={{
+            default: "Meet the Puppies",
+            alternate: "Update Puppies / Family"
+          }}
+          alternateContent={
+            <>
+              <EditItems />
+              <NewItems />
+            </>
+          }
+        >
           <Slideshow />
         </Section>
         

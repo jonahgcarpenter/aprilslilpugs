@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
+import { getAuth, signOut } from 'firebase/auth';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../auth/AuthContext';
+import LoginComponent from '../components/logincomponent';
 import '../styles/navbar.css';
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   const toggleMenu = () => {
@@ -29,15 +32,6 @@ const Navbar: React.FC = () => {
       document.removeEventListener("click", handleClickOutside);
     };
   }, [isOpen]);
-
-  useEffect(() => {
-    const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setIsLoggedIn(!!user);
-    });
-
-    return () => unsubscribe();
-  }, []);
 
   const handleLogout = async () => {
     const auth = getAuth();
@@ -78,16 +72,9 @@ const Navbar: React.FC = () => {
               Media
             </Link>
           </li>
-          {isLoggedIn && (
-            <li>
-              <Link to="/login" className="Navbar-link" onClick={() => setIsOpen(false)}>
-                Admin Page
-              </Link>
-            </li>
-          )}
         </ul>
         <div className="Navbar-right">
-          {isLoggedIn ? (
+          {isAuthenticated ? (
             <button 
               onClick={handleLogout}
               className="auth-button"
@@ -95,13 +82,18 @@ const Navbar: React.FC = () => {
               Logout
             </button>
           ) : (
-            <Link 
-              to="/login" 
-              className="auth-button"
-              onClick={() => setIsOpen(false)}
-            >
-              Login
-            </Link>
+            <>
+              <button 
+                onClick={() => setShowLoginModal(true)}
+                className="auth-button"
+              >
+                Login
+              </button>
+              <LoginComponent 
+                isOpen={showLoginModal}
+                onClose={() => setShowLoginModal(false)}
+              />
+            </>
           )}
         </div>
       </div>

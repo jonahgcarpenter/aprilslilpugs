@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import '../styles/pictures.css';
+import '../styles/cameraroll.css';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../secrets/firebase';
 

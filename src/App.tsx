@@ -5,9 +5,8 @@ import Navbar from "./components/navbar";
 import About from "./pages/About";
 import Puppies from "./pages/Puppies";
 import Family from "./pages/Family";
-import AdminPage from './pages/AdminPage';
-import Login from "./pages/Login";
 import Media from "./pages/Media";
+import { AuthProvider } from "./auth/AuthContext";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const auth = getAuth();
@@ -19,24 +18,20 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 const App: React.FC = () => {
   return (
-    <div>
-      <Navbar />
-      <main>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/admin" element={
-            <ProtectedRoute>
-              <AdminPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/about" element={<About />} />
-          <Route path="/puppies" element={<Puppies />} />
-          <Route path="/family" element={<Family />} />
-          <Route path="/media" element={<Media />} />
-          <Route path="/" element={<Navigate to="/about" />} />
-        </Routes>
-      </main>
-    </div>
+    <AuthProvider>
+      <div>
+        <Navbar />
+        <main>
+          <Routes>
+            <Route path="/about" element={<About />} />
+            <Route path="/puppies" element={<Puppies />} />
+            <Route path="/family" element={<Family />} />
+            <Route path="/media" element={<Media />} />
+            <Route path="/" element={<Navigate to="/about" />} />
+          </Routes>
+        </main>
+      </div>
+    </AuthProvider>
   );
 };
 

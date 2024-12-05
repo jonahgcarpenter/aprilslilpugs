@@ -3,16 +3,25 @@ import '../styles/main.css';
 import Footer from "../components/footer";
 import Section from "../components/section";
 import FamilySlideshow from '../components/familyslideshow';
-
-const sectionDefaults = {
-  FamilySlideshow: true
-};
+import NewItems from "../components/newitems";
+import EditItems from "../components/edititems";
 
 const Family: React.FC = () => {
   return (
     <>
       <div className="page-container">
-        <Section title="Meet My Family" defaultExpanded={sectionDefaults.FamilySlideshow}>
+        <Section 
+          title={{
+            default: "Meet My Family",
+            alternate: "Update Puppies / Family"
+          }}
+          alternateContent={
+            <>
+              <EditItems />
+              <NewItems />
+            </>
+          }
+        >
           <FamilySlideshow />
         </Section>
       </div>
