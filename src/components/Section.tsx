@@ -22,8 +22,8 @@ const Section: React.FC<SectionProps> = ({
   const currentTitle = typeof title === 'string' ? title : (showAlternate ? title.alternate : title.default);
 
   return (
-    <div className="explorer-section" onClick={() => setIsExpanded(!isExpanded)}>
-      <div className="explorer-header">
+    <div className="explorer-section">
+      <div className="explorer-header" onClick={() => setIsExpanded(!isExpanded)}>
         <div className="header-main">
           <span className={`explorer-arrow ${isExpanded ? 'expanded' : ''}`}>▶</span>
           <h2 className="explorer-title">{currentTitle}</h2>

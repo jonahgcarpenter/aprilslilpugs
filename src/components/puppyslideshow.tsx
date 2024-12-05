@@ -24,7 +24,7 @@ const Slideshow: React.FC = () => {
       const puppiesCollection = collection(db, "puppies");
       const puppiesSnapshot = await getDocs(puppiesCollection);
       const puppiesList = puppiesSnapshot.docs
-        .map((doc) => ({ id: doc.id, ...doc.data() }))
+        .map((doc) => ({ ...(doc.data() as PuppyData), id: doc.id }))
         .filter(puppy => puppy.isActive);
       setPuppies(puppiesList);
     };

@@ -35,13 +35,11 @@ const Parents: React.FC<ParentsProps> = ({ momName, dadName }) => {
           if (data.name === momName) {
             setMom({
               ...data,
-              imageUrl: data.imageUrl || data.image,
               isActive: true
             });
           } else if (data.name === dadName) {
             setDad({
               ...data,
-              imageUrl: data.imageUrl || data.image,
               isActive: true
             });
           }

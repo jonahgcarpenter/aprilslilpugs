@@ -28,7 +28,7 @@ const PastLittersSlideshow: React.FC<PastLittersSlideshowProps> = ({ onEmpty }) 
       const littersCollection = collection(db, "puppies");
       const littersSnapshot = await getDocs(littersCollection);
       const littersList = littersSnapshot.docs
-        .map((doc) => ({ id: doc.id, ...doc.data() }))
+        .map((doc) => ({ ...(doc.data() as LitterData), id: doc.id }))
         .filter(litter => !litter.isActive);
       setLitters(littersList);
       

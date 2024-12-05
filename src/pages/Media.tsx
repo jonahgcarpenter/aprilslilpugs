@@ -5,10 +5,6 @@ import Section from "../components/section";
 import CameraRoll from '../components/cameraroll';
 import { NewPicture } from "../components/newpictures";
 
-const sectionDefaults = {
-  cameraRoll: true
-};
-
 const Media: React.FC = () => {
   return (
     <>

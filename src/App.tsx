@@ -1,20 +1,11 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import { getAuth } from 'firebase/auth';
 import Navbar from "./components/navbar";
 import About from "./pages/About";
 import Puppies from "./pages/Puppies";
 import Family from "./pages/Family";
 import Media from "./pages/Media";
 import { AuthProvider } from "./auth/AuthContext";
-
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const auth = getAuth();
-  if (!auth.currentUser) {
-    return <Navigate to="/login" />;
-  }
-  return <>{children}</>;
-};
 
 const App: React.FC = () => {
   return (
