@@ -38,20 +38,18 @@ const Login: React.FC = () => {
       navigate('/admin');
     } catch (error: any) {
       switch (error.code) {
-        case 'auth/invalid-email':
-          setError('Invalid email format');
-          break;
-        case 'auth/user-not-found':
-          setError('No account exists with this email');
-          break;
-        case 'auth/wrong-password':
-          setError('Incorrect password');
+        case 'auth/invalid-credential':
+          setError('Invalid email or password');
           break;
         case 'auth/too-many-requests':
-          setError('Too many failed attempts. Please try again later');
+          setError('Account temporarily locked due to too many failed attempts. Please try again later');
+          break;
+        case 'auth/network-request-failed':
+          setError('Network error. Please check your internet connection');
           break;
         default:
           setError('An error occurred. Please try again.');
+          console.error('Login error:', error.code, error.message);
       }
     }
   };
