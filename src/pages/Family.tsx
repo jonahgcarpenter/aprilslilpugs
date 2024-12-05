@@ -29,13 +29,16 @@ const Family: React.FC = () => {
     fetchFamilyMembers();
   }, []);
 
+  // Filter active family members
+  const activeMembers = familyMembers.filter(member => member.isActive);
+
   const handleNext = () => {
-    setCurrentMemberIndex((prevIndex) => (prevIndex + 1) % familyMembers.length);
+    setCurrentMemberIndex((prevIndex) => (prevIndex + 1) % activeMembers.length);
   };
 
   const handlePrevious = () => {
     setCurrentMemberIndex((prevIndex) =>
-      prevIndex === 0 ? familyMembers.length - 1 : prevIndex - 1
+      prevIndex === 0 ? activeMembers.length - 1 : prevIndex - 1
     );
   };
 
@@ -43,11 +46,11 @@ const Family: React.FC = () => {
     setImageModal(null);
   };
 
-  if (familyMembers.length === 0) {
-    return <div>Loading family members...</div>;
+  if (activeMembers.length === 0) {
+    return <div>No active family members available</div>;
   }
 
-  const currentMember = familyMembers[currentMemberIndex];
+  const currentMember = activeMembers[currentMemberIndex];
 
   return (
     <>

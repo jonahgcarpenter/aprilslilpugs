@@ -78,17 +78,20 @@ const Puppies: React.FC = () => {
     fetchParents();
   }, []);
 
+  // Filter active puppies
+  const activePuppies = puppies.filter(puppy => puppy.isActive);
+
   const handleCloseModal = () => {
     setActiveModal(null);
   };
 
   const handleNext = () => {
-    setCurrentPuppyIndex((prevIndex) => (prevIndex + 1) % puppies.length);
+    setCurrentPuppyIndex((prevIndex) => (prevIndex + 1) % activePuppies.length);
   };
 
   const handlePrevious = () => {
     setCurrentPuppyIndex((prevIndex) =>
-      prevIndex === 0 ? puppies.length - 1 : prevIndex - 1
+      prevIndex === 0 ? activePuppies.length - 1 : prevIndex - 1
     );
   };
 
@@ -101,11 +104,11 @@ const Puppies: React.FC = () => {
     setImageModal(null);
   };
 
-  if (puppies.length === 0) {
-    return <div>Loading puppies...</div>;
+  if (activePuppies.length === 0) {
+    return <div>No active puppies available</div>;
   }
 
-  const currentPuppy = puppies[currentPuppyIndex];
+  const currentPuppy = activePuppies[currentPuppyIndex];
 
   return (
     <>

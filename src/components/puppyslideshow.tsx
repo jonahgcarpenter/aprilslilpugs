@@ -21,7 +21,7 @@ interface SlideshowProps {
 const Slideshow: React.FC<SlideshowProps> = ({ currentPuppy, onPrevious, onNext }) => {
   const [modalImage, setModalImage] = useState<{ url: string, description: string } | null>(null);
 
-  if (!currentPuppy || !currentPuppy.isActive) return null;
+  if (!currentPuppy) return null;
 
   return (
     <>

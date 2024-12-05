@@ -24,7 +24,7 @@ const FamilySlideshow: React.FC<FamilySlideshowProps> = ({
 }) => {
   const [modalImage, setModalImage] = useState<{ url: string, description: string } | null>(null);
 
-  if (!currentFamilyMember || !currentFamilyMember.isActive) return null;
+  if (!currentFamilyMember) return null;
 
   return (
     <>
