@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../secrets/firebase";
 import '../styles/slideshow.css';
 
 interface PuppyData {
@@ -12,16 +14,36 @@ interface PuppyData {
   gender: string;
 }
 
-interface SlideshowProps {
-  currentPuppy: PuppyData;
-  onPrevious: () => void;
-  onNext: () => void;
-}
-
-const Slideshow: React.FC<SlideshowProps> = ({ currentPuppy, onPrevious, onNext }) => {
+const Slideshow: React.FC = () => {
+  const [puppies, setPuppies] = useState<PuppyData[]>([]);
+  const [currentPuppyIndex, setCurrentPuppyIndex] = useState(0);
   const [modalImage, setModalImage] = useState<{ url: string, description: string } | null>(null);
 
-  if (!currentPuppy) return null;
+  useEffect(() => {
+    const fetchPuppies = async () => {
+      const puppiesCollection = collection(db, "puppies");
+      const puppiesSnapshot = await getDocs(puppiesCollection);
+      const puppiesList = puppiesSnapshot.docs
+        .map((doc) => ({ id: doc.id, ...doc.data() }))
+        .filter(puppy => puppy.isActive);
+      setPuppies(puppiesList);
+    };
+
+    fetchPuppies();
+  }, []);
+
+  if (puppies.length === 0) return <div>No active puppies available</div>;
+
+  const currentPuppy = puppies[currentPuppyIndex];
+  const handlePrevious = () => {
+    setCurrentPuppyIndex((prevIndex) =>
+      prevIndex === 0 ? puppies.length - 1 : prevIndex - 1
+    );
+  };
+
+  const handleNext = () => {
+    setCurrentPuppyIndex((prevIndex) => (prevIndex + 1) % puppies.length);
+  };
 
   return (
     <>
@@ -33,8 +55,8 @@ const Slideshow: React.FC<SlideshowProps> = ({ currentPuppy, onPrevious, onNext 
           onClick={() => setModalImage({ url: currentPuppy.imageUrl, description: currentPuppy.name })}
         />
         <div className="puppyslideshow-controls">
-          <button className="puppyslideshowprev-button" onClick={onPrevious}>&lt;</button>
-          <button className="puppyslideshownext-button" onClick={onNext}>&gt;</button>
+          <button className="puppyslideshowprev-button" onClick={handlePrevious}>&lt;</button>
+          <button className="puppyslideshownext-button" onClick={handleNext}>&gt;</button>
         </div>
         <h2 className="puppyslideshow-subtitle">{currentPuppy.name}</h2>
         <div className="puppyslideshow-info">

@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../secrets/firebase";
 import '../styles/parents.css';
 
 interface PetData {
@@ -8,32 +10,53 @@ interface PetData {
   description: string;
   gender: string;
   isActive: boolean;
-  updatedAt: any; // Using 'any' for Firebase timestamp
+  updatedAt: any;
 }
 
 interface ParentsProps {
-  millie: PetData | null;
-  mardis: PetData | null; // Note: We keep this as 'mardis' for prop naming consistency
-  // Remove onImageClick from props
+  momName: string;
+  dadName: string;
 }
 
-const Parents: React.FC<ParentsProps> = ({ millie, mardis }) => {
+const Parents: React.FC<ParentsProps> = ({ momName, dadName }) => {
+  const [mom, setMom] = useState<PetData | null>(null);
+  const [dad, setDad] = useState<PetData | null>(null);
   const [imgErrors, setImgErrors] = useState<{ [key: string]: boolean }>({});
   const [modalImage, setModalImage] = useState<{ url: string, description: string } | null>(null);
 
-  // Add debug logging
-  React.useEffect(() => {
-    console.log('Component rendered with props:', { millie, mardis });
-  }, [millie, mardis]);
+  useEffect(() => {
+    const fetchParents = async () => {
+      try {
+        const familyRef = collection(db, "family");
+        const querySnapshot = await getDocs(familyRef);
+        
+        querySnapshot.forEach((doc) => {
+          const data = doc.data() as PetData;
+          if (data.name === momName) {
+            setMom({
+              ...data,
+              imageUrl: data.imageUrl || data.image,
+              isActive: true
+            });
+          } else if (data.name === dadName) {
+            setDad({
+              ...data,
+              imageUrl: data.imageUrl || data.image,
+              isActive: true
+            });
+          }
+        });
+      } catch (error) {
+        console.error("Error fetching parent data:", error);
+      }
+    };
 
-  React.useEffect(() => {
-    if (millie) console.log('Millie image URL:', millie.imageUrl);
-    if (mardis) console.log('Mardis image URL:', mardis.imageUrl);
-  }, [millie, mardis]);
+    fetchParents();
+  }, [momName, dadName]);
 
-  const handleImageError = (petType: 'millie' | 'mardis') => {
+  const handleImageError = (petType: 'mom' | 'dad') => {
     setImgErrors(prev => ({ ...prev, [petType]: true }));
-    console.error('Image failed to load:', petType === 'millie' ? millie?.imageUrl : mardis?.imageUrl);
+    console.error('Image failed to load:', petType === 'mom' ? mom?.imageUrl : dad?.imageUrl);
   };
 
   const getFallbackImage = () => '/path/to/fallback-image.png';
@@ -50,51 +73,48 @@ const Parents: React.FC<ParentsProps> = ({ millie, mardis }) => {
     <>
       <div className="parents-container">
         <div className="parents-grid">
-          {/* Add debug message if no pets */}
-          {!millie && !mardis && (
+          {!mom && !dad && (
             <div className="no-pets-message">
-              <p>No pet data available</p>
-              <p>Debug info: Millie: {JSON.stringify(!!millie)}, Mardis: {JSON.stringify(!!mardis)}</p>
+              <p>Loading parents...</p>
             </div>
           )}
           
-          {/* Add debug info to each pet card */}
-          {millie && millie.isActive && (
-            <div className="parent-card" data-testid="millie-card">
+          {mom && mom.isActive && (
+            <div className="parent-card" data-testid="mom-card">
               <div className="parentimage-container">
                 <img
-                  src={imgErrors['millie'] ? getFallbackImage() : millie.imageUrl}
-                  alt={`${millie.name} - ${millie.gender === 'female' ? 'Female' : 'Male'} Dog`}
-                  onClick={() => !imgErrors['millie'] && handleImageClick(millie.imageUrl, millie.name)}
-                  className={`parent-image ${imgErrors['millie'] ? 'image-error' : ''}`}
-                  onError={() => handleImageError('millie')}
+                  src={imgErrors['mom'] ? getFallbackImage() : mom.imageUrl}
+                  alt={`${mom.name} - ${mom.gender === 'female' ? 'Female' : 'Male'} Dog`}
+                  onClick={() => !imgErrors['mom'] && handleImageClick(mom.imageUrl, mom.name)}
+                  className={`parent-image ${imgErrors['mom'] ? 'image-error' : ''}`}
+                  onError={() => handleImageError('mom')}
                 />
               </div>
               <div className="parent-info">
-                <h3 className="parent-name">{millie.name}</h3>
-                <p className="parent-age">Age: {millie.age} {millie.age === 1 ? 'year' : 'years'}</p>
-                <p className="parent-gender">Gender: {millie.gender.charAt(0).toUpperCase() + millie.gender.slice(1)}</p>
-                <p className="parent-description">{millie.description}</p>
+                <h3 className="parent-name">{mom.name}</h3>
+                <p className="parent-age">Age: {mom.age} {mom.age === 1 ? 'year' : 'years'}</p>
+                <p className="parent-gender">Gender: {mom.gender.charAt(0).toUpperCase() + mom.gender.slice(1)}</p>
+                <p className="parent-description">{mom.description}</p>
               </div>
             </div>
           )}
           
-          {mardis && mardis.isActive && (
-            <div className="parent-card" data-testid="mardis-card">
+          {dad && dad.isActive && (
+            <div className="parent-card" data-testid="dad-card">
               <div className="parentimage-container">
                 <img
-                  src={imgErrors['mardis'] ? getFallbackImage() : mardis.imageUrl}
-                  alt={`${mardis.name} - ${mardis.gender === 'female' ? 'Female' : 'Male'} Dog`}
-                  onClick={() => !imgErrors['mardis'] && handleImageClick(mardis.imageUrl, mardis.name)}
-                  className={`parent-image ${imgErrors['mardis'] ? 'image-error' : ''}`}
-                  onError={() => handleImageError('mardis')}
+                  src={imgErrors['dad'] ? getFallbackImage() : dad.imageUrl}
+                  alt={`${dad.name} - ${dad.gender === 'female' ? 'Female' : 'Male'} Dog`}
+                  onClick={() => !imgErrors['dad'] && handleImageClick(dad.imageUrl, dad.name)}
+                  className={`parent-image ${imgErrors['dad'] ? 'image-error' : ''}`}
+                  onError={() => handleImageError('dad')}
                 />
               </div>
               <div className="parent-info">
-                <h3 className="parent-name">{mardis.name}</h3>
-                <p className="parent-age">Age: {mardis.age} {mardis.age === 1 ? 'year' : 'years'}</p>
-                <p className="parent-gender">Gender: {mardis.gender.charAt(0).toUpperCase() + mardis.gender.slice(1)}</p>
-                <p className="parent-description">{mardis.description}</p>
+                <h3 className="parent-name">{dad.name}</h3>
+                <p className="parent-age">Age: {dad.age} {dad.age === 1 ? 'year' : 'years'}</p>
+                <p className="parent-gender">Gender: {dad.gender.charAt(0).toUpperCase() + dad.gender.slice(1)}</p>
+                <p className="parent-description">{dad.description}</p>
               </div>
             </div>
           )}
@@ -118,7 +138,6 @@ const Parents: React.FC<ParentsProps> = ({ millie, mardis }) => {
   );
 };
 
-// Add displayName for debugging
 Parents.displayName = 'Parents';
 
 export default Parents;
