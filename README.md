@@ -12,8 +12,9 @@ Modern, responsive website built to showcase and manage a dog breeding business.
 
 ## Features
 - Real-time database updates
+- Can toggle between the Admin view for each respective component once logged in
+- Admin view enables the logged in user to make edits to the webpage / database within the UI
 - View archived puppies as a Past Litters section
-- Allows the client to login and make edits to the database within the UI
 - Inlcudes a youtube livestream to show puppies live
 - Waitlist functionality with the ability to check your position based on phone number
 - Slideshows with buttons and clickable images for easy viewing
