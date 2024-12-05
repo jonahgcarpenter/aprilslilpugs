@@ -1,7 +1,7 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { getAuth } from 'firebase/auth';
-import Navbar from "./components/Navbar";
+import Navbar from "./components/navbar";
 import About from "./pages/About";
 import Puppies from "./pages/Puppies";
 import Family from "./pages/Family";
