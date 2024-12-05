@@ -5,7 +5,7 @@
 
 .parents-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: 1fr 1fr;
   gap: 2rem;
   justify-items: center;
   align-items: start;
@@ -121,4 +121,57 @@
   font-weight: 600;
   text-align: center;
   padding-right: 2rem;
+}
+
+/* Mobile Responsive Styles */
+@media screen and (max-width: 768px) {
+  .parents-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .parent-card {
+    max-width: 100%;
+  }
+
+  .parent-card .parentimage-container {
+    height: 200px;
+  }
+
+  .parent-info {
+    padding: 0.75rem;
+  }
+
+  .parent-name {
+    font-size: 1.25rem;
+  }
+
+  .parentmodal-content {
+    padding: 1rem;
+    width: 95%;
+  }
+
+  .parentmodal-header {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  .parentmodal-close {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .parents-container {
+    padding: 10px;
+  }
+
+  .parent-card .parentimage-container {
+    height: 180px;
+  }
+
+  .parent-description {
+    font-size: 0.9rem;
+  }
 }

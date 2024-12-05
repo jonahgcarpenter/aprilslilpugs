@@ -3,7 +3,6 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1rem;
-  padding: 1.5rem;
   width: 100%;
   max-width: 1600px;
   margin: 0 auto;
@@ -142,22 +141,22 @@
 
 .editmodal-content {
   background: #fff;
-  padding: 2rem;
   border-radius: 12px;
   max-width: 90%;
   max-height: 90vh;
   position: relative;
+  padding: 2rem;
 }
 
 .editmodal-image-container {
   background: var(--background-color-dark);
-  padding: 1.5rem;
   border-radius: var(--border-radius-md);
   align-items: center;
   justify-content: center;
   max-height: 60vh;
   width: 100%;
   overflow: hidden;
+  margin-top: 6%
 }
 
 .editmodal-image {
@@ -234,16 +233,9 @@
 
 .uploadmodal-form-container,
 .editmodal-form-container {
-  padding: 2rem;
   overflow-y: auto;
   max-height: calc(90vh - 4rem);
   width: 100%;
-}
-
-.uploadmodal-form-container,
-.editmodal-form-container {
-  padding: 2rem;
-  overflow-y: auto;
 }
 
 .uploadmodal-header,
@@ -254,7 +246,6 @@
   margin-bottom: 2rem;
   font-weight: var(--font-weight-semi);
   text-align: center;
-  padding-right: 15%;
 }
 
 .uploadform,
@@ -262,7 +253,6 @@
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-  text-align: column;
 }
 
 .uploadform-group,
@@ -272,7 +262,6 @@
   flex-direction: column;
   gap: 0.5rem;
   width: 100%;
-  max-width: 400px;
   margin-bottom: 1rem;
 }
 
