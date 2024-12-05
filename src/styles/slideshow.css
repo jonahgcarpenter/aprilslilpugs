@@ -1,6 +1,7 @@
 /* Slideshow Component */
 .puppyslideshow-container,
-.familyslideshow-container {
+.familyslideshow-container,
+.pastlittersslideshow-container {
   position: relative;
   margin: 0;
   padding: 1rem 2rem;
@@ -9,7 +10,8 @@
 
 /* Image Styles */
 .puppyslideshow-image,
-.familyslideshow-image {
+.familyslideshow-image,
+.pastlittersslideshow-image {
   width: 100%;
   height: 400px;
   object-fit: cover;
@@ -20,7 +22,8 @@
 }
 
 .puppyslideshow-controls,
-.familyslideshow-controls {
+.familyslideshow-controls,
+.pastlittersslideshow-controls {
   display: flex;
   justify-content: space-between;
   margin: 1rem 0;
@@ -30,7 +33,9 @@
 .puppyslideshowprev-button,
 .puppyslideshownext-button,
 .familyslideshowprev-button,
-.familyslideshownext-button {
+.familyslideshownext-button,
+.pastlittersslideshowprev-button,
+.pastlittersslideshownext-button {
   background: var(--primary-color);
   color: var(--text-color);
   border: none;
@@ -48,30 +53,36 @@
 .puppyslideshowprev-button:hover,
 .puppyslideshownext-button:hover,
 .familyslideshowprev-button:hover,
-.familyslideshownext-button:hover {
+.familyslideshownext-button:hover,
+.pastlittersslideshowprev-button:hover,
+.pastlittersslideshownext-button:hover {
   opacity: 1;
   background: var(--primary-hover-color);
 }
 
 .puppyslideshow-info,
-.familyslideshow-info {
+.familyslideshow-info,
+.pastlittersslideshow-info {
   flex: 1;
   margin-top: 1rem;
 }
 
 .puppyslideshow-detail,
-.familyslideshow-detail {
+.familyslideshow-detail,
+.pastlittersslideshow-detail {
   padding-top: .5rem;
 }
 
 .puppyslideshow-description,
-.familyslideshow-description {
+.familyslideshow-description,
+.pastlittersslideshow-description {
   text-align: center;
 }
 
 /* Modal Styles */
 .puppyslideshow-modal,
-.familyslideshow-modal {
+.familyslideshow-modal,
+.pastlittersslideshow-modal {
   position: fixed;
   top: 0;
   left: 0;
@@ -85,7 +96,8 @@
 }
 
 .puppyslideshowmodal-content,
-.familyslideshowmodal-content {
+.familyslideshowmodal-content,
+.pastlittersslideshowmodal-content {
   background: #fff;
   padding: 2rem;
   border-radius: 12px;
@@ -97,7 +109,8 @@
 }
 
 .puppyslideshowmodal-close,
-.familyslideshowmodal-close {
+.familyslideshowmodal-close,
+.pastlittersslideshowmodal-close {
   position: absolute;
   top: var(--spacing-sm);
   right: var(--spacing-sm);
@@ -115,13 +128,15 @@
 }
 
 .puppyslideshowmodal-close:hover,
-.familyslideshowmodal-close:hover {
+.familyslideshowmodal-close:hover,
+.pastlittersslideshowmodal-close:hover {
   opacity: 1;
   background: var(--primary-hover-color);
 }
 
 .puppyslideshowmodal-header,
-.familyslideshowmodal-header {
+.familyslideshowmodal-header,
+.pastlittersslideshowmodal-header {
   color: var(--secondary-color);
   font-size: 1.5rem;
   margin-bottom: 2rem;
@@ -131,7 +146,8 @@
 }
 
 .puppyslideshowmodal-image,
-.familyslideshowmodal-image {
+.familyslideshowmodal-image,
+.pastlittersslideshowmodal-image {
   max-width: 100%;
   max-height: calc(90vh - 150px);
   object-fit: contain;

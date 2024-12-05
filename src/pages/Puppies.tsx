@@ -6,6 +6,7 @@ import Waitlist from "../components/waitlist";
 import Slideshow from '../components/puppyslideshow';
 import Parents from '../components/parents';
 import Section from "../components/section";
+import PastLittersSlideshow from "../components/pastlittersslideshow";
 
 const sectionDefaults = {
   waitlist: false,
@@ -32,6 +33,10 @@ const Puppies: React.FC = () => {
         
         <Section title="Meet The Parents" defaultExpanded={sectionDefaults.meetParents}>
           <Parents momName="Millie" dadName="Mardi" />
+        </Section>
+
+        <Section title="Past Litters" defaultExpanded={sectionDefaults.meetPuppies}>
+          <PastLittersSlideshow />
         </Section>
       </div>
       <Footer />
