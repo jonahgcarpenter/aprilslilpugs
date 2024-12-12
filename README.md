@@ -1,24 +1,27 @@
 # April's Lil Pugs
 
-A React-based website for a small business, featuring Firebase integration for database management. Build to be completely updatable from within the webapplication if logged in as an admin.
+A 100% under construction project I am developing tailored to the Clients needs and desires. 
+
+Currently under rework for properly managing the data within our local servers
 
 ## Overview
 Modern, responsive website built to showcase and manage a dog breeding business.
 
 ## Technologies
-- React
-- Firebase Database
-- JavaScript/TypeScript
+- Vite React
+- Python w/Flask
+- MySQL
 
-## Features
+## Features ( or soon to be )
 - Real-time database updates
-- Can toggle between the Admin view for each respective component once logged in
-- Admin view enables the logged in user to make edits to the webpage / database within the UI
-- View archived puppies as a Past Litters section
-- Inlcudes a youtube livestream to show puppies live
-- Waitlist functionality with the ability to check your position based on phone number
-- Slideshows with buttons and clickable images for easy viewing
-- A media tab for the client to upload picture and videos to showcase within the site
+- Fallback data ( this is self hosted so we're not expecting blazing speeds )
+- Waitlist for users to join and view
+- Media Post w/ user comments
+- User Reviews
+- Email Notifications
+- Puppy live stream w/ admin notifications for unavailable
+
+- Whatever else we decide to add 
   
 # Screenshots
 ## Regular User
