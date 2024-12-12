@@ -14,3 +14,9 @@ def index():
 
 if __name__ == '__main__':
     app.run(debug=True,)
+
+
+# Plan to resolve import issues in VS Code:
+# Verify VS Code is using correct Python interpreter
+# Create VS Code workspace settings
+# Reload VS Code window
