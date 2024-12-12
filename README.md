@@ -19,9 +19,16 @@ Modern, responsive website built to showcase and manage a dog breeding business.
 - Media Post w/ user comments
 - User Reviews
 - Email Notifications
-- Puppy live stream w/ admin notifications for unavailable
+- Puppy live stream
 
-- Whatever else we decide to add 
+### Admin Specific
+- User Bug Reporting
+- Notifications for me ( dev/sys admin ) when something is broken on my end
+- Moderate comments
+- Create Post
+- Reply to user reviews
+- View/Edit Waitlist
+- Add/Edit dog related databases
   
 # Screenshots ( before UI rework )
 ## Regular User
