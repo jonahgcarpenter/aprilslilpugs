@@ -1,7 +1,4 @@
-// the about us section.
-
 import React from "react";
-import Logo from '/images/logo.jpg';
 
 const AboutUs: React.FC = () => {
   return (
