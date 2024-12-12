@@ -23,7 +23,7 @@ Modern, responsive website built to showcase and manage a dog breeding business.
 
 - Whatever else we decide to add 
   
-# Screenshots
+# Screenshots ( before UI rework )
 ## Regular User
 ![image](https://github.com/user-attachments/assets/ac047e24-6059-46a3-989a-5001d175150a)
 ![image](https://github.com/user-attachments/assets/f3cc550d-a993-418f-9be2-c7d91cd8b425)
