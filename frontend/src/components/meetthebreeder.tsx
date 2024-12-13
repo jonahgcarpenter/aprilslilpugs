@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import ProfilePicture from '/images/profilepic.jpg';
 import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock } from 'react-icons/fa';
 
@@ -14,16 +14,31 @@ interface BreederInfo {
 }
 
 const MeetTheBreeder: React.FC = () => {
-    const breederInfo: BreederInfo = {
-        firstName: "April",
-        lastName: "Carpenter",
-        city: "Tupelo",
-        state: "MS",
-        experienceYears: 15,
-        story: "I've been passionate about breeding dogs for over 15 years. My journey started when I rescued my first dog and realized the importance of responsible breeding. I've dedicated my life to ensuring our puppies are raised in a loving, healthy environment and go to wonderful homes.",
-        phone: "(662) 321-8352",
-        email: "aprilslilpugs@gmail.com"
-    };
+    const [breederInfo, setBreederInfo] = useState<BreederInfo | null>(null);
+    const [error, setError] = useState<string>('');
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchBreederInfo = async () => {
+            try {
+                const response = await fetch('http://localhost:5000/api/breeder');
+                if (!response.ok) throw new Error('Failed to fetch breeder info');
+                const data = await response.json();
+                setBreederInfo(data);
+            } catch (err) {
+                setError('Failed to load breeder information');
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchBreederInfo();
+    }, []);
+
+    if (loading) return <div className="text-center p-8">Loading...</div>;
+    if (error) return <div className="text-red-500 text-center p-8">{error}</div>;
+    if (!breederInfo) return <div className="text-center p-8">No breeder information found</div>;
 
     return (
         <div className="p-8 max-w-7xl mx-auto">
