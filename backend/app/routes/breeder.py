@@ -1,11 +1,22 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, session
+from flask_cors import CORS
+from functools import wraps
+from ..database import get_db_connection
 from mysql.connector import Error
-from .database import get_db_connection
 import base64
 
-bp = Blueprint('main', __name__)
+breeder_bp = Blueprint('breeder', __name__)
+CORS(breeder_bp, supports_credentials=True)
 
-@bp.route('/api/breeder', methods=['GET'])
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            return jsonify({"error": "Authentication required"}), 401
+        return f(*args, **kwargs)
+    return decorated_function
+
+@breeder_bp.route('/api/breeder', methods=['GET'])
 def get_breeder_info():
     try:
         conn = get_db_connection()
@@ -38,7 +49,8 @@ def get_breeder_info():
         if 'conn' in locals():
             conn.close()
 
-@bp.route('/api/breeder/update', methods=['POST'])
+@breeder_bp.route('/api/breeder/update', methods=['POST'])
+@login_required
 def update_breeder_info():
     try:
         data = request.json
@@ -80,7 +92,6 @@ def update_breeder_info():
         ))
         
         conn.commit()
-        
         return jsonify({"message": "Breeder information updated successfully"})
 
     except Exception as e:
@@ -93,7 +104,8 @@ def update_breeder_info():
         if 'conn' in locals():
             conn.close()
 
-@bp.route('/api/breeder/image', methods=['POST'])
+@breeder_bp.route('/api/breeder/image', methods=['POST'])
+@login_required
 def upload_profile_image():
     try:
         if 'image' not in request.files:

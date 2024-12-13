@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom';
+import Login from '../auth/Login';
+import Logout from '../auth/Logout';
 
 const PageNav: React.FC = () => {
   return (
@@ -18,6 +20,8 @@ const PageNav: React.FC = () => {
           Waitlist
         </button>
       </Link>
+      <Login />
+      <Logout />
     </div>
   );
 };

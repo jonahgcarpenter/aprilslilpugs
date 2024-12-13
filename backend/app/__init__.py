@@ -1,6 +1,9 @@
 from flask import Flask
 from flask_cors import CORS
 from .config import Config
+from .routes import bp
+from .routes.auth import auth_bp
+from .routes.breeder import breeder_bp
 
 def create_app(test_config=None):
     app = Flask(__name__)
@@ -12,11 +15,15 @@ def create_app(test_config=None):
     else:
         app.config.update(test_config)
 
+    # Configure session
+    app.secret_key = app.config['SECRET_KEY']
+    
     # Enable CORS
     CORS(app, supports_credentials=True)
 
     # Register blueprints
-    from .routes import bp
     app.register_blueprint(bp)
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(breeder_bp)
 
     return app
