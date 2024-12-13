@@ -5,6 +5,7 @@ import Background from '/images/backdrop.jpg';
 import Header from '../components/Header';
 import AboutUs from '../components/AboutUs';
 import MeetTheBreeder from "../components/MeettheBreeder";
+import UpdateBreeder from "../components/UpdateBreeder";
 
 const Home: React.FC = () => {
   return (
@@ -14,6 +15,7 @@ const Home: React.FC = () => {
         <main>
           <AboutUs />
           <MeetTheBreeder />
+          <UpdateBreeder />
         </main>
       </Suspense>
     </div>

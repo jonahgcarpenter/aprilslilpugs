@@ -11,10 +11,7 @@ def get_db_connection():
             password=current_app.config['MYSQL_PASSWORD'],
             database=current_app.config['MYSQL_DATABASE']
         )
-        
-        print("Database connection successful")  # Debug log
         return connection
-        
     except Error as e:
-        print(f"Database connection failed: {e}")
+        print(f"DB Error: {e}")
         raise e
