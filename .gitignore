@@ -32,6 +32,7 @@ ENV/
 .venv
 .pytest_cache/
 .coverage
+flask_sessions/
 
 # Database
 database/

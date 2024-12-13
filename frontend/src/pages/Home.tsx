@@ -2,14 +2,14 @@
 
 import React, { Suspense } from "react";
 import Background from '/images/backdrop.jpg';
-import Nav from '../components/Navbar';
+import Header from '../components/Header';
 import AboutUs from '../components/AboutUs';
 import MeetTheBreeder from "../components/MeettheBreeder";
 
 const Home: React.FC = () => {
   return (
     <div className="bg-fixed bg-cover bg-center min-h-screen" style={{ backgroundImage: `url(${Background})` }}>
-      <Nav />
+      <Header />
       <Suspense fallback={<div>Loading...</div>}>
         <main>
           <AboutUs />
