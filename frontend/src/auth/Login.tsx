@@ -1,9 +1,22 @@
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useRef, useEffect } from 'react';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
@@ -65,7 +78,8 @@ const Login = () => {
         throw new Error(data?.error || 'Server error');
       }
 
-      window.location.href = '/';
+      setIsOpen(false);
+      window.location.reload(); // Refresh to update auth state
     } catch (error) {
       setError(error instanceof Error ? error.message : 'An unknown error occurred');
       console.error('Login error:', error);
@@ -73,35 +87,48 @@ const Login = () => {
   };
 
   return (
-    <form onSubmit={handleLogin} className="space-y-4">
-      {error && <div className="text-red-500 text-sm">{error}</div>}
-      <div>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email"
-          required
-          className="w-full px-3 py-2 border rounded-md"
-        />
-      </div>
-      <div>
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
-          required
-          className="w-full px-3 py-2 border rounded-md"
-        />
-      </div>
+    <div className="relative" ref={dropdownRef}>
       <button
-        type="submit"
-        className="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+        onClick={() => setIsOpen(!isOpen)}
+        className="bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-4 py-1.5 text-sm rounded-full font-semibold shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
       >
-        Sign In
+        Login
       </button>
-    </form>
+
+      {isOpen && (
+        <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg p-4 z-50">
+          <form onSubmit={handleLogin} className="space-y-4">
+            {error && <div className="text-red-500 text-sm">{error}</div>}
+            <div>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email"
+                required
+                className="w-full px-3 py-2 border rounded-md"
+              />
+            </div>
+            <div>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+                required
+                className="w-full px-3 py-2 border rounded-md"
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 rounded-full shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+            >
+              Sign In
+            </button>
+          </form>
+        </div>
+      )}
+    </div>
   );
 };
 

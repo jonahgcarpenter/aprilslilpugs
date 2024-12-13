@@ -10,8 +10,8 @@ const Logout = () => {
         throw new Error('Logout failed');
       }
 
-      // Redirect to home page after logout
-      window.location.href = '/';
+      window.location.reload(); // Refresh to update auth state
+
     } catch (error) {
       console.error('Logout error:', error);
     }
@@ -20,7 +20,7 @@ const Logout = () => {
   return (
     <button
       onClick={handleLogout}
-      className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
+      className="px-4 py-1.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 rounded-full shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
     >
       Sign Out
     </button>

@@ -144,3 +144,65 @@ def logout():
     except Exception as e:
         print(f"Logout error: {e}")
         return jsonify({"error": str(e)}), 500
+
+@auth_bp.route('/api/auth/session', methods=['GET'])
+def check_session():
+    print("Session check requested")
+    print("Current session:", dict(session))
+    
+    response_headers = {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Credentials': 'true'
+    }
+    
+    try:
+        user_id = session.get('user_id')
+        print(f"User ID from session: {user_id}")
+        
+        if not user_id:
+            print("No user_id in session")
+            return jsonify({"authenticated": False}), 401, response_headers
+
+        # Check if session exists in Redis
+        session_exists = redis_client.exists(f"session:{user_id}")
+        print(f"Redis session exists: {session_exists}")
+        
+        if not session_exists:
+            print("Session not found in Redis")
+            session.clear()
+            return jsonify({"authenticated": False}), 401, response_headers
+
+        try:
+            # Get user info from database
+            conn = get_db_connection()
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute("SELECT id, email FROM breeder WHERE id = %s", (user_id,))
+            user = cursor.fetchone()
+            print(f"User data from DB: {user}")
+            
+            if not user:
+                print("User not found in database")
+                session.clear()
+                redis_client.delete(f"session:{user_id}")
+                return jsonify({"authenticated": False}), 401, response_headers
+
+            return jsonify({
+                "authenticated": True,
+                "user": {
+                    "id": user['id'],
+                    "email": user['email']
+                }
+            }), 200, response_headers
+
+        finally:
+            if 'cursor' in locals():
+                cursor.close()
+            if 'conn' in locals():
+                conn.close()
+
+    except redis.RedisError as e:
+        print(f"Redis error: {e}")
+        return jsonify({"error": "Session store error", "authenticated": False}), 500, response_headers
+    except Exception as e:
+        print(f"Session check error: {e}")
+        return jsonify({"error": str(e), "authenticated": False}), 500, response_headers
