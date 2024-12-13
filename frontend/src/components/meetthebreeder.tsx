@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import ProfilePicture from '/images/profilepic.jpg';
 import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock } from 'react-icons/fa';
 
 interface BreederInfo {
@@ -11,6 +10,7 @@ interface BreederInfo {
     story: string;
     phone: string;
     email: string;
+    profile_image: string;
 }
 
 const MeetTheBreeder: React.FC = () => {
@@ -36,6 +36,19 @@ const MeetTheBreeder: React.FC = () => {
         fetchBreederInfo();
     }, []);
 
+    const handleEmailClick = () => {
+        window.location.href = `mailto:${breederInfo?.email}`;
+    };
+
+    const handlePhoneClick = () => {
+        window.location.href = `tel:${breederInfo?.phone}`;
+    };
+
+    const handleLocationClick = () => {
+        const address = `${breederInfo?.city}, ${breederInfo?.state}`;
+        window.open(`https://maps.google.com?q=${encodeURIComponent(address)}`, '_blank');
+    };
+
     if (loading) return <div className="text-center p-8">Loading...</div>;
     if (error) return <div className="text-red-500 text-center p-8">{error}</div>;
     if (!breederInfo) return <div className="text-center p-8">No breeder information found</div>;
@@ -49,7 +62,7 @@ const MeetTheBreeder: React.FC = () => {
             <div className="flex flex-col md:flex-row items-center gap-8 mb-12">
                 <div className="w-full md:w-1/2">
                     <img 
-                        src={ProfilePicture} 
+                        src={breederInfo.profile_image || '/images/default-profile.jpg'} 
                         alt="Breeder Profile" 
                         className="w-full max-w-lg mx-auto h-[400px] object-cover rounded-xl shadow-lg"
                     />
@@ -64,7 +77,10 @@ const MeetTheBreeder: React.FC = () => {
                         </div>
                         
                         <div className="space-y-6">
-                            <div className="flex items-center gap-3">
+                            <div 
+                                className="flex items-center gap-3 cursor-pointer hover:text-blue-400 transition-colors"
+                                onClick={handleLocationClick}
+                            >
                                 <FaMapMarkerAlt className="text-blue-400 text-xl" />
                                 <div>
                                     <p className="text-slate-300">{breederInfo.city}, {breederInfo.state}</p>
@@ -78,14 +94,20 @@ const MeetTheBreeder: React.FC = () => {
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-3">
+                            <div 
+                                className="flex items-center gap-3 cursor-pointer hover:text-blue-400 transition-colors"
+                                onClick={handlePhoneClick}
+                            >
                                 <FaPhone className="text-blue-400 text-xl" />
                                 <div>
                                     <p className="text-slate-300">{breederInfo.phone}</p>
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-3">
+                            <div 
+                                className="flex items-center gap-3 cursor-pointer hover:text-blue-400 transition-colors"
+                                onClick={handleEmailClick}
+                            >
                                 <FaEnvelope className="text-blue-400 text-xl" />
                                 <div>
                                     <p className="text-slate-300">{breederInfo.email}</p>
