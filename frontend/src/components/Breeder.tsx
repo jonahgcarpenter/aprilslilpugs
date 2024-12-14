@@ -13,7 +13,7 @@ interface BreederInfo {
     profile_image: string;
 }
 
-const MeetTheBreeder: React.FC = () => {
+const Breeder: React.FC = () => {
     const [breederInfo, setBreederInfo] = useState<BreederInfo | null>(null);
     const [error, setError] = useState<string>('');
     const [loading, setLoading] = useState(true);
@@ -126,4 +126,4 @@ const MeetTheBreeder: React.FC = () => {
     );
 };
 
-export default MeetTheBreeder;
+export default Breeder;

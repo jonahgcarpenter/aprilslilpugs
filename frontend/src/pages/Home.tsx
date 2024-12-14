@@ -2,8 +2,8 @@ import React, { Suspense } from "react";
 import Background from '/images/backdrop.jpg';
 import Header from '../components/Header';
 import AboutUs from '../components/AboutUs';
-import MeetTheBreeder from "../components/MeettheBreeder";
-import UpdateBreeder from "../components/UpdateBreeder";
+import MeetTheBreeder from "../components/Breeder";
+import UpdateBreeder from "../adminfeatures/UpdateBreeder";
 
 const Home: React.FC = () => {
   return (
