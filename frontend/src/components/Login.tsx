@@ -7,7 +7,7 @@ const Login = () => {
   const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault();
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {  // Update URL to match your Flask backend
+      const response = await fetch('http://localhost:5000/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -15,7 +15,15 @@ const Login = () => {
         body: JSON.stringify({ username, password }),
         credentials: 'include'
       });
-      // Handle response here
+
+      if (!response.ok) {
+        throw new Error('Login failed');
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        window.location.reload(); // Refresh to update auth state
+      }
     } catch (error) {
       console.error('Login error:', error);
     }

@@ -41,7 +41,12 @@ const AuthButton = () => {
     checkAuthStatus();
   }, []);
 
-  return isLoggedIn ? <Logout /> : <Login />;
+  return (
+    <div>
+      {isLoggedIn && userData && <span>Welcome, {userData.email}!</span>}
+      {isLoggedIn ? <Logout /> : <Login />}
+    </div>
+  );
 };
 
 export default AuthButton;
