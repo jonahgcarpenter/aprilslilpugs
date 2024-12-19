@@ -30,5 +30,3 @@ Modern, responsive website built to showcase and manage a dog breeding business.
 - Add/Edit dog related databases
 
 ## TODO
-
-Fully Dockerize for easily deployment on UnRaid
