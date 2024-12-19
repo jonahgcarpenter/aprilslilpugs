@@ -1,5 +1,5 @@
 import React, { Suspense } from "react";
-import Background from '/images/backdrop.jpg';
+import Background from '/images/background.jpg';
 import Header from '../components/Header';
 
 const Media: React.FC = () => {

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock } from 'react-icons/fa';
+import api from '../utils/api';
 
 interface BreederInfo {
     firstName: string;
@@ -10,7 +11,8 @@ interface BreederInfo {
     story: string;
     phone: string;
     email: string;
-    profile_image: string;
+    profile_image: string | null;
+    image_type?: string;
 }
 
 const Breeder: React.FC = () => {
@@ -21,13 +23,11 @@ const Breeder: React.FC = () => {
     useEffect(() => {
         const fetchBreederInfo = async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/breeder');
-                if (!response.ok) throw new Error('Failed to fetch breeder info');
-                const data = await response.json();
+                const { data } = await api.get('/api/breeder/profile');
                 setBreederInfo(data);
-            } catch (err) {
-                setError('Failed to load breeder information');
-                console.error(err);
+            } catch (err: any) {
+                setError(err.response?.data?.error || 'Failed to load breeder information');
+                console.error('Error fetching breeder info:', err);
             } finally {
                 setLoading(false);
             }
@@ -49,6 +49,11 @@ const Breeder: React.FC = () => {
         window.open(`https://maps.google.com?q=${encodeURIComponent(address)}`, '_blank');
     };
 
+    const getImageUrl = (imageData: string | null) => {
+        if (!imageData) return '/images/default-profile.jpg';
+        return `data:image/jpeg;base64,${imageData}`;
+    };
+
     if (loading) return <div className="text-center p-8">Loading...</div>;
     if (error) return <div className="text-red-500 text-center p-8">{error}</div>;
     if (!breederInfo) return <div className="text-center p-8">No breeder information found</div>;
@@ -62,9 +67,13 @@ const Breeder: React.FC = () => {
             <div className="flex flex-col md:flex-row items-center gap-8 mb-12">
                 <div className="w-full md:w-1/2">
                     <img 
-                        src={breederInfo.profile_image || '/images/default-profile.jpg'} 
+                        src={breederInfo.profile_image ? getImageUrl(breederInfo.profile_image) : '/images/default-profile.jpg'} 
                         alt="Breeder Profile" 
                         className="w-full max-w-lg mx-auto h-[400px] object-cover rounded-xl shadow-lg"
+                        onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = '/images/default-profile.jpg';
+                        }}
                     />
                 </div>
                 <div className="w-full md:w-1/2">

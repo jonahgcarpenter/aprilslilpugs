@@ -1,8 +1,9 @@
 import React, { Suspense } from "react";
-import Background from '/images/backdrop.jpg';
+import Background from '/images/background.jpg';
 import Header from '../components/Header';
 import AboutUs from '../components/AboutUs';
 import MeetTheBreeder from "../components/Breeder";
+// import BreederForm from "../adminfeatures/BreederForm";
 
 const Home: React.FC = () => {
   return (
@@ -12,6 +13,7 @@ const Home: React.FC = () => {
         <main>
           <AboutUs />
           <MeetTheBreeder />
+          {/* <BreederForm /> */}
         </main>
       </Suspense>
     </div>

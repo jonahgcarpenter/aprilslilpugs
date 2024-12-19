@@ -1,10 +1,7 @@
 import React, { Suspense } from "react";
-import Background from '/images/backdrop.jpg';
+import Background from '/images/background.jpg';
 import Header from '../components/Header';
-// import Litters from '../components/Litters';
-// import UpdateLitters from '../adminfeatures/UpdateLitters';
-// import Grumble from '../components/Grumble';
-// import UpdateGrumble from '../adminfeatures/UpdateGrumble';
+import Live from '../components/Live';
 
 const Puppies: React.FC = () => {
   return (
@@ -12,10 +9,7 @@ const Puppies: React.FC = () => {
       <Header />
       <Suspense fallback={<div>Loading...</div>}>
         <main>
-          {/* <Litters />
-          <UpdateLitters />
-          <Grumble />
-          <UpdateGrumble /> */}
+          <Live />
         </main>
       </Suspense>
     </div>

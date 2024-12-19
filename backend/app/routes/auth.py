@@ -1,22 +1,62 @@
 from flask import Blueprint, jsonify, request, session, current_app
-from flask_cors import CORS
-from ..database import get_db_connection
-from ..config import Config
+from app.database import get_db_connection
+from app.config import Config
 import redis
 import bcrypt
+import os
+import json
+import time
+from werkzeug.utils import secure_filename
+from werkzeug.exceptions import HTTPException
+import logging
+import uuid
+
+logger = logging.getLogger(__name__)
 
 auth_bp = Blueprint('auth', __name__)
-CORS(auth_bp, supports_credentials=True, resources={
-    r"/api/*": {
-        "origins": ["http://localhost:5173", "http://localhost:3000"],  # Add Vite's default port
-        "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type"],
-        "expose_headers": ["Content-Type"],
-    }
-})
 
 # Initialize Redis connection using config
 redis_client = redis.Redis(**Config.get_redis_config())
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def create_session(user_id):
+    """Create a new session token and store in Redis"""
+    session_token = str(uuid.uuid4())
+    session_key = f"session:{session_token}"
+    session_data = {
+        'user_id': user_id,
+        'created_at': int(time.time())
+    }
+    redis_client.setex(
+        session_key,
+        Config.SESSION_LIFETIME,
+        json.dumps(session_data)
+    )
+    return session_token
+
+def get_session(session_token):
+    """Get session data from Redis"""
+    if not session_token:
+        return None
+    session_key = f"session:{session_token}"
+    data = redis_client.get(session_key)
+    if data:
+        redis_client.expire(session_key, Config.SESSION_LIFETIME)  # Extend session
+        return json.loads(data)
+    return None
+
+@auth_bp.errorhandler(Exception)
+def handle_error(error):
+    if isinstance(error, HTTPException):
+        return jsonify({"error": error.description}), error.code
+    
+    logger.exception("Unexpected error occurred")
+    return jsonify({"error": "Internal server error"}), 500
 
 @auth_bp.route('/api/health', methods=['GET'])
 def health_check():
@@ -55,144 +95,111 @@ def health_check():
     
     return jsonify(status)
 
-@auth_bp.route('/api/auth/login', methods=['POST'])
+@auth_bp.route('/auth/login', methods=['POST'])
 def login():
-    print("Login request received")
-    print("Request headers:", dict(request.headers))
-    print("Request body:", request.get_data(as_text=True))
-    
-    response_headers = {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Credentials': 'true'
-    }
-    
     try:
-        if not request.is_json:
-            print("Error: Request is not JSON")
-            return jsonify({"error": "Invalid request format"}), 400, response_headers
-
-        if not current_app.config['SECRET_KEY']:
-            print("Error: Missing SECRET_KEY")
-            return jsonify({"error": "Server configuration error: Missing secret key"}), 500, response_headers
-
         data = request.get_json()
-        print("Parsed JSON data:", data)
-        
         if not data or 'email' not in data or 'password' not in data:
-            print("Error: Missing email or password in request")
-            return jsonify({"error": "Email and password required"}), 400, response_headers
+            return jsonify({"error": "Email and password are required"}), 400
 
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        
         try:
-            conn = get_db_connection()
-            cursor = conn.cursor(dictionary=True)
-        except Exception as db_error:
-            print(f"Database connection error: {db_error}")
-            return jsonify({"error": f"Database connection error: {str(db_error)}"}), 500, response_headers
-            
-        try:
-            cursor.execute("""
-                SELECT id, email, password 
-                FROM breeder 
-                WHERE email = %s
-            """, (data['email'],))
-            
+            # Get user from database
+            cursor.execute("SELECT id, email, firstName, password FROM breeder WHERE email = %s", (data['email'],))
             user = cursor.fetchone()
-        except Exception as query_error:
-            print(f"Database query error: {query_error}")
-            return jsonify({"error": f"Database query error: {str(query_error)}"}), 500, response_headers
 
-        if not user:
-            print("Error: User not found")
-            return jsonify({"error": "User not found"}), 401, response_headers
+            if not user or not bcrypt.checkpw(data['password'].encode('utf-8'), user['password'].encode('utf-8')):
+                return jsonify({"error": "Invalid credentials"}), 401
+
+            # Create session
+            session_token = create_session(user['id'])
             
-        if not bcrypt.checkpw(data['password'].encode('utf-8'), user['password'].encode('utf-8')):
-            print("Error: Invalid password")
-            return jsonify({"error": "Invalid password"}), 401, response_headers
-
-        try:
-            session['user_id'] = user['id']
-            redis_client.set(
-                f"session:{user['id']}", 
-                'active', 
-                ex=Config.SESSION_LIFETIME
+            response = jsonify({
+                "success": True,
+                "user": {
+                    "id": user['id'],
+                    "email": user['email'],
+                    "firstName": user['firstName']
+                }
+            })
+            
+            # Set session cookie
+            response.set_cookie(
+                'session_token',
+                session_token,
+                httponly=True,
+                secure=False,  # Set to True in production with HTTPS
+                samesite='Lax',
+                max_age=Config.SESSION_LIFETIME
             )
-        except Exception as redis_error:
-            print(f"Session storage error: {redis_error}")
-            return jsonify({"error": f"Session storage error: {str(redis_error)}"}), 500, response_headers
+            
+            return response
 
-        return jsonify({"message": "Login successful"}), 200, response_headers
+        finally:
+            cursor.close()
+            conn.close()
 
     except Exception as e:
-        print(f"Unexpected error in login route: {e}")
-        return jsonify({"error": "Internal server error"}), 500, response_headers
-    finally:
-        if 'cursor' in locals():
-            cursor.close()
-        if 'conn' in locals():
-            conn.close()
+        logger.error(f"Login error: {e}")
+        return jsonify({"error": "Login failed"}), 500
+
+@auth_bp.route('/auth/logout', methods=['POST'])
+def legacy_logout():
+    return logout()
 
 @auth_bp.route('/api/auth/logout', methods=['POST'])
 def logout():
     try:
-        user_id = session.get('user_id')
-        if (user_id):
-            redis_client.delete(f"session:{user_id}")
-            session.clear()
-            
-        return jsonify({"message": "Logout successful"})
+        session_token = request.cookies.get('session_token')
+        if session_token:
+            redis_client.delete(f"session:{session_token}")
+        
+        response = jsonify({
+            "message": "Logout successful",
+            "authenticated": False
+        })
+        response.delete_cookie('session_token')
+        return response
 
     except Exception as e:
-        print(f"Logout error: {e}")
-        return jsonify({"error": str(e)}), 500
+        logger.error(f"Logout error: {e}")
+        return jsonify({
+            "message": "Logged out but session cleanup failed",
+            "authenticated": False
+        })
 
 @auth_bp.route('/api/auth/session', methods=['GET'])
 def check_session():
-    print("Session check requested")
-    print("Current session:", dict(session))
-    
-    response_headers = {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Credentials': 'true'
-    }
-    
     try:
-        user_id = session.get('user_id')
-        print(f"User ID from session: {user_id}")
+        session_token = request.cookies.get('session_token')
+        session_data = get_session(session_token)
         
-        if not user_id:
-            print("No user_id in session")
-            return jsonify({"authenticated": False}), 401, response_headers
-
-        # Check if session exists in Redis
-        session_exists = redis_client.exists(f"session:{user_id}")
-        print(f"Redis session exists: {session_exists}")
-        
-        if not session_exists:
-            print("Session not found in Redis")
-            session.clear()
-            return jsonify({"authenticated": False}), 401, response_headers
+        if not session_data:
+            return jsonify({"authenticated": False}), 401
 
         try:
             # Get user info from database
             conn = get_db_connection()
             cursor = conn.cursor(dictionary=True)
-            cursor.execute("SELECT id, email FROM breeder WHERE id = %s", (user_id,))
+            cursor.execute("SELECT id, email, firstName FROM breeder WHERE id = %s", (session_data['user_id'],))
             user = cursor.fetchone()
             print(f"User data from DB: {user}")
             
             if not user:
                 print("User not found in database")
-                session.clear()
-                redis_client.delete(f"session:{user_id}")
-                return jsonify({"authenticated": False}), 401, response_headers
+                redis_client.delete(f"session:{session_token}")
+                return jsonify({"authenticated": False}), 401
 
             return jsonify({
                 "authenticated": True,
                 "user": {
                     "id": user['id'],
-                    "email": user['email']
+                    "email": user['email'],
+                    "firstName": user['firstName']
                 }
-            }), 200, response_headers
+            }), 200
 
         finally:
             if 'cursor' in locals():
@@ -202,7 +209,111 @@ def check_session():
 
     except redis.RedisError as e:
         print(f"Redis error: {e}")
-        return jsonify({"error": "Session store error", "authenticated": False}), 500, response_headers
+        return jsonify({"error": "Session store error", "authenticated": False}), 500
     except Exception as e:
         print(f"Session check error: {e}")
-        return jsonify({"error": str(e), "authenticated": False}), 500, response_headers
+        logger.error(f"Session check error: {e}")
+        return jsonify({
+            "error": str(e),
+            "authenticated": False,
+            "message": "Session check failed"
+        }), 500
+
+@auth_bp.route('/api/auth/register', methods=['POST', 'OPTIONS'])
+def register_breeder():
+    if request.method == 'OPTIONS':
+        return jsonify({}), 200
+        
+    print("Registration request received")
+    print("Request headers:", dict(request.headers))
+    
+    try:
+        # Handle multipart form data
+        email = request.form.get('email')
+        password = request.form.get('password')
+        user_detail = json.loads(request.form.get('userDetail', '{}'))
+        profile_image = request.files.get('profileImage')
+        
+        breeder_data = {
+            'email': email,
+            'password': password,
+            'firstName': user_detail.get('firstName'),
+            'lastName': user_detail.get('lastName'),
+            'city': user_detail.get('city'),
+            'state': user_detail.get('state'),
+            'experienceYears': user_detail.get('experienceYears'),
+            'story': user_detail.get('story'),
+            'phone': user_detail.get('phone'),
+            'profile_image': None
+        }
+
+        # Validate required fields
+        required_fields = ['email', 'password', 'firstName', 'lastName']
+        missing_fields = [field for field in required_fields if not breeder_data.get(field)]
+        if missing_fields:
+            return jsonify({"error": f"Missing required fields: {', '.join(missing_fields)}"}), 400
+
+        # Process profile image if provided
+        if profile_image:
+            if not allowed_file(profile_image.filename):
+                return jsonify({
+                    "error": f"Invalid file type. Allowed types: {', '.join(ALLOWED_EXTENSIONS)}"
+                }), 415
+            
+            if len(profile_image.read()) > MAX_FILE_SIZE:
+                return jsonify({
+                    "error": f"File size too large. Maximum size: {MAX_FILE_SIZE/1024/1024}MB"
+                }), 413
+            
+            # Reset file pointer after reading
+            profile_image.seek(0)
+            breeder_data['profile_image'] = profile_image.read()
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Check if email exists
+        cursor.execute('SELECT id FROM breeder WHERE email = %s', (breeder_data['email'],))
+        if cursor.fetchone():
+            return jsonify({"error": "Email already registered"}), 409
+
+        # Hash password
+        hashed_password = bcrypt.hashpw(breeder_data['password'].encode('utf-8'), bcrypt.gensalt())
+
+        # Updated insert query with profile_image
+        insert_query = """
+            INSERT INTO breeder (
+                email, password, firstName, lastName,
+                city, state, experienceYears, story, phone,
+                profile_image
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """
+        
+        cursor.execute(insert_query, (
+            breeder_data['email'],
+            hashed_password,
+            breeder_data['firstName'],
+            breeder_data['lastName'],
+            breeder_data['city'],
+            breeder_data['state'],
+            breeder_data['experienceYears'],
+            breeder_data['story'],
+            breeder_data['phone'],
+            breeder_data['profile_image']
+        ))
+        
+        conn.commit()
+        return jsonify({
+            "message": "Breeder registered successfully",
+            "id": cursor.lastrowid
+        }), 201
+
+    except Exception as e:
+        print(f"Registration error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
+        if 'conn' in locals():
+            conn.close()

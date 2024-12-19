@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import AuthButton from '../auth/AuthButton';
+import LoginButton from '../auth/LoginButton';
 
 const PageNav: React.FC = () => {
   return (
@@ -14,12 +14,7 @@ const PageNav: React.FC = () => {
           Puppies
         </button>
       </Link>
-      <Link to="/media">
-        <button className="bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-4 py-1.5 text-sm rounded-full font-semibold shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200">
-          Media
-        </button>
-      </Link>
-      <AuthButton />
+      <LoginButton />
     </div>
   );
 };

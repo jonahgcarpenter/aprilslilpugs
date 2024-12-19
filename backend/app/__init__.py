@@ -1,35 +1,36 @@
 from flask import Flask
-from flask_cors import CORS
+from redis import Redis
+import os
 from .config import Config
-from .routes import bp
-from .routes.auth import auth_bp
-from .routes.breeder import breeder_bp
-from .routes.litters import litters
-from .routes.grumbles import grumbles
-from .routes.puppies import puppies
+from .database import init_db
+from .routes import main_bp, auth_bp, breeder_bp, aboutus_bp
+
+redis_client = None
 
 def create_app(test_config=None):
-    app = Flask(__name__)
+    app = Flask(__name__, instance_relative_config=True)
     
-    # Load configuration
+    # Ensure instance folder exists
+    os.makedirs(app.instance_path, exist_ok=True)
+
+    # Load configurations
     if test_config is None:
         app.config.from_object(Config)
-        Config.validate()
+        app.config.from_pyfile('config.py', silent=True)
     else:
         app.config.update(test_config)
 
-    # Configure session
-    app.secret_key = app.config['SECRET_KEY']
+    # Initialize Redis
+    global redis_client
+    redis_client = Redis(**Config.get_redis_config())
     
-    # Enable CORS
-    CORS(app, supports_credentials=True)
+    # Initialize database
+    init_db(app)
 
     # Register blueprints
-    app.register_blueprint(bp)
+    app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(breeder_bp)
-    app.register_blueprint(litters)
-    app.register_blueprint(grumbles)
-    app.register_blueprint(puppies)
+    app.register_blueprint(aboutus_bp)
 
     return app

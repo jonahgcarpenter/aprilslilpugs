@@ -1,21 +1,33 @@
 import React, { Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Home from './pages/Home';
-import Puppies from './pages/Puppies';
-import Media from './pages/Media';
+import { AuthProvider } from './auth/AuthContext';
+// import ProtectedRoute from './auth/ProtectedRoute';
+import LoadingSpinner from './components/LoadingSpinner';
+
+// Lazy load components
+const Home = React.lazy(() => import('./pages/Home'));
+const Puppies = React.lazy(() => import('./pages/Puppies'));
 
 const App: React.FC = () => {
   return (
-    <Router>
-      <Suspense fallback={<div>Loading...</div>}>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/puppies" element={<Puppies />} />
-          <Route path="/media" element={<Media />} />
-          {/* Add more routes here as needed */}
-        </Routes>
-      </Suspense>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Suspense fallback={<LoadingSpinner />}>
+          <Routes>
+            {/* Public routes */}
+            <Route path="/" element={<Home />} />
+            <Route path="/puppies" element={<Puppies />} />
+            
+            {/* Protected routes
+            <Route path="/dashboard" element={
+              <ProtectedRoute redirectTo="/login">
+                <BreederDashboard />
+              </ProtectedRoute>
+            } /> */}
+          </Routes>
+        </Suspense>
+      </Router>
+    </AuthProvider>
   );
 };
 
