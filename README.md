@@ -2,24 +2,23 @@
 
 A 100% under construction project I am developing tailored to the Clients needs and desires. 
 
-Currently under rework for properly managing the data within our local servers
-
 ## Overview
 Modern, responsive website built to showcase and manage a dog breeding business.
 
 ## Technologies
+- Docker
 - Vite React
 - Flask
 - MySQL
+- RTMPS Server
 
 ## Features ( or soon to be )
 - Real-time database updates
-- Fallback data ( this is self hosted so we're not expecting blazing speeds )
 - Waitlist for users to join and view
 - Media Post w/ user comments
 - User Reviews
 - Email Notifications
-- Puppy live stream
+- Puppy live stream using a local RTMPS server that converts to HLS for browser viewing
 
 ### Admin Specific
 - User Bug Reporting
@@ -32,6 +31,4 @@ Modern, responsive website built to showcase and manage a dog breeding business.
 
 ## TODO
 
-- ensure proper API handling
-
-- deploy on live server as is
+Fully Dockerize for easily deployment on UnRaid
