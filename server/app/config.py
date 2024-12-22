@@ -1,67 +1,50 @@
-"""
-Application configuration management.
-Handles all environment variables and configuration settings for the application.
-"""
-from datetime import timedelta
+"""Application configuration management"""
 import os
 from dotenv import load_dotenv
 
-# Load environment variables
-env_path = os.path.join('.env')
-if os.path.exists(env_path):
-    load_dotenv(env_path)
-else:
-    raise FileNotFoundError("Missing .env file in server directory")
-
-def get_required_env(key: str) -> str:
-    """
-    Retrieve a required environment variable.
-    Raises ValueError if the variable is not set.
-    """
-    value = os.getenv(key)
-    if value is None:
-        raise ValueError(f"Missing required environment variable: {key}")
-    return value
+load_dotenv()
 
 class Config:
-    """Central configuration class for the application."""
+    """Application configuration"""
     
-    # Core Flask Configuration
-    SECRET_KEY = get_required_env('SECRET_KEY')
-    DEBUG = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
+    # Core Configuration
+    SECRET_KEY = os.getenv('SECRET_KEY', 'dev-key-change-in-prod')
     PORT = int(os.getenv('PORT', '5000'))
-    
-    # Security and Session Configuration
-    SESSION_LIFETIME = int(os.getenv('SESSION_LIFETIME', '3600'))  # 1 hour default
-    
-    # File Upload Configuration
-    UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER', 'uploads')
-    MAX_CONTENT_LENGTH = int(os.getenv('MAX_FILE_SIZE', '5242880'))  # 5MB default
+    DEBUG = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
     
     # CORS Configuration
-    CORS_ORIGIN = 'http://localhost:5173'  # Vite development server
-    CORS_HEADERS = ['Content-Type', 'Authorization']
+    CORS_ORIGINS = os.getenv('CORS_ORIGINS', 'http://localhost:5173').split(',')
+    CORS_HEADERS = [
+        'Content-Type',
+        'Authorization',
+        'Access-Control-Allow-Credentials',
+        'X-Requested-With'
+    ]
     CORS_METHODS = ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
-    CORS_SUPPORTS_CREDENTIALS = True
+    
+    # File Upload Configuration
+    MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5MB
+    
+    # Session Configuration
+    SESSION_LIFETIME = int(os.getenv('SESSION_LIFETIME', '3600'))
     
     @staticmethod
-    def get_db_config() -> dict:
+    def get_db_config():
         """Database connection configuration"""
         return {
-            'host': get_required_env('MYSQL_HOST'),
-            'port': int(os.getenv('MYSQL_PORT', '3306')),
-            'user': get_required_env('MYSQL_USER'),
-            'password': get_required_env('MYSQL_PASSWORD'),
-            'database': get_required_env('MYSQL_DATABASE')
+            'host': os.getenv('MYSQL_HOST', 'localhost'),
+            'user': os.getenv('MYSQL_USER', 'root'),
+            'password': os.getenv('MYSQL_PASSWORD', ''),
+            'database': os.getenv('MYSQL_DATABASE', 'aprilslilpugs')
         }
     
     @staticmethod
-    def get_redis_config() -> dict:
+    def get_redis_config():
         """Redis connection configuration"""
         return {
-            'host': get_required_env('REDIS_HOST'),
+            'host': os.getenv('REDIS_HOST', 'localhost'),
             'port': int(os.getenv('REDIS_PORT', '6379')),
             'db': int(os.getenv('REDIS_DB', '0')),
-            'password': get_required_env('REDIS_PASSWORD'),
+            'password': os.getenv('REDIS_PASSWORD', None),
             'decode_responses': True
         }

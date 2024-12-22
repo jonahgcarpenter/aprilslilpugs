@@ -1,60 +1,59 @@
 """
-About Us page content management routes.
+About Us content management routes.
 Handles retrieval and updates of breeder information sections.
+
+Routes:
+    - / [GET]  : Retrieve about us sections
+    - / [POST] : Update about us sections
 """
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, current_app
+from flask_cors import cross_origin
+from typing import Dict, List
+
 from app.database import get_db_connection
 
 aboutus_bp = Blueprint('aboutus', __name__)
 
-@aboutus_bp.route('/api/aboutus', methods=['GET'])
+# Route handlers
+@aboutus_bp.route('/', methods=['GET'])
+@cross_origin(supports_credentials=True)
 def get_aboutus_info():
+    """Retrieve about us sections using a single efficient query"""
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
         
-        # Always use breeder_id = 1
-        breeder_id = 1
-        
-        # Get breeding standards
+        # Use a single query to get all sections, properly ordered
         cursor.execute("""
-            SELECT item 
+            SELECT section, item 
             FROM about_us_items 
-            WHERE section = 'breeding_standards' 
-            AND breeder_id = %s 
-            ORDER BY display_order, id
-        """, (breeder_id,))
-        breeding_standards = [row['item'] for row in cursor.fetchall()]
+            WHERE breeder_id = 1
+            ORDER BY section, display_order, created_at
+        """)
         
-        # Get services provided
-        cursor.execute("""
-            SELECT item 
-            FROM about_us_items 
-            WHERE section = 'services_provided' 
-            AND breeder_id = %s 
-            ORDER BY display_order, id
-        """, (breeder_id,))
-        services_provided = [row['item'] for row in cursor.fetchall()]
+        # Initialize the response structure
+        result = {
+            'breeding_standards': [],
+            'services_provided': [],
+            'what_we_require': []
+        }
         
-        # Get what we require
-        cursor.execute("""
-            SELECT item 
-            FROM about_us_items 
-            WHERE section = 'what_we_require' 
-            AND breeder_id = %s 
-            ORDER BY display_order, id
-        """, (breeder_id,))
-        what_we_require = [row['item'] for row in cursor.fetchall()]
-        
+        # Organize items by section
+        for row in cursor.fetchall():
+            if row['section'] in result:
+                result[row['section']].append(row['item'])
+
         return jsonify({
-            'breeding_standards': breeding_standards,
-            'services_provided': services_provided,
-            'what_we_require': what_we_require
+            "status": "success",
+            "data": result
         })
 
     except Exception as e:
         print(f"Database error: {str(e)}")
-        return jsonify({"error": str(e)}), 500
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
     
     finally:
         if 'cursor' in locals():
@@ -62,46 +61,50 @@ def get_aboutus_info():
         if 'conn' in locals():
             conn.close()
 
-@aboutus_bp.route('/api/aboutus', methods=['POST'])
+@aboutus_bp.route('/', methods=['POST'])
+@cross_origin(supports_credentials=True)
 def update_aboutus_info():
+    """Update about us sections maintaining proper order and timestamps"""
     try:
-        data = request.json
+        data = request.get_json()
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        # Always use breeder_id = 1
-        breeder_id = 1
-
-        # Clear existing items for this breeder
-        cursor.execute("DELETE FROM about_us_items WHERE breeder_id = %s", (breeder_id,))
-
-        # Insert new breeding standards
-        for i, item in enumerate(data.get('breeding_standards', [])):
-            cursor.execute("""
-                INSERT INTO about_us_items (breeder_id, section, item, display_order)
-                VALUES (%s, 'breeding_standards', %s, %s)
-            """, (breeder_id, item, i))
-
-        # Insert new services provided
-        for i, item in enumerate(data.get('services_provided', [])):
-            cursor.execute("""
-                INSERT INTO about_us_items (breeder_id, section, item, display_order)
-                VALUES (%s, 'services_provided', %s, %s)
-            """, (breeder_id, item, i))
-
-        # Insert what we require
-        for i, item in enumerate(data.get('what_we_require', [])):
-            cursor.execute("""
-                INSERT INTO about_us_items (breeder_id, section, item, display_order)
-                VALUES (%s, 'what_we_require', %s, %s)
-            """, (breeder_id, item, i))
-
-        conn.commit()
-        return jsonify({"message": "About us information updated successfully"})
+        # Start transaction
+        conn.begin()
+        
+        try:
+            # Clear existing items for breeder_id 1
+            cursor.execute("DELETE FROM about_us_items WHERE breeder_id = 1")
+            
+            # Insert new items with proper section names and order
+            for section in ['breeding_standards', 'services_provided', 'what_we_require']:
+                items = data.get(section, [])
+                for order, item in enumerate(items):
+                    cursor.execute("""
+                        INSERT INTO about_us_items 
+                        (breeder_id, section, item, display_order) 
+                        VALUES (%s, %s, %s, %s)
+                    """, (1, section, item, order))
+            
+            # Commit transaction
+            conn.commit()
+            
+            return jsonify({
+                "status": "success",
+                "message": "About us information updated successfully"
+            })
+            
+        except Exception as e:
+            conn.rollback()
+            raise e
 
     except Exception as e:
         print(f"Database error: {str(e)}")
-        return jsonify({"error": str(e)}), 500
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
     
     finally:
         if 'cursor' in locals():

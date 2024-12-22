@@ -1,54 +1,78 @@
-from flask import Blueprint, jsonify, request
-from app.database import get_db_connection
-from app.config import Config
-import redis
-import bcrypt
+"""
+Authentication routes module.
+Handles user authentication, session management, and registration.
+
+Routes:
+    - /health   : Service health check
+    - /login    : User authentication
+    - /logout   : Session termination
+    - /session  : Session validation
+    - /register : New user registration
+"""
+# Standard library imports
 import json
 import time
-from werkzeug.utils import secure_filename
-from werkzeug.exceptions import HTTPException
-import logging
 import uuid
+import logging
+
+# Third party imports
+from flask import Blueprint, jsonify, request
 from flask_cors import cross_origin
+import bcrypt
+import redis
+
+# Local imports
+from app.database import get_db_connection
+from app.config import Config
 
 logger = logging.getLogger(__name__)
 
-auth_bp = Blueprint('auth', __name__)  # Remove url_prefix as it's set in __init__.py
+auth_bp = Blueprint('auth', __name__)
 
 # Initialize Redis connection using config
-redis_client = redis.Redis(**Config.get_redis_config())
+try:
+    redis_client = redis.Redis(**Config.get_redis_config())
+    redis_client.ping()  # Test connection
+    REDIS_AVAILABLE = True
+except (redis.RedisError, Exception) as e:
+    logger.warning(f"Redis connection failed: {e}. Running without session storage.")
+    redis_client = None
+    REDIS_AVAILABLE = False
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
 
+class AuthError(Exception):
+    """Custom exception for authentication errors"""
+    def __init__(self, message: str, code: int = 401):
+        self.message = message
+        self.code = code
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-def create_session(user_id):
-    """Create a new session token and store in Redis"""
-    session_token = str(uuid.uuid4())
-    session_key = f"session:{session_token}"
-    session_data = {
-        'user_id': user_id,
-        'created_at': int(time.time())
-    }
-    redis_client.setex(
-        session_key,
-        Config.SESSION_LIFETIME,
-        json.dumps(session_data)
-    )
-    return session_token
+def store_session(session_token: str, session_data: dict, expiry: int) -> bool:
+    """Store session data safely"""
+    if not REDIS_AVAILABLE:
+        return False
+    try:
+        session_key = f"session:{session_token}"
+        return redis_client.setex(session_key, expiry, json.dumps(session_data))
+    except Exception as e:
+        logger.error(f"Session storage error: {e}")
+        return False
 
-def get_session(session_token):
-    """Get session data from Redis"""
-    if not session_token:
+def get_session(session_token: str) -> dict:
+    """Retrieve session data safely"""
+    if not REDIS_AVAILABLE or not session_token:
         return None
-    session_key = f"session:{session_token}"
-    data = redis_client.get(session_key)
-    if data:
-        redis_client.expire(session_key, Config.SESSION_LIFETIME)  # Extend session
-        return json.loads(data)
-    return None
+    try:
+        session_key = f"session:{session_token}"
+        data = redis_client.get(session_key)
+        return json.loads(data) if data else None
+    except Exception as e:
+        logger.error(f"Session retrieval error: {e}")
+        return None
 
 @auth_bp.errorhandler(Exception)
 def handle_error(error):
@@ -58,8 +82,9 @@ def handle_error(error):
     logger.exception("Unexpected error occurred")
     return jsonify({"error": "Internal server error"}), 500
 
-@auth_bp.route('/health', methods=['GET'])  # Changed from '/api/health'
+@auth_bp.route('/health', methods=['GET'])  # Will be /api/auth/health
 def health_check():
+    """Health check endpoint for service monitoring"""
     status = {
         'database': False,
         'redis': False,
@@ -95,22 +120,21 @@ def health_check():
     
     return jsonify(status)
 
-@auth_bp.route('/login', methods=['POST', 'OPTIONS'])
+@auth_bp.route('/login', methods=['POST', 'OPTIONS'])  # Will be /api/auth/login
 @cross_origin(supports_credentials=True)
 def login():
     if request.method == 'OPTIONS':
-        return jsonify({}), 200
+        return handle_preflight()
 
     try:
         data = request.get_json()
         if not data or 'email' not in data or 'password' not in data:
-            return jsonify({"error": "Email and password are required"}), 400
+            return jsonify({"status": "error", "message": "Email and password are required"}), 400
 
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
         
         try:
-            # Modified query to include active column check
             cursor.execute("""
                 SELECT id, email, firstName, password, active 
                 FROM breeder 
@@ -118,31 +142,37 @@ def login():
             """, (data['email'],))
             user = cursor.fetchone()
 
-            if not user:
-                return jsonify({"error": "Invalid credentials"}), 401
+            if not user or not bcrypt.checkpw(data['password'].encode('utf-8'), user['password'].encode('utf-8')):
+                return jsonify({
+                    "status": "error",
+                    "message": "Invalid credentials"
+                }), 401
 
-            if not bcrypt.checkpw(data['password'].encode('utf-8'), user['password'].encode('utf-8')):
-                return jsonify({"error": "Invalid credentials"}), 401
-
-            # Create session
-            session_token = create_session(user['id'])
+            session_token = str(uuid.uuid4())
+            session_data = {
+                'user_id': user['id'],
+                'created_at': int(time.time())
+            }
             
-            # Ensure response format matches what frontend expects
+            store_session(session_token, session_data, Config.SESSION_LIFETIME)
+            
             response = jsonify({
-                "success": True,
-                "user": {
-                    "id": user['id'],
-                    "email": user['email'],
-                    "firstName": user['firstName']
+                "status": "success",
+                "data": {
+                    "authenticated": True,
+                    "user": {
+                        "id": user['id'],
+                        "email": user['email'],
+                        "firstName": user['firstName']
+                    }
                 }
             })
             
-            # Set session cookie with proper configuration
             response.set_cookie(
                 'session_token',
                 session_token,
                 httponly=True,
-                secure=Config.DEBUG is False,
+                secure=not Config.DEBUG,
                 samesite='Lax',
                 max_age=Config.SESSION_LIFETIME,
                 path='/'
@@ -153,105 +183,115 @@ def login():
         finally:
             cursor.close()
             conn.close()
-
+            
     except Exception as e:
         logger.error(f"Login error: {e}")
-        return jsonify({"error": "Login failed", "success": False}), 500
+        return jsonify({
+            "status": "error",
+            "message": "Authentication failed"
+        }), 500
 
-@auth_bp.route('/logout', methods=['POST'])
+@auth_bp.route('/logout', methods=['POST'])  # Will be /api/auth/logout
 @cross_origin(supports_credentials=True)
 def logout():
     try:
         session_token = request.cookies.get('session_token')
-        if session_token:
+        if not session_token:
+            return jsonify({
+                "status": "success",
+                "message": "Already logged out"
+            })
+
+        # Verify session before logout
+        session_data = get_session(session_token)
+        if session_data and REDIS_AVAILABLE:
             redis_client.delete(f"session:{session_token}")
         
         response = jsonify({
-            "message": "Logout successful",
-            "authenticated": False
+            "status": "success",
+            "message": "Logout successful"
         })
-        response.delete_cookie('session_token')
+        response.delete_cookie('session_token', path='/')
         return response
 
     except Exception as e:
         logger.error(f"Logout error: {e}")
         return jsonify({
-            "message": "Logged out but session cleanup failed",
-            "authenticated": False
-        })
+            "status": "error",
+            "message": "Logout failed"
+        }), 500
 
-@auth_bp.route('/session', methods=['GET'])
+@auth_bp.route('/session', methods=['GET'])  # Will be /api/auth/session
 @cross_origin(supports_credentials=True)
 def check_session():
     try:
         session_token = request.cookies.get('session_token')
         if not session_token:
             return jsonify({
-                "authenticated": False,
-                "message": "No session token"
-            }), 200  # Changed from 401 to 200
-
-        session_data = get_session(session_token)
-        if not session_data:
-            return jsonify({
-                "authenticated": False,
-                "message": "Invalid or expired session"
-            }), 200  # Changed from 401 to 200
-
-        conn = None
-        cursor = None
-        try:
-            conn = get_db_connection()
-            cursor = conn.cursor(dictionary=True)
-            cursor.execute(
-                "SELECT id, email, firstName FROM breeder WHERE id = %s AND active = 1", 
-                (session_data['user_id'],)
-            )
-            user = cursor.fetchone()
-
-            if not user:
-                redis_client.delete(f"session:{session_token}")
-                return jsonify({
-                    "authenticated": False,
-                    "message": "User not found or deactivated"
-                }), 401
-
-            return jsonify({
-                "authenticated": True,
-                "user": {
-                    "id": user['id'],
-                    "email": user['email'],
-                    "firstName": user['firstName']
+                "status": "success",
+                "data": {
+                    "authenticated": False
                 }
             })
 
-        except Exception as e:
-            logger.error(f"Database error during session check: {str(e)}")
+        session_data = get_session(session_token)
+        if not session_data:
+            response = jsonify({
+                "status": "success",
+                "data": {
+                    "authenticated": False
+                }
+            })
+            response.delete_cookie('session_token', path='/')
+            return response
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        
+        try:
+            cursor.execute("""
+                SELECT id, email, firstName, active 
+                FROM breeder 
+                WHERE id = %s AND active = 1
+            """, (session_data['user_id'],))
+            user = cursor.fetchone()
+
+            if not user:
+                if REDIS_AVAILABLE:
+                    redis_client.delete(f"session:{session_token}")
+                response = jsonify({
+                    "status": "success",
+                    "data": {
+                        "authenticated": False
+                    }
+                })
+                response.delete_cookie('session_token', path='/')
+                return response
+
             return jsonify({
-                "authenticated": False,
-                "message": "Database error during session check"
-            }), 500
+                "status": "success",
+                "data": {
+                    "authenticated": True,
+                    "user": {
+                        "id": user['id'],
+                        "email": user['email'],
+                        "firstName": user['firstName']
+                    }
+                }
+            })
 
         finally:
-            if cursor:
-                cursor.close()
-            if conn:
-                conn.close()
+            cursor.close()
+            conn.close()
 
-    except redis.RedisError as e:
-        logger.error(f"Redis error during session check: {str(e)}")
-        return jsonify({
-            "authenticated": False,
-            "message": "Session store error"
-        }), 500
     except Exception as e:
-        logger.error(f"Unexpected error during session check: {str(e)}")
+        logger.error(f"Session check error: {e}")
         return jsonify({
-            "authenticated": False,
+            "status": "error",
             "message": "Session check failed"
         }), 500
 
-@auth_bp.route('/register', methods=['POST', 'OPTIONS'])
+@auth_bp.route('/register', methods=['POST', 'OPTIONS'])  # Will be /api/auth/register
 @cross_origin(supports_credentials=True)
 def register_breeder():
     if request.method == 'OPTIONS':
@@ -350,3 +390,9 @@ def register_breeder():
             cursor.close()
         if 'conn' in locals():
             conn.close()
+
+def handle_preflight():
+    response = jsonify({})
+    response.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+    return response

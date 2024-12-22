@@ -30,7 +30,5 @@ Modern, responsive website built to showcase and manage a dog breeding business.
 - Add/Edit dog related databases
 
 ## TODO
-
-Fully Dockerize for easily deployment on UnRaid for proper deployment
-
-This container should include all aspects of ALP and correctly diffreienciate HTTP/HTTPS servers so that we can use HTTPS for the prod server, and HTTP for the dev server
+- Add underconstruction section
+- Add ADMIN DASH for admins onces logged in

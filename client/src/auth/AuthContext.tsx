@@ -3,14 +3,8 @@
  * Manages global authentication state and session management.
  */
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import api from '../utils/api';
-
-// Type definitions
-interface UserData {
-  id: number;
-  email: string;
-  firstName: string;
-}
+import { auth } from '../services/authService';
+import type { UserData } from '../services/types';
 
 interface AuthContextType {
   isLoggedIn: boolean;
@@ -19,16 +13,6 @@ interface AuthContextType {
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-}
-
-// Type guard for user data validation
-function isValidUserData(data: any): data is UserData {
-  return (
-    data &&
-    typeof data.id === 'number' &&
-    typeof data.email === 'string' &&
-    typeof data.firstName === 'string'
-  );
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -41,14 +25,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [error, setError] = useState<string | null>(null);
 
   // Session management functions
-  const checkSession = async () => {
+  const verifySession = async () => {
     try {
-      const response = await api.get('/auth/session');
-      
-      if (response.data?.authenticated && response.data?.user) {
+      const response = await auth.checkSession();
+      if (response.status === 'success' && response.data?.authenticated) {
         setIsLoggedIn(true);
-        setUserData(response.data.user);
-        setError(null);
+        setUserData(response.data.user || null);
       } else {
         setIsLoggedIn(false);
         setUserData(null);
@@ -56,81 +38,48 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } catch (err) {
       setIsLoggedIn(false);
       setUserData(null);
-      if (err instanceof Error && 
-          err.message !== "No session token" && 
-          err.message !== "Invalid or expired session") {
-        setError(err.message);
-      }
+    } finally {
+      setLoading(false);
     }
   };
 
-  const login = async (email: string, password: string) => {
+  const handleLogin = async (email: string, password: string) => {
+    setLoading(true);
+    setError(null);
     try {
-      setError(null);
-      setLoading(true);
-      
-      const response = await api.post('/auth/login', { 
-        email, 
-        password 
-      });
-      
-      if (response.data?.success && isValidUserData(response.data.user)) {
+      const response = await auth.login(email, password);
+      if (response.status === 'success' && response.data?.authenticated) {
         setIsLoggedIn(true);
-        setUserData(response.data.user);
+        setUserData(response.data.user || null);
       } else {
-        throw new Error('Invalid login response format');
+        throw new Error(response.message || 'Login failed');
       }
     } catch (err) {
       setIsLoggedIn(false);
       setUserData(null);
-      const errorMessage = err instanceof Error ? err.message : 'Login failed';
-      setError(errorMessage);
-      throw err;
+      const message = err instanceof Error ? err.message : 'Login failed';
+      setError(message);
+      throw new Error(message);
     } finally {
       setLoading(false);
     }
   };
 
-  const logout = async () => {
+  const handleLogout = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      await api.post('/auth/logout');
+      await auth.logout();
+    } finally {
       setIsLoggedIn(false);
       setUserData(null);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Logout failed';
-      setError(errorMessage);
-      throw new Error(errorMessage);
-    } finally {
       setLoading(false);
     }
   };
 
-  // Session check effect
+  // Session check effect - simplified without auto-refresh
   useEffect(() => {
-    let isSubscribed = true;
-    let intervalId: NodeJS.Timeout | null = null;
-    
-    const initialCheck = async () => {
-      if (!isSubscribed) return;
-      
-      await checkSession();
-      setLoading(false);
-
-      if (isSubscribed && isLoggedIn) {
-        intervalId = setInterval(checkSession, 5 * 60 * 1000);
-      }
-    };
-
-    initialCheck();
-
-    return () => {
-      isSubscribed = false;
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-    };
-  }, [isLoggedIn]);
+    verifySession();
+  }, []); // Empty dependency array
 
   // Loading state handler
   if (loading && !isLoggedIn && !userData) {
@@ -143,8 +92,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       userData,
       loading,
       error,
-      login,
-      logout
+      login: handleLogin,
+      logout: handleLogout
     }}>
       {children}
     </AuthContext.Provider>
