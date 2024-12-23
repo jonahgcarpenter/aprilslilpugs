@@ -38,7 +38,8 @@ export default defineConfig(({ command, mode }) => {
 
     server: {
       port: parseInt(env.VITE_PORT || '5173'),
-      host: false,
+      host: true, // Changed from false to true to allow external access
+      cors: true, // Add CORS support
       proxy: {
         '/api': {
           target: env.VITE_API_URL || 'http://localhost:5000',
