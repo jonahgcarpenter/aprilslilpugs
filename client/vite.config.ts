@@ -6,9 +6,10 @@ import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import { resolve } from 'path'
 
-export default defineConfig(({ command, mode }) => {
-  const env = loadEnv(mode, process.cwd(), '')
-  const isProduction = mode === 'production'
+export default defineConfig(() => {
+  // Force development env file
+  const env = loadEnv('development', process.cwd(), '')
+  const isProduction = false
 
   return {
     plugins: [react()],
@@ -38,22 +39,22 @@ export default defineConfig(({ command, mode }) => {
 
     server: {
       port: parseInt(env.VITE_PORT || '5173'),
-      host: true, // Changed from false to true to allow external access
-      cors: true, // Add CORS support
+      host: '0.0.0.0',
+      watch: {
+        usePolling: true,
+        interval: 1000,
+      },
       proxy: {
-        '/api': {
-          target: env.VITE_API_URL || 'http://localhost:5000',
+        '^/api/.*': {
+          target: 'http://api:5000',  // Use Docker service name
           changeOrigin: true,
-          secure: isProduction,
+          secure: false,
           ws: true,
-          rewrite: (path) => path.replace(/^\/api/, ''),
-          headers: {
-            'Access-Control-Allow-Origin': '*'
-          }
         },
         '/socket.io': {
-          target: env.VITE_API_URL || 'http://localhost:5000',
-          ws: true
+          target: 'http://api:5000',  // Use Docker service name
+          ws: true,
+          changeOrigin: true
         }
       }
     },

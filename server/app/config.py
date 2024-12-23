@@ -4,16 +4,23 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+def get_env_or_raise(key: str) -> str:
+    """Get environment variable or raise error if not found"""
+    value = os.getenv(key)
+    if value is None:
+        raise ValueError(f"Required environment variable '{key}' is not set")
+    return value
+
 class Config:
     """Application configuration"""
     
     # Core Configuration
-    SECRET_KEY = os.getenv('SECRET_KEY', 'dev-key-change-in-prod')
-    PORT = int(os.getenv('PORT', '5000'))
+    SECRET_KEY = get_env_or_raise('SECRET_KEY')
+    PORT = int(get_env_or_raise('WAITRESS_PORT'))
     DEBUG = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
     
     # CORS Configuration
-    CORS_ORIGINS = os.getenv('CORS_ORIGINS', 'http://localhost:5173').split(',')
+    CORS_ORIGINS = get_env_or_raise('CORS_ORIGINS').split(',')
     CORS_HEADERS = [
         'Content-Type',
         'Authorization',
@@ -26,25 +33,25 @@ class Config:
     MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5MB
     
     # Session Configuration
-    SESSION_LIFETIME = int(os.getenv('SESSION_LIFETIME', '3600'))
+    SESSION_LIFETIME = int(get_env_or_raise('SESSION_LIFETIME'))
     
     @staticmethod
     def get_db_config():
         """Database connection configuration"""
         return {
-            'host': os.getenv('MYSQL_HOST', 'localhost'),
-            'user': os.getenv('MYSQL_USER', 'root'),
-            'password': os.getenv('MYSQL_PASSWORD', ''),
-            'database': os.getenv('MYSQL_DATABASE', 'aprilslilpugs')
+            'host': get_env_or_raise('MYSQL_HOST'),
+            'user': get_env_or_raise('MYSQL_USER'),
+            'password': get_env_or_raise('MYSQL_PASSWORD'),
+            'database': get_env_or_raise('MYSQL_DATABASE')
         }
     
     @staticmethod
     def get_redis_config():
         """Redis connection configuration"""
         return {
-            'host': os.getenv('REDIS_HOST', 'localhost'),
-            'port': int(os.getenv('REDIS_PORT', '6379')),
-            'db': int(os.getenv('REDIS_DB', '0')),
-            'password': os.getenv('REDIS_PASSWORD', None),
+            'host': get_env_or_raise('REDIS_HOST'),
+            'port': int(get_env_or_raise('REDIS_PORT')),
+            'db': int(get_env_or_raise('REDIS_DB')),
+            'password': get_env_or_raise('REDIS_PASSWORD'),
             'decode_responses': True
         }

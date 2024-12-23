@@ -2,9 +2,8 @@
 import os
 import logging
 from app import create_app
-from dotenv import load_dotenv
 
-load_dotenv()
+# Remove load_dotenv() since it's now handled in run.py
 
 def setup_logging():
     """Configure logging for production"""
@@ -22,21 +21,21 @@ def get_server_config(environment):
     if environment == 'production':
         return {
             'host': '0.0.0.0',  # Allow external connections
-            'port': int(os.getenv('WAITRESS_PORT', 8000)),
-            'threads': int(os.getenv('WAITRESS_THREADS', 16)),
-            'connection_limit': int(os.getenv('WAITRESS_CONNECTION_LIMIT', 2000)),
-            'channel_timeout': int(os.getenv('WAITRESS_CHANNEL_TIMEOUT', 60)),
-            'cleanup_interval': int(os.getenv('WAITRESS_CLEANUP_INTERVAL', 30)),
+            'port': int(os.getenv('WAITRESS_PORT', '5000')),  # Add fallback for port
+            'threads': int(os.getenv('WAITRESS_THREADS', '16')),
+            'connection_limit': int(os.getenv('WAITRESS_CONNECTION_LIMIT', '2000')),
+            'channel_timeout': int(os.getenv('WAITRESS_CHANNEL_TIMEOUT', '60')),
+            'cleanup_interval': int(os.getenv('WAITRESS_CLEANUP_INTERVAL', '30')),
             'ident': 'PugBreeder-Production'
         }
     return {
         'host': os.getenv('WAITRESS_HOST', 'localhost'),
-        'port': int(os.getenv('WAITRESS_PORT', 5000)),
-        'threads': int(os.getenv('WAITRESS_THREADS', 4)),
-        'connection_limit': int(os.getenv('WAITRESS_CONNECTION_LIMIT', 1000)),
-        'channel_timeout': int(os.getenv('WAITRESS_CHANNEL_TIMEOUT', 30)),
-        'cleanup_interval': int(os.getenv('WAITRESS_CLEANUP_INTERVAL', 30)),
-        'ident': os.getenv('WAITRESS_IDENT', 'PugBreeder')
+        'port': int(os.getenv('WAITRESS_PORT', '5000')),
+        'threads': int(os.getenv('WAITRESS_THREADS', '4')),
+        'connection_limit': int(os.getenv('WAITRESS_CONNECTION_LIMIT', '1000')),
+        'channel_timeout': int(os.getenv('WAITRESS_CHANNEL_TIMEOUT', '30')),
+        'cleanup_interval': int(os.getenv('WAITRESS_CLEANUP_INTERVAL', '30')),
+        'ident': os.getenv('WAITRESS_IDENT', 'PugBreeder-Dev')
     }
 
 def run_server(environment='development'):
