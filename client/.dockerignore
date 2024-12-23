@@ -1,0 +1,15 @@
+# BACKEND
+*.env*
+.venv/
+__pycache__/
+*.log
+
+# FRONTEND
+node_modules/
+dist/
+
+# Docker
+docker-compose-dev.yaml
+*Dockerfile*
+
+commands.txt
