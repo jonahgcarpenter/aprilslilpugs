@@ -8,4 +8,8 @@ __pycache__/
 node_modules/
 dist/
 
+# Docker
+docker-compose.yaml
+*Dockerfile*
+
 commands.txt
