@@ -2,36 +2,72 @@
  * Vite configuration file
  * Configures build settings and development server
  */
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react-swc'
+import { resolve } from 'path'
 
-export default defineConfig({
-  base: '/', // Ensures absolute paths for all assets
-  plugins: [react()],
-  
-  // Build configuration
-  build: {
-    outDir: 'dist', // Output folder for production build
-    emptyOutDir: true,
-    assetsDir: 'assets', // Directory for static assets
-    sourcemap: process.env.NODE_ENV === 'development', // Source maps in development for debugging
-  },
-  
-  // Development server configuration
-  server: {
-    port: 5173, // Match the port backend expects
-    proxy: {
-      '/api': {
-        target: 'http://localhost:5000',
-        changeOrigin: true,
-        secure: false,
-        ws: true
+export default defineConfig(({ command, mode }) => {
+  const env = loadEnv(mode, process.cwd(), '')
+  const isProduction = mode === 'production'
+
+  return {
+    plugins: [react()],
+    
+    resolve: {
+      alias: {
+        '@': resolve(__dirname, 'src')
+      }
+    },
+
+    build: {
+      outDir: 'dist',
+      emptyOutDir: true,
+      assetsDir: 'assets',
+      sourcemap: !isProduction,
+      minify: isProduction,
+      target: 'es2015',
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            vendor: ['react', 'react-dom', 'react-router-dom'],
+            utils: ['axios']
+          }
+        }
+      }
+    },
+
+    server: {
+      port: parseInt(env.VITE_PORT || '5173'),
+      host: false,
+      proxy: {
+        '/api': {
+          target: env.VITE_API_URL || 'http://localhost:5000',
+          changeOrigin: true,
+          secure: isProduction,
+          ws: true,
+          rewrite: (path) => path.replace(/^\/api/, ''),
+          headers: {
+            'Access-Control-Allow-Origin': '*'
+          }
+        },
+        '/socket.io': {
+          target: env.VITE_API_URL || 'http://localhost:5000',
+          ws: true
+        }
+      }
+    },
+
+    preview: {
+      port: parseInt(env.VITE_PREVIEW_PORT || '4173'),
+      host: true,
+      proxy: {
+        '/api': {
+          target: env.VITE_API_URL,
+          changeOrigin: true,
+          secure: true,
+          ws: true
+        }
       }
     }
-  },
-  
-  // Production optimizations
-  esbuild: {
-    drop: ['console', 'debugger'], // Remove logs and debuggers in production
-  },
+  }
 })

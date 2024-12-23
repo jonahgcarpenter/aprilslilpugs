@@ -11,9 +11,23 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def create_app(config_class=Config):
+def create_app(environment='development'):
+    """
+    Create and configure the Flask application.
+    Args:
+        environment (str): The environment to run in ('development' or 'production')
+    """
     app = Flask(__name__)
-    app.config.from_object(config_class)
+    
+    # Configure the app based on environment
+    if environment == 'production':
+        app.config['ENV'] = 'production'
+        app.config['DEBUG'] = False
+    else:
+        app.config['ENV'] = 'development'
+        app.config['DEBUG'] = True
+    
+    app.config.from_object(Config)
 
     # Configure logging
     logging.basicConfig(level=logging.INFO)
