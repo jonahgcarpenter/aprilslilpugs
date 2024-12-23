@@ -30,5 +30,4 @@ Modern, responsive website built to showcase and manage a dog breeding business.
 - Add/Edit dog related databases
 
 ## TODO
-- Add underconstruction section
-- Add ADMIN DASH for admins onces logged in
+- FIGURE OUT HOW TO DEPLOY ON UNRAID

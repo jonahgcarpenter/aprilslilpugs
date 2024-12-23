@@ -9,7 +9,7 @@ node_modules/
 dist/
 
 # Docker
-docker-compose.yaml
+docker-compose-prod.yaml
 *Dockerfile*
 
 commands.txt

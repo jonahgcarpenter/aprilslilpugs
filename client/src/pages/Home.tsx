@@ -5,6 +5,7 @@
 import React, { Suspense } from "react";
 import Background from '/images/background.jpg';
 import Header from '../components/Header';
+import Construction from '../components/Construction';
 import AboutUs from '../components/AboutUs';
 import MeetTheBreeder from "../components/Breeder";
 
@@ -15,6 +16,7 @@ const Home: React.FC = () => {
       <Header />
       <Suspense fallback={<div>Loading...</div>}>
         <main className="container mx-auto px-4">
+          <Construction />
           <AboutUs />
           <MeetTheBreeder />
         </main>
