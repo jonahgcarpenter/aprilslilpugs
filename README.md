@@ -28,6 +28,3 @@ Modern, responsive website built to showcase and manage a dog breeding business.
 - Reply to user reviews
 - View/Edit Waitlist
 - Add/Edit dog related databases
-
-## TODO
-- FIGURE OUT HOW TO DEPLOY ON UNRAID
