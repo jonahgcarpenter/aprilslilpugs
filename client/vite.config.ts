@@ -1,21 +1,19 @@
-import { defineConfig, loadEnv } from 'vite'
-import react from '@vitejs/plugin-react-swc'
-import { resolve } from 'path'
+import { defineConfig, loadEnv } from 'vite';
+import react from '@vitejs/plugin-react-swc';
+import { resolve } from 'path';
 
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, resolve(__dirname, '..'), '')
-  const isProduction = env.FLASK_ENV === 'production'
+  const env = loadEnv(mode, resolve(__dirname, '..'), '');
+  const isProduction = mode === 'production';
 
   return {
     plugins: [react()],
-    base: '/',  // Always use root path
-
+    base: '/',
     build: {
       outDir: '../server/static',
       emptyOutDir: true,
-      sourcemap: true,
+      sourcemap: !isProduction,
       minify: isProduction,
-      target: 'es2015',
       rollupOptions: {
         output: {
           manualChunks: {
@@ -24,17 +22,16 @@ export default defineConfig(({ mode }) => {
         }
       }
     },
-
     server: {
       port: parseInt(env.VITE_DEV_PORT || '5173'),
       host: env.VITE_DEV_HOST || 'localhost',
       proxy: {
         '/api': {
-          target: 'http://localhost:5000',
+          target: env.VITE_API_URL || 'http://localhost:5000',
           changeOrigin: true,
           secure: false
         }
       }
     }
-  }
-})
+  };
+});
