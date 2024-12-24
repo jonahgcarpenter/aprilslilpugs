@@ -6,6 +6,7 @@ breeder_bp = Blueprint('breeder', __name__)
 
 @breeder_bp.route('/', methods=['GET'])
 def get_breeder():
+    cursor = None
     try:
         cursor = mysql.connection.cursor()
         # Fetch the first breeder from the database
@@ -19,7 +20,6 @@ def get_breeder():
         """)
         
         breeder = cursor.fetchone()
-        cursor.close()
         
         if not breeder:
             return jsonify({
@@ -28,16 +28,16 @@ def get_breeder():
             }), 404
 
         breeder_data = {
-            "id": breeder[0],
-            "email": breeder[1],
-            "firstName": breeder[2] or "",
-            "lastName": breeder[3] or "",
-            "city": breeder[4] or "",
-            "state": breeder[5] or "",
-            "experienceYears": breeder[6] or 0,
-            "story": breeder[7] or "",
-            "phone": breeder[8] or "",
-            "profile_image": base64.b64encode(breeder[9]).decode('utf-8') if breeder[9] else None
+            "id": breeder['id'],
+            "email": breeder['email'],
+            "firstName": breeder['firstName'] or "",
+            "lastName": breeder['lastName'] or "",
+            "city": breeder['city'] or "",
+            "state": breeder['state'] or "",
+            "experienceYears": breeder['experienceYears'] or 0,
+            "story": breeder['story'] or "",
+            "phone": breeder['phone'] or "",
+            "profile_image": base64.b64encode(breeder['profile_image']).decode('utf-8') if breeder['profile_image'] else None
         }
 
         return jsonify({
@@ -51,3 +51,6 @@ def get_breeder():
             "status": "error",
             "message": "Failed to fetch breeder data"
         }), 500
+    finally:
+        if cursor:
+            cursor.close()

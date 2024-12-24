@@ -18,7 +18,7 @@ def about():
                 "message": "No breeder found"
             }), 404
             
-        breeder_id = breeder_result[0]
+        breeder_id = breeder_result['id']
         
         # Fetch all requirements and group by type
         cursor.execute("""
@@ -39,12 +39,12 @@ def about():
         }
 
         for row in results:
-            if row[0] == 'breeding_standard':
-                about_data["breeding_standards"].append(row[1])
-            elif row[0] == 'service':
-                about_data["services_provided"].append(row[1])
-            elif row[0] == 'requirement':
-                about_data["what_we_require"].append(row[1])
+            if row['type'] == 'breeding_standard':
+                about_data["breeding_standards"].append(row['description'])
+            elif row['type'] == 'service':
+                about_data["services_provided"].append(row['description'])
+            elif row['type'] == 'requirement':
+                about_data["what_we_require"].append(row['description'])
 
         return jsonify({
             "status": "success",

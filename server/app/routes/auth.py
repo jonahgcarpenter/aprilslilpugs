@@ -19,22 +19,14 @@ def login():
     try:
         cursor = mysql.connection.cursor()
         cursor.execute("SELECT * FROM breeders WHERE email = %s", (email,))
-        user = cursor.fetchone()
+        user = cursor.fetchone()  # Will return a dict due to DictCursor
 
         if user:
-            # Convert tuple to dict for easier access
-            user_dict = {
-                'id': user[0],
-                'email': user[1],
-                'password': user[2],
-                'first_name': user[3]
-            }
-
-            if bcrypt.checkpw(password.encode('utf-8'), user_dict['password'].encode('utf-8')):
+            if bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8')):
                 # Update is_active status
                 cursor.execute(
                     "UPDATE breeders SET is_active = TRUE WHERE id = %s",
-                    (user_dict['id'],)
+                    (user['id'],)
                 )
                 mysql.connection.commit()  # Important: Commit the changes
                 cursor.close()
@@ -43,8 +35,8 @@ def login():
                     "status": "success",
                     "message": "Login successful",
                     "data": {
-                        "email": user_dict['email'],
-                        "id": user_dict['id']
+                        "email": user['email'],
+                        "id": user['id']
                     }
                 })
         

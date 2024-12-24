@@ -1,4 +1,4 @@
-from flask import Flask, send_from_directory, make_response
+from flask import Flask, send_from_directory, make_response, g
 from .config import Config
 from .routes import init_routes
 from .utils.logger import setup_logger
@@ -27,10 +27,17 @@ def create_app():
     app.config.from_object(Config)
     setup_logger(app)
     
+    @app.teardown_appcontext
+    def close_db_connection(exception):
+        db = getattr(g, '_database', None)
+        if db is not None:
+            db.close()
+    
     try:
         mysql.init_app(app)
         with app.app_context():
             cursor = mysql.connection.cursor()
+            cursor.execute('SELECT 1')
             cursor.close()
             app.logger.info("Successfully connected to MySQL")
     except Exception as e:
