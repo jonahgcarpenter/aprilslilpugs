@@ -9,4 +9,6 @@ database.sql
 node_modules/
 dist/
 
+# MISC
+.dockerignore
 commands.txt
