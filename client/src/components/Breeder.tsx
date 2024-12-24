@@ -1,12 +1,6 @@
-/**
- * Breeder Profile Component
- * Displays comprehensive information about the breeder including contact details
- * and professional background.
- */
-
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock } from 'react-icons/fa';
-import { getProfile } from '../utils/api';
 
 interface BreederData {
     firstName: string;
@@ -21,56 +15,26 @@ interface BreederData {
 }
 
 const Breeder: React.FC = () => {
-    const [breederInfo, setBreederInfo] = useState<BreederData | null>(null);
-    const [error, setError] = useState<string>('');
-    const [loading, setLoading] = useState(true);
-
-    const getImageSrc = (imageData?: string) => {
-        if (!imageData) return '/images/default-profile.jpg';
-        return `data:image/jpeg;base64,${imageData}`;
-    };
+    const [data, setData] = useState<BreederData | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        let isSubscribed = true;
-        
-        const fetchBreederInfo = async () => {
-            try {
-                setLoading(true);
-                const response = await getProfile();
-                
-                if (isSubscribed && response.data && response.data.length > 0) {
-                    setBreederInfo(response.data[0]);
-                    setError('');
+        axios.get('/api/breeder')
+            .then(response => {
+                if (response.data.status === 'success') {
+                    setData(response.data.data);
                 } else {
-                    throw new Error('No breeder data available');
+                    setError('Failed to load breeder data');
                 }
-            } catch (err) {
-                if (isSubscribed) {
-                    setError(err instanceof Error ? err.message : 'Failed to load breeder information');
-                    console.error('Breeder fetch error:', err);
-                }
-            } finally {
-                if (isSubscribed) {
-                    setLoading(false);
-                }
-            }
-        };
-
-        fetchBreederInfo();
-        return () => { isSubscribed = false; };
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                setError('Failed to load breeder data');
+            });
     }, []);
 
-    // Handler functions
-    const handleEmailClick = () => window.location.href = `mailto:${breederInfo?.email}`;
-    const handlePhoneClick = () => window.location.href = `tel:${breederInfo?.phone}`;
-    const handleLocationClick = () => {
-        const address = `${breederInfo?.city}, ${breederInfo?.state}`;
-        window.open(`https://maps.google.com?q=${encodeURIComponent(address)}`, '_blank');
-    };
-
-    if (loading) return <div className="text-center p-8">Loading...</div>;
-    if (error) return <div className="text-red-500 text-center p-8">{error}</div>;
-    if (!breederInfo) return <div className="text-center p-8">No breeder information found</div>;
+    if (error) return <div className="text-center p-8 text-red-500">{error}</div>;
+    if (!data) return <div className="text-center p-8">Loading...</div>;
 
     return (
         <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto">
@@ -83,78 +47,57 @@ const Breeder: React.FC = () => {
                             </h1>
                         </div>
 
-                        <div className="space-y-6 sm:space-y-8">
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 items-start">
-                                <div className="flex justify-center">
-                                    <div className="bg-slate-700/30 rounded-full overflow-hidden w-[240px] sm:w-[280px] h-[240px] sm:h-[280px]">
-                                        <img 
-                                            src={getImageSrc(breederInfo?.profile_image)}
-                                            alt="Breeder Profile" 
-                                            className="w-full h-full object-cover"
-                                            onError={(e) => {
-                                                const target = e.target as HTMLImageElement;
-                                                target.src = '/images/default-profile.jpg';
-                                            }}
-                                        />
-                                    </div>
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 items-start">
+                            <div className="flex justify-center">
+                                <div className="bg-slate-700/30 rounded-full overflow-hidden w-[240px] sm:w-[280px] h-[240px] sm:h-[280px]">
+                                    <img 
+                                        src={data.profile_image ? `data:image/jpeg;base64,${data.profile_image}` : '/images/default-profile.jpg'}
+                                        alt="Breeder Profile" 
+                                        className="w-full h-full object-cover"
+                                    />
                                 </div>
+                            </div>
+                            
+                            <div className="bg-slate-700/30 p-4 sm:p-5 rounded-lg">
+                                <h3 className="text-lg sm:text-xl font-semibold text-blue-400 mb-2">
+                                    {data.firstName} {data.lastName}
+                                </h3>
+                                <p className="text-slate-300 mb-3 text-base sm:text-lg">Professional Pug Breeder</p>
                                 
-                                <div>
-                                    <div className="bg-slate-700/30 p-4 sm:p-5 rounded-lg">
-                                        <h3 className="text-lg sm:text-xl font-semibold text-blue-400 mb-2">
-                                            {breederInfo.firstName} {breederInfo.lastName}
-                                        </h3>
-                                        <p className="text-slate-300 mb-3 text-base sm:text-lg">Professional Pug Breeder</p>
-                                        
-                                        <div className="space-y-3">
-                                            {[
-                                                {
-                                                    icon: <FaMapMarkerAlt className="text-blue-400" />,
-                                                    text: `${breederInfo.city}, ${breederInfo.state}`,
-                                                    action: handleLocationClick
-                                                },
-                                                {
-                                                    icon: <FaClock className="text-blue-400" />,
-                                                    text: `${breederInfo.experienceYears} Years Experience`
-                                                },
-                                                {
-                                                    icon: <FaPhone className="text-blue-400" />,
-                                                    text: breederInfo.phone,
-                                                    action: handlePhoneClick
-                                                },
-                                                {
-                                                    icon: <FaEnvelope className="text-blue-400" />,
-                                                    text: breederInfo.email,
-                                                    action: handleEmailClick
-                                                }
-                                            ].map((item, index) => (
-                                                <div 
-                                                    key={index}
-                                                    onClick={item.action}
-                                                    className={`flex items-center gap-3 ${item.action ? 'cursor-pointer hover:text-blue-400' : ''} transition-colors`}
-                                                >
-                                                    {item.icon}
-                                                    <p className="text-slate-300">{item.text}</p>
-                                                </div>
-                                            ))}
-                                        </div>
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-3">
+                                        <FaMapMarkerAlt className="text-blue-400" />
+                                        <p className="text-slate-300">{data.city}, {data.state}</p>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <FaClock className="text-blue-400" />
+                                        <p className="text-slate-300">{data.experienceYears} Years Experience</p>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <FaPhone className="text-blue-400" />
+                                        <p className="text-slate-300">{data.phone}</p>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <FaEnvelope className="text-blue-400" />
+                                        <p className="text-slate-300">{data.email}</p>
                                     </div>
                                 </div>
                             </div>
+                        </div>
 
-                            <div className="bg-slate-700/30 p-4 sm:p-6 rounded-lg">
-                                <h3 className="text-lg sm:text-xl font-semibold text-blue-400 mb-2 sm:mb-3">My Story</h3>
-                                <div className="text-slate-300 space-y-4 text-base sm:text-lg">
-                                    {((breederInfo?.story || "No story available.").split('\n') || []).map((paragraph, index) => (
-                                        <p key={index} className="leading-relaxed">{paragraph}</p>
-                                    ))}
-                                </div>
+                        <div className="bg-slate-700/30 p-4 sm:p-6 rounded-lg mt-6">
+                            <h3 className="text-lg sm:text-xl font-semibold text-blue-400 mb-2 sm:mb-3">My Story</h3>
+                            <div className="text-slate-300 space-y-4 text-base sm:text-lg">
+                                {data.story.split('\n').map((paragraph, index) => (
+                                    <p key={index} className="leading-relaxed">{paragraph}</p>
+                                ))}
                             </div>
-                            {/* Remove the excellence in breeding section */}
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     );
-};export default Breeder;
+};
+
+export default Breeder;

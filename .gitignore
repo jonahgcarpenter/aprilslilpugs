@@ -1,16 +1,12 @@
 # BACKEND
-*.env*
+*.env
 .venv/
 __pycache__/
-*.log
+logs/
+database.sql
 
 # FRONTEND
 node_modules/
 dist/
-static/
-
-# Docker
-docker-compose-dev.yaml
-*Dockerfile*
 
 commands.txt

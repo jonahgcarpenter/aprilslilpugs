@@ -1,6 +1,17 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { LoginButton } from '../auth/LoginButton';
+import { LogoutButton } from '../auth/LogoutButton';
+import { checkSession } from '../utils/sessionManager';
 
 const PageNav: React.FC = () => {
+  const [user, setUser] = useState<{ id: number; email: string } | null>(null);
+
+  useEffect(() => {
+    const userData = checkSession();
+    setUser(userData);
+  }, []);
+
   return (
     <div className="flex justify-center space-x-4 mt-4">
       <Link to="/">
@@ -13,6 +24,11 @@ const PageNav: React.FC = () => {
           Puppies
         </button>
       </Link>
+      {!user ? (
+        <LoginButton />
+      ) : (
+        <LogoutButton breederId={user.id} />
+      )}
     </div>
   );
 };

@@ -1,7 +1,3 @@
-/**
- * Live Stream Component
- * Displays RTMP stream from external server
- */
 const Live: React.FC = () => {
   return (
     <div style={{ width: '100%', maxWidth: '960px', margin: '0 auto' }}>

@@ -5,13 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "tsc && vite build --outDir ../server/dist",
     "build:prod": "tsc && vite build --mode production",
     "preview": "vite preview",
     "lint": "eslint src --ext ts,tsx",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "axios": "^1.7.9",
     "date-fns": "^2.30.0",
     "hls.js": "^1.5.18",
     "react": "^18.3.1",
