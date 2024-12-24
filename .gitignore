@@ -7,6 +7,7 @@ __pycache__/
 # FRONTEND
 node_modules/
 dist/
+static/
 
 # Docker
 docker-compose-dev.yaml

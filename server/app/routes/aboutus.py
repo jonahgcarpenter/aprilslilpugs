@@ -1,26 +1,23 @@
 """
 About Us content management routes.
-Handles retrieval and updates of breeder information sections.
 
-Routes:
-    - / [GET]  : Retrieve about us sections
-    - / [POST] : Update about us sections
+Endpoints:
+    GET   /api/aboutus/ : Retrieve all about us sections (breeding standards, services, requirements)
+    PATCH /api/aboutus/ : Update all about us sections
 """
-from flask import Blueprint, jsonify, request, current_app
-from flask_cors import cross_origin
+from flask import Blueprint, jsonify, request
 from typing import Dict, List
+import logging
+from ..config import Config
 
-from app.database import get_db_connection
-
+logger = logging.getLogger(__name__)
 aboutus_bp = Blueprint('aboutus', __name__)
 
-# Route handlers
 @aboutus_bp.route('/', methods=['GET'])
-@cross_origin(supports_credentials=True)
 def get_aboutus_info():
     """Retrieve about us sections using a single efficient query"""
     try:
-        conn = get_db_connection()
+        conn = Config.get_db_connection()
         cursor = conn.cursor(dictionary=True)
         
         # Use a single query to get all sections, properly ordered
@@ -49,7 +46,7 @@ def get_aboutus_info():
         })
 
     except Exception as e:
-        print(f"Database error: {str(e)}")
+        logger.error(f"Database error: {str(e)}")
         return jsonify({
             "status": "error",
             "message": str(e)
@@ -61,13 +58,12 @@ def get_aboutus_info():
         if 'conn' in locals():
             conn.close()
 
-@aboutus_bp.route('/', methods=['POST'])
-@cross_origin(supports_credentials=True)
+@aboutus_bp.route('/', methods=['PATCH'])
 def update_aboutus_info():
     """Update about us sections maintaining proper order and timestamps"""
     try:
         data = request.get_json()
-        conn = get_db_connection()
+        conn = Config.get_db_connection()
         cursor = conn.cursor()
 
         # Start transaction
@@ -80,12 +76,13 @@ def update_aboutus_info():
             # Insert new items with proper section names and order
             for section in ['breeding_standards', 'services_provided', 'what_we_require']:
                 items = data.get(section, [])
-                for order, item in enumerate(items):
-                    cursor.execute("""
-                        INSERT INTO about_us_items 
-                        (breeder_id, section, item, display_order) 
-                        VALUES (%s, %s, %s, %s)
-                    """, (1, section, item, order))
+                if items:  # Only update sections that are provided in the PATCH request
+                    for order, item in enumerate(items):
+                        cursor.execute("""
+                            INSERT INTO about_us_items 
+                            (breeder_id, section, item, display_order) 
+                            VALUES (%s, %s, %s, %s)
+                        """, (1, section, item, order))
             
             # Commit transaction
             conn.commit()
@@ -100,7 +97,7 @@ def update_aboutus_info():
             raise e
 
     except Exception as e:
-        print(f"Database error: {str(e)}")
+        logger.error(f"Database error: {str(e)}")
         return jsonify({
             "status": "error",
             "message": str(e)

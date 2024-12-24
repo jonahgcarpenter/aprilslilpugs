@@ -6,8 +6,19 @@
 
 import React, { useState, useEffect } from 'react';
 import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock } from 'react-icons/fa';
-import { getProfile } from '../services/breederService';
-import type { BreederData } from '../services/types';
+import { getProfile } from '../utils/api';
+
+interface BreederData {
+    firstName: string;
+    lastName: string;
+    city: string;
+    state: string;
+    phone: string;
+    email: string;
+    experienceYears: number;
+    story: string;
+    profile_image?: string;
+}
 
 const Breeder: React.FC = () => {
     const [breederInfo, setBreederInfo] = useState<BreederData | null>(null);
@@ -24,14 +35,14 @@ const Breeder: React.FC = () => {
         
         const fetchBreederInfo = async () => {
             try {
+                setLoading(true);
                 const response = await getProfile();
-                if (isSubscribed) {
-                    if (response.status === 'success' && response.data) {
-                        setBreederInfo(response.data);
-                        setError('');
-                    } else {
-                        throw new Error(response.message || 'Failed to load breeder data');
-                    }
+                
+                if (isSubscribed && response.data && response.data.length > 0) {
+                    setBreederInfo(response.data[0]);
+                    setError('');
+                } else {
+                    throw new Error('No breeder data available');
                 }
             } catch (err) {
                 if (isSubscribed) {
@@ -134,7 +145,7 @@ const Breeder: React.FC = () => {
                             <div className="bg-slate-700/30 p-4 sm:p-6 rounded-lg">
                                 <h3 className="text-lg sm:text-xl font-semibold text-blue-400 mb-2 sm:mb-3">My Story</h3>
                                 <div className="text-slate-300 space-y-4 text-base sm:text-lg">
-                                    {breederInfo.story.split('\n').map((paragraph, index) => (
+                                    {((breederInfo?.story || "No story available.").split('\n') || []).map((paragraph, index) => (
                                         <p key={index} className="leading-relaxed">{paragraph}</p>
                                     ))}
                                 </div>
@@ -146,6 +157,4 @@ const Breeder: React.FC = () => {
             </div>
         </div>
     );
-};
-
-export default Breeder;
+};export default Breeder;

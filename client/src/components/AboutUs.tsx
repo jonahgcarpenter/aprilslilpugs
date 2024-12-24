@@ -5,8 +5,13 @@
  */
 
 import React, { useEffect, useState } from "react";
-import * as aboutService from '../services/aboutService';
-import type { AboutUsData } from '../services/types';
+import { getAboutInfo } from '../utils/api';
+
+interface AboutUsData {
+    breeding_standards: string[];
+    services_provided: string[];
+    what_we_require: string[];
+}
 
 const AboutUs: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -22,14 +27,21 @@ const AboutUs: React.FC = () => {
     
     const fetchAboutData = async () => {
       try {
-        const response = await aboutService.getAboutInfo();
+        console.log('Fetching about data...');
+        const response = await getAboutInfo();
+        console.log('About data response:', JSON.stringify(response, null, 2));
         if (isSubscribed && response.data) {
-          setAboutData(response.data);
+          setAboutData({
+            breeding_standards: response.data.breeding_standards || [],
+            services_provided: response.data.services_provided || [],
+            what_we_require: response.data.what_we_require || []
+          });
         }
       } catch (err) {
         if (isSubscribed) {
-          setError(err instanceof Error ? err.message : 'Failed to load about us data');
-          console.error('Error loading about data:', err);
+          const errorMessage = err instanceof Error ? err.message : 'Failed to load about us data';
+          console.error('Error loading about data:', errorMessage);
+          setError(errorMessage);
         }
       } finally {
         if (isSubscribed) {

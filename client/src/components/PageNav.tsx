@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import LoginButton from '../auth/LoginButton';
 
 const PageNav: React.FC = () => {
   return (
@@ -14,7 +13,6 @@ const PageNav: React.FC = () => {
           Puppies
         </button>
       </Link>
-      <LoginButton />
     </div>
   );
 };

@@ -7,7 +7,7 @@ Modern, responsive website built to showcase and manage a dog breeding business.
 
 ## Technologies
 - Vite React
-- Flask CORS
+- Flask
 - MySQL
 - Reddis
 - RTMPS Server
