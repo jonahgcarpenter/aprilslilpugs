@@ -7,7 +7,8 @@ const{
   getBreeders,
   getBreeder,
   deleteBreeder,
-  updateBreeder
+  updateBreeder,
+  loginBreeder
 } = require('../controllers/breederController')
 
 // GET all breeders
@@ -24,5 +25,8 @@ router.delete('/:id', deleteBreeder)
 
 // Update breeder
 router.patch('/:id',  upload.single('profilePicture'), updateBreeder)
+
+// Login breeder
+router.post('/login', loginBreeder)
 
 module.exports = router

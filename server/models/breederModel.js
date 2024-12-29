@@ -31,6 +31,10 @@ const breederSchema = new Schema({
   profilePicture: {
     type: String,
     required: false
+  },
+  password: {
+    type: String,
+    required: true
   }
 }, {timestamps: true})
 

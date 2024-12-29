@@ -1,5 +1,8 @@
 import { Link } from 'react-router-dom'
 
+// COMPONENTS
+import LoginButton from './LoginButton'
+
 const Navbar = () => {
   return (
     <div className="bg-slate-900 border-b border-slate-800">
@@ -19,6 +22,7 @@ const Navbar = () => {
                 Puppies
               </button>
             </Link>
+            <LoginButton />
           </div>
         </div>
       </div>
