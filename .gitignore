@@ -1,8 +1,6 @@
 # FRONTEND
 node_modules/
+uploads/
 
 # BACKEND
 .env
-
-# OTHER
-.gitiignore

@@ -23,38 +23,38 @@ const BreederDetails = () => {
   return (
     <>
       {breeder && (
-        <div key={breeder._id} className="max-w-2xl mx-auto mt-8 mb-6 bg-red-500 rounded-lg shadow-md p-8 hover:shadow-lg transition-shadow duration-300">
-          <div className="flex items-start gap-6">
+        <div key={breeder._id} className="mx-4 bg-slate-900 rounded-xl shadow-xl p-8 hover:shadow-2xl transition-all duration-300 mt-8">
+          <div className="flex flex-col md:flex-row items-start gap-8">
             {breeder.profilePicture && (
               <img 
                 src={breeder.profilePicture} 
                 alt={`${breeder.firstName} ${breeder.lastName}`}
-                className="w-32 h-32 rounded-full object-cover border-4 border-white"
+                className="w-40 h-40 rounded-xl object-cover border-4 border-slate-700 shadow-lg"
               />
             )}
-            <div className="flex-1">
-              <h1 className="text-2xl font-semibold text-white mb-2">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-4">
                 {breeder.firstName} {breeder.lastName}
               </h1>
               
-              <div className="space-y-2 text-white">
+              <div className="space-y-2 text-white/95 text-base">
                 {breeder.location && (
-                  <p className="flex items-center gap-2">
-                    <span className="font-semibold">📍 Location:</span> {breeder.location}
+                  <p className="flex items-center gap-3 bg-slate-800/50 rounded-lg p-2">
+                    <span className="text-xl">📍</span> {breeder.location}
                   </p>
                 )}
                 {breeder.email && (
-                  <p className="flex items-center gap-2">
-                    <span className="font-semibold">📧 Email:</span> 
-                    <a href={`mailto:${breeder.email}`} className="hover:underline">
+                  <p className="flex items-center gap-3 bg-slate-800/50 rounded-lg p-2">
+                    <span className="text-xl">📧</span>
+                    <a href={`mailto:${breeder.email}`} className="hover:text-blue-400 transition-all">
                       {breeder.email}
                     </a>
                   </p>
                 )}
                 {breeder.phoneNumber && (
-                  <p className="flex items-center gap-2">
-                    <span className="font-semibold">📞 Phone:</span> 
-                    <a href={`tel:${breeder.phoneNumber}`} className="hover:underline">
+                  <p className="flex items-center gap-3 bg-slate-800/50 rounded-lg p-2">
+                    <span className="text-xl">📞</span>
+                    <a href={`tel:${breeder.phoneNumber}`} className="hover:text-blue-400 transition-all">
                       {breeder.phoneNumber}
                     </a>
                   </p>
@@ -64,13 +64,13 @@ const BreederDetails = () => {
           </div>
           
           {breeder.story && (
-            <div className="mt-6 p-4 bg-white/10 rounded-lg">
-              <h2 className="text-xl font-semibold text-white mb-2">My Story</h2>
-              <p className="text-white/90 whitespace-pre-line">{breeder.story}</p>
+            <div className="mt-8 p-6 bg-slate-800/50 rounded-xl backdrop-blur-sm">
+              <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-3">My Story</h2>
+              <p className="text-white/90 whitespace-pre-line leading-relaxed text-base">{breeder.story}</p>
             </div>
           )}
 
-          <p className="text-sm text-white/75 mt-4">Member since: {new Date(breeder.createdAt).toLocaleDateString()}</p>
+          <p className="text-sm text-slate-400 mt-6 italic">Member since: {new Date(breeder.createdAt).toLocaleDateString()}</p>
         </div>
       )}
     </>

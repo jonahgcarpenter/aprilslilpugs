@@ -1,4 +1,7 @@
 const express = require('express')
+const router = express.Router();
+const upload = require('../middleware/multerConfig');
+
 const{
   createBreeder,
   getBreeders,
@@ -6,7 +9,6 @@ const{
   deleteBreeder,
   updateBreeder
 } = require('../controllers/breederController')
-const router = express.Router()
 
 // GET all breeders
 router.get('/', getBreeders)
@@ -21,6 +23,6 @@ router.post('/', createBreeder)
 router.delete('/:id', deleteBreeder)
 
 // Update breeder
-router.patch('/:id', updateBreeder)
+router.patch('/:id',  upload.single('profilePicture'), updateBreeder)
 
 module.exports = router
