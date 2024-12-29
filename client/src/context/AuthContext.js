@@ -1,29 +1,62 @@
 import { createContext, useState, useContext } from 'react';
 
-const AuthContext = createContext(null);
+export const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token'));
+  const [loginStatus, setLoginStatus] = useState({ message: '', type: '' });
 
   const login = async (email, password) => {
     try {
       const response = await fetch('/api/breeders/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify({ email, password }),
       });
+      
       const data = await response.json();
-      if (response.ok) {
+      
+      if (!response.ok) {
+        const errorMessage = data.message || 'Login failed';
+        setLoginStatus({ 
+          message: errorMessage, 
+          type: 'error' 
+        });
+        return { success: false, message: errorMessage };
+      }
+      
+      if (data.status === 'success') {
         setUser(data.user);
         setToken(data.token);
         localStorage.setItem('token', data.token);
-        return true;
+        localStorage.setItem('user', JSON.stringify(data.user));
+        
+        setLoginStatus({ 
+          message: data.message || 'Login successful!', 
+          type: 'success' 
+        });
+        
+        return { success: true };
       }
-      return false;
+      
+      throw new Error('Invalid response format');
+      
     } catch (error) {
-      return false;
+      const errorMessage = error.message || 'Network error - please try again';
+      setLoginStatus({ 
+        message: errorMessage, 
+        type: 'error' 
+      });
+      return { success: false, message: errorMessage };
     }
+  };
+
+  const clearLoginStatus = () => {
+    setLoginStatus({ message: '', type: '' });
   };
 
   const logout = () => {
@@ -33,7 +66,15 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      token, 
+      login, 
+      logout,
+      loginStatus,
+      setLoginStatus,  // Make sure this is included
+      clearLoginStatus 
+    }}>
       {children}
     </AuthContext.Provider>
   );

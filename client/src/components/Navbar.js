@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom'
-
-// COMPONENTS
+import { useAuth } from '../context/AuthContext'
 import LoginButton from './LoginButton'
+import LogoutButton from './LogoutButton'
 
 const Navbar = () => {
+  const { user } = useAuth();
+
   return (
     <div className="bg-slate-900 border-b border-slate-800">
       <div className="container mx-auto px-4 max-w-7xl py-6">
@@ -22,7 +24,7 @@ const Navbar = () => {
                 Puppies
               </button>
             </Link>
-            <LoginButton />
+            {user ? <LogoutButton /> : <LoginButton />}
           </div>
         </div>
       </div>

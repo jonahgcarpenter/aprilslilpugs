@@ -34,7 +34,8 @@ const breederSchema = new Schema({
   },
   password: {
     type: String,
-    required: true
+    required: true,
+    minlength: [6, 'Password must be at least 6 characters long']
   }
 }, {timestamps: true})
 

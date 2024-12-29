@@ -97,21 +97,94 @@ const updateBreeder = async (req, res) => {
   }
 };
 
-// login breeder
-const loginBreeder = async (req, res) => {
-  const { email, password } = req.body;
-
+// Update breeder password (development only)
+const updateBreederPassword = async (req, res) => {
   try {
-    const breeder = await Breeder.findOne({ email });
-    
-    if (!breeder) {
-      return res.status(404).json({ error: 'No breeder found with this email' });
+    const { id } = req.params;
+    const { newPassword } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'Invalid breeder ID' });
     }
 
-    const isValidPassword = await bcrypt.compare(password, breeder.password);
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters' });
+    }
+
+    // Hash the new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update the password
+    const breeder = await Breeder.findByIdAndUpdate(
+      id,
+      { password: hashedPassword },
+      { new: true }
+    );
+
+    if (!breeder) {
+      return res.status(404).json({ error: 'Breeder not found' });
+    }
+
+    res.status(200).json({ message: 'Password updated successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// login breeder
+const loginBreeder = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Input validation
+    if (!email) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Email is required'
+      });
+    }
+
+    if (!password) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Password is required'
+      });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Invalid email format'
+      });
+    }
+
+    // Find breeder by email
+    const breeder = await Breeder.findOne({ email });
+    
+    // Generic message for security
+    const invalidCredentialsMessage = 'Invalid email or password';
+
+    if (!breeder) {
+      return res.status(401).json({
+        status: 'error',
+        message: invalidCredentialsMessage
+      });
+    }
+
+    // Verify password
+    const isValidPassword = await bcrypt.compare(
+      String(password),
+      String(breeder.password)
+    );
     
     if (!isValidPassword) {
-      return res.status(400).json({ error: 'Invalid password' });
+      return res.status(401).json({
+        status: 'error',
+        message: invalidCredentialsMessage
+      });
     }
 
     // Create token
@@ -121,7 +194,10 @@ const loginBreeder = async (req, res) => {
       { expiresIn: '24h' }
     );
 
+    // Send success response
     res.status(200).json({
+      status: 'success',
+      message: 'Login successful',
       user: {
         id: breeder._id,
         email: breeder.email,
@@ -130,8 +206,13 @@ const loginBreeder = async (req, res) => {
       },
       token
     });
+
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    console.error('Login error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'An unexpected error occurred. Please try again later.'
+    });
   }
 };
 
@@ -141,5 +222,6 @@ module.exports = {
   createBreeder,
   deleteBreeder,
   updateBreeder,
-  loginBreeder
+  loginBreeder,
+  updateBreederPassword
 }

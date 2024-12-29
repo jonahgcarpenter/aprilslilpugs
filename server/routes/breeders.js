@@ -8,13 +8,17 @@ const{
   getBreeder,
   deleteBreeder,
   updateBreeder,
-  loginBreeder
+  loginBreeder,
+  updateBreederPassword
 } = require('../controllers/breederController')
 
 // GET all breeders
 router.get('/', getBreeders)
 
-// GET one breeders
+// Login breeder
+router.post('/login', loginBreeder)
+
+// GET one breeder
 router.get('/:id', getBreeder)
 
 // POST a breeder
@@ -26,7 +30,7 @@ router.delete('/:id', deleteBreeder)
 // Update breeder
 router.patch('/:id',  upload.single('profilePicture'), updateBreeder)
 
-// Login breeder
-router.post('/login', loginBreeder)
+// Update password (development only)
+router.post('/update-password/:id', updateBreederPassword)
 
 module.exports = router
