@@ -12,6 +12,7 @@ const BreederUpdateForm = () => {
   const [profilePicture, setProfilePicture] = useState(null)
   const [error, setError] = useState(null)
   const fileInputRef = useRef(null);
+  const textareaRef = useRef(null);
 
   useEffect(() => {
     if (breeder) {
@@ -23,6 +24,33 @@ const BreederUpdateForm = () => {
       setStory(breeder.story || '')
     }
   }, [breeder])
+
+  // Add auto-resize effect for textarea
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = textarea.scrollHeight + 'px';
+    }
+  }, [story]);
+
+  const formatPhoneNumber = (value) => {
+    // Remove all non-digits
+    const numbers = value.replace(/\D/g, '')
+    
+    // Limit to 10 digits
+    const truncated = numbers.slice(0, 10)
+    
+    // Format the number
+    if (truncated.length < 4) return truncated
+    if (truncated.length < 7) return `(${truncated.slice(0, 3)}) ${truncated.slice(3)}`
+    return `(${truncated.slice(0, 3)}) ${truncated.slice(3, 6)}-${truncated.slice(6)}`
+  }
+
+  const handlePhoneChange = (e) => {
+    const formattedNumber = formatPhoneNumber(e.target.value)
+    setPhoneNumber(formattedNumber)
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -82,10 +110,10 @@ const BreederUpdateForm = () => {
           />
           <input 
             type="tel"
-            onChange={(e) => setPhoneNumber(e.target.value)}
+            onChange={handlePhoneChange}
             value={phoneNumber}
             className="w-full p-3 rounded-lg bg-slate-800 text-white text-base border border-slate-700 shadow-sm focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 outline-none transition-all duration-200"
-            placeholder="Phone Number"
+            placeholder="(XXX) XXX-XXXX"
           />
           <input 
             type="email"
@@ -102,20 +130,19 @@ const BreederUpdateForm = () => {
             placeholder="Location"
           />
           <textarea
+            ref={textareaRef}
             onChange={(e) => setStory(e.target.value)}
             value={story}
-            className="w-full p-3 rounded-lg bg-slate-800 text-white text-base border border-slate-700 shadow-sm focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 outline-none transition-all duration-200 min-h-[150px] md:col-span-2"
+            className="w-full p-3 rounded-lg bg-slate-800 text-white text-base border border-slate-700 shadow-sm focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 outline-none transition-all duration-200 md:col-span-2 resize-none scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-slate-700 hover:scrollbar-thumb-blue-400 max-h-[300px] overflow-y-auto"
             placeholder="Your Story"
           />
-          <div className="bg-slate-800 p-4 rounded-lg md:col-span-2 border border-slate-700">
-            <input
-              ref={fileInputRef}
-              type="file"
-              onChange={(e) => setProfilePicture(e.target.files[0])}
-              className="text-white w-full"
-              accept="image/*"
-            />
-          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            onChange={(e) => setProfilePicture(e.target.files[0])}
+            className="w-full md:col-span-2 text-white text-base file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-gradient-to-r file:from-blue-600 file:to-blue-400 file:text-white hover:file:from-blue-700 hover:file:to-blue-500 file:transition-all file:duration-200 file:shadow-lg hover:file:shadow-xl"
+            accept="image/*"
+          />
         </div>
         <button className="mt-8 bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white text-base px-8 py-3 rounded-lg transition-all duration-200 font-bold shadow-lg hover:shadow-xl">
           Update Profile

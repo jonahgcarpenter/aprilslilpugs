@@ -15,7 +15,7 @@ function App() {
     >
       <BrowserRouter>
         <Navbar />
-        <div className="text-4xl font-bold text-black">
+        <div className="container mx-auto px-4 max-w-7xl">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/puppies" element={<Puppies />} />
