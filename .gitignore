@@ -1,0 +1,8 @@
+# FRONTEND
+node_modules/
+
+# BACKEND
+.env
+
+# OTHER
+.gitiignore
