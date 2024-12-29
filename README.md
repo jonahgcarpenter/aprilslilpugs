@@ -3,6 +3,9 @@
 A website for my moms buisness, in which I have tailored to her request.
 
 ## Technologies
-- React
-- Express
+
+### MERN Stack
 - MongoDB
+- Express
+- React
+- Node.js
