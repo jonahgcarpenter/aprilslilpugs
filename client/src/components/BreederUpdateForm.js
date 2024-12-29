@@ -1,39 +1,29 @@
 import { useState, useEffect } from "react"
+import { useBreederContext } from '../hooks/useBreederContext'
 
 const BreederUpdateForm = () => {
-  const [firstName, setFirstName] = useState('April')
+  const { breeder, dispatch } = useBreederContext()
+  const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [error, setError] = useState(null)
-  const [breederId, setBreederId] = useState(null)
 
   useEffect(() => {
-    const fetchAprilBreeder = async () => {
-      const response = await fetch('/api/breeders')
-      const json = await response.json()
-      
-      if(response.ok) {
-        const april = json.find(b => b.firstName.toLowerCase() === 'april')
-        if(april) {
-          setBreederId(april._id)
-          setFirstName(april.firstName)
-          setLastName(april.lastName)
-        }
-      }
+    if (breeder) {
+      setFirstName(breeder.firstName)
+      setLastName(breeder.lastName)
     }
-    
-    fetchAprilBreeder()
-  }, [])
+  }, [breeder])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    if (!breederId) return
+    if (!breeder?._id) return
 
-    const breeder = { firstName, lastName }
+    const updatedBreeder = { firstName, lastName }
 
-    const response = await fetch('/api/breeders/' + breederId, {
+    const response = await fetch('/api/breeders/' + breeder._id, {
       method: 'PATCH',
-      body: JSON.stringify(breeder),
+      body: JSON.stringify(updatedBreeder),
       headers: {
         'Content-Type': 'application/json'
       }
@@ -41,11 +31,11 @@ const BreederUpdateForm = () => {
     const json = await response.json()
 
     if (!response.ok) {
-      setError(json.message)
+      setError(json.error)
     }
     if (response.ok) {
       setError(null)
-      console.log('Breeder updated successfully', json)
+      dispatch({ type: 'UPDATE_BREEDER', payload: json })
     }
   }
 

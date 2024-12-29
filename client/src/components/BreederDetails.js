@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
+import { useBreederContext } from '../hooks/useBreederContext'
 
 const BreederDetails = () => {
-  const [breeder, setBreeder] = useState(null)
+  const { breeder, dispatch } = useBreederContext()
 
   useEffect(() => {
     const fetchAprilBreeder = async () => {
@@ -11,13 +12,13 @@ const BreederDetails = () => {
       if (response.ok) {
         const april = json.find(b => b.firstName.toLowerCase() === 'april')
         if (april) {
-          setBreeder(april)
+          dispatch({ type: 'SET_BREEDER', payload: april })
         }
       }
     }
 
     fetchAprilBreeder()
-  }, [])
+  }, [dispatch])
 
   return (
     <>
