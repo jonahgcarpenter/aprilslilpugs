@@ -187,14 +187,17 @@ const loginBreeder = async (req, res) => {
       });
     }
 
-    // Create token
+    // Create token with explicit expiration
+    const expiresIn = '1h'; // Configure as needed
     const token = jwt.sign(
-      { id: breeder._id },
-      process.env.JWT_SECRET,
-      { expiresIn: '24h' }
+      { 
+        id: breeder._id,
+        exp: Math.floor(Date.now() / 1000) + (60 * 60) // 1 hour from now
+      },
+      process.env.JWT_SECRET
     );
 
-    // Send success response
+    // Send success response with expiration
     res.status(200).json({
       status: 'success',
       message: 'Login successful',
@@ -204,7 +207,8 @@ const loginBreeder = async (req, res) => {
         firstName: breeder.firstName,
         lastName: breeder.lastName
       },
-      token
+      token,
+      expiresIn
     });
 
   } catch (error) {
