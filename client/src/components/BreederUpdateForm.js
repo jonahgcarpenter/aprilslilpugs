@@ -90,57 +90,57 @@ const BreederUpdateForm = () => {
   return (
     <form className="mx-2 sm:mx-4 bg-slate-900 rounded-xl shadow-xl p-4 sm:p-8" onSubmit={handleSubmit}>
       <div className="max-w-[120ch] mx-auto"> {/* Keep form inputs at readable width */}
-        <h1 className="text-xl sm:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-4 sm:mb-6">
+        <h1 className="text-xl sm:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-6 sm:mb-8">
           Update Breeder Profile
         </h1>
-        <div className="grid grid-cols-1 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
           <input 
             type="text"
             onChange={(e) => setFirstName(e.target.value)}
             value={firstName}
-            className="w-full p-3 rounded-lg bg-slate-800 text-white text-base border border-slate-700 shadow-sm focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 outline-none transition-all duration-200"
+            className="w-full p-4 rounded-lg bg-slate-800 text-white text-base border border-slate-700 shadow-sm focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 outline-none transition-all duration-200"
             placeholder="First Name"
           />
           <input 
             type="text"
             onChange={(e) => setLastName(e.target.value)}
             value={lastName}
-            className="w-full p-3 rounded-lg bg-slate-800 text-white text-base border border-slate-700 shadow-sm focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 outline-none transition-all duration-200"
+            className="w-full p-4 rounded-lg bg-slate-800 text-white text-base border border-slate-700 shadow-sm focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 outline-none transition-all duration-200"
             placeholder="Last Name"
           />
           <input 
             type="tel"
             onChange={handlePhoneChange}
             value={phoneNumber}
-            className="w-full p-3 rounded-lg bg-slate-800 text-white text-base border border-slate-700 shadow-sm focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 outline-none transition-all duration-200"
+            className="w-full p-4 rounded-lg bg-slate-800 text-white text-base border border-slate-700 shadow-sm focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 outline-none transition-all duration-200"
             placeholder="(XXX) XXX-XXXX"
           />
           <input 
             type="email"
             onChange={(e) => setEmail(e.target.value)}
             value={email}
-            className="w-full p-3 rounded-lg bg-slate-800 text-white text-base border border-slate-700 shadow-sm focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 outline-none transition-all duration-200"
+            className="w-full p-4 rounded-lg bg-slate-800 text-white text-base border border-slate-700 shadow-sm focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 outline-none transition-all duration-200"
             placeholder="Email"
           />
           <input 
             type="text"
             onChange={(e) => setLocation(e.target.value)}
             value={location}
-            className="w-full p-3 rounded-lg bg-slate-800 text-white text-base border border-slate-700 shadow-sm focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 outline-none transition-all duration-200 md:col-span-2"
+            className="w-full p-4 rounded-lg bg-slate-800 text-white text-base border border-slate-700 shadow-sm focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 outline-none transition-all duration-200 sm:col-span-2"
             placeholder="Location"
           />
           <textarea
             ref={textareaRef}
             onChange={(e) => setStory(e.target.value)}
             value={story}
-            className="w-full p-3 rounded-lg bg-slate-800 text-white text-base border border-slate-700 shadow-sm focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 outline-none transition-all duration-200 md:col-span-2 resize-none scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-slate-700 hover:scrollbar-thumb-blue-400 max-h-[300px] overflow-y-auto"
+            className="w-full p-4 rounded-lg bg-slate-800 text-white text-base border border-slate-700 shadow-sm focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 outline-none transition-all duration-200 sm:col-span-2 resize-none scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-slate-700 hover:scrollbar-thumb-blue-400 max-h-[300px] overflow-y-auto"
             placeholder="Your Story"
           />
           <input
             ref={fileInputRef}
             type="file"
             onChange={(e) => setProfilePicture(e.target.files[0])}
-            className="w-full md:col-span-2 text-white text-base file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-gradient-to-r file:from-blue-600 file:to-blue-400 file:text-white hover:file:from-blue-700 hover:file:to-blue-500 file:transition-all file:duration-200 file:shadow-lg hover:file:shadow-xl"
+            className="w-full sm:col-span-2 text-white text-base file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-gradient-to-r file:from-blue-600 file:to-blue-400 file:text-white hover:file:from-blue-700 hover:file:to-blue-500 file:transition-all file:duration-200 file:shadow-lg hover:file:shadow-xl"
             accept="image/*"
           />
         </div>
