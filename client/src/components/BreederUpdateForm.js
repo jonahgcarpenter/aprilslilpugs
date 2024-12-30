@@ -88,12 +88,12 @@ const BreederUpdateForm = () => {
   }
 
   return (
-    <form className="mx-4 bg-slate-900 rounded-xl shadow-xl p-8" onSubmit={handleSubmit}>
+    <form className="mx-2 sm:mx-4 bg-slate-900 rounded-xl shadow-xl p-4 sm:p-8" onSubmit={handleSubmit}>
       <div className="max-w-[120ch] mx-auto"> {/* Keep form inputs at readable width */}
-        <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-6">
+        <h1 className="text-xl sm:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-4 sm:mb-6">
           Update Breeder Profile
         </h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-4 sm:gap-6">
           <input 
             type="text"
             onChange={(e) => setFirstName(e.target.value)}
@@ -144,10 +144,10 @@ const BreederUpdateForm = () => {
             accept="image/*"
           />
         </div>
-        <button className="mt-8 bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white text-base px-8 py-3 rounded-lg transition-all duration-200 font-bold shadow-lg hover:shadow-xl">
+        <button className="w-full sm:w-auto mt-6 sm:mt-8 bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white text-base px-6 py-3 rounded-lg transition-all duration-200 font-bold shadow-lg hover:shadow-xl">
           Update Profile
         </button>
-        {error && <div className="text-white text-base mt-6 p-4 bg-slate-800/50 backdrop-blur-sm rounded-lg border border-slate-700">{error}</div>}
+        {error && <div className="text-white text-sm sm:text-base mt-4 sm:mt-6 p-3 sm:p-4 bg-slate-800/50 backdrop-blur-sm rounded-lg border border-slate-700">{error}</div>}
       </div>
     </form>
   )
