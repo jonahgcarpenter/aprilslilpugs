@@ -24,7 +24,7 @@ const BreederDetails = () => {
   return (
     <>
       {breeder && (
-        <div key={breeder._id} className="mx-4 bg-slate-900 rounded-xl shadow-xl p-8 hover:shadow-2xl transition-all duration-300 mt-8">
+        <div key={breeder._id} className="mx-4 bg-slate-900 rounded-xl shadow-xl p-8 hover:shadow-2xl transition-all duration-300">
           <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-8 text-center">
             Meet The Breeder
           </h1>
