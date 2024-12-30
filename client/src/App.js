@@ -5,7 +5,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 // PAGES
 import Home from './pages/Home';
 import Puppies from './pages/Puppies';
-import BreederDashboard from './pages/BreederDashboard';  // Add this import
+import BreederDashboard from './pages/BreederDashboard';
 
 // COMPONENTS
 import Navbar from './components/Navbar';

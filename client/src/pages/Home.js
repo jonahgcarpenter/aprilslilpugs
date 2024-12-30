@@ -1,6 +1,5 @@
 // components
 import BreederDetails from '../components/BreederDetails';
-import BreederUpdateForm from '../components/BreederUpdateForm';
 import UnderConstruction from '../components/UnderConstruction';
 
 const Home = () => {
@@ -11,7 +10,6 @@ const Home = () => {
       </div>
       <div className="grid gap-8">
         <BreederDetails />
-        <BreederUpdateForm />
       </div>
     </div>
   )

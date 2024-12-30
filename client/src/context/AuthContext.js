@@ -112,7 +112,7 @@ export const AuthProvider = ({ children }) => {
       login, 
       logout,
       loginStatus,
-      setLoginStatus,  // Make sure this is included
+      setLoginStatus,
       clearLoginStatus 
     }}>
       {children}

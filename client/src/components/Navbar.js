@@ -24,6 +24,13 @@ const Navbar = () => {
                 Puppies
               </button>
             </Link>
+            {user && (
+              <Link to="/breeder-dashboard">
+                <button className="bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-6 py-2 text-sm rounded-full font-semibold shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+                  Admin
+                </button>
+              </Link>
+            )}
             {user ? <LogoutButton /> : <LoginButton />}
           </div>
         </div>
