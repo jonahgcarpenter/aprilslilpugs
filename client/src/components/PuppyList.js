@@ -58,10 +58,10 @@ const PuppyList = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {litter.puppies.map(puppy => (
               <div key={puppy._id} className="bg-slate-700/50 rounded-lg p-4">
-                {puppy.images && puppy.images.length > 0 && (
+                {puppy.profilePicture && (
                   <img
                     loading="lazy"
-                    src={`/api/images/uploads/puppy-dogs/${puppy.images.find(img => img.isProfile)?.filename || puppy.images[0].filename}`}
+                    src={puppy.profilePicture}
                     alt={puppy.name}
                     className="w-full aspect-square object-cover rounded-lg mb-4"
                   />

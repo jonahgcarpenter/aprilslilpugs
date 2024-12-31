@@ -52,16 +52,14 @@ const DogList = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {dogs && dogs.map(dog => (
           <div key={dog._id} className="bg-slate-800/50 rounded-xl p-4">
-            {dog.images && dog.images.length > 0 && (
+            {dog.profilePicture && (
               <img 
-                src={`/api/images/uploads/profile-pictures/${dog.profilePicture.split('/').pop()}`}
+                src={dog.profilePicture}
                 alt={dog.name}
                 className="w-full aspect-square object-cover rounded-lg mb-4"
               />
             )}
-            
             <h3 className="text-xl font-semibold text-white mb-2">{dog.name}</h3>
-            
             <div className="space-y-2 text-white/80">
               <p>Color: {dog.color}</p>
               <p>Gender: {dog.gender}</p>

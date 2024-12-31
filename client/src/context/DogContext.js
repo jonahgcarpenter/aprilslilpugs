@@ -72,7 +72,9 @@ export const dogReducer = (state, action) => {
         litters: state.litters.map(litter => ({
           ...litter,
           puppies: litter.puppies.map(puppy =>
-            puppy._id === action.payload._id ? action.payload : puppy
+            puppy._id === action.payload._id 
+              ? { ...puppy, ...action.payload }
+              : puppy
           )
         }))
       };

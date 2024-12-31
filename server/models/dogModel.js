@@ -12,9 +12,15 @@ const grownDogSchema = new mongoose.Schema({
   },
   profilePicture: { 
     type: String,
-    default: null
+    get: function(v) {
+      return v ? `/api/images/uploads/profile-pictures/${v}` : null;
+    }
   }
-}, { timestamps: true });
+}, { 
+  timestamps: true,
+  toJSON: { getters: true }, // Enable getters when converting to JSON
+  toObject: { getters: true } // Enable getters when converting to object
+});
 
 // Updated puppy schema with profile picture
 const puppySchema = new mongoose.Schema({

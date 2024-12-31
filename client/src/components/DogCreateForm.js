@@ -25,7 +25,8 @@ const DogCreateForm = () => {
 
   const getImagePath = (profilePicture) => {
     if (!profilePicture) return '';
-    return `/api/images/uploads/profile-pictures/${profilePicture}`;
+    // Use the path as-is since it's already complete from the model getter
+    return profilePicture;
   };
 
   const validateField = (name, value) => {
@@ -44,6 +45,20 @@ const DogCreateForm = () => {
   };
 
   const validateForm = () => {
+    // If we're editing and have all required fields, or if we're only changing the profile picture
+    if (editingDog) {
+      const hasAllRequiredFields = !Object.values({
+        name: validateField('name', formData.name),
+        birthDate: validateField('birthDate', formData.birthDate),
+        gender: validateField('gender', formData.gender),
+        color: validateField('color', formData.color)
+      }).some(error => error);
+
+      // Allow update if all fields are valid or if we only changed the profile picture
+      return hasAllRequiredFields;
+    }
+
+    // For new dogs, require all fields
     const errors = {
       name: validateField('name', formData.name),
       birthDate: validateField('birthDate', formData.birthDate),
@@ -123,7 +138,7 @@ const DogCreateForm = () => {
       gender: dog.gender,
       color: dog.color
     });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setIsValid(true); // Set form as valid when editing
   };
 
   const handleSubmit = async (e) => {
@@ -133,21 +148,23 @@ const DogCreateForm = () => {
     setSuccessMessage('');
 
     try {
-      // First create/update the dog with basic info
+      // Create a FormData instance to handle both text data and files
+      const formDataToSend = new FormData();
+      formDataToSend.append('name', formData.name);
+      formDataToSend.append('birthDate', formData.birthDate);
+      formDataToSend.append('gender', formData.gender);
+      formDataToSend.append('color', formData.color);
+      formDataToSend.append('status', formData.status);
+      if (profilePicture) {
+        formDataToSend.append('profilePicture', profilePicture);
+      }
+
+      // Send all data in a single request
       const response = await fetch(
         editingDog ? `/api/dogs/grown/${editingDog._id}` : '/api/dogs/grown',
         {
           method: editingDog ? 'PUT' : 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            name: formData.name,
-            birthDate: formData.birthDate,
-            gender: formData.gender,
-            color: formData.color,
-            status: formData.status
-          })
+          body: formDataToSend // Remove Content-Type header to let browser set it
         }
       );
 
@@ -157,36 +174,11 @@ const DogCreateForm = () => {
         throw new Error(dog.error || 'Failed to save dog');
       }
 
-      // If there's a profile picture, upload it separately
-      if (profilePicture) {
-        const imageFormData = new FormData();
-        imageFormData.append('profilePicture', profilePicture);
-
-        const imageResponse = await fetch(
-          `/api/dogs/grown/${dog._id}/profile-picture`,
-          {
-            method: 'POST',
-            body: imageFormData
-          }
-        );
-
-        if (!imageResponse.ok) {
-          throw new Error('Failed to upload profile picture');
-        }
-
-        const updatedDog = await imageResponse.json();
-        
-        // Use the updated dog data that includes the profile picture path
-        dispatch({ 
-          type: editingDog ? 'UPDATE_DOG' : 'ADD_GROWN_DOG', 
-          payload: updatedDog 
-        });
-      } else {
-        dispatch({ 
-          type: editingDog ? 'UPDATE_DOG' : 'ADD_GROWN_DOG', 
-          payload: dog 
-        });
-      }
+      // Update the context with the new/updated dog data
+      dispatch({ 
+        type: editingDog ? 'UPDATE_DOG' : 'ADD_GROWN_DOG', 
+        payload: dog 
+      });
 
       // Reset form and show success message
       setFormData({

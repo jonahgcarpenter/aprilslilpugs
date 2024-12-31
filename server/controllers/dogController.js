@@ -6,18 +6,26 @@ const path = require('path');
 const dogController = {
   createGrownDog: async (req, res) => {
     try {
-      const dog = new GrownDog(req.body);
-      await dog.save();
-      res.status(201).json(dog);
+      // Create the dog with all data including profilePicture
+      const dogData = {
+        ...req.body,
+        // The filename is already set in the middleware
+      };
+      
+      const dog = await GrownDog.create(dogData);
+      
+      // Return the populated dog object
+      const populatedDog = await GrownDog.findById(dog._id);
+      res.status(201).json(populatedDog);
     } catch (error) {
-      res.status(400).json({ error: error.message, code: error.code });
+      res.status(400).json({ error: error.message });
     }
   },
 
   getActiveBreeders: async (req, res) => {
     try {
       const breeders = await GrownDog.find()
-        .select('name birthDate gender color images')
+        .select('name birthDate gender color profilePicture')
         .sort('name');
       res.json(breeders);
     } catch (error) {
@@ -74,9 +82,18 @@ const dogController = {
 
   createPuppy: async (req, res) => {
     try {
-      const puppy = new Puppy(req.body);
-      await puppy.save();
-      res.status(201).json(puppy);
+      // Create the puppy with all data including profilePicture
+      const puppyData = {
+        ...req.body,
+        // The filename is already set in the middleware
+      };
+      
+      const puppy = await Puppy.create(puppyData);
+      
+      // Return the populated puppy object
+      const populatedPuppy = await Puppy.findById(puppy._id)
+        .populate('mother father', 'name color');
+      res.status(201).json(populatedPuppy);
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
@@ -121,7 +138,8 @@ const dogController = {
         req.params.id,
         req.body,
         { new: true }
-      );
+      ).populate('mother father', 'name color');
+
       if (!puppy) {
         return res.status(404).json({ error: 'Puppy not found' });
       }
@@ -133,14 +151,18 @@ const dogController = {
 
   deletePuppy: async (req, res) => {
     try {
-      const puppy = await Puppy.findByIdAndDelete(req.params.id);
+      const puppy = await Puppy.findById(req.params.id);
       if (!puppy) {
         return res.status(404).json({ error: 'Puppy not found' });
       }
-      // Delete associated images
-      for (const image of puppy.images) {
-        await fs.unlink(image.url).catch(() => {});
+
+      // Delete profile picture if it exists
+      if (puppy.profilePicture) {
+        const imagePath = path.join(__dirname, '..', 'public', 'uploads', puppy.profilePicture);
+        await fs.unlink(imagePath).catch(() => {});
       }
+
+      await puppy.deleteOne();
       res.json({ message: 'Puppy deleted successfully' });
     } catch (error) {
       res.status(400).json({ error: error.message });

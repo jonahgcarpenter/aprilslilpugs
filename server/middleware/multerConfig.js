@@ -1,5 +1,6 @@
 const multer = require('multer');
 const fs = require('fs');
+const path = require('path');
 
 // Storage configuration for breeder profile pictures
 const breederStorage = multer.diskStorage({
@@ -14,7 +15,7 @@ const breederStorage = multer.diskStorage({
   }
 });
 
-// Storage configuration for dog profile pictures
+// Update dog storage configuration to match breeder pattern
 const dogStorage = multer.diskStorage({
   destination: function (req, file, cb) {
     const uploadDir = 'public/uploads/profile-pictures';
@@ -23,7 +24,8 @@ const dogStorage = multer.diskStorage({
   },
   filename: function (req, file, cb) {
     const timestamp = Date.now();
-    cb(null, `${timestamp}-${file.originalname}`);
+    const ext = path.extname(file.originalname);
+    cb(null, `${timestamp}-${file.originalname.replace(ext, '')}${ext}`);
   }
 });
 
@@ -47,7 +49,15 @@ const dogUpload = multer({
   fileFilter: fileFilter
 });
 
+// Remove the separate puppy storage and use the same dogStorage for puppies
+const puppyUpload = multer({
+  storage: dogStorage,  // Use the same storage as dogs
+  limits: { fileSize: 1024 * 1024 * 5 },
+  fileFilter: fileFilter
+});
+
 module.exports = {
   breederUpload,
-  dogUpload
+  dogUpload,
+  puppyUpload
 };
