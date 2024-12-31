@@ -1,12 +1,26 @@
 const multer = require('multer');
 const path = require('path');
 
-const storage = multer.diskStorage({
+// Storage configuration for breeder profile pictures
+const breederStorage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'uploads/breeder-profiles/');  // Create this folder in your project
+    cb(null, 'uploads/breeder-profiles/');
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + '-' + file.originalname);
+  }
+});
+
+// Storage configuration for dog images
+const dogStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const type = req.params.type || 'grown'; // 'grown' or 'puppy'
+    const uploadDir = `uploads/${type}-dogs/`;
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, `${uniqueSuffix}${path.extname(file.originalname)}`);
   }
 });
 
@@ -18,12 +32,20 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-const upload = multer({
-  storage: storage,
-  limits: {
-    fileSize: 1024 * 1024 * 5 // 5MB
-  },
+// Create separate multer instances
+const breederUpload = multer({
+  storage: breederStorage,
+  limits: { fileSize: 1024 * 1024 * 5 },
   fileFilter: fileFilter
 });
 
-module.exports = upload;
+const dogUpload = multer({
+  storage: dogStorage,
+  limits: { fileSize: 1024 * 1024 * 5 },
+  fileFilter: fileFilter
+});
+
+module.exports = {
+  breederUpload,
+  dogUpload
+};

@@ -1,7 +1,14 @@
 const mongoose = require('mongoose');
 
-// Base schema for shared dog properties
-const baseFields = {
+// Shared image schema
+const imageSchema = new mongoose.Schema({
+  url: { type: String, required: true },
+  isProfile: { type: Boolean, default: false },
+  uploadDate: { type: Date, default: Date.now }
+});
+
+// Simplified grown dog schema with images
+const grownDogSchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },
   birthDate: { type: Date, required: true },
   gender: { type: String, enum: ['male', 'female'], required: true },
@@ -10,139 +17,121 @@ const baseFields = {
     enum: ['black', 'fawn', 'apricot'],
     required: true 
   },
-  health: {
-    vaccinations: [{
-      name: String,
-      date: Date
-    }],
-    medicalHistory: [{
-      date: Date,
-      description: String
-    }]
-  }
-};
-
-// Schema for grown dogs (breeders and retired)
-const grownDogSchema = new mongoose.Schema({
-  ...baseFields,
-  status: { 
-    type: String, 
-    enum: ['active', 'retired'],
-    default: 'active',
-    required: true
-  },
-  registration: { type: String, unique: true, sparse: true },
-  offspring: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Puppy' }]
+  images: [imageSchema]
 }, { timestamps: true });
 
-// Schema for puppies
+// Updated puppy schema with images
 const puppySchema = new mongoose.Schema({
-  ...baseFields,
-  mother: { type: mongoose.Schema.Types.ObjectId, ref: 'GrownDog', required: true },
-  father: { type: mongoose.Schema.Types.ObjectId, ref: 'GrownDog', required: true },
-  litterRef: { type: mongoose.Schema.Types.ObjectId, ref: 'Litter', required: true },
-  status: {
-    type: String,
-    enum: ['available', 'reserved', 'sold'],
-    default: 'available'
-  }
-}, { timestamps: true });
-
-const litterSchema = new mongoose.Schema({
-  litterName: { 
-    type: String,
-    unique: true,
-    sparse: true
+  name: { type: String, required: true, trim: true },
+  mother: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'GrownDog', 
+    required: true 
   },
-  mother: { type: mongoose.Schema.Types.ObjectId, ref: 'GrownDog', required: true },
-  father: { type: mongoose.Schema.Types.ObjectId, ref: 'GrownDog', required: true },
-  expectedBy: { 
-    type: Date,
-    required: true
+  father: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'GrownDog', 
+    required: true 
   },
-  birthDate: { 
-    type: Date,
-    validate: {
-      validator: function(birthDate) {
-        return !this.expectedBy || birthDate >= this.expectedBy - (5 * 24 * 60 * 60 * 1000); // Within 5 days of expected date
-      },
-      message: 'Birth date should not be more than 5 days before expected date'
-    }
-  },
-  readyBy: { 
-    type: Date,
-    validate: {
-      validator: function(readyDate) {
-        // Puppies should be at least 8 weeks old before ready
-        return !this.birthDate || readyDate >= new Date(this.birthDate.getTime() + (8 * 7 * 24 * 60 * 60 * 1000));
-      },
-      message: 'Puppies must be at least 8 weeks old before being ready'
-    }
-  },
-  notes: String,
-  status: { 
+  birthDate: { type: Date, required: true },
+  gender: { type: String, enum: ['male', 'female'], required: true },
+  color: { 
     type: String, 
-    enum: ['expecting', 'born', 'completed'],
-    default: 'expecting',
-    required: true
+    enum: ['black', 'fawn', 'apricot'],
+    required: true 
   },
-  puppies: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Puppy' }]
+  images: [imageSchema]
 }, { timestamps: true });
 
-// Helper function to generate litter name
-litterSchema.methods.generateLitterName = async function() {
-  try {
-    const mother = await mongoose.model('GrownDog').findById(this.mother);
-    const father = await mongoose.model('GrownDog').findById(this.father);
-    if (mother && father) {
-      return `${mother.name}X${father.name}`;
-    }
-    return null;
-  } catch (error) {
-    return null;
+// Add method to set profile picture
+const setProfilePicture = async function(imageId) {
+  // Reset all images isProfile flag to false
+  await this.updateOne({
+    'images': { '$set': { 'isProfile': false } }
+  });
+  
+  // Set the selected image as profile
+  await this.updateOne(
+    { 'images._id': imageId },
+    { '$set': { 'images.$.isProfile': true } }
+  );
+};
+
+grownDogSchema.methods.setProfilePicture = setProfilePicture;
+puppySchema.methods.setProfilePicture = setProfilePicture;
+
+// Virtual for profile picture
+const profilePictureVirtual = {
+  get() {
+    const profileImg = this.images.find(img => img.isProfile);
+    return profileImg ? profileImg.url : null;
   }
 };
 
-// Pre-save middleware to set litter name and handle dates
-litterSchema.pre('save', async function(next) {
-  try {
-    // Generate litter name if not set
-    if (!this.litterName) {
-      const generatedName = await this.generateLitterName();
-      if (!generatedName) {
-        throw new Error('Unable to generate litter name - parent dogs not found');
-      }
-      this.litterName = generatedName;
-    }
+grownDogSchema.virtual('profilePicture').get(profilePictureVirtual.get);
+puppySchema.virtual('profilePicture').get(profilePictureVirtual.get);
 
-    // Handle existing date logic
-    if (this.birthDate && !this.readyBy) {
-      this.readyBy = new Date(this.birthDate.getTime() + (8 * 7 * 24 * 60 * 60 * 1000));
-    }
-    
-    // Update status based on dates
-    const now = new Date();
-    if (this.birthDate) {
-      this.status = 'born';
-    } else if (this.expectedBy > now) {
-      this.status = 'expecting';
-    } else if (this.readyBy && this.readyBy < now) {
-      this.status = 'completed';
-    }
-    
-    next();
-  } catch (error) {
-    next(error);
-  }
-});
+// Helper method to find litter siblings (puppies with same parents and birthdate)
+puppySchema.statics.findLittermates = async function(puppyId) {
+  const puppy = await this.findById(puppyId);
+  if (!puppy) return [];
+  
+  return this.find({
+    mother: puppy.mother,
+    father: puppy.father,
+    birthDate: puppy.birthDate,
+    _id: { $ne: puppyId }
+  });
+};
+
+// Helper method to find all litters (grouped by parents and birthdate)
+puppySchema.statics.findLitters = async function() {
+  return this.aggregate([
+    {
+      $group: {
+        _id: {
+          mother: '$mother',
+          father: '$father',
+          birthDate: '$birthDate'
+        },
+        puppies: { $push: '$$ROOT' },
+        count: { $sum: 1 }
+      }
+    },
+    {
+      $lookup: {
+        from: 'growndogs',
+        localField: '_id.mother',
+        foreignField: '_id',
+        as: 'motherDetails'
+      }
+    },
+    {
+      $lookup: {
+        from: 'growndogs',
+        localField: '_id.father',
+        foreignField: '_id',
+        as: 'fatherDetails'
+      }
+    },
+    {
+      $project: {
+        mother: { $arrayElemAt: ['$motherDetails', 0] },
+        father: { $arrayElemAt: ['$fatherDetails', 0] },
+        birthDate: '$_id.birthDate',
+        puppies: 1,
+        count: 1
+      }
+    },
+    { $sort: { birthDate: -1 } }
+  ]);
+};
 
 // Add indexes
-grownDogSchema.index({ status: 1, name: 1 });
-puppySchema.index({ status: 1, litterRef: 1, name: 1 });
-litterSchema.index({ status: 1, expectedBy: -1 });
+grownDogSchema.index({ name: 1 });
+puppySchema.index({ mother: 1, father: 1, birthDate: 1 });
 
 module.exports = {
   GrownDog: mongoose.model('GrownDog', grownDogSchema),
-  Puppy: mongoose.model('Puppy', puppySchema),
-  Litter: mongoose.model('Litter', litterSchema)
+  Puppy: mongoose.model('Puppy', puppySchema)
 };

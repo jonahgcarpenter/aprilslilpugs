@@ -1,4 +1,6 @@
-const { GrownDog, Puppy, Litter } = require('../models/dogModel');
+const mongoose = require('mongoose');
+const { GrownDog, Puppy } = require('../models/dogModel');
+const fs = require('fs').promises;
 
 const dogController = {
   createGrownDog: async (req, res) => {
@@ -6,6 +8,64 @@ const dogController = {
       const dog = new GrownDog(req.body);
       await dog.save();
       res.status(201).json(dog);
+    } catch (error) {
+      res.status(400).json({ error: error.message, code: error.code });
+    }
+  },
+
+  getActiveBreeders: async (req, res) => {
+    try {
+      const breeders = await GrownDog.find()
+        .select('name birthDate gender color images')
+        .sort('name');
+      res.json(breeders);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  },
+
+  getGrownDog: async (req, res) => {
+    try {
+      const dog = await GrownDog.findById(req.params.id);
+      if (!dog) {
+        return res.status(404).json({ error: 'Dog not found' });
+      }
+      res.json(dog);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  },
+
+  updateGrownDog: async (req, res) => {
+    try {
+      const dog = await GrownDog.findByIdAndUpdate(
+        req.params.id,
+        req.body,
+        { new: true }
+      );
+      if (!dog) {
+        return res.status(404).json({ error: 'Dog not found' });
+      }
+      res.json(dog);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  },
+
+  deleteGrownDog: async (req, res) => {
+    try {
+      const dog = await GrownDog.findById(req.params.id);
+      if (!dog) {
+        return res.status(404).json({ error: 'Dog not found' });
+      }
+      
+      // Delete associated images
+      for (const image of dog.images || []) {
+        await fs.unlink(image.url).catch(() => {});
+      }
+      
+      await dog.deleteOne();
+      res.json({ message: 'Dog deleted successfully' });
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
@@ -15,68 +75,155 @@ const dogController = {
     try {
       const puppy = new Puppy(req.body);
       await puppy.save();
-      // Update litter's puppies array
-      await Litter.findByIdAndUpdate(
-        puppy.litterRef,
-        { $push: { puppies: puppy._id } }
-      );
       res.status(201).json(puppy);
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
   },
 
-  getActiveBreeders: async (req, res) => {
+  getAllPuppies: async (req, res) => {
     try {
-      const breeders = await GrownDog.find({ status: 'active' })
-        .select('-health.medicalHistory')
-        .sort('name');
-      res.json(breeders);
-    } catch (error) {
-      res.status(500).json({ error: error.message, code: error.code });
-    }
-  },
-
-  getPuppiesByLitter: async (req, res) => {
-    try {
-      const puppies = await Puppy.find({ litterRef: req.params.litterId })
-        .populate('mother father', 'name registration color')
-        .populate('litterRef', 'litterName birthDate readyBy')
-        .sort('name');
-      
-      if (!puppies.length) {
-        return res.status(404).json({ error: 'No puppies found for this litter' });
-      }
+      const puppies = await Puppy.find()
+        .populate('mother father', 'name color')
+        .sort('-birthDate');
       res.json(puppies);
     } catch (error) {
-      res.status(500).json({ error: error.message, code: error.code });
+      res.status(500).json({ error: error.message });
     }
   },
 
-  getAllLitters: async (req, res) => {
+  getLitters: async (req, res) => {
     try {
-      const litters = await Litter.find()
-        .populate('mother father', 'name registration color')
-        .populate('puppies', 'name color status')
-        .sort('-expectedBy');
-      res.json(litters);
-    } catch (error) {
-      res.status(500).json({ error: error.message, code: error.code });
-    }
-  },
-
-  getActiveLitters: async (req, res) => {
-    try {
-      const litters = await Litter.find({
-        status: { $in: ['expecting', 'born'] }
-      })
-      .populate('mother father', 'name registration')
-      .sort('-birthDate');
+      const litters = await Puppy.findLitters();
       res.json(litters);
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
+  },
+
+  getPuppy: async (req, res) => {
+    try {
+      const puppy = await Puppy.findById(req.params.id)
+        .populate('mother father', 'name color');
+      if (!puppy) {
+        return res.status(404).json({ error: 'Puppy not found' });
+      }
+      res.json(puppy);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  },
+
+  updatePuppy: async (req, res) => {
+    try {
+      const puppy = await Puppy.findByIdAndUpdate(
+        req.params.id,
+        req.body,
+        { new: true }
+      );
+      if (!puppy) {
+        return res.status(404).json({ error: 'Puppy not found' });
+      }
+      res.json(puppy);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  },
+
+  deletePuppy: async (req, res) => {
+    try {
+      const puppy = await Puppy.findByIdAndDelete(req.params.id);
+      if (!puppy) {
+        return res.status(404).json({ error: 'Puppy not found' });
+      }
+      // Delete associated images
+      for (const image of puppy.images) {
+        await fs.unlink(image.url).catch(() => {});
+      }
+      res.json({ message: 'Puppy deleted successfully' });
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
   }
 };
+
+const handleImageUpload = async (Model, id, files) => {
+  const doc = await Model.findById(id);
+  if (!doc) throw new Error('Document not found');
+
+  const newImages = files.map(file => ({
+    url: file.path,
+    caption: '',
+    isProfile: doc.images.length === 0 // Make first image the profile image
+  }));
+
+  doc.images.push(...newImages);
+  await doc.save();
+  return doc;
+};
+
+Object.assign(dogController, {
+  uploadGrownDogImages: async (req, res) => {
+    try {
+      const dog = await handleImageUpload(GrownDog, req.params.id, req.files);
+      res.json(dog);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  },
+
+  uploadPuppyImages: async (req, res) => {
+    try {
+      const puppy = await handleImageUpload(Puppy, req.params.id, req.files);
+      res.json(puppy);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  },
+
+  setProfileImage: async (Model, req, res) => {
+    try {
+      const doc = await Model.findById(req.params.id);
+      if (!doc) throw new Error('Document not found');
+
+      doc.images.forEach(img => {
+        img.isProfile = img._id.toString() === req.params.imageId;
+      });
+
+      await doc.save();
+      res.json(doc);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  },
+
+  setGrownDogProfileImage: (req, res) => dogController.setProfileImage(GrownDog, req, res),
+  setPuppyProfileImage: (req, res) => dogController.setProfileImage(Puppy, req, res),
+
+  deleteImage: async (Model, req, res) => {
+    try {
+      const doc = await Model.findById(req.params.id);
+      if (!doc) throw new Error('Document not found');
+
+      const image = doc.images.id(req.params.imageId);
+      if (!image) throw new Error('Image not found');
+
+      await fs.unlink(image.url);
+      doc.images.pull(req.params.imageId);
+      
+      if (image.isProfile && doc.images.length > 0) {
+        doc.images[0].isProfile = true;
+      }
+
+      await doc.save();
+      res.json(doc);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  },
+
+  deleteGrownDogImage: (req, res) => dogController.deleteImage(GrownDog, req, res),
+  deletePuppyImage: (req, res) => dogController.deleteImage(Puppy, req, res)
+});
 
 module.exports = dogController;

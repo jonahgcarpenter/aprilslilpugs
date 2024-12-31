@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router();
-const upload = require('../middleware/multerConfig');
+const { breederUpload } = require('../middleware/multerConfig');
 
 const{
   createBreeder,
@@ -28,7 +28,7 @@ router.post('/', createBreeder)
 router.delete('/:id', deleteBreeder)
 
 // Update breeder
-router.patch('/:id',  upload.single('profilePicture'), updateBreeder)
+router.patch('/:id',  breederUpload.single('profilePicture'), updateBreeder)
 
 // Update password (development only)
 router.post('/update-password/:id', updateBreederPassword)

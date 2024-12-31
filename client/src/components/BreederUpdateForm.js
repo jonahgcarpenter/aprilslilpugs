@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react"
 import { useBreederContext } from '../hooks/useBreederContext'
 
-const BreederUpdateForm = () => {
+const BreederUpdateForm = ({ initialData = null }) => {
   const { breeder, dispatch } = useBreederContext()
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
@@ -10,6 +10,7 @@ const BreederUpdateForm = () => {
   const [location, setLocation] = useState('')
   const [story, setStory] = useState('')
   const [profilePicture, setProfilePicture] = useState(null)
+  const [currentProfilePicture, setCurrentProfilePicture] = useState(null)
   const [error, setError] = useState(null)
   const fileInputRef = useRef(null);
   const textareaRef = useRef(null);
@@ -22,6 +23,7 @@ const BreederUpdateForm = () => {
       setEmail(breeder.email || '')
       setLocation(breeder.location || '')
       setStory(breeder.story || '')
+      setCurrentProfilePicture(breeder.profilePicture || null)
     }
   }, [breeder])
 
@@ -52,40 +54,85 @@ const BreederUpdateForm = () => {
     setPhoneNumber(formattedNumber)
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
-    if (!breeder?._id) return
-
-    const formData = new FormData()
-    formData.append('firstName', firstName)
-    formData.append('lastName', lastName)
-    formData.append('phoneNumber', phoneNumber)
-    formData.append('email', email)
-    formData.append('location', location)
-    formData.append('story', story)
-    if (profilePicture) {
-      formData.append('profilePicture', profilePicture)
-    }
-
-    const response = await fetch('/api/breeders/' + breeder._id, {
-      method: 'PATCH',
-      body: formData
-    })
-    const json = await response.json()
-
-    if (!response.ok) {
-      setError(json.error)
-    }
-    if (response.ok) {
-      setError(null)
-      setProfilePicture(null)
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      setError('Image must be less than 5MB');
       if (fileInputRef.current) {
-        fileInputRef.current.value = ''
+        fileInputRef.current.value = '';
       }
-      dispatch({ type: 'UPDATE_BREEDER', payload: json })
+      return;
     }
-  }
+
+    try {
+      // Include the file directly in the breeder update
+      const formData = new FormData();
+      formData.append('profilePicture', file);
+      formData.append('firstName', firstName);
+      formData.append('lastName', lastName);
+      formData.append('phoneNumber', phoneNumber);
+      formData.append('email', email);
+      formData.append('location', location);
+      formData.append('story', story);
+
+      const response = await fetch('/api/breeders/' + breeder._id, {
+        method: 'PATCH',
+        body: formData
+      });
+
+      const updatedBreeder = await response.json();
+
+      if (!response.ok) {
+        throw new Error(updatedBreeder.error || 'Update failed');
+      }
+
+      setCurrentProfilePicture(updatedBreeder.profilePicture);
+      setProfilePicture(null);
+      setError(null);
+      dispatch({ type: 'UPDATE_BREEDER', payload: updatedBreeder });
+
+    } catch (err) {
+      setError('Failed to update profile: ' + err.message);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!breeder?._id) return;
+
+    try {
+      const formData = new FormData();
+      formData.append('firstName', firstName);
+      formData.append('lastName', lastName);
+      formData.append('phoneNumber', phoneNumber);
+      formData.append('email', email);
+      formData.append('location', location);
+      formData.append('story', story);
+
+      const response = await fetch('/api/breeders/' + breeder._id, {
+        method: 'PATCH',
+        body: formData
+      });
+
+      const json = await response.json();
+
+      if (!response.ok) {
+        throw new Error(json.error || 'Update failed');
+      }
+
+      setError(null);
+      dispatch({ type: 'UPDATE_BREEDER', payload: json });
+
+    } catch (err) {
+      setError(err.message);
+    }
+  };
 
   return (
     <form className="mx-2 sm:mx-4 bg-slate-900 rounded-xl shadow-xl p-4 sm:p-8" onSubmit={handleSubmit}>
@@ -136,13 +183,28 @@ const BreederUpdateForm = () => {
             className="w-full p-4 rounded-lg bg-slate-800 text-white text-base border border-slate-700 shadow-sm focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 outline-none transition-all duration-200 sm:col-span-2 resize-none scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-slate-700 hover:scrollbar-thumb-blue-400 max-h-[300px] overflow-y-auto"
             placeholder="Your Story"
           />
-          <input
-            ref={fileInputRef}
-            type="file"
-            onChange={(e) => setProfilePicture(e.target.files[0])}
-            className="w-full sm:col-span-2 text-white text-base file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-gradient-to-r file:from-blue-600 file:to-blue-400 file:text-white hover:file:from-blue-700 hover:file:to-blue-500 file:transition-all file:duration-200 file:shadow-lg hover:file:shadow-xl"
-            accept="image/*"
-          />
+          <div className="form-group sm:col-span-2">
+            <label className="block text-lg font-semibold mb-4 text-white">Profile Picture</label>
+            <div className="flex flex-col gap-4">
+              {currentProfilePicture && (
+                <div className="relative w-32 h-32">
+                  <img
+                    src={currentProfilePicture}
+                    alt="Current Profile"
+                    className="w-full h-full object-cover rounded"
+                  />
+                </div>
+              )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="flex-1 text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:bg-blue-500 file:text-white hover:file:bg-blue-600 file:cursor-pointer"
+              />
+              <p className="text-sm text-slate-400">Upload a new image to replace the current profile picture</p>
+            </div>
+          </div>
         </div>
         <button className="w-full sm:w-auto mt-6 sm:mt-8 bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white text-base px-6 py-3 rounded-lg transition-all duration-200 font-bold shadow-lg hover:shadow-xl">
           Update Profile

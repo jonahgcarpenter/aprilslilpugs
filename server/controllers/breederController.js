@@ -5,26 +5,32 @@ const jwt = require('jsonwebtoken')
 
 // get all breeders
 const getBreeders = async (req, res) => {
-  const breeders = await Breeder.find({}).sort ({createdAt: -1})
-
-  res.status(200).json(breeders)
+  try {
+    const breeders = await Breeder.find({}).sort({createdAt: -1})
+    res.status(200).json(breeders)
+  } catch (error) {
+    res.status(500).json({ error: error.message, code: error.code })
+  }
 }
 
 // get a single breeder
 const getBreeder = async (req, res) => {
-  const { id } = req.params
+  try {
+    const { id } = req.params
 
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(400).json({error: 'Invalid ID, Breeder not found'})
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({error: 'Invalid ID format'})
+    }
+
+    const breeder = await Breeder.findById(id)
+    if (!breeder) {
+      return res.status(404).json({error: 'Breeder not found'})
+    }
+
+    res.status(200).json(breeder)
+  } catch (error) {
+    res.status(500).json({ error: error.message, code: error.code })
   }
-
-  const breeder = await Breeder.findById(id)
-
-  if (!breeder) {
-    return res.status(404).json({error: 'Breeder not found'})
-  }
-
-  res.status(200).json(breeder)
 }
 
 // create new breeder
