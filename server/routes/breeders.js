@@ -28,7 +28,7 @@ router.post('/', createBreeder)
 router.delete('/:id', deleteBreeder)
 
 // Update breeder
-router.patch('/:id',  breederUpload.single('profilePicture'), updateBreeder)
+router.patch('/:id', breederUpload.single('profilePicture'), updateBreeder)
 
 // Update password (development only)
 router.post('/update-password/:id', updateBreederPassword)

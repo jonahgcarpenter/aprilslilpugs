@@ -1,13 +1,18 @@
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 
 // Storage configuration for breeder profile pictures
 const breederStorage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, '../public/uploads/breeder-profiles/'));
+    const uploadPath = path.join(__dirname, '../public/uploads/breeder-profiles');
+    // Ensure directory exists
+    fs.mkdirSync(uploadPath, { recursive: true });
+    cb(null, uploadPath);
   },
   filename: function (req, file, cb) {
-    cb(null, Date.now() + '-' + file.originalname);
+    const uniqueSuffix = Date.now() + '-profile' + path.extname(file.originalname);
+    cb(null, uniqueSuffix);
   }
 });
 

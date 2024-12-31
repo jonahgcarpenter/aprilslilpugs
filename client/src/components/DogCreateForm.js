@@ -432,7 +432,7 @@ const DogCreateForm = () => {
             <div key={dog._id} className="bg-slate-800/50 rounded-lg p-4 relative group">
               {dog.images && dog.images.length > 0 && (
                 <img 
-                  src={dog.images.find(img => img.isProfile)?.url || dog.images[0].url}
+                  src={`/api/images/${dog.images.find(img => img.isProfile)?.url || dog.images[0].url}`}
                   alt={dog.name}
                   className="w-full aspect-square object-cover rounded-lg mb-4"
                 />

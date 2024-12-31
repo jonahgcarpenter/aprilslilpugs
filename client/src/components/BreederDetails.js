@@ -3,23 +3,27 @@ import { useBreederContext } from '../hooks/useBreederContext'
 import { FaFacebook, FaEnvelope, FaPhoneAlt, FaMapMarkerAlt } from 'react-icons/fa'
 
 const BreederDetails = () => {
-  const { breeder, dispatch } = useBreederContext()
+  const { breeder, loading, error, fetchBreeder } = useBreederContext()
 
   useEffect(() => {
-    const fetchAprilBreeder = async () => {
-      const response = await fetch('/api/breeders')
-      const json = await response.json()
+    fetchBreeder()
+  }, [])
 
-      if (response.ok) {
-        const april = json.find(b => b.firstName.toLowerCase() === 'april')
-        if (april) {
-          dispatch({ type: 'SET_BREEDER', payload: april })
-        }
-      }
-    }
+  if (loading) {
+    return (
+      <div className="mx-2 sm:mx-4 bg-slate-900 rounded-xl shadow-xl p-4 sm:p-8">
+        <p className="text-white text-center">Loading...</p>
+      </div>
+    );
+  }
 
-    fetchAprilBreeder()
-  }, [dispatch])
+  if (error) {
+    return (
+      <div className="mx-2 sm:mx-4 bg-slate-900 rounded-xl shadow-xl p-4 sm:p-8">
+        <p className="text-red-500 text-center">{error}</p>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -37,7 +41,7 @@ const BreederDetails = () => {
             
             {breeder.profilePicture && (
               <img 
-                src={breeder.profilePicture}
+                src={`/api/images/${breeder.profilePicture}`}
                 alt={`${breeder.firstName} ${breeder.lastName}`}
                 className="w-full max-w-[500px] aspect-square rounded-xl object-cover border-4 border-slate-700 shadow-lg mb-6 sm:mb-8"
               />

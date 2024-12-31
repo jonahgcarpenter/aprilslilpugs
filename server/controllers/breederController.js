@@ -2,6 +2,7 @@ const Breeder = require('../models/breederModel')
 const mongoose = require('mongoose')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const path = require('path')
 
 // get all breeders
 const getBreeders = async (req, res) => {
@@ -80,23 +81,23 @@ const deleteBreeder = async (req, res) => {
 
 // update a breeder
 const updateBreeder = async (req, res) => {
-  const { id } = req.params;
-  
   try {
-    const updateData = {
-      firstName: req.body.firstName,
-      lastName: req.body.lastName,
-      phoneNumber: req.body.phoneNumber,
-      email: req.body.email,
-      location: req.body.location,
-      story: req.body.story
-    };
-
+    let updateData = { ...req.body };
+    
     if (req.file) {
-      updateData.profilePicture = `/uploads/breeder-profiles/${req.file.filename}`;
+      // Fix the URL path to avoid duplication
+      const filename = path.basename(req.file.path);
+      updateData.profilePicture = `/uploads/breeder-profiles/${filename}`;
+      // or alternatively: updateData.profilePicture = `/api/images/uploads/breeder-profiles/${filename}`;
+      // but not both prefixes
     }
-
-    const breeder = await Breeder.findByIdAndUpdate(id, updateData, { new: true });
+    
+    const breeder = await Breeder.findOneAndUpdate(
+      { _id: req.params.id },
+      updateData,
+      { new: true }
+    );
+    
     res.status(200).json(breeder);
   } catch (error) {
     res.status(400).json({ error: error.message });

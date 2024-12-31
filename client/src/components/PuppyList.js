@@ -61,7 +61,7 @@ const PuppyList = () => {
                 {puppy.images && puppy.images.length > 0 && (
                   <img
                     loading="lazy"
-                    src={puppy.images.find(img => img.isProfile)?.url || puppy.images[0].url}
+                    src={`/api/images/${puppy.images.find(img => img.isProfile)?.url || puppy.images[0].url}`}
                     alt={puppy.name}
                     className="w-full aspect-square object-cover rounded-lg mb-4"
                   />

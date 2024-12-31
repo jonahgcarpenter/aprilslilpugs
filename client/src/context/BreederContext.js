@@ -2,37 +2,51 @@ import { createContext, useReducer } from 'react';
 
 export const BreederContext = createContext();
 
+const initialState = {
+  breeder: null,
+  loading: false,
+  error: null
+};
+
 export const breederReducer = (state, action) => {
   switch (action.type) {
     case 'SET_BREEDER':
       return {
         ...state,
-        breeder: action.payload
-      }
-    case 'SET_DOGS':
-      return {
-        ...state,
-        dogs: action.payload
-      }
-    case 'SET_PUPPIES':
-      return {
-        ...state,
-        puppies: action.payload
-      }
+        breeder: action.payload,
+        loading: false
+      };
+    case 'SET_LOADING':
+      return { ...state, loading: true, error: null };
+    case 'SET_ERROR':
+      return { ...state, error: action.payload, loading: false };
     default:
       return state;
   }
 };
 
 export const BreederContextProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(breederReducer, {
-    breeder: null,
-    dogs: null,
-    puppies: null
-  });
+  const [state, dispatch] = useReducer(breederReducer, initialState);
+
+  const fetchBreeder = async () => {
+    dispatch({ type: 'SET_LOADING' });
+    try {
+      const response = await fetch('/api/breeders');
+      if (!response.ok) throw Error('Failed to fetch breeder info');
+      const json = await response.json();
+      const april = json.find(b => b.firstName.toLowerCase() === 'april');
+      if (april) {
+        dispatch({ type: 'SET_BREEDER', payload: april });
+      } else {
+        throw Error('Breeder not found');
+      }
+    } catch (error) {
+      dispatch({ type: 'SET_ERROR', payload: error.message });
+    }
+  };
 
   return (
-    <BreederContext.Provider value={{...state, dispatch}}>
+    <BreederContext.Provider value={{...state, dispatch, fetchBreeder}}>
       {children}
     </BreederContext.Provider>
   );

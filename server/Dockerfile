@@ -1,17 +1,18 @@
 FROM node:18-alpine
 WORKDIR /app
 
-# Create uploads directory structure
+# Create uploads directory with proper permissions
 RUN mkdir -p public/uploads/breeder-profiles \
     public/uploads/grown-dogs \
-    public/uploads/puppy-dogs
+    public/uploads/puppy-dogs \
+    && chown -R node:node /app
+
+# Create volume for persistent storage
+VOLUME /app/public/uploads
 
 COPY package*.json ./
-RUN npm install
-COPY . .
-
-# Make sure the upload directories are writable
-RUN chown -R node:node public/uploads
+RUN npm install --production
+COPY --chown=node:node . .
 
 # Switch to non-root user
 USER node

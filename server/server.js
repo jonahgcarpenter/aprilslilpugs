@@ -11,7 +11,11 @@ const app = express();
 
 // middleware
 app.use(express.json())
-app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+
+// Configure static file serving for all uploads
+app.use('/api/images/uploads', express.static(path.join(__dirname, 'public/uploads')))
+// Keep original upload paths for backward compatibility
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')))
 
 app.use((req, res, next) => {
   console.log(req.path, req.method)
