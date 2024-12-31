@@ -7,6 +7,8 @@ services:
       - "3000:3000"
     depends_on:
       - backend
+    networks:
+      - proxynet
 
   backend:
     build:
@@ -14,3 +16,9 @@ services:
       dockerfile: Dockerfile
     ports:
       - "4000:4000"
+    networks:
+      - proxynet
+
+networks:
+  proxynet:
+    external: true
