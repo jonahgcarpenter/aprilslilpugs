@@ -18,32 +18,14 @@ router.get('/puppies/:id', dogController.getPuppy);
 router.put('/puppies/:id', dogController.updatePuppy);
 router.delete('/puppies/:id', dogController.deletePuppy);
 
-// Image routes
-router.post('/:type/:id/images', 
-  dogUpload.array('images', 10),
+// Profile picture routes
+router.post('/:type/:id/profile-picture', 
+  dogUpload.single('profilePicture'),
   (req, res) => {
     if (req.params.type === 'grown') {
-      return dogController.uploadGrownDogImages(req, res);
+      return dogController.uploadGrownDogProfilePic(req, res);
     }
-    return dogController.uploadPuppyImages(req, res);
-  }
-);
-
-router.put('/:type/:id/images/:imageId/profile',
-  (req, res) => {
-    if (req.params.type === 'grown') {
-      return dogController.setGrownDogProfileImage(req, res);
-    }
-    return dogController.setPuppyProfileImage(req, res);
-  }
-);
-
-router.delete('/:type/:id/images/:imageId',
-  (req, res) => {
-    if (req.params.type === 'grown') {
-      return dogController.deleteGrownDogImage(req, res);
-    }
-    return dogController.deletePuppyImage(req, res);
+    return dogController.uploadPuppyProfilePic(req, res);
   }
 );
 

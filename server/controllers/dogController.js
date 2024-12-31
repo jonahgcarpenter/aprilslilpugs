@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const { GrownDog, Puppy } = require('../models/dogModel');
 const fs = require('fs').promises;
+const path = require('path');
 
 const dogController = {
   createGrownDog: async (req, res) => {
@@ -152,12 +153,29 @@ const handleImageUpload = async (Model, id, files) => {
   if (!doc) throw new Error('Document not found');
 
   const newImages = files.map(file => ({
-    url: file.path,
+    url: `/api/images/uploads/${file.path.replace(/\\/g, '/').replace('public/uploads/', '')}`,
     caption: '',
     isProfile: doc.images.length === 0 // Make first image the profile image
   }));
 
   doc.images.push(...newImages);
+  await doc.save();
+  return doc;
+};
+
+const handleProfilePicUpload = async (Model, id, file) => {
+  const doc = await Model.findById(id);
+  if (!doc) throw new Error('Document not found');
+
+  // Delete old profile picture if it exists
+  if (doc.profilePicture) {
+    const oldPath = path.join(__dirname, '..', 'public', 'uploads', 'profile-pictures', 
+      doc.profilePicture.split('/').pop());
+    await fs.unlink(oldPath).catch(() => {});
+  }
+
+  // Store just the filename in the database
+  doc.profilePicture = file.filename;
   await doc.save();
   return doc;
 };
@@ -175,6 +193,27 @@ Object.assign(dogController, {
   uploadPuppyImages: async (req, res) => {
     try {
       const puppy = await handleImageUpload(Puppy, req.params.id, req.files);
+      res.json(puppy);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  },
+
+  uploadGrownDogProfilePic: async (req, res) => {
+    try {
+      if (!req.file) {
+        throw new Error('No file uploaded');
+      }
+      const dog = await handleProfilePicUpload(GrownDog, req.params.id, req.file);
+      res.json(dog);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  },
+
+  uploadPuppyProfilePic: async (req, res) => {
+    try {
+      const puppy = await handleProfilePicUpload(Puppy, req.params.id, req.file);
       res.json(puppy);
     } catch (error) {
       res.status(400).json({ error: error.message });
@@ -208,7 +247,11 @@ Object.assign(dogController, {
       const image = doc.images.id(req.params.imageId);
       if (!image) throw new Error('Image not found');
 
-      await fs.unlink(image.url);
+      const filePath = path.join(__dirname, '..', 
+        image.url.replace('/api/images/', 'public/'));
+      
+      await fs.unlink(filePath);
+      
       doc.images.pull(req.params.imageId);
       
       if (image.isProfile && doc.images.length > 0) {

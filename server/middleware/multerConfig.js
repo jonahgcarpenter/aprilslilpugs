@@ -1,31 +1,29 @@
 const multer = require('multer');
-const path = require('path');
 const fs = require('fs');
 
 // Storage configuration for breeder profile pictures
 const breederStorage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const uploadPath = path.join(__dirname, '../public/uploads/breeder-profiles');
-    // Ensure directory exists
-    fs.mkdirSync(uploadPath, { recursive: true });
-    cb(null, uploadPath);
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-profile' + path.extname(file.originalname);
-    cb(null, uniqueSuffix);
-  }
-});
-
-// Storage configuration for dog images
-const dogStorage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const type = req.params.type || 'grown'; // 'grown' or 'puppy'
-    const uploadDir = path.join(__dirname, `../public/uploads/${type}-dogs/`);
+    const uploadDir = 'public/uploads/breeder-profiles';
+    fs.mkdirSync(uploadDir, { recursive: true });
     cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, `${uniqueSuffix}${path.extname(file.originalname)}`);
+    const timestamp = Date.now();
+    cb(null, `${timestamp}-${file.originalname}`);
+  }
+});
+
+// Storage configuration for dog profile pictures
+const dogStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadDir = 'public/uploads/profile-pictures';
+    fs.mkdirSync(uploadDir, { recursive: true });
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    const timestamp = Date.now();
+    cb(null, `${timestamp}-${file.originalname}`);
   }
 });
 
@@ -37,7 +35,6 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-// Create separate multer instances
 const breederUpload = multer({
   storage: breederStorage,
   limits: { fileSize: 1024 * 1024 * 5 },

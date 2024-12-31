@@ -93,101 +93,40 @@ const PuppyCreateForm = () => {
     setError(null);
 
     try {
-      if (editingPuppy) {
-        let updatedPuppy = editingPuppy;
+      // First create the puppy
+      const puppyResponse = await fetch('/api/dogs/puppies', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
 
-        // Only submit form data if it has changed
-        if (formData.name !== editingPuppy.name ||
-            formData.birthDate !== new Date(editingPuppy.birthDate).toISOString().split('T')[0] ||
-            formData.gender !== editingPuppy.gender ||
-            formData.color !== editingPuppy.color ||
-            formData.mother !== editingPuppy.mother._id ||
-            formData.father !== editingPuppy.father._id) {
-          
-          const response = await fetch(`/api/dogs/puppies/${editingPuppy._id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData)
-          });
-
-          updatedPuppy = await response.json();
-          if (!response.ok) throw new Error(updatedPuppy.error || 'Failed to update puppy');
-        }
-
-        // Handle image updates separately
-        if (pendingImages.length > 0) {
-          const imageFormData = new FormData();
-          pendingImages.forEach(img => {
-            imageFormData.append('images', img.file);
-          });
-
-          const imageResponse = await fetch(`/api/dogs/puppy/${editingPuppy._id}/images`, {
-            method: 'POST',
-            body: imageFormData
-          });
-
-          if (!imageResponse.ok) {
-            throw new Error('Failed to upload images');
-          }
-
-          updatedPuppy = await imageResponse.json();
-        }
-
-        dispatch({ type: 'UPDATE_PUPPY', payload: updatedPuppy });
-        setEditingPuppy(null);
-        setCurrentImages([]);
-        setPendingImages([]);
-        setFormData({
-          name: '',
-          birthDate: '',
-          gender: '',
-          color: '',
-          mother: '',
-          father: ''
-        });
-      } else {
-        // First create the puppy
-        const puppyResponse = await fetch('/api/dogs/puppies', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData)
-        });
-
-        if (!puppyResponse.ok) {
-          const errorData = await puppyResponse.json();
-          throw new Error(errorData.error || 'Failed to create puppy');
-        }
-
-        const newPuppy = await puppyResponse.json();
-
-        // If there are images, upload them
-        if (pendingImages.length > 0) {
-          const imageFormData = new FormData();
-          pendingImages.forEach(img => {
-            imageFormData.append('images', img.file);
-          });
-
-          const imageResponse = await fetch(`/api/dogs/puppy/${newPuppy._id}/images`, {
-            method: 'POST',
-            body: imageFormData
-          });
-
-          if (!imageResponse.ok) {
-            const errorData = await imageResponse.json();
-            throw new Error(errorData.error || 'Failed to upload images');
-          }
-
-          const puppyWithImages = await imageResponse.json();
-          dispatch({ type: 'UPDATE_PUPPY', payload: puppyWithImages });
-        } else {
-          dispatch({ type: 'ADD_PUPPY', payload: newPuppy });
-        }
+      if (!puppyResponse.ok) {
+        throw new Error('Failed to create puppy');
       }
 
-      // Cleanup image previews
-      pendingImages.forEach(img => {
-        URL.revokeObjectURL(img.preview);
-      });
+      const newPuppy = await puppyResponse.json();
+
+      // If there are images, upload them
+      if (pendingImages.length > 0) {
+        const imageFormData = new FormData();
+        pendingImages.forEach(img => {
+          imageFormData.append('images', img.file);
+        });
+
+        const imageResponse = await fetch(`/api/dogs/puppy/${newPuppy._id}/images`, {
+          method: 'POST',
+          body: imageFormData
+        });
+
+        if (!imageResponse.ok) {
+          throw new Error('Failed to upload images');
+        }
+
+        const updatedPuppy = await imageResponse.json();
+        dispatch({ type: 'UPDATE_PUPPY', payload: updatedPuppy });
+      } else {
+        dispatch({ type: 'ADD_PUPPY', payload: newPuppy });
+      }
 
       // Reset form
       setFormData({
@@ -378,6 +317,21 @@ const PuppyCreateForm = () => {
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* Current Images Preview */}
+          {editingPuppy && currentImages.length > 0 && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-4">
+              {currentImages.map((img) => (
+                <div key={img.filename} className="relative group">
+                  <img 
+                    src={`/api/images/uploads/puppy-dogs/${img.filename}`}
+                    alt="Puppy" 
+                    className="w-full aspect-square object-cover rounded-lg" 
+                  />
+                </div>
+              ))}
             </div>
           )}
 

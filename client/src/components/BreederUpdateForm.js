@@ -68,9 +68,8 @@ const BreederUpdateForm = ({ initialData = null }) => {
     }
 
     try {
-      // Include the file directly in the breeder update
       const formData = new FormData();
-      formData.append('profilePicture', file);
+      formData.append('profilePicture', file); // Must match the field name expected by multer
       formData.append('firstName', firstName);
       formData.append('lastName', lastName);
       formData.append('phoneNumber', phoneNumber);
@@ -78,24 +77,25 @@ const BreederUpdateForm = ({ initialData = null }) => {
       formData.append('location', location);
       formData.append('story', story);
 
-      const response = await fetch('/api/breeders/' + breeder._id, {
+      const response = await fetch(`/api/breeders/${breeder._id}`, {
         method: 'PATCH',
-        body: formData
+        body: formData // Don't set Content-Type header, let browser set it with boundary
       });
 
-      const updatedBreeder = await response.json();
+      const json = await response.json();
 
       if (!response.ok) {
-        throw new Error(updatedBreeder.error || 'Update failed');
+        throw new Error(json.error || 'Failed to update profile picture');
       }
 
-      setCurrentProfilePicture(updatedBreeder.profilePicture);
-      setProfilePicture(null);
+      dispatch({ type: 'UPDATE_BREEDER', payload: json });
+      if (json.profilePicture) {
+        setCurrentProfilePicture(json.profilePicture);
+      }
       setError(null);
-      dispatch({ type: 'UPDATE_BREEDER', payload: updatedBreeder });
 
     } catch (err) {
-      setError('Failed to update profile: ' + err.message);
+      setError(err.message);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -189,7 +189,7 @@ const BreederUpdateForm = ({ initialData = null }) => {
               {currentProfilePicture && (
                 <div className="relative w-32 h-32">
                   <img
-                    src={currentProfilePicture}
+                    src={`/api/images/uploads/breeder-profiles/${currentProfilePicture.split('/').pop()}`}
                     alt="Current Profile"
                     className="w-full h-full object-cover rounded"
                   />

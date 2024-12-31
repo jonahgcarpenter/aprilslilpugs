@@ -84,6 +84,30 @@ export const dogReducer = (state, action) => {
           puppies: litter.puppies.filter(puppy => puppy._id !== action.payload)
         }))
       };
+    case 'ADD_DOG_IMAGES':
+      return {
+        ...state,
+        currentDog: {
+          ...state.currentDog,
+          images: [...(state.currentDog?.images || []), ...action.payload]
+        }
+      };
+    case 'SET_PROFILE_IMAGE':
+      return {
+        ...state,
+        currentDog: {
+          ...state.currentDog,
+          profileImage: action.payload
+        }
+      };
+    case 'DELETE_DOG_IMAGE':
+      return {
+        ...state,
+        currentDog: {
+          ...state.currentDog,
+          images: state.currentDog.images.filter(img => img._id !== action.payload)
+        }
+      };
     default:
       return state;
   }
@@ -104,8 +128,57 @@ export const DogContextProvider = ({ children }) => {
     }
   };
 
+  const uploadDogImages = async (dogId, type, formData) => {
+    dispatch({ type: 'SET_LOADING' });
+    try {
+      const response = await fetch(`/api/dogs/${type}/${dogId}/images`, {
+        method: 'POST',
+        body: formData // FormData is already properly formatted for multipart/form-data
+      });
+      if (!response.ok) throw Error('Failed to upload images');
+      const json = await response.json();
+      dispatch({ type: 'ADD_DOG_IMAGES', payload: json.images });
+    } catch (error) {
+      dispatch({ type: 'SET_ERROR', payload: error.message });
+    }
+  };
+
+  const setProfileImage = async (dogId, type, imageId) => {
+    dispatch({ type: 'SET_LOADING' });
+    try {
+      const response = await fetch(`/api/dogs/${type}/${dogId}/images/${imageId}/profile`, {
+        method: 'PUT'
+      });
+      if (!response.ok) throw Error('Failed to set profile image');
+      const json = await response.json();
+      dispatch({ type: 'SET_PROFILE_IMAGE', payload: json.profileImage });
+    } catch (error) {
+      dispatch({ type: 'SET_ERROR', payload: error.message });
+    }
+  };
+
+  const deleteDogImage = async (dogId, type, imageId) => {
+    dispatch({ type: 'SET_LOADING' });
+    try {
+      const response = await fetch(`/api/dogs/${type}/${dogId}/images/${imageId}`, {
+        method: 'DELETE'
+      });
+      if (!response.ok) throw Error('Failed to delete image');
+      dispatch({ type: 'DELETE_DOG_IMAGE', payload: imageId });
+    } catch (error) {
+      dispatch({ type: 'SET_ERROR', payload: error.message });
+    }
+  };
+
   return (
-    <DogContext.Provider value={{...state, dispatch, fetchDogs}}>
+    <DogContext.Provider value={{
+      ...state,
+      dispatch,
+      fetchDogs,
+      uploadDogImages,
+      setProfileImage,
+      deleteDogImage
+    }}>
       {children}
     </DogContext.Provider>
   );

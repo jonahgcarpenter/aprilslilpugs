@@ -1,13 +1,6 @@
 const mongoose = require('mongoose');
 
-// Shared image schema
-const imageSchema = new mongoose.Schema({
-  url: { type: String, required: true },
-  isProfile: { type: Boolean, default: false },
-  uploadDate: { type: Date, default: Date.now }
-});
-
-// Simplified grown dog schema with images
+// Simplified grown dog schema with profile picture
 const grownDogSchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },
   birthDate: { type: Date, required: true },
@@ -17,10 +10,13 @@ const grownDogSchema = new mongoose.Schema({
     enum: ['black', 'fawn', 'apricot'],
     required: true 
   },
-  images: [imageSchema]
+  profilePicture: { 
+    type: String,
+    default: null
+  }
 }, { timestamps: true });
 
-// Updated puppy schema with images
+// Updated puppy schema with profile picture
 const puppySchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },
   mother: { 
@@ -40,36 +36,8 @@ const puppySchema = new mongoose.Schema({
     enum: ['black', 'fawn', 'apricot'],
     required: true 
   },
-  images: [imageSchema]
+  profilePicture: { type: String }
 }, { timestamps: true });
-
-// Add method to set profile picture
-const setProfilePicture = async function(imageId) {
-  // Reset all images isProfile flag to false
-  await this.updateOne({
-    'images': { '$set': { 'isProfile': false } }
-  });
-  
-  // Set the selected image as profile
-  await this.updateOne(
-    { 'images._id': imageId },
-    { '$set': { 'images.$.isProfile': true } }
-  );
-};
-
-grownDogSchema.methods.setProfilePicture = setProfilePicture;
-puppySchema.methods.setProfilePicture = setProfilePicture;
-
-// Virtual for profile picture
-const profilePictureVirtual = {
-  get() {
-    const profileImg = this.images.find(img => img.isProfile);
-    return profileImg ? profileImg.url : null;
-  }
-};
-
-grownDogSchema.virtual('profilePicture').get(profilePictureVirtual.get);
-puppySchema.virtual('profilePicture').get(profilePictureVirtual.get);
 
 // Helper method to find litter siblings (puppies with same parents and birthdate)
 puppySchema.statics.findLittermates = async function(puppyId) {

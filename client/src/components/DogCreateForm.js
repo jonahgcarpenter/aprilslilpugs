@@ -1,10 +1,9 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useDogContext } from '../hooks/useDogContext';
 
 const DogCreateForm = () => {
   const { dispatch, grownDogs } = useDogContext();
   const [error, setError] = useState(null);
-  const [pendingImages, setPendingImages] = useState([]);
   const [formErrors, setFormErrors] = useState({});
   const [isValid, setIsValid] = useState(false);
   const [formData, setFormData] = useState({
@@ -19,7 +18,15 @@ const DogCreateForm = () => {
     }
   });
   const [editingDog, setEditingDog] = useState(null);
-  const [currentImages, setCurrentImages] = useState([]); // Add this state
+  const fileInputRef = useRef(null);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [profilePicture, setProfilePicture] = useState(null);
+  const [currentProfilePicture, setCurrentProfilePicture] = useState(null);
+
+  const getImagePath = (profilePicture) => {
+    if (!profilePicture) return '';
+    return `/api/images/uploads/profile-pictures/${profilePicture}`;
+  };
 
   const validateField = (name, value) => {
     switch (name) {
@@ -55,14 +62,12 @@ const DogCreateForm = () => {
       [name]: value
     }));
 
-    // Update errors for the changed field
     const fieldError = validateField(name, value);
     setFormErrors(prev => ({
       ...prev,
       [name]: fieldError
     }));
 
-    // Check overall form validity
     setIsValid(
       !validateField('name', name === 'name' ? value : formData.name) &&
       !validateField('birthDate', name === 'birthDate' ? value : formData.birthDate) &&
@@ -71,35 +76,28 @@ const DogCreateForm = () => {
     );
   };
 
-  const handleFileSelect = (e) => {
-    const files = Array.from(e.target.files);
-    const maxSize = 5 * 1024 * 1024; // 5MB
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
-    const validFiles = files.filter(file => {
-      if (file.size > maxSize) {
-        setError(`File ${file.name} is larger than 5MB`);
-        return false;
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      setError('Image must be less than 5MB');
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
       }
-      return true;
-    });
+      return;
+    }
 
-    setPendingImages(prev => [
-      ...prev,
-      ...validFiles.map(file => ({
-        file,
-        caption: file.name,
-        preview: URL.createObjectURL(file)
-      }))
-    ]);
+    setProfilePicture(file);
+    setError(null);
   };
 
-  const handleRemovePendingImage = (index) => {
-    setPendingImages(prev => {
-      const newImages = [...prev];
-      URL.revokeObjectURL(newImages[index].preview);
-      newImages.splice(index, 1);
-      return newImages;
-    });
+  const handleRemoveImage = () => {
+    setProfilePicture(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleDelete = async (dogId) => {
@@ -119,7 +117,6 @@ const DogCreateForm = () => {
 
   const handleEdit = (dog) => {
     setEditingDog(dog);
-    setCurrentImages(dog.images || []); // Add this line
     setFormData({
       name: dog.name,
       birthDate: new Date(dog.birthDate).toISOString().split('T')[0],
@@ -131,109 +128,85 @@ const DogCreateForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validateForm()) return;
     setError(null);
+    setSuccessMessage('');
 
     try {
-      if (editingDog) {
-        let updatedDog = editingDog;
-
-        // Only submit form data if it has changed
-        if (formData.name !== editingDog.name ||
-            formData.birthDate !== new Date(editingDog.birthDate).toISOString().split('T')[0] ||
-            formData.gender !== editingDog.gender ||
-            formData.color !== editingDog.color) {
-          
-          const response = await fetch(`/api/dogs/grown/${editingDog._id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              name: formData.name,
-              birthDate: formData.birthDate,
-              gender: formData.gender,
-              color: formData.color
-            })
-          });
-
-          updatedDog = await response.json();
-          if (!response.ok) throw new Error(updatedDog.error || 'Failed to update dog');
-        }
-
-        // Handle image updates separately
-        if (pendingImages.length > 0) {
-          const uploadForm = new FormData();
-          pendingImages.forEach(img => {
-            uploadForm.append('images', img.file);
-          });
-
-          const imageResponse = await fetch(`/api/dogs/grown/${editingDog._id}/images`, {
-            method: 'POST',
-            body: uploadForm
-          });
-
-          if (!imageResponse.ok) {
-            throw new Error('Failed to upload images');
-          }
-
-          updatedDog = await imageResponse.json();
-        }
-
-        dispatch({ type: 'UPDATE_DOG', payload: updatedDog });
-        setEditingDog(null);
-        setCurrentImages([]);
-        setPendingImages([]);
-        setFormData({
-          name: '',
-          birthDate: '',
-          gender: '',
-          color: ''
-        });
-      } else {
-        // First create the dog
-        const response = await fetch('/api/dogs/grown', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+      // First create/update the dog with basic info
+      const response = await fetch(
+        editingDog ? `/api/dogs/grown/${editingDog._id}` : '/api/dogs/grown',
+        {
+          method: editingDog ? 'PUT' : 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
           body: JSON.stringify({
             name: formData.name,
             birthDate: formData.birthDate,
             gender: formData.gender,
-            color: formData.color
+            color: formData.color,
+            status: formData.status
           })
-        });
-
-        const newDog = await response.json();
-        if (!response.ok) throw new Error(newDog.error || 'Failed to create dog');
-
-        // Then upload images if any
-        if (pendingImages.length > 0) {
-          const uploadForm = new FormData();
-          pendingImages.forEach(img => {
-            uploadForm.append('images', img.file);
-          });
-
-          const imageResponse = await fetch(`/api/dogs/grown/${newDog._id}/images`, {
-            method: 'POST',
-            body: uploadForm
-          });
-
-          if (!imageResponse.ok) {
-            throw new Error('Failed to upload images');
-          }
-
-          const updatedDog = await imageResponse.json();
-          dispatch({ type: 'ADD_GROWN_DOG', payload: updatedDog });
-        } else {
-          dispatch({ type: 'ADD_GROWN_DOG', payload: newDog });
         }
+      );
+
+      const dog = await response.json();
+
+      if (!response.ok) {
+        throw new Error(dog.error || 'Failed to save dog');
       }
 
-      // Reset form
+      // If there's a profile picture, upload it separately
+      if (profilePicture) {
+        const imageFormData = new FormData();
+        imageFormData.append('profilePicture', profilePicture);
+
+        const imageResponse = await fetch(
+          `/api/dogs/grown/${dog._id}/profile-picture`,
+          {
+            method: 'POST',
+            body: imageFormData
+          }
+        );
+
+        if (!imageResponse.ok) {
+          throw new Error('Failed to upload profile picture');
+        }
+
+        const updatedDog = await imageResponse.json();
+        
+        // Use the updated dog data that includes the profile picture path
+        dispatch({ 
+          type: editingDog ? 'UPDATE_DOG' : 'ADD_GROWN_DOG', 
+          payload: updatedDog 
+        });
+      } else {
+        dispatch({ 
+          type: editingDog ? 'UPDATE_DOG' : 'ADD_GROWN_DOG', 
+          payload: dog 
+        });
+      }
+
+      // Reset form and show success message
       setFormData({
         name: '',
         birthDate: '',
         gender: '',
-        color: ''
+        color: '',
+        status: 'active',
+        health: {
+          vaccinations: [],
+          medicalHistory: []
+        }
       });
-      setPendingImages([]);
+      setProfilePicture(null);
+      setCurrentProfilePicture(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      setEditingDog(null);
+      setSuccessMessage(editingDog ? 'Dog updated successfully!' : 'Dog added successfully!');
 
     } catch (err) {
       setError(err.message);
@@ -253,8 +226,12 @@ const DogCreateForm = () => {
               {error}
             </div>
           )}
+          {successMessage && (
+            <div className="mt-4 p-3 bg-green-500/10 border border-green-500 rounded-lg">
+              <p className="text-green-500 text-sm">{successMessage}</p>
+            </div>
+          )}
 
-          {/* Basic Information Section */}
           <div className="space-y-6">
             <div className="border-b border-slate-700 pb-4">
               <h3 className="text-lg font-semibold mb-4 text-white">Basic Information</h3>
@@ -338,56 +315,29 @@ const DogCreateForm = () => {
                     <p className="text-red-500 text-sm mt-1">{formErrors.color}</p>
                   )}
                 </div>
-
-                {/* Remove the registration input field */}
               </div>
             </div>
 
-            {/* Images Section */}
-            <div className="border-b border-slate-700 pb-4">
-              <h3 className="text-lg font-semibold mb-4 text-white">Images</h3>
-              
-              {/* Current Images (only show in edit mode) */}
-              {editingDog && currentImages.length > 0 && (
-                <div className="mb-4">
-                  <h4 className="text-md font-medium text-gray-300 mb-2">Current Images</h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    {currentImages.map((img) => (
-                      <div key={img._id} className="relative border border-slate-700 p-2 rounded-lg bg-slate-800">
-                        <img 
-                          src={img.url} 
-                          alt="Dog" 
-                          className="w-full h-32 object-cover rounded" 
-                        />
-                      </div>
-                    ))}
+            <div className="form-group sm:col-span-2">
+              <label className="block text-lg font-semibold mb-4 text-white">Profile Picture</label>
+              <div className="flex flex-col gap-4">
+                {(editingDog?.profilePicture || currentProfilePicture) && (
+                  <div className="relative w-32 h-32">
+                    <img
+                      src={getImagePath(editingDog?.profilePicture || currentProfilePicture)}
+                      alt="Current Profile"
+                      className="w-full h-full object-cover rounded"
+                    />
                   </div>
-                </div>
-              )}
-
-              {/* New Images Upload */}
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handleFileSelect}
-                className="flex-1 text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:bg-blue-500 file:text-white hover:file:bg-blue-600 file:cursor-pointer"
-              />
-
-              {/* Pending Images Preview */}
-              <div className="grid grid-cols-2 gap-4 mt-4">
-                {pendingImages.map((img, index) => (
-                  <div key={index} className="relative border border-slate-700 p-2 rounded-lg bg-slate-800">
-                    <img src={img.preview} alt={img.caption} className="w-full h-32 object-cover rounded" />
-                    <button
-                      type="button"
-                      onClick={() => handleRemovePendingImage(index)}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600"
-                    >
-                      ×
-                    </button>
-                  </div>
-                ))}
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="flex-1 text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:bg-blue-500 file:text-white hover:file:bg-blue-600 file:cursor-pointer"
+                />
+                <p className="text-sm text-slate-400">Upload a new image to replace the current picture</p>
               </div>
             </div>
 
@@ -421,7 +371,6 @@ const DogCreateForm = () => {
         </div>
       </form>
 
-      {/* Dog Management Section */}
       <div className="bg-slate-900 rounded-xl shadow-xl p-4 sm:p-8">
         <h2 className="text-xl sm:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-6">
           Manage Dogs
@@ -430,9 +379,9 @@ const DogCreateForm = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {grownDogs?.map(dog => (
             <div key={dog._id} className="bg-slate-800/50 rounded-lg p-4 relative group">
-              {dog.images && dog.images.length > 0 && (
+              {dog.profilePicture && (
                 <img 
-                  src={`/api/images/${dog.images.find(img => img.isProfile)?.url || dog.images[0].url}`}
+                  src={getImagePath(dog.profilePicture)}
                   alt={dog.name}
                   className="w-full aspect-square object-cover rounded-lg mb-4"
                 />
@@ -461,6 +410,7 @@ const DogCreateForm = () => {
           ))}
         </div>
       </div>
+
     </div>
   );
 };

@@ -27,8 +27,17 @@ router.post('/', createBreeder)
 // DELETE one breeder
 router.delete('/:id', deleteBreeder)
 
-// Update breeder
-router.patch('/:id', breederUpload.single('profilePicture'), updateBreeder)
+// Update breeder - update file handling middleware
+router.patch('/:id', 
+  breederUpload.single('profilePicture'), 
+  (req, res, next) => {
+    if (req.file) {
+      req.body.profilePicture = `/api/images/breeder-profiles/${req.file.filename}`;
+    }
+    next();
+  },
+  updateBreeder
+);
 
 // Update password (development only)
 router.post('/update-password/:id', updateBreederPassword)

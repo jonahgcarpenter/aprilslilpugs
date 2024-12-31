@@ -20,6 +20,15 @@ export const breederReducer = (state, action) => {
       return { ...state, loading: true, error: null };
     case 'SET_ERROR':
       return { ...state, error: action.payload, loading: false };
+    case 'UPDATE_PROFILE_PICTURE':
+      return {
+        ...state,
+        breeder: {
+          ...state.breeder,
+          profilePicture: action.payload
+        },
+        loading: false
+      };
     default:
       return state;
   }
@@ -45,8 +54,28 @@ export const BreederContextProvider = ({ children }) => {
     }
   };
 
+  const updateProfilePicture = async (breederId, formData) => {
+    dispatch({ type: 'SET_LOADING' });
+    try {
+      const response = await fetch(`/api/breeders/${breederId}`, {
+        method: 'PATCH',
+        body: formData
+      });
+      if (!response.ok) throw Error('Failed to update profile picture');
+      const json = await response.json();
+      dispatch({ type: 'UPDATE_PROFILE_PICTURE', payload: json.profilePicture });
+    } catch (error) {
+      dispatch({ type: 'SET_ERROR', payload: error.message });
+    }
+  };
+
   return (
-    <BreederContext.Provider value={{...state, dispatch, fetchBreeder}}>
+    <BreederContext.Provider value={{
+      ...state,
+      dispatch,
+      fetchBreeder,
+      updateProfilePicture
+    }}>
       {children}
     </BreederContext.Provider>
   );
