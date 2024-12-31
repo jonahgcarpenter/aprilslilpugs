@@ -1,6 +1,7 @@
 # FRONTEND
 node_modules/
 uploads/
+build/
 
 # BACKEND
 .env
