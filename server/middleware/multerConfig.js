@@ -4,7 +4,7 @@ const path = require('path');
 // Storage configuration for breeder profile pictures
 const breederStorage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'uploads/breeder-profiles/');
+    cb(null, path.join(__dirname, '../public/uploads/breeder-profiles/'));
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + '-' + file.originalname);
@@ -15,7 +15,7 @@ const breederStorage = multer.diskStorage({
 const dogStorage = multer.diskStorage({
   destination: function (req, file, cb) {
     const type = req.params.type || 'grown'; // 'grown' or 'puppy'
-    const uploadDir = `uploads/${type}-dogs/`;
+    const uploadDir = path.join(__dirname, `../public/uploads/${type}-dogs/`);
     cb(null, uploadDir);
   },
   filename: function (req, file, cb) {

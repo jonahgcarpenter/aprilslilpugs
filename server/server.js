@@ -2,6 +2,7 @@ require('dotenv').config()
 
 const express = require('express')
 const mongoose = require('mongoose')
+const path = require('path')
 const breederRoutes = require('./routes/breeders')
 const dogRoutes = require('./routes/dogs')
 
@@ -10,7 +11,7 @@ const app = express();
 
 // middleware
 app.use(express.json())
-app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 app.use((req, res, next) => {
   console.log(req.path, req.method)

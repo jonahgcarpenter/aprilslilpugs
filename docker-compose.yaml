@@ -16,9 +16,15 @@ services:
       dockerfile: Dockerfile
     ports:
       - "4000:4000"
+    volumes:
+      - uploads_data:/app/public/uploads
     networks:
       - proxynet
 
 networks:
   proxynet:
     external: true
+
+volumes:
+  uploads_data:
+    driver: local

@@ -6,11 +6,6 @@ const DogList = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const getImageUrl = (imagePath) => {
-    if (!imagePath) return null;
-    return imagePath; // Backend already provides full URLs
-  };
-
   useEffect(() => {
     const fetchDogs = async () => {
       try {
@@ -59,7 +54,7 @@ const DogList = () => {
           <div key={dog._id} className="bg-slate-800/50 rounded-xl p-4">
             {dog.images && dog.images.length > 0 && (
               <img 
-                src={getImageUrl(dog.images.find(img => img.isProfile)?.url || dog.images[0].url)}
+                src={dog.images.find(img => img.isProfile)?.url || dog.images[0].url}
                 alt={dog.name}
                 className="w-full aspect-square object-cover rounded-lg mb-4"
               />

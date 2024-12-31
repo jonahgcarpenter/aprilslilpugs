@@ -37,7 +37,7 @@ const BreederDetails = () => {
             
             {breeder.profilePicture && (
               <img 
-                src={breeder.profilePicture} 
+                src={breeder.profilePicture}
                 alt={`${breeder.firstName} ${breeder.lastName}`}
                 className="w-full max-w-[500px] aspect-square rounded-xl object-cover border-4 border-slate-700 shadow-lg mb-6 sm:mb-8"
               />
