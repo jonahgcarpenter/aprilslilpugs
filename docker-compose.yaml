@@ -17,7 +17,13 @@ services:
     ports:
       - "4000:4000"
     volumes:
-      - uploads_data:/app/public/uploads
+      - breeder_profiles:/app/public/uploads/breeder-profiles
+      - profile_pictures:/app/public/uploads/profile-pictures
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - MONGODB_URI=${MONGODB_URI}
+      - JWT_SECRET=${JWT_SECRET}
     networks:
       - proxynet
 
@@ -26,5 +32,7 @@ networks:
     external: true
 
 volumes:
-  uploads_data:
+  breeder_profiles:
+    driver: local
+  profile_pictures:
     driver: local
