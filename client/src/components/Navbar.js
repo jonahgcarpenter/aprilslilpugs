@@ -7,10 +7,10 @@ const Navbar = () => {
   const { user } = useAuth();
 
   return (
-    <div className="bg-slate-900 border-b border-slate-800">
+    <div className="bg-slate-900/95 backdrop-blur-sm border-b border-slate-800/50 sticky top-0 z-50">
       <div className="container mx-auto px-4 max-w-7xl py-6">
         <div className="flex flex-col items-center">
-          <h1 className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 text-3xl sm:text-4xl font-extrabold text-center tracking-wider px-4">
+          <h1 className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 text-3xl sm:text-4xl font-extrabold text-center tracking-wider px-4 hover:scale-105 transition-transform duration-300">
             April's Lil Pugs
           </h1>
           <div className="flex flex-wrap justify-center gap-3 mt-4 px-4">

@@ -1,5 +1,10 @@
 const mongoose = require('mongoose');
 
+const profilePictureGetter = function(v) {
+  // Return just the filename as the URL already contains the path
+  return v ? v : null;
+};
+
 // Simplified grown dog schema with profile picture
 const grownDogSchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },
@@ -12,9 +17,7 @@ const grownDogSchema = new mongoose.Schema({
   },
   profilePicture: { 
     type: String,
-    get: function(v) {
-      return v ? `/api/images/uploads/profile-pictures/${v}` : null;
-    }
+    get: profilePictureGetter
   }
 }, { 
   timestamps: true,
@@ -42,64 +45,15 @@ const puppySchema = new mongoose.Schema({
     enum: ['black', 'fawn', 'apricot'],
     required: true 
   },
-  profilePicture: { type: String }
-}, { timestamps: true });
-
-// Helper method to find litter siblings (puppies with same parents and birthdate)
-puppySchema.statics.findLittermates = async function(puppyId) {
-  const puppy = await this.findById(puppyId);
-  if (!puppy) return [];
-  
-  return this.find({
-    mother: puppy.mother,
-    father: puppy.father,
-    birthDate: puppy.birthDate,
-    _id: { $ne: puppyId }
-  });
-};
-
-// Helper method to find all litters (grouped by parents and birthdate)
-puppySchema.statics.findLitters = async function() {
-  return this.aggregate([
-    {
-      $group: {
-        _id: {
-          mother: '$mother',
-          father: '$father',
-          birthDate: '$birthDate'
-        },
-        puppies: { $push: '$$ROOT' },
-        count: { $sum: 1 }
-      }
-    },
-    {
-      $lookup: {
-        from: 'growndogs',
-        localField: '_id.mother',
-        foreignField: '_id',
-        as: 'motherDetails'
-      }
-    },
-    {
-      $lookup: {
-        from: 'growndogs',
-        localField: '_id.father',
-        foreignField: '_id',
-        as: 'fatherDetails'
-      }
-    },
-    {
-      $project: {
-        mother: { $arrayElemAt: ['$motherDetails', 0] },
-        father: { $arrayElemAt: ['$fatherDetails', 0] },
-        birthDate: '$_id.birthDate',
-        puppies: 1,
-        count: 1
-      }
-    },
-    { $sort: { birthDate: -1 } }
-  ]);
-};
+  profilePicture: { 
+    type: String,
+    get: profilePictureGetter
+  }
+}, { 
+  timestamps: true,
+  toJSON: { getters: true },
+  toObject: { getters: true }
+});
 
 // Add indexes
 grownDogSchema.index({ name: 1 });

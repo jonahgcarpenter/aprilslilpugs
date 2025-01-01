@@ -92,17 +92,18 @@ const dogController = {
     try {
       const puppies = await Puppy.find()
         .populate('mother father', 'name color')
-        .sort('-birthDate');
-      res.json(puppies);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  },
+        .sort('-birthDate')
+        .lean();  // Convert to plain objects for easier manipulation
 
-  getLitters: async (req, res) => {
-    try {
-      const litters = await Puppy.findLitters();
-      res.json(litters);
+      const enrichedPuppies = puppies.map(puppy => ({
+        ...puppy,
+        parents: {
+          mother: puppy.mother,
+          father: puppy.father
+        }
+      }));
+
+      res.json(enrichedPuppies);
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
@@ -148,25 +149,6 @@ const dogController = {
   }
 };
 
-const handleImageUpload = async (Model, id, files) => {
-  if (!files || files.length === 0) {
-    throw new Error('No files uploaded');
-  }
-
-  const doc = await Model.findById(id);
-  if (!doc) throw new Error('Document not found');
-
-  const newImages = files.map(file => ({
-    url: `/uploads/${file.filename}`,
-    caption: '',
-    isProfile: doc.images.length === 0
-  }));
-
-  doc.images.push(...newImages);
-  await doc.save();
-  return doc;
-};
-
 const handleProfilePicUpload = async (Model, id, file) => {
   if (!file) {
     throw new Error('No file uploaded');
@@ -181,7 +163,8 @@ const handleProfilePicUpload = async (Model, id, file) => {
     await fs.unlink(oldPath).catch(console.error);
   }
 
-  doc.profilePicture = file.filename;
+  // Store the complete URL path
+  doc.profilePicture = `/api/images/uploads/profile-pictures/${file.filename}`;
   await doc.save();
   return doc;
 };
@@ -196,35 +179,11 @@ const deleteDocument = async (Model, id) => {
     await fs.unlink(profilePath).catch(console.error);
   }
 
-  // Delete all associated images
-  for (const image of doc.images || []) {
-    const imagePath = path.join(__dirname, '..', 'public', image.url);
-    await fs.unlink(imagePath).catch(console.error);
-  }
-
   await doc.deleteOne();
   return { message: 'Document deleted successfully' };
 };
 
 Object.assign(dogController, {
-  uploadGrownDogImages: async (req, res) => {
-    try {
-      const dog = await handleImageUpload(GrownDog, req.params.id, req.files);
-      res.json(dog);
-    } catch (error) {
-      res.status(400).json({ error: error.message });
-    }
-  },
-
-  uploadPuppyImages: async (req, res) => {
-    try {
-      const puppy = await handleImageUpload(Puppy, req.params.id, req.files);
-      res.json(puppy);
-    } catch (error) {
-      res.status(400).json({ error: error.message });
-    }
-  },
-
   uploadGrownDogProfilePic: async (req, res) => {
     try {
       if (!req.file) {
@@ -244,55 +203,7 @@ Object.assign(dogController, {
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
-  },
-
-  setProfileImage: async (Model, req, res) => {
-    try {
-      const doc = await Model.findById(req.params.id);
-      if (!doc) throw new Error('Document not found');
-
-      doc.images.forEach(img => {
-        img.isProfile = img._id.toString() === req.params.imageId;
-      });
-
-      await doc.save();
-      res.json(doc);
-    } catch (error) {
-      res.status(400).json({ error: error.message });
-    }
-  },
-
-  setGrownDogProfileImage: (req, res) => dogController.setProfileImage(GrownDog, req, res),
-  setPuppyProfileImage: (req, res) => dogController.setProfileImage(Puppy, req, res),
-
-  deleteImage: async (Model, req, res) => {
-    try {
-      const doc = await Model.findById(req.params.id);
-      if (!doc) throw new Error('Document not found');
-
-      const image = doc.images.id(req.params.imageId);
-      if (!image) throw new Error('Image not found');
-
-      const filePath = path.join(__dirname, '..', 
-        image.url.replace('/api/images/', 'public/'));
-      
-      await fs.unlink(filePath);
-      
-      doc.images.pull(req.params.imageId);
-      
-      if (image.isProfile && doc.images.length > 0) {
-        doc.images[0].isProfile = true;
-      }
-
-      await doc.save();
-      res.json(doc);
-    } catch (error) {
-      res.status(400).json({ error: error.message });
-    }
-  },
-
-  deleteGrownDogImage: (req, res) => dogController.deleteImage(GrownDog, req, res),
-  deletePuppyImage: (req, res) => dogController.deleteImage(Puppy, req, res)
+  }
 });
 
 module.exports = dogController;

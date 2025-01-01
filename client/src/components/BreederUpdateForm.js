@@ -1,133 +1,138 @@
 import { useState, useEffect, useRef } from "react"
 import { useBreederContext } from '../hooks/useBreederContext'
 
-const BreederUpdateForm = ({ initialData = null }) => {
+const BreederUpdateForm = () => {
   const { breeder, dispatch } = useBreederContext()
-  const [firstName, setFirstName] = useState('')
-  const [lastName, setLastName] = useState('')
-  const [phoneNumber, setPhoneNumber] = useState('')
-  const [email, setEmail] = useState('')
-  const [location, setLocation] = useState('')
-  const [story, setStory] = useState('')
-  const [profilePicture, setProfilePicture] = useState(null)
-  const [currentProfilePicture, setCurrentProfilePicture] = useState(null)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState(null);
   const fileInputRef = useRef(null);
-  const textareaRef = useRef(null);
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    phoneNumber: '',
+    email: '',
+    location: '',
+    story: ''
+  });
+  const [profilePicture, setProfilePicture] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
 
   useEffect(() => {
     if (breeder) {
-      setFirstName(breeder.firstName)
-      setLastName(breeder.lastName)
-      setPhoneNumber(breeder.phoneNumber || '')
-      setEmail(breeder.email || '')
-      setLocation(breeder.location || '')
-      setStory(breeder.story || '')
-      setCurrentProfilePicture(breeder.profilePicture || null)
+      setFormData({
+        firstName: breeder.firstName || '',
+        lastName: breeder.lastName || '',
+        phoneNumber: breeder.phoneNumber || '',
+        email: breeder.email || '',
+        location: breeder.location || '',
+        story: breeder.story || ''
+      });
     }
-  }, [breeder])
+  }, [breeder]);
 
-  // Add auto-resize effect for textarea
-  useEffect(() => {
-    const textarea = textareaRef.current;
-    if (textarea) {
-      textarea.style.height = 'auto';
-      textarea.style.height = textarea.scrollHeight + 'px';
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    if (name === 'phoneNumber') {
+      // Format phone number
+      const formatted = value.replace(/\D/g, '').slice(0, 10);
+      if (formatted.length > 6) {
+        setFormData(prev => ({
+          ...prev,
+          [name]: `(${formatted.slice(0,3)}) ${formatted.slice(3,6)}-${formatted.slice(6)}`
+        }));
+      } else if (formatted.length > 3) {
+        setFormData(prev => ({
+          ...prev,
+          [name]: `(${formatted.slice(0,3)}) ${formatted.slice(3)}`
+        }));
+      } else {
+        setFormData(prev => ({ ...prev, [name]: formatted }));
+      }
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
     }
-  }, [story]);
+  };
 
-  const formatPhoneNumber = (value) => {
-    // Remove all non-digits
-    const numbers = value.replace(/\D/g, '')
-    
-    // Limit to 10 digits
-    const truncated = numbers.slice(0, 10)
-    
-    // Format the number
-    if (truncated.length < 4) return truncated
-    if (truncated.length < 7) return `(${truncated.slice(0, 3)}) ${truncated.slice(3)}`
-    return `(${truncated.slice(0, 3)}) ${truncated.slice(3, 6)}-${truncated.slice(6)}`
-  }
-
-  const handlePhoneChange = (e) => {
-    const formattedNumber = formatPhoneNumber(e.target.value)
-    setPhoneNumber(formattedNumber)
-  }
-
-  const handleFileChange = async (e) => {
+  const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
-    const maxSize = 5 * 1024 * 1024;
-    if (file.size > maxSize) {
+    
+    if (file.size > 5 * 1024 * 1024) {
       setError('Image must be less than 5MB');
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
+      fileInputRef.current.value = '';
       return;
     }
 
-    try {
-      const formData = new FormData();
-      formData.append('profilePicture', file); // Must match the field name expected by multer
-      formData.append('firstName', firstName);
-      formData.append('lastName', lastName);
-      formData.append('phoneNumber', phoneNumber);
-      formData.append('email', email);
-      formData.append('location', location);
-      formData.append('story', story);
+    // Create preview URL
+    const objectUrl = URL.createObjectURL(file);
+    setPreviewUrl(objectUrl);
+    setProfilePicture(file);
+    setError(null);
 
-      const response = await fetch(`/api/breeders/${breeder._id}`, {
-        method: 'PATCH',
-        body: formData // Don't set Content-Type header, let browser set it with boundary
-      });
+    // Cleanup previous preview URL
+    return () => URL.revokeObjectURL(objectUrl);
+  };
 
-      const json = await response.json();
+  const preventDefaultValidation = (e) => {
+    e.preventDefault();
+  };
 
-      if (!response.ok) {
-        throw new Error(json.error || 'Failed to update profile picture');
-      }
-
-      dispatch({ type: 'UPDATE_BREEDER', payload: json });
-      if (json.profilePicture) {
-        setCurrentProfilePicture(json.profilePicture);
-      }
-      setError(null);
-
-    } catch (err) {
-      setError(err.message);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
+  const validateForm = () => {
+    const missingFields = [];
+    if (!formData.firstName.trim()) missingFields.push('First Name');
+    if (!formData.lastName.trim()) missingFields.push('Last Name');
+    if (!formData.email.trim()) missingFields.push('Email');
+    
+    if (missingFields.length > 0) {
+      setError(`Please fill in the following required fields: ${missingFields.join(', ')}`);
+      return false;
     }
+
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (formData.email && !emailRegex.test(formData.email)) {
+      setError('Invalid email format');
+      return false;
+    }
+
+    // Phone format validation (if provided)
+    if (formData.phoneNumber && formData.phoneNumber.replace(/\D/g, '').length !== 10) {
+      setError('Phone number must be 10 digits');
+      return false;
+    }
+
+    return true;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null);
+
+    if (!validateForm()) return;
+
     if (!breeder?._id) return;
 
-    try {
-      const formData = new FormData();
-      formData.append('firstName', firstName);
-      formData.append('lastName', lastName);
-      formData.append('phoneNumber', phoneNumber);
-      formData.append('email', email);
-      formData.append('location', location);
-      formData.append('story', story);
+    const formDataToSend = new FormData();
+    Object.keys(formData).forEach(key => {
+      formDataToSend.append(key, formData[key]);
+    });
+    
+    if (profilePicture) {
+      formDataToSend.append('profilePicture', profilePicture);
+    }
 
+    try {
       const response = await fetch('/api/breeders/' + breeder._id, {
         method: 'PATCH',
-        body: formData
+        body: formDataToSend
       });
 
       const json = await response.json();
+      if (!response.ok) throw new Error(json.error || 'Update failed');
 
-      if (!response.ok) {
-        throw new Error(json.error || 'Update failed');
-      }
-
-      setError(null);
       dispatch({ type: 'UPDATE_BREEDER', payload: json });
+      setError(null);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      setProfilePicture(null);
 
     } catch (err) {
       setError(err.message);
@@ -135,84 +140,133 @@ const BreederUpdateForm = ({ initialData = null }) => {
   };
 
   return (
-    <form className="mx-2 sm:mx-4 bg-slate-900 rounded-xl shadow-xl p-4 sm:p-8" onSubmit={handleSubmit}>
-      <div className="max-w-[120ch] mx-auto"> {/* Keep form inputs at readable width */}
-        <h1 className="text-xl sm:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-6 sm:mb-8">
-          Update Breeder Profile
-        </h1>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
-          <input 
-            type="text"
-            onChange={(e) => setFirstName(e.target.value)}
-            value={firstName}
-            className="w-full p-4 rounded-lg bg-slate-800 text-white text-base border border-slate-700 shadow-sm focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 outline-none transition-all duration-200"
-            placeholder="First Name"
-          />
-          <input 
-            type="text"
-            onChange={(e) => setLastName(e.target.value)}
-            value={lastName}
-            className="w-full p-4 rounded-lg bg-slate-800 text-white text-base border border-slate-700 shadow-sm focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 outline-none transition-all duration-200"
-            placeholder="Last Name"
-          />
-          <input 
-            type="tel"
-            onChange={handlePhoneChange}
-            value={phoneNumber}
-            className="w-full p-4 rounded-lg bg-slate-800 text-white text-base border border-slate-700 shadow-sm focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 outline-none transition-all duration-200"
-            placeholder="(XXX) XXX-XXXX"
-          />
-          <input 
-            type="email"
-            onChange={(e) => setEmail(e.target.value)}
-            value={email}
-            className="w-full p-4 rounded-lg bg-slate-800 text-white text-base border border-slate-700 shadow-sm focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 outline-none transition-all duration-200"
-            placeholder="Email"
-          />
-          <input 
-            type="text"
-            onChange={(e) => setLocation(e.target.value)}
-            value={location}
-            className="w-full p-4 rounded-lg bg-slate-800 text-white text-base border border-slate-700 shadow-sm focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 outline-none transition-all duration-200 sm:col-span-2"
-            placeholder="Location"
-          />
-          <textarea
-            ref={textareaRef}
-            onChange={(e) => setStory(e.target.value)}
-            value={story}
-            className="w-full p-4 rounded-lg bg-slate-800 text-white text-base border border-slate-700 shadow-sm focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 outline-none transition-all duration-200 sm:col-span-2 resize-none scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-slate-700 hover:scrollbar-thumb-blue-400 max-h-[300px] overflow-y-auto"
-            placeholder="Your Story"
-          />
+    <div className="mx-2 sm:mx-4">
+      <form onSubmit={handleSubmit} className="bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">
+        <h2 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-8">
+          Update Profile
+        </h2>
+
+        {error && (
+          <div className="mb-6 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500">
+            {error}
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+          <div className="form-group">
+            <label className="block text-sm font-medium text-gray-300 mb-2">First Name</label>
+            <input
+              type="text"
+              name="firstName"
+              value={formData.firstName}
+              onChange={handleChange}
+              onInvalid={preventDefaultValidation}
+              className="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700 focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="block text-sm font-medium text-gray-300 mb-2">Last Name</label>
+            <input
+              type="text"
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleChange}
+              onInvalid={preventDefaultValidation}
+              className="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700 focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="block text-sm font-medium text-gray-300 mb-2">Phone Number</label>
+            <input
+              type="tel"
+              name="phoneNumber"
+              value={formData.phoneNumber}
+              onChange={handleChange}
+              onInvalid={preventDefaultValidation}
+              className="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700 focus:ring-2 focus:ring-blue-500"
+              placeholder="(XXX) XXX-XXXX"
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              onInvalid={preventDefaultValidation}
+              className="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700 focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
           <div className="form-group sm:col-span-2">
-            <label className="block text-lg font-semibold mb-4 text-white">Profile Picture</label>
-            <div className="flex flex-col gap-4">
-              {currentProfilePicture && (
-                <div className="relative w-32 h-32">
-                  <img
-                    src={`/api/images/uploads/breeder-profiles/${currentProfilePicture.split('/').pop()}`}
-                    alt="Current Profile"
-                    className="w-full h-full object-cover rounded"
-                  />
-                </div>
-              )}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="flex-1 text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:bg-blue-500 file:text-white hover:file:bg-blue-600 file:cursor-pointer"
-              />
-              <p className="text-sm text-slate-400">Upload a new image to replace the current profile picture</p>
-            </div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Location</label>
+            <input
+              type="text"
+              name="location"
+              value={formData.location}
+              onChange={handleChange}
+              onInvalid={preventDefaultValidation}
+              className="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700 focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div className="form-group sm:col-span-2">
+            <label className="block text-sm font-medium text-gray-300 mb-2">Your Story</label>
+            <textarea
+              name="story"
+              value={formData.story}
+              onChange={handleChange}
+              onInvalid={preventDefaultValidation}
+              rows={6}
+              className="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700 focus:ring-2 focus:ring-blue-500 resize-none"
+            />
+          </div>
+
+          <div className="form-group sm:col-span-2">
+            <label className="block text-sm font-medium text-gray-300 mb-2">Profile Picture</label>
+            {previewUrl && (
+              <div className="mb-4 relative w-32 h-32">
+                <img
+                  src={previewUrl}
+                  alt="Preview"
+                  className="w-full h-full object-cover rounded-lg border border-slate-700"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPreviewUrl(null);
+                    setProfilePicture(null);
+                    if (fileInputRef.current) fileInputRef.current.value = '';
+                  }}
+                  className="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-600"
+                >
+                  ×
+                </button>
+              </div>
+            )}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="w-full text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:bg-blue-500 file:text-white hover:file:bg-blue-600"
+            />
           </div>
         </div>
-        <button className="w-full sm:w-auto mt-6 sm:mt-8 bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white text-base px-6 py-3 rounded-lg transition-all duration-200 font-bold shadow-lg hover:shadow-xl">
+
+        <button 
+          type="submit"
+          className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition-all duration-200"
+        >
           Update Profile
         </button>
-        {error && <div className="text-white text-sm sm:text-base mt-4 sm:mt-6 p-3 sm:p-4 bg-slate-800/50 backdrop-blur-sm rounded-lg border border-slate-700">{error}</div>}
-      </div>
-    </form>
-  )
-}
+      </form>
+    </div>
+  );
+};
 
-export default BreederUpdateForm
+export default BreederUpdateForm;

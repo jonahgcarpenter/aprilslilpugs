@@ -4,7 +4,7 @@ export const DogContext = createContext();
 
 const initialState = {
   grownDogs: [],
-  litters: [],
+  puppies: [],
   currentDog: null,
   loading: false,
   error: null
@@ -18,73 +18,56 @@ export const dogReducer = (state, action) => {
         grownDogs: action.payload,
         loading: false
       };
+    case 'SET_PUPPIES':
+      return {
+        ...state,
+        puppies: action.payload,
+        loading: false
+      };
     case 'ADD_GROWN_DOG':
       return {
         ...state,
         grownDogs: [action.payload, ...state.grownDogs]
       };
-    case 'SET_LITTERS':
-      return {
-        ...state,
-        litters: action.payload,
-        loading: false
-      };
     case 'ADD_PUPPY':
       return {
         ...state,
-        litters: state.litters.map(litter => {
-          if (litter._id.mother === action.payload.mother &&
-              litter._id.father === action.payload.father &&
-              litter._id.birthDate === action.payload.birthDate) {
-            return {
-              ...litter,
-              puppies: [...litter.puppies, action.payload]
-            };
-          }
-          return litter;
-        })
+        puppies: [...state.puppies, action.payload]
       };
     case 'SET_LOADING':
       return { ...state, loading: true, error: null };
     case 'SET_ERROR':
       return { ...state, error: action.payload, loading: false };
+    case 'SET_DOG':
+      return { ...state, currentDog: action.payload, loading: false };
     case 'UPDATE_DOG':
       return {
         ...state,
         grownDogs: state.grownDogs.map(dog => 
-          dog._id === action.payload._id ? action.payload : dog
+          dog._id === action.payload._id ? { ...dog, ...action.payload } : dog
         ),
-        currentDog: action.payload,
-        loading: false
-      };
-    case 'SET_DOG':
-      return { ...state, currentDog: action.payload, loading: false };
-    case 'DELETE_DOG':
-      return {
-        ...state,
-        grownDogs: state.grownDogs.filter(dog => dog._id !== action.payload),
-        currentDog: null,
+        currentDog: state.currentDog?._id === action.payload._id ? 
+          { ...state.currentDog, ...action.payload } : state.currentDog,
         loading: false
       };
     case 'UPDATE_PUPPY':
       return {
         ...state,
-        litters: state.litters.map(litter => ({
-          ...litter,
-          puppies: litter.puppies.map(puppy =>
-            puppy._id === action.payload._id 
-              ? { ...puppy, ...action.payload }
-              : puppy
-          )
-        }))
+        puppies: state.puppies.map(puppy =>
+          puppy._id === action.payload._id ? { ...puppy, ...action.payload } : puppy
+        )
+      };
+    case 'DELETE_DOG':
+      return {
+        ...state,
+        grownDogs: state.grownDogs.filter(dog => dog._id !== action.payload),
+        currentDog: state.currentDog?._id === action.payload ? null : state.currentDog,
+        loading: false
       };
     case 'DELETE_PUPPY':
       return {
         ...state,
-        litters: state.litters.map(litter => ({
-          ...litter,
-          puppies: litter.puppies.filter(puppy => puppy._id !== action.payload)
-        }))
+        puppies: state.puppies.filter(puppy => puppy._id !== action.payload)
       };
     case 'ADD_DOG_IMAGES':
       return {
@@ -135,7 +118,7 @@ export const DogContextProvider = ({ children }) => {
     try {
       const response = await fetch(`/api/dogs/${type}/${dogId}/images`, {
         method: 'POST',
-        body: formData // FormData is already properly formatted for multipart/form-data
+        body: formData
       });
       if (!response.ok) throw Error('Failed to upload images');
       const json = await response.json();

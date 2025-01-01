@@ -5,13 +5,15 @@ import UnderConstruction from '../components/UnderConstruction';
 
 const Home = () => {
   return (
-    <div className="space-y-6 py-8">
-      <div className="max-w-4xl mx-auto">
-        <UnderConstruction />
-      </div>
-      <div className="grid gap-8">
-        <BreederDetails />
-        <DogList />
+    <div className="min-h-screen pt-8 pb-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-12">
+        <div className="max-w-4xl mx-auto transform hover:scale-[1.01] transition-all duration-300">
+          <UnderConstruction />
+        </div>
+        <div className="grid gap-8 sm:gap-12">
+          <BreederDetails />
+          <DogList />
+        </div>
       </div>
     </div>
   )
