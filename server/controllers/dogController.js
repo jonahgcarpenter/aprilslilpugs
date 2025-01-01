@@ -1,4 +1,3 @@
-const mongoose = require('mongoose');
 const { GrownDog, Puppy } = require('../models/dogModel');
 const fs = require('fs').promises;
 const path = require('path');
@@ -63,20 +62,10 @@ const dogController = {
 
   deleteGrownDog: async (req, res) => {
     try {
-      const dog = await GrownDog.findById(req.params.id);
-      if (!dog) {
-        return res.status(404).json({ error: 'Dog not found' });
-      }
-      
-      // Delete associated images
-      for (const image of dog.images || []) {
-        await fs.unlink(image.url).catch(() => {});
-      }
-      
-      await dog.deleteOne();
-      res.json({ message: 'Dog deleted successfully' });
+      const result = await deleteDocument(GrownDog, req.params.id);
+      res.json(result);
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      res.status(404).json({ error: error.message });
     }
   },
 
@@ -151,33 +140,26 @@ const dogController = {
 
   deletePuppy: async (req, res) => {
     try {
-      const puppy = await Puppy.findById(req.params.id);
-      if (!puppy) {
-        return res.status(404).json({ error: 'Puppy not found' });
-      }
-
-      // Delete profile picture if it exists
-      if (puppy.profilePicture) {
-        const imagePath = path.join(__dirname, '..', 'public', 'uploads', puppy.profilePicture);
-        await fs.unlink(imagePath).catch(() => {});
-      }
-
-      await puppy.deleteOne();
-      res.json({ message: 'Puppy deleted successfully' });
+      const result = await deleteDocument(Puppy, req.params.id);
+      res.json(result);
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      res.status(404).json({ error: error.message });
     }
   }
 };
 
 const handleImageUpload = async (Model, id, files) => {
+  if (!files || files.length === 0) {
+    throw new Error('No files uploaded');
+  }
+
   const doc = await Model.findById(id);
   if (!doc) throw new Error('Document not found');
 
   const newImages = files.map(file => ({
-    url: `/api/images/uploads/${file.path.replace(/\\/g, '/').replace('public/uploads/', '')}`,
+    url: `/uploads/${file.filename}`,
     caption: '',
-    isProfile: doc.images.length === 0 // Make first image the profile image
+    isProfile: doc.images.length === 0
   }));
 
   doc.images.push(...newImages);
@@ -186,20 +168,42 @@ const handleImageUpload = async (Model, id, files) => {
 };
 
 const handleProfilePicUpload = async (Model, id, file) => {
+  if (!file) {
+    throw new Error('No file uploaded');
+  }
+
   const doc = await Model.findById(id);
   if (!doc) throw new Error('Document not found');
 
   // Delete old profile picture if it exists
   if (doc.profilePicture) {
-    const oldPath = path.join(__dirname, '..', 'public', 'uploads', 'profile-pictures', 
-      doc.profilePicture.split('/').pop());
-    await fs.unlink(oldPath).catch(() => {});
+    const oldPath = path.join(__dirname, '..', 'public/uploads/profile-pictures', doc.profilePicture);
+    await fs.unlink(oldPath).catch(console.error);
   }
 
-  // Store just the filename in the database
   doc.profilePicture = file.filename;
   await doc.save();
   return doc;
+};
+
+const deleteDocument = async (Model, id) => {
+  const doc = await Model.findById(id);
+  if (!doc) throw new Error('Document not found');
+
+  // Delete profile picture
+  if (doc.profilePicture) {
+    const profilePath = path.join(__dirname, '..', 'public/uploads/profile-pictures', doc.profilePicture);
+    await fs.unlink(profilePath).catch(console.error);
+  }
+
+  // Delete all associated images
+  for (const image of doc.images || []) {
+    const imagePath = path.join(__dirname, '..', 'public', image.url);
+    await fs.unlink(imagePath).catch(console.error);
+  }
+
+  await doc.deleteOne();
+  return { message: 'Document deleted successfully' };
 };
 
 Object.assign(dogController, {

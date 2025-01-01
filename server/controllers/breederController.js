@@ -7,7 +7,9 @@ const path = require('path')
 // get all breeders
 const getBreeders = async (req, res) => {
   try {
-    const breeders = await Breeder.find({}).sort({createdAt: -1})
+    const breeders = await Breeder.find({})
+      .select('-password')  // Exclude password
+      .sort({createdAt: -1})
     res.status(200).json(breeders)
   } catch (error) {
     res.status(500).json({ error: error.message, code: error.code })
@@ -23,7 +25,7 @@ const getBreeder = async (req, res) => {
       return res.status(400).json({error: 'Invalid ID format'})
     }
 
-    const breeder = await Breeder.findById(id)
+    const breeder = await Breeder.findById(id).select('-password')  // Exclude password
     if (!breeder) {
       return res.status(404).json({error: 'Breeder not found'})
     }
@@ -32,51 +34,6 @@ const getBreeder = async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message, code: error.code })
   }
-}
-
-// create new breeder
-const createBreeder = async (req, res) => {
-  const { firstName, lastName, email, password, phoneNumber, location } = req.body;
-
-  try {
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    const breeder = await Breeder.create({
-      firstName,
-      lastName,
-      email,
-      password: hashedPassword,
-      phoneNumber,
-      location
-    });
-
-    res.status(200).json({
-      id: breeder._id,
-      email: breeder.email,
-      firstName: breeder.firstName,
-      lastName: breeder.lastName
-    });
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-};
-
-// delete a breeder
-const deleteBreeder = async (req, res) => {
-  const { id } = req.params
-
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(400).json({error: 'Invalid ID, Breeder not found'})
-  }
-
-  const breeder = await Breeder.findOneAndDelete({_id: id})
-
-  if (!breeder) {
-    return res.status(404).json({error: 'Breeder not found'})
-  }
-
-  res.status(200).json({message: 'Breeder deleted'})
 }
 
 // update a breeder
@@ -88,8 +45,6 @@ const updateBreeder = async (req, res) => {
       // Fix the URL path to avoid duplication
       const filename = path.basename(req.file.path);
       updateData.profilePicture = `/uploads/breeder-profiles/${filename}`;
-      // or alternatively: updateData.profilePicture = `/api/images/uploads/breeder-profiles/${filename}`;
-      // but not both prefixes
     }
     
     const breeder = await Breeder.findOneAndUpdate(
@@ -101,41 +56,6 @@ const updateBreeder = async (req, res) => {
     res.status(200).json(breeder);
   } catch (error) {
     res.status(400).json({ error: error.message });
-  }
-};
-
-// Update breeder password (development only)
-const updateBreederPassword = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { newPassword } = req.body;
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ error: 'Invalid breeder ID' });
-    }
-
-    if (!newPassword || newPassword.length < 6) {
-      return res.status(400).json({ error: 'Password must be at least 6 characters' });
-    }
-
-    // Hash the new password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(newPassword, salt);
-
-    // Update the password
-    const breeder = await Breeder.findByIdAndUpdate(
-      id,
-      { password: hashedPassword },
-      { new: true }
-    );
-
-    if (!breeder) {
-      return res.status(404).json({ error: 'Breeder not found' });
-    }
-
-    res.status(200).json({ message: 'Password updated successfully' });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
   }
 };
 
@@ -230,9 +150,6 @@ const loginBreeder = async (req, res) => {
 module.exports = {
   getBreeders,
   getBreeder,
-  createBreeder,
-  deleteBreeder,
   updateBreeder,
-  loginBreeder,
-  updateBreederPassword
+  loginBreeder
 }

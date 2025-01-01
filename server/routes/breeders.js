@@ -3,13 +3,10 @@ const router = express.Router();
 const { breederUpload } = require('../middleware/multerConfig');
 
 const{
-  createBreeder,
   getBreeders,
   getBreeder,
-  deleteBreeder,
   updateBreeder,
   loginBreeder,
-  updateBreederPassword
 } = require('../controllers/breederController')
 
 // GET all breeders
@@ -20,12 +17,6 @@ router.post('/login', loginBreeder)
 
 // GET one breeder
 router.get('/:id', getBreeder)
-
-// POST a breeder
-router.post('/', createBreeder)
-
-// DELETE one breeder
-router.delete('/:id', deleteBreeder)
 
 // Update breeder - update file handling middleware
 router.patch('/:id', 
@@ -38,8 +29,5 @@ router.patch('/:id',
   },
   updateBreeder
 );
-
-// Update password (development only)
-router.post('/update-password/:id', updateBreederPassword)
 
 module.exports = router
