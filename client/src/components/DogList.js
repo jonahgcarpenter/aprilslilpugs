@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useDogContext } from '../hooks/useDogContext';
-import { motion, useSpring, useMotionValue } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 const calculateAge = (birthDate) => {
   const today = new Date();
@@ -20,13 +20,7 @@ const DogList = () => {
   const { grownDogs: dogs, dispatch } = useDogContext();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [width, setWidth] = useState(0);
-  const carousel = useRef();
-  const mouseX = useMotionValue(0);
   const containerRef = useRef();
-  const [visibleItems, setVisibleItems] = useState(3);
-  const CARD_WIDTH = 300; // Fixed card width
-  const CARD_GAP = 32; // Matches space-x-8
 
   useEffect(() => {
     const fetchDogs = async () => {
@@ -48,73 +42,6 @@ const DogList = () => {
 
     fetchDogs();
   }, [dispatch]);
-
-  useEffect(() => {
-    const updateVisibleItems = () => {
-      if (containerRef.current) {
-        const containerWidth = containerRef.current.offsetWidth;
-        const itemsPerView = Math.floor(containerWidth / (CARD_WIDTH + CARD_GAP));
-        setVisibleItems(Math.max(1, itemsPerView));
-      }
-    };
-
-    updateVisibleItems();
-    window.addEventListener('resize', updateVisibleItems);
-    return () => window.removeEventListener('resize', updateVisibleItems);
-  }, []);
-
-  useEffect(() => {
-    if (carousel.current && dogs) {
-      const totalWidth = dogs.length * (CARD_WIDTH + CARD_GAP) - CARD_GAP;
-      const containerWidth = carousel.current.offsetWidth;
-      setWidth(Math.max(0, totalWidth - containerWidth));
-    }
-  }, [dogs, visibleItems]);
-
-  // Add this function to handle container classes
-  const getContainerClasses = () => {
-    if (!dogs || dogs.length <= visibleItems) {
-      return 'flex justify-center space-x-8';
-    }
-    return 'flex space-x-8';
-  };
-
-  const x = useSpring(useMotionValue(0), {
-    stiffness: 100,
-    damping: 30
-  });
-
-  const handleMouseMove = (event) => {
-    if (width <= 0) return; // Don't move if all cards fit
-    const mouseXPosition = event.clientX;
-    const carouselWidth = carousel.current.offsetWidth;
-    const percentage = mouseXPosition / carouselWidth;
-    const newX = percentage * -width;
-    x.set(Math.max(Math.min(newX, 0), -width));
-  };
-
-  const cardVariants = {
-    hidden: { opacity: 0, scale: 0.8 },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      transition: {
-        type: "spring",
-        stiffness: 100,
-        damping: 15
-      }
-    },
-    hover: {
-      scale: 1.05,
-      rotateY: 10,
-      boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.2)",
-      transition: {
-        type: "spring",
-        stiffness: 400,
-        damping: 25
-      }
-    }
-  };
 
   if (isLoading) {
     return (
@@ -141,29 +68,49 @@ const DogList = () => {
       ref={containerRef}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl overflow-hidden"
+      className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl"
     >
       <h2 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-8 sm:mb-10 text-center">
         Our Family
       </h2>
       
       <motion.div 
-        ref={carousel}
-        className={`cursor-${width > 0 ? 'grab' : 'default'}`}
-        onMouseMove={width > 0 ? handleMouseMove : undefined}
-        whileTap={width > 0 ? { cursor: "grabbing" } : undefined}
+        className="overflow-x-auto overflow-y-hidden px-4 pb-4 -mx-4 sm:mx-0"
+        style={{ 
+          scrollbarWidth: 'none',
+          WebkitOverflowScrolling: 'touch',
+          scrollSnapType: 'x mandatory',
+          msOverflowStyle: 'none'
+        }}
       >
         <motion.div 
-          className={getContainerClasses()}
-          style={{ x: width > 0 ? x : 0 }}
-          drag={width > 0 ? "x" : false}
-          dragConstraints={{ right: 0, left: -width }}
-          dragTransition={{ bounceStiffness: 300, bounceDamping: 20 }}
+          className="flex space-x-4 sm:space-x-8 px-4"
         >
           {dogs && dogs.map((dog, index) => (
             <motion.div 
               key={dog._id}
-              variants={cardVariants}
+              variants={{
+                hidden: { opacity: 0, scale: 0.8 },
+                visible: {
+                  opacity: 1,
+                  scale: 1,
+                  transition: {
+                    type: "spring",
+                    stiffness: 100,
+                    damping: 15
+                  }
+                },
+                hover: {
+                  scale: 1.05,
+                  rotateY: 10,
+                  boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.2)",
+                  transition: {
+                    type: "spring",
+                    stiffness: 400,
+                    damping: 25
+                  }
+                }
+              }}
               initial="hidden"
               animate="visible"
               whileHover="hover"
@@ -171,7 +118,8 @@ const DogList = () => {
               custom={index}
               className="bg-white/5 backdrop-blur-sm rounded-xl p-4 transform border border-white/10 hover:border-white/20 shadow-lg"
               style={{
-                width: CARD_WIDTH,
+                width: 280,
+                scrollSnapAlign: 'start',
                 flexShrink: 0,
                 flexGrow: 0
               }}

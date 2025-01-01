@@ -1,9 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useDogContext } from '../hooks/useDogContext';
 
 const DogUpdate = () => {
-    const navigate = useNavigate();
     const { dispatch, grownDogs } = useDogContext();
     const [selectedDog, setSelectedDog] = useState('');
     const [error, setError] = useState(null);
@@ -128,7 +126,6 @@ const DogUpdate = () => {
             if (!response.ok) throw new Error('Failed to update dog');
             const updatedDog = await response.json();
             dispatch({ type: 'UPDATE_DOG', payload: updatedDog });
-            navigate('/dogs');
         } catch (err) {
             setError(err.message);
         }
@@ -142,7 +139,7 @@ const DogUpdate = () => {
 
             if (!response.ok) throw new Error('Failed to delete dog');
             dispatch({ type: 'DELETE_DOG', payload: selectedDog });
-            navigate('/dogs');
+            setShowDeleteConfirm(false);
         } catch (err) {
             setError(err.message);
         }

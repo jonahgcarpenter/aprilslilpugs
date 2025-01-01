@@ -10,10 +10,8 @@ const Home = () => {
         <div className="max-w-4xl mx-auto transform hover:scale-[1.01] transition-all duration-300">
           <UnderConstruction />
         </div>
-        <div className="grid gap-8 sm:gap-12">
           <BreederDetails />
           <DogList />
-        </div>
       </div>
     </div>
   )
