@@ -15,7 +15,7 @@ const UnderConstruction = () => {
       <span className="text-sm sm:text-base text-center sm:text-left
         bg-clip-text text-transparent bg-gradient-to-r 
         from-white via-white/90 to-white">
-        This page is currently under development - Check back soon for updates!
+        This page is always under development - Check back soon for updates!
       </span>
       <span role="img" aria-label="construction" 
         className="text-2xl sm:text-3xl animate-bounce" 

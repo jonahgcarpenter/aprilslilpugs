@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import videojs from 'video.js';
 import 'video.js/dist/video-js.css';
-import { FaVideo, FaInfoCircle, FaTimes } from 'react-icons/fa';
+import { FaInfoCircle, FaTimes } from 'react-icons/fa';
 
 // Configure your HLS stream URL here
 const HLS_STREAM_URL = process.env.REACT_APP_HLS_STREAM_URL;
