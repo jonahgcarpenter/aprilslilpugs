@@ -6,8 +6,29 @@ import { FaInfoCircle, FaTimes } from 'react-icons/fa';
 // Configure your HLS stream URL here
 const HLS_STREAM_URL = process.env.REACT_APP_HLS_STREAM_URL;
 
-// Add console.log to debug
-console.log('Stream URL:', process.env.REACT_APP_HLS_STREAM_URL);
+class StreamErrorBoundary extends React.Component {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error) {
+    console.error('Stream component error');
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="text-center p-4">
+          <p>Something went wrong with the stream. Please refresh the page.</p>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 const Stream = () => {
   const videoRef = useRef(null);
@@ -100,4 +121,10 @@ const Stream = () => {
   );
 };
 
-export default Stream;
+export default function SafeStream() {
+  return (
+    <StreamErrorBoundary>
+      <Stream />
+    </StreamErrorBoundary>
+  );
+}

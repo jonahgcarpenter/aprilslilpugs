@@ -1,25 +1,58 @@
 import React, { useState, useEffect } from 'react';
+import { Navigate } from 'react-router-dom';
+import { useLive } from '../context/LiveContext';
 
 // COMPONENTES
 import UnderConstruction from '../components/UnderConstruction';
 import Stream from '../components/Stream';
 
 const Live = () => {
+  const { isLive } = useLive();
   const [isStreamAvailable, setIsStreamAvailable] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    checkStreamAvailability();
-  }, []);
+    let mounted = true;
 
-  const checkStreamAvailability = async () => {
-    try {
-      const response = await fetch(process.env.REACT_APP_HLS_STREAM_URL);
-      setIsStreamAvailable(response.ok);
-    } catch (error) {
-      console.error('Stream check failed:', error);
-      setIsStreamAvailable(false);
+    const checkStreamAvailability = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch(process.env.REACT_APP_HLS_STREAM_URL);
+        if (mounted) {
+          setIsStreamAvailable(response.ok);
+        }
+      } catch (error) {
+        if (mounted) {
+          console.error('Failed to check stream status');
+          setIsStreamAvailable(false);
+        }
+      } finally {
+        if (mounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    if (isLive) {
+      checkStreamAvailability();
     }
-  };
+
+    return () => {
+      mounted = false;
+    };
+  }, [isLive]);
+
+  if (!isLive) {
+    return <Navigate to="/" />;
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen pt-8 pb-16 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen pt-8 pb-16">
