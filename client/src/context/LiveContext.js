@@ -1,12 +1,17 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 
 const LiveContext = createContext();
 
 export const LiveProvider = ({ children }) => {
-  const [isLive, setIsLive] = useState(false);
+  const [isLive, setIsLive] = useState(() => {
+    const saved = localStorage.getItem('isLive');
+    return saved ? JSON.parse(saved) : false;
+  });
 
   const toggleLive = () => {
-    setIsLive(!isLive);
+    const newState = !isLive;
+    setIsLive(newState);
+    localStorage.setItem('isLive', JSON.stringify(newState));
   };
 
   return (
