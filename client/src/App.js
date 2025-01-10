@@ -8,6 +8,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
 import Puppies from './pages/Puppies';
 import BreederDashboard from './pages/BreederDashboard';
+import Live from './pages/Live';
 
 // COMPONENTS
 import Navbar from './components/Navbar';
@@ -28,6 +29,7 @@ function App() {
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/puppies" element={<Puppies />} />
+                  <Route path="/live" element={<Live />} />
                   <Route 
                     path="/breeder-dashboard" 
                     element={
