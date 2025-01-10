@@ -23,7 +23,6 @@ const Stream = () => {
   useEffect(() => {
     // Make sure Video.js player is only initialized once and after DOM is ready
     if (!playerRef.current && mounted && videoRef.current) {
-      // Add error event handler
       const player = videojs(videoRef.current, {
         controls: true,
         fluid: true,
@@ -34,10 +33,6 @@ const Stream = () => {
           src: HLS_STREAM_URL,
           type: 'application/x-mpegURL'
         }]
-      });
-
-      player.on('error', function() {
-        console.error('Video player error:', player.error());
       });
 
       playerRef.current = player;
