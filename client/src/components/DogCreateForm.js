@@ -1,8 +1,8 @@
-import { useState, useRef } from 'react';
-import { useDogContext } from '../hooks/useDogContext';
+import { useState, useRef, useContext } from 'react';
+import { DogContext } from '../context/DogContext';
 
 const DogCreateForm = () => {
-  const { dispatch } = useDogContext();
+  const { dispatch } = useContext(DogContext);
   const [error, setError] = useState(null);
   const fileInputRef = useRef(null);
   const [formData, setFormData] = useState({

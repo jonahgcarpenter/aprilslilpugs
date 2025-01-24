@@ -1,5 +1,5 @@
-import { useEffect, useState, useRef } from 'react';
-import { useDogContext } from '../hooks/useDogContext';
+import { useEffect, useState, useRef, useContext } from 'react';
+import { DogContext } from '../context/DogContext';
 import { motion } from 'framer-motion';
 
 const calculateAge = (birthDate) => {
@@ -17,7 +17,7 @@ const calculateAge = (birthDate) => {
 };
 
 const DogList = () => {
-  const { grownDogs: dogs, dispatch } = useDogContext();
+  const { grownDogs: dogs, dispatch } = useContext(DogContext);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const containerRef = useRef();

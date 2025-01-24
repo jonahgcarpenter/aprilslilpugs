@@ -1,5 +1,5 @@
-import { useEffect, useState, useRef } from 'react';
-import { useDogContext } from '../hooks/useDogContext';
+import { useEffect, useState, useRef, useContext } from 'react';
+import { DogContext } from '../context/DogContext';
 import { motion } from 'framer-motion';
 
 const PuppyList = () => {
@@ -20,7 +20,7 @@ const PuppyList = () => {
     return `${monthsDiff} month${monthsDiff !== 1 ? 's' : ''} old`;
   };
 
-  const { puppies, dispatch } = useDogContext(); // Update context usage
+  const { puppies, dispatch } = useContext(DogContext);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const containerRef = useRef();

@@ -1,9 +1,9 @@
-import { useEffect } from 'react'
-import { useBreederContext } from '../hooks/useBreederContext'
+import { useEffect, useContext } from 'react'
+import { BreederContext } from '../context/BreederContext'
 import { FaFacebook, FaEnvelope, FaPhoneAlt, FaMapMarkerAlt, FaHeart } from 'react-icons/fa'
 
 const BreederDetails = () => {
-  const { breeder, loading, error, fetchBreeder } = useBreederContext()
+  const { breeder, loading, error, fetchBreeder } = useContext(BreederContext)
 
   useEffect(() => {
     fetchBreeder()

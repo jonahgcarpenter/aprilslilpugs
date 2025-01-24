@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
-import { useDogContext } from '../hooks/useDogContext';
+import { useState, useEffect, useRef, useContext } from 'react';
+import { DogContext } from '../context/DogContext';
 
 const DogUpdate = () => {
-    const { dispatch, grownDogs } = useDogContext();
+    const { dispatch, grownDogs } = useContext(DogContext);
     const [selectedDog, setSelectedDog] = useState('');
     const [error, setError] = useState(null);
     const fileInputRef = useRef(null);

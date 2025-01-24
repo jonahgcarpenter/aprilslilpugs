@@ -2,7 +2,6 @@
 import BreederDetails from '../components/BreederDetails';
 import DogList from '../components/DogList';
 import UnderConstruction from '../components/UnderConstruction';
-import Facebook from '../components/Facebook';
 
 const Home = () => {
   return (
@@ -12,7 +11,6 @@ const Home = () => {
           <UnderConstruction />
         </div>
           <BreederDetails />
-          <Facebook />
           <DogList />
       </div>
     </div>

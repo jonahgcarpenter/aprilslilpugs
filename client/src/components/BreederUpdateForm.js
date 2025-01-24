@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from "react"
-import { useBreederContext } from '../hooks/useBreederContext'
+import { useState, useEffect, useRef, useContext } from "react"
+import { BreederContext } from '../context/BreederContext'
 
 const BreederUpdateForm = () => {
-  const { breeder, dispatch } = useBreederContext()
+  const { breeder, dispatch } = useContext(BreederContext);
   const [error, setError] = useState(null);
   const fileInputRef = useRef(null);
   const [formData, setFormData] = useState({
