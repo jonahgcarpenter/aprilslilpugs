@@ -8,6 +8,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
 import BreederDashboard from './pages/BreederDashboard';
 import Live from './pages/Live';
+import MyGrumble from './pages/MyGrumble';
+import Puppies from './pages/Puppies';
 
 // COMPONENTS
 import Navbar from './components/Navbar';
@@ -27,6 +29,8 @@ function App() {
                 <div className="container mx-auto px-4 max-w-7xl relative">
                   <Routes>
                     <Route path="/" element={<Home />} />
+                    <Route path="/mygrumble" element={<MyGrumble />} />
+                    <Route path="/puppies" element={<Puppies />} />
                     <Route path="/live" element={<Live />} />
                     <Route 
                       path="/breeder-dashboard" 
