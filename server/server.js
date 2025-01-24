@@ -4,7 +4,6 @@ const express = require('express')
 const mongoose = require('mongoose')
 const path = require('path')
 const breederRoutes = require('./routes/breeders')
-const dogRoutes = require('./routes/dogs')
 const liveRoutes = require('./routes/live')
 
 // Create an express app
@@ -16,14 +15,13 @@ app.use(express.json())
 // Serve images from public/uploads directory
 app.use('/api/images', express.static(path.join(__dirname, 'public')))
 
-app.use((req, res, next) => {
+app.use((req, _res, next) => {
   console.log(req.path, req.method)
   next()
 })
 
 // routes
 app.use('/api/breeders', breederRoutes)
-app.use('/api/dogs', dogRoutes)
 app.use('/api/live', liveRoutes)
 
 // connect to mongodb

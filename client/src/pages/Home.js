@@ -1,6 +1,5 @@
 // components
 import BreederDetails from '../components/BreederDetails';
-import DogList from '../components/DogList';
 import UnderConstruction from '../components/UnderConstruction';
 
 const Home = () => {
@@ -11,7 +10,6 @@ const Home = () => {
           <UnderConstruction />
         </div>
           <BreederDetails />
-          <DogList />
       </div>
     </div>
   )

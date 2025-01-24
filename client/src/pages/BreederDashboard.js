@@ -2,10 +2,6 @@ import { useLive } from '../context/LiveContext';
 
 // COMPONENTS
 import BreederUpdateForm from '../components/BreederUpdateForm';
-import DogCreateForm from '../components/DogCreateForm';
-import DogUpdate from '../components/DogUpdate';
-import PuppyCreateForm from '../components/PuppyCreateForm';
-import PuppyUpdate from '../components/PuppyUpdate';
 
 const BreederDashboard = () => {
   const { isLive, toggleLive } = useLive();
@@ -22,10 +18,6 @@ const BreederDashboard = () => {
       </div>
       <div className="grid gap-8">
         <BreederUpdateForm />
-        <DogCreateForm />
-        <DogUpdate />
-        <PuppyCreateForm />
-        <PuppyUpdate />
       </div>
     </div>
   );
