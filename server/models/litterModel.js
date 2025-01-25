@@ -1,6 +1,7 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
+const Schema = mongoose.Schema
 
-const puppySchema = new mongoose.Schema({
+const puppySchema = new Schema({
   name: {
     type: String,
     required: true
@@ -29,7 +30,7 @@ const puppySchema = new mongoose.Schema({
   }
 });
 
-const litterSchema = new mongoose.Schema({
+const litterSchema = new Schema({
   name: {
     type: String,
     required: true
@@ -59,6 +60,6 @@ const litterSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   }
-});
+}, { timestamps: true });
 
-module.exports = mongoose.model('Litter', litterSchema);
+module.exports = mongoose.model('Litter', litterSchema)
