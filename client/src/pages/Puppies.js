@@ -1,6 +1,7 @@
 import UnderConstruction from '../components/UnderConstruction';
 import Litters from '../components/Litters';
 import AvailablePups from '../components/AvailablePups';
+import Waitlist from '../components/Waitlist';
 
 const Puppies = () => {
   return (
@@ -9,6 +10,7 @@ const Puppies = () => {
         <div className="max-w-4xl mx-auto transform hover:scale-[1.01] transition-all duration-300">
           <UnderConstruction />
         </div>
+            <Waitlist />
             <AvailablePups />
             <Litters />
       </div>

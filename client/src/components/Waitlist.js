@@ -1,0 +1,222 @@
+import React, { useState } from 'react';
+
+const Waitlist = () => {
+    const [formData, setFormData] = useState({
+        firstName: '',
+        lastName: '',
+        phoneNumber: '',
+        submissionDate: ''
+    });
+    const [message, setMessage] = useState({ text: '', isError: false });
+    const [showInfo, setShowInfo] = useState(false);
+
+    const formatPhoneNumber = (value) => {
+        const phoneNumber = value.replace(/\D/g, '');
+        let formattedNumber = '';
+        if (phoneNumber.length === 0) {
+            formattedNumber = '';
+        } else if (phoneNumber.length <= 3) {
+            formattedNumber = `(${phoneNumber}`;
+        } else if (phoneNumber.length <= 6) {
+            formattedNumber = `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3)}`;
+        } else {
+            formattedNumber = `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6, 10)}`;
+        }
+        return formattedNumber;
+    };
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        if (name === 'phoneNumber') {
+            const formatted = formatPhoneNumber(value);
+            if (formatted.length <= 14) {
+                setFormData(prevState => ({
+                    ...prevState,
+                    [name]: formatted
+                }));
+            }
+        } else {
+            setFormData(prevState => ({
+                ...prevState,
+                [name]: value
+            }));
+        }
+    };
+
+    const validatePhoneNumber = (phoneNumber) => {
+        const phoneRegex = /^\(\d{3}\) \d{3}-\d{4}$/;
+        return phoneRegex.test(phoneNumber);
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (!formData.firstName || !formData.lastName || !formData.phoneNumber) {
+            setMessage({ text: 'Please fill in all fields', isError: true });
+            return;
+        }
+
+        if (!validatePhoneNumber(formData.phoneNumber)) {
+            setMessage({ text: 'Please enter a valid phone number', isError: true });
+            return;
+        }
+
+        const submissionDate = new Date().toISOString();
+        const submissionData = {
+            ...formData,
+            submissionDate
+        };
+
+        console.log('Waitlist submission:', submissionData);
+        setMessage({ text: 'Thank you for joining our waitlist!', isError: false });
+        
+        setFormData({
+            firstName: '',
+            lastName: '',
+            phoneNumber: '',
+            submissionDate: ''
+        });
+    };
+
+    return (
+        <>
+            <div className={`transition-all duration-300 ${showInfo ? 'blur-sm' : ''}`}>
+                <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl mb-8">
+                    <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="flex items-center justify-center mb-8 relative">
+                            <h2 className="text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 text-center tracking-wider px-4">
+                                Join Our Waitlist
+                            </h2>
+                            <button
+                                onClick={() => setShowInfo(true)}
+                                className="absolute right-0 text-slate-400 hover:text-blue-400 transition-colors"
+                                aria-label="Show waitlist information"
+                            >
+                                <svg 
+                                    className="w-6 h-6" 
+                                    fill="none" 
+                                    stroke="currentColor" 
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path 
+                                        strokeLinecap="round" 
+                                        strokeLinejoin="round" 
+                                        strokeWidth={2} 
+                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
+                                    />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleSubmit} className="space-y-6">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <div>
+                                    <label htmlFor="firstName" className="block text-slate-300 mb-2">
+                                        First Name
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="firstName"
+                                        name="firstName"
+                                        value={formData.firstName}
+                                        onChange={handleChange}
+                                        className="w-full px-4 py-2 rounded-lg bg-slate-800/50 border border-slate-700/50 focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-slate-100"
+                                        placeholder="Enter your first name"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="lastName" className="block text-slate-300 mb-2">
+                                        Last Name
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="lastName"
+                                        name="lastName"
+                                        value={formData.lastName}
+                                        onChange={handleChange}
+                                        className="w-full px-4 py-2 rounded-lg bg-slate-800/50 border border-slate-700/50 focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-slate-100"
+                                        placeholder="Enter your last name"
+                                        required
+                                    />
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label htmlFor="phoneNumber" className="block text-slate-300 mb-2">
+                                    Phone Number
+                                </label>
+                                <input
+                                    type="tel"
+                                    id="phoneNumber"
+                                    name="phoneNumber"
+                                    value={formData.phoneNumber}
+                                    onChange={handleChange}
+                                    className="w-full px-4 py-2 rounded-lg bg-slate-800/50 border border-slate-700/50 focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-slate-100"
+                                    placeholder="(123) 456-7890"
+                                    required
+                                />
+                            </div>
+
+                            {message.text && (
+                                <div className={`text-center p-3 rounded-lg ${
+                                    message.isError 
+                                        ? 'bg-red-500/20 text-red-400' 
+                                        : 'bg-green-500/20 text-green-400'
+                                }`}>
+                                    {message.text}
+                                </div>
+                            )}
+
+                            <div className="text-center">
+                                <button
+                                    type="submit"
+                                    className="px-8 py-3 rounded-lg bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 text-white font-semibold hover:from-blue-500 hover:via-blue-600 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-blue-500/25"
+                                >
+                                    Join Waitlist
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            {showInfo && (
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+                    <div 
+                        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                        onClick={() => setShowInfo(false)}
+                    />
+                    <div className="relative z-[10000] bg-slate-900 rounded-xl p-6 max-w-lg mx-4 border border-slate-800/50 shadow-xl">
+                        <div className="flex justify-between items-start mb-4">
+                            <h3 className="text-xl font-semibold text-slate-100">
+                                How the Waitlist Works
+                            </h3>
+                            <button
+                                onClick={() => setShowInfo(false)}
+                                className="text-slate-400 hover:text-slate-200 transition-colors"
+                                aria-label="Close information modal"
+                            >
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div className="space-y-4 text-slate-300">
+                            <p>Our waitlist system helps you secure your spot for upcoming puppy litters. Here's how it works:</p>
+                            <ol className="list-decimal list-inside space-y-2 pl-4">
+                                <li>Fill out the form with your contact information</li>
+                                <li>Your information will be added to our waitlist database</li>
+                                <li>We'll contact you when new puppies become available</li>
+                                <li>Priority is given based on your position in the waitlist</li>
+                            </ol>
+                            <p>We'll reach out via phone when puppies become available. Make sure your phone number is correct as this will be our primary method of contact.</p>
+                            <p className="text-slate-400 text-sm">Your information is securely stored and will only be used for waitlist purposes.</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </>
+    );
+};
+
+export default Waitlist;
