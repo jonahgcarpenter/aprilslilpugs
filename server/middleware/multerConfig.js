@@ -31,4 +31,5 @@ const createUploader = (dir) => multer({
 module.exports = {
   breederUpload: createUploader('breeder-profiles'),
   littersUpload: createUploader('litter-images'),
+  puppyUpload: createUploader('puppy-images'),
 };
