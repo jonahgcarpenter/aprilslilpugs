@@ -70,7 +70,7 @@ const AvailablePups = () => {
 
                 {availablePuppies.length === 0 && (
                     <p className="text-center text-slate-300 py-8">
-                        No puppies are currently available. Please check back later!
+                        No puppies are currently available. Please check back later! Or join our waitlist to be the first to know when new puppies are available.
                     </p>
                 )}
             </div>      

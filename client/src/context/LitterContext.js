@@ -4,7 +4,7 @@ export const LitterContext = createContext();
 
 export const PLACEHOLDER_LITTERS = [
     {
-        id: "litter1",
+        id: "1",
         name: "Litter 1",
         mother: "Mother 1",
         father: "Father 1",
@@ -26,7 +26,7 @@ export const PLACEHOLDER_LITTERS = [
                 color: "Color 2",
                 image: "/puppy-placeholder.jpg",
                 gender: "Female",
-                status: "Available",
+                status: "Reserved",
             },
             {
                 id: "puppy3",
@@ -34,7 +34,7 @@ export const PLACEHOLDER_LITTERS = [
                 color: "Color 3",
                 image: "/puppy-placeholder.jpg",
                 gender: "Male",
-                status: "Available",
+                status: "Sold",
             },
         ],
     },
