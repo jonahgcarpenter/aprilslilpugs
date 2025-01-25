@@ -1,47 +1,34 @@
-import React from 'react';
-
-export const PLACEHOLDER_LITTERS = [
-    
-    {
-        id: "litter1",
-        name: "Litter 1",
-        mother: "Mother 1",
-        father: "Father 1",
-        birthDate: "January 1, 2022",
-        availableDate: "February 1, 2022",
-        image: "/puppy-placeholder.jpg",
-        puppies: [
-            {
-                id: "puppy1",
-                name: "Puppy 1",
-                color: "Color 1",
-                image: "/puppy-placeholder.jpg",
-                gender: "Female",
-                status: "Available",
-            },
-            {
-                id: "puppy2",
-                name: "Puppy 2",
-                color: "Color 2",
-                image: "/puppy-placeholder.jpg",
-                gender: "Female",
-                status: "Available",
-            },
-            {
-                id: "puppy3",
-                name: "Puppy 3",
-                color: "Color 3",
-                image: "/puppy-placeholder.jpg",
-                gender: "Male",
-                status: "Available",
-            },
-        ],
-    },
-];
+import React, { useContext, useEffect } from 'react';
+import { LitterContext } from '../context/LitterContext';
 
 const AvailablePups = () => {
+    const { litters, loading, error, fetchLitters } = useContext(LitterContext);
 
-    const availablePuppies = PLACEHOLDER_LITTERS.reduce((acc, litter) => {
+    useEffect(() => {
+        fetchLitters();
+    }, []);
+
+    if (loading) {
+        return (
+            <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 border border-slate-800/50">
+                <div className="flex items-center justify-center space-x-2">
+                    <div className="w-4 h-4 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
+                    <div className="w-4 h-4 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    <div className="w-4 h-4 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="mx-2 sm:mx-4 bg-slate-900 rounded-xl shadow-xl p-4 sm:p-8">
+                <p className="text-red-500 text-center">{error}</p>
+            </div>
+        );
+    }
+
+    const availablePuppies = litters.reduce((acc, litter) => {
         return [...acc, ...litter.puppies.filter(puppy => puppy.status === "Available")];
     }, []);
 
@@ -86,7 +73,7 @@ const AvailablePups = () => {
                 )}
             </div>      
         </div>
-    ) 
-}
+    );
+};
 
 export default AvailablePups;

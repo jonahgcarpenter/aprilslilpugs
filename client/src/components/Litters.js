@@ -1,45 +1,33 @@
-import React from 'react';
-
-export const PLACEHOLDER_LITTERS = [
-    
-    {
-        id: "litter1",
-        name: "Litter 1",
-        mother: "Mother 1",
-        father: "Father 1",
-        birthDate: "January 1, 2022",
-        availableDate: "February 1, 2022",
-        image: "/puppy-placeholder.jpg",
-        puppies: [
-            {
-                id: "puppy1",
-                name: "Puppy 1",
-                color: "Color 1",
-                image: "/puppy-placeholder.jpg",
-                gender: "Female",
-                status: "Available",
-            },
-            {
-                id: "puppy2",
-                name: "Puppy 2",
-                color: "Color 2",
-                image: "/puppy-placeholder.jpg",
-                gender: "Female",
-                status: "Available",
-            },
-            {
-                id: "puppy3",
-                name: "Puppy 3",
-                color: "Color 3",
-                image: "/puppy-placeholder.jpg",
-                gender: "Male",
-                status: "Available",
-            },
-        ],
-    },
-];
+import React, { useContext, useEffect } from 'react';
+import { LitterContext } from '../context/LitterContext';
 
 const Litters = () => {
+    const { litters, loading, error, fetchLitters } = useContext(LitterContext);
+
+    useEffect(() => {
+        fetchLitters();
+    }, []);
+
+    if (loading) {
+        return (
+            <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 border border-slate-800/50">
+                <div className="flex items-center justify-center space-x-2">
+                    <div className="w-4 h-4 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
+                    <div className="w-4 h-4 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    <div className="w-4 h-4 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="mx-2 sm:mx-4 bg-slate-900 rounded-xl shadow-xl p-4 sm:p-8">
+                <p className="text-red-500 text-center">{error}</p>
+            </div>
+        );
+    }
+
     return (
         <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-12">
@@ -47,7 +35,7 @@ const Litters = () => {
                     Litters
                 </h1>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {PLACEHOLDER_LITTERS.map((litter) => (
+                    {litters.map((litter) => (
                         <div key={litter.id} className="bg-slate-900/80 backdrop-blur-sm border border-slate-800/50 shadow-xl rounded-lg overflow-hidden hover:border-white/20 transition-all duration-300">
                             <img
                                 src={litter.image}
@@ -66,7 +54,7 @@ const Litters = () => {
                 </div>
             </div>
         </div>
-    )
-}
+    );
+};
 
 export default Litters;

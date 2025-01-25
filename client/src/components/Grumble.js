@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useContext, useEffect } from 'react';
+import { GrumbleContext } from '../context/GrumbleContext'; // Adjust the path as needed
 
 const calculateAge = (birthDate) => {
     const today = new Date();
@@ -13,43 +14,33 @@ const calculateAge = (birthDate) => {
     return age;
 }
 
-export const PLACEHOLDER_GRUMBLE = [
-    
-    {
-        id: "1",
-        name: "Winston",
-        gender: "Male",
-        description: "A pain in my ass",
-        image: "/puppy-placeholder.jpg",
-        birthDate: "2020-10-20",
-    },
-    {
-        id: "2",
-        name: "Hallie",
-        gender: "Female",
-        description: "A pain in my ass",
-        image: "/puppy-placeholder.jpg",
-        birthDate: "2020-10-20",
-    },
-    {
-        id: "3",
-        name: "Mille",
-        gender: "Female",
-        description: "A pain in my ass",
-        image: "/puppy-placeholder.jpg",
-        birthDate: "2020-10-20",
-    },
-    {
-        id: "4",
-        name: "Mardi",
-        gender: "Male",
-        description: "A pain in my ass",
-        image: "/puppy-placeholder.jpg",
-        birthDate: "2020-10-20",
-    },
-];
-
 const Grumble = () => {
+    const { grumbles, loading, error, fetchGrumbles } = useContext(GrumbleContext);
+
+    useEffect(() => {
+        fetchGrumbles();
+    }, []);
+
+    if (loading) {
+        return (
+            <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 border border-slate-800/50">
+                <div className="flex items-center justify-center space-x-2">
+                    <div className="w-4 h-4 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
+                    <div className="w-4 h-4 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    <div className="w-4 h-4 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="mx-2 sm:mx-4 bg-slate-900 rounded-xl shadow-xl p-4 sm:p-8">
+                <p className="text-red-500 text-center">{error}</p>
+            </div>
+        );
+    }
+
     return (
         <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-12">
@@ -58,7 +49,7 @@ const Grumble = () => {
                 </h1>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {PLACEHOLDER_GRUMBLE.map((pug) => (
+                    {grumbles.map((pug) => (
                         <div
                             key={pug.id}
                             className="bg-slate-800/50 rounded-xl overflow-hidden hover:transform hover:scale-[1.02] transition-all duration-300"
@@ -86,18 +77,14 @@ const Grumble = () => {
                                     </div>
                                 </div>
 
-                                <div className="space-y-2 text-slate-300">
-                                    <p className="text-slate-300">
-                                        {pug.description}
-                                    </p>
-                                </div>
+                                <p className="text-slate-300">{pug.description}</p>
                             </div>
                         </div>
                     ))}
                 </div>
             </div>      
         </div>
-    ) 
-}
+    );
+};
 
 export default Grumble;
