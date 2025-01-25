@@ -4,6 +4,12 @@ import { LitterContext } from '../context/LitterContext';
 const Litters = () => {
     const { litters, loading, error, fetchLitters } = useContext(LitterContext);
 
+    const isDateInFuture = (dateString) => {
+        const date = new Date(dateString);
+        const today = new Date();
+        return date > today;
+    };
+
     useEffect(() => {
         fetchLitters();
     }, []);
@@ -50,7 +56,9 @@ const Litters = () => {
                             <div className="p-6 space-y-4">
                                 <h2 className="text-2xl font-semibold text-slate-100">{litter.name}</h2>
                                 <div className="space-y-2 text-slate-300">
-                                    <p>Born on {litter.birthDate}</p>
+                                    <p>
+                                        {isDateInFuture(litter.birthDate) ? 'Expected' : 'Born'} on {litter.birthDate}
+                                    </p>
                                     <p>Available on {litter.availableDate}</p>
                                     <p>Mother: {litter.mother}</p>
                                     <p>Father: {litter.father}</p>

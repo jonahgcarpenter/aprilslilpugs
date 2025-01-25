@@ -8,7 +8,7 @@ export const PLACEHOLDER_LITTERS = [
         name: "Litter 1",
         mother: "Mother 1",
         father: "Father 1",
-        birthDate: "January 1, 2022",
+        birthDate: "January 25, 2025",
         availableDate: "February 1, 2022",
         image: "/puppy-placeholder.jpg",
         puppies: [
