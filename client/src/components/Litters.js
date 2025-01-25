@@ -36,18 +36,25 @@ const Litters = () => {
                 </h1>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                     {litters.map((litter) => (
-                        <div key={litter.id} className="bg-slate-900/80 backdrop-blur-sm border border-slate-800/50 shadow-xl rounded-lg overflow-hidden hover:border-white/20 transition-all duration-300">
-                            <img
-                                src={litter.image}
-                                alt={litter.name}
-                                className="w-full h-48 object-cover object-center"
-                            />
-                            <div className="p-4">
-                                <h2 className="text-xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600">{litter.name}</h2>
-                                <p className="text-white/80">Born on {litter.birthDate}</p>
-                                <p className="text-white/80">Available on {litter.availableDate}</p>
-                                <p className="text-white/80">Mother: {litter.mother}</p>
-                                <p className="text-white/80">Father: {litter.father}</p>
+                        <div 
+                            key={litter.id} 
+                            className="bg-slate-800/50 rounded-xl overflow-hidden hover:transform hover:scale-[1.02] transition-all duration-300 border border-slate-700/50"
+                        >
+                            <div className="aspect-square w-full overflow-hidden">
+                                <img
+                                    src={litter.image}
+                                    alt={litter.name}
+                                    className="w-full h-full object-cover"
+                                />
+                            </div>
+                            <div className="p-6 space-y-4">
+                                <h2 className="text-2xl font-semibold text-slate-100">{litter.name}</h2>
+                                <div className="space-y-2 text-slate-300">
+                                    <p>Born on {litter.birthDate}</p>
+                                    <p>Available on {litter.availableDate}</p>
+                                    <p>Mother: {litter.mother}</p>
+                                    <p>Father: {litter.father}</p>
+                                </div>
                             </div>
                         </div>
                     ))}

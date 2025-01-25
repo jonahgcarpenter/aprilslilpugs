@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from 'react';
-import { GrumbleContext } from '../context/GrumbleContext'; // Adjust the path as needed
+import { GrumbleContext } from '../context/GrumbleContext';
 
 const calculateAge = (birthDate) => {
     const today = new Date();
@@ -52,7 +52,7 @@ const Grumble = () => {
                     {grumbles.map((pug) => (
                         <div
                             key={pug.id}
-                            className="bg-slate-800/50 rounded-xl overflow-hidden hover:transform hover:scale-[1.02] transition-all duration-300"
+                            className="bg-slate-800/50 rounded-xl overflow-hidden hover:transform hover:scale-[1.02] transition-all duration-300 border border-slate-700/50"
                         >
                             <div className="aspect-square w-full overflow-hidden">
                                 <img
@@ -76,7 +76,6 @@ const Grumble = () => {
                                         </p>
                                     </div>
                                 </div>
-
                                 <p className="text-slate-300">{pug.description}</p>
                             </div>
                         </div>

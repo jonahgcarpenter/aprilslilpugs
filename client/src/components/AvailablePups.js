@@ -39,27 +39,29 @@ const AvailablePups = () => {
                     Available Puppies
                 </h1>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                     {availablePuppies.map(puppy => (
                         <div
                             key={puppy.id}
-                            className="bg-slate-800/50 rounded-lg p-4 border border-slate-700/50 hover:border-blue-500/50 transition-all"
+                            className="bg-slate-800/50 rounded-xl overflow-hidden hover:transform hover:scale-[1.02] transition-all duration-300 border border-slate-700/50"
                         >
-                            <div className="aspect-square w-full overflow-hidden rounded-lg mb-4">
+                            <div className="aspect-square w-full overflow-hidden">
                                 <img
                                     src={puppy.image}
                                     alt={puppy.name}
                                     className="w-full h-full object-cover"
                                 />
                             </div>
-                            <div className="space-y-2">
-                                <h3 className="text-xl front-semibold text-slate-100">
+                            <div className="p-6 space-y-4">
+                                <h3 className="text-2xl font-semibold text-slate-100">
                                     {puppy.name}
                                 </h3>
-                                <div className="text-slate-300 space-y-1">
+                                <div className="space-y-2 text-slate-300">
                                     <p>Color: {puppy.color}</p>
                                     <p>Gender: {puppy.gender}</p>
-                                    <p className="inline-block bg-green-500/20 text-green-400 px-2 py-1 rounded-full text-sm">{puppy.status}</p>
+                                    <p className="inline-block bg-green-500/20 text-green-400 px-2 py-1 rounded-full text-sm">
+                                        {puppy.status}
+                                    </p>
                                 </div>
                             </div>
                         </div>
