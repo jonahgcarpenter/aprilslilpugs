@@ -7,6 +7,7 @@ const breederRoutes = require('./routes/breeders')
 const liveRoutes = require('./routes/live')
 const littersRoutes = require('./routes/litters')
 const grumbleRoutes = require('./routes/grumble')
+const waitlistRoutes = require('./routes/waitlist')
 
 // Create an express app
 const app = express();
@@ -27,6 +28,7 @@ app.use('/api/breeders', breederRoutes)
 app.use('/api/live', liveRoutes)
 app.use('/api/litters', littersRoutes)
 app.use('/api/grumble', grumbleRoutes)
+app.use('/api/waitlist', waitlistRoutes)
 
 // connect to mongodb
 mongoose.connect(process.env.MONGODB_URI)
