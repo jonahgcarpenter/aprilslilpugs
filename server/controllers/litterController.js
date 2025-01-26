@@ -1,27 +1,39 @@
 const Litter = require('../models/litterModel')
 const mongoose = require('mongoose')
 
+// Function to check if ObjectId is valid
+const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id)
+
+// Function to handle errors
+const handleErrors = (res, error) => {
+  res.status(error.status || 500).json({ error: error.message || 'Internal Server Error' })
+}
+
 const getLitters = async (req, res) => {
   try {
-    const litters = await Litter.find({}).sort({createdAt: -1})
+    const litters = await Litter.find({}).sort({ createdAt: -1 })
     res.status(200).json(litters)
   } catch (error) {
-    res.status(500).json({ error: error.message, code: error.code })
+    handleErrors(res, error)
   }
 }
 
 const getLitter = async (req, res) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.litterId)) {
-      return res.status(400).json({error: 'Invalid litter ID format'})
+    const { litterId } = req.params
+
+    if (!isValidObjectId(litterId)) {
+      return res.status(400).json({ error: 'Invalid litter ID format' })
     }
-    const litter = await Litter.findById(req.params.litterId)
+
+    const litter = await Litter.findById(litterId)
     if (!litter) {
-      return res.status(404).json({error: 'Litter not found'})
+      return res.status(404).json({ error: 'Litter not found' })
     }
+
     res.status(200).json(litter)
   } catch (error) {
-    res.status(500).json({ error: error.message })
+    handleErrors(res, error)
   }
 }
 
@@ -36,70 +48,70 @@ const createLitter = async (req, res) => {
     const litter = await Litter.create(litterData)
     res.status(201).json(litter)
   } catch (error) {
-    res.status(400).json({ error: error.message })
+    handleErrors(res, error)
   }
 }
 
 const updateLitter = async (req, res) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.litterId)) {
-      return res.status(400).json({error: 'Invalid litter ID format'})
+    const { litterId } = req.params
+
+    if (!isValidObjectId(litterId)) {
+      return res.status(400).json({ error: 'Invalid litter ID format' })
     }
 
-    const updateData = {
-      ...req.body
-    }
-    
+    const updateData = { ...req.body }
+
     if (req.file) {
       updateData.image = `/uploads/litter-images/${req.file.filename}`
     }
-    
+
     if (req.body.birthDate) {
       updateData.birthDate = new Date(req.body.birthDate)
     }
-    
+
     if (req.body.availableDate) {
       updateData.availableDate = new Date(req.body.availableDate)
     }
 
-    const litter = await Litter.findOneAndUpdate(
-      { _id: req.params.litterId },
-      updateData,
-      { new: true }
-    )
+    const litter = await Litter.findByIdAndUpdate(litterId, updateData, { new: true })
 
     if (!litter) {
-      return res.status(404).json({error: 'Litter not found'})
+      return res.status(404).json({ error: 'Litter not found' })
     }
 
     res.status(200).json(litter)
   } catch (error) {
-    res.status(400).json({ error: error.message })
+    handleErrors(res, error)
   }
 }
 
 const deleteLitter = async (req, res) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.litterId)) {
-      return res.status(400).json({error: 'Invalid litter ID format'})
+    const { litterId } = req.params
+
+    if (!isValidObjectId(litterId)) {
+      return res.status(400).json({ error: 'Invalid litter ID format' })
     }
 
-    const litter = await Litter.findOneAndDelete({ _id: req.params.litterId })
+    const litter = await Litter.findByIdAndDelete(litterId)
 
     if (!litter) {
-      return res.status(404).json({error: 'Litter not found'})
+      return res.status(404).json({ error: 'Litter not found' })
     }
 
-    res.status(200).json(litter)
+    res.status(200).json({ message: 'Litter deleted successfully', litter })
   } catch (error) {
-    res.status(400).json({ error: error.message })
+    handleErrors(res, error)
   }
 }
 
 const addPuppy = async (req, res) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.litterId)) {
-      return res.status(400).json({error: 'Invalid litter ID format'})
+    const { litterId } = req.params
+
+    if (!isValidObjectId(litterId)) {
+      return res.status(400).json({ error: 'Invalid litter ID format' })
     }
 
     const puppyData = {
@@ -107,26 +119,28 @@ const addPuppy = async (req, res) => {
       image: req.file ? `/uploads/puppy-images/${req.file.filename}` : '/puppy-placeholder.jpg'
     }
 
-    const litter = await Litter.findOneAndUpdate(
-      { _id: req.params.litterId },
+    const litter = await Litter.findByIdAndUpdate(
+      litterId,
       { $push: { puppies: puppyData } },
       { new: true }
     )
 
     if (!litter) {
-      return res.status(404).json({error: 'Litter not found'})
+      return res.status(404).json({ error: 'Litter not found' })
     }
 
     res.status(200).json(litter)
   } catch (error) {
-    res.status(400).json({ error: error.message })
+    handleErrors(res, error)
   }
 }
 
 const updatePuppy = async (req, res) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.litterId)) {
-      return res.status(400).json({error: 'Invalid litter ID format'})
+    const { litterId, puppyId } = req.params
+
+    if (!isValidObjectId(litterId) || !isValidObjectId(puppyId)) {
+      return res.status(400).json({ error: 'Invalid ID format' })
     }
 
     const updateData = {
@@ -141,43 +155,45 @@ const updatePuppy = async (req, res) => {
     }
 
     const litter = await Litter.findOneAndUpdate(
-      { 
-        _id: req.params.litterId,
-        'puppies._id': req.params.puppyId
+      {
+        _id: litterId,
+        'puppies._id': puppyId
       },
       { $set: updateData },
       { new: true }
     )
 
     if (!litter) {
-      return res.status(404).json({error: 'Litter or puppy not found'})
+      return res.status(404).json({ error: 'Litter or puppy not found' })
     }
 
     res.status(200).json(litter)
   } catch (error) {
-    res.status(400).json({ error: error.message })
+    handleErrors(res, error)
   }
 }
 
 const deletePuppy = async (req, res) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.litterId)) {
-      return res.status(400).json({error: 'Invalid litter ID format'})
+    const { litterId, puppyId } = req.params
+
+    if (!isValidObjectId(litterId) || !isValidObjectId(puppyId)) {
+      return res.status(400).json({ error: 'Invalid ID format' })
     }
 
-    const litter = await Litter.findOneAndUpdate(
-      { _id: req.params.litterId },
-      { $pull: { puppies: { _id: req.params.puppyId } } },
+    const litter = await Litter.findByIdAndUpdate(
+      litterId,
+      { $pull: { puppies: { _id: puppyId } } },
       { new: true }
     )
 
     if (!litter) {
-      return res.status(404).json({error: 'Litter or puppy not found'})
+      return res.status(404).json({ error: 'Litter or puppy not found' })
     }
 
     res.status(200).json(litter)
   } catch (error) {
-    res.status(400).json({ error: error.message })
+    handleErrors(res, error)
   }
 }
 
