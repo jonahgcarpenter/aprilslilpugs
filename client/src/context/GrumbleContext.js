@@ -12,6 +12,10 @@ export const GrumbleProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    const getFullImageUrl = (relativePath) => {
+        return `${process.env.REACT_APP_API_URL || ''}${relativePath}`;
+    };
+
     // CRUD Operations
     // Fetch all grumbles
     const fetchGrumbles = async () => {
@@ -23,6 +27,7 @@ export const GrumbleProvider = ({ children }) => {
                 throw new Error('Failed to fetch grumbles');
             }
             const data = await response.json();
+            // Remove image URL transformation, let components handle it
             setGrumbles(data);
         } catch (err) {
             setError('Failed to fetch grumbles. Please try again later.');
@@ -33,20 +38,18 @@ export const GrumbleProvider = ({ children }) => {
     };
 
     // Add a new grumble
-    const addGrumble = async (grumbleData) => {
+    const addGrumble = async (formData) => {
         setLoading(true);
         setError(null);
         try {
             const response = await fetch('/api/grumble', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(grumbleData),
+                body: formData  // Remove headers since we're sending FormData
             });
             
             if (!response.ok) {
-                throw new Error('Failed to add grumble');
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to add grumble');
             }
             
             const newGrumble = await response.json();
@@ -87,20 +90,18 @@ export const GrumbleProvider = ({ children }) => {
     };
 
     // Update a grumble
-    const updateGrumble = async (grumbleId, updateData) => {
+    const updateGrumble = async (grumbleId, formData) => {
         setLoading(true);
         setError(null);
         try {
             const response = await fetch(`/api/grumble/${grumbleId}`, {
                 method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(updateData),
+                body: formData  // Remove headers since we're sending FormData
             });
             
             if (!response.ok) {
-                throw new Error('Failed to update grumble');
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to update grumble');
             }
             
             const updatedGrumble = await response.json();

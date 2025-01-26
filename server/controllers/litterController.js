@@ -160,13 +160,15 @@ const updatePuppy = async (req, res) => {
       return res.status(400).json({ error: 'Invalid ID format' })
     }
 
-    // Only include fields that are present in the request body
+    // Create update data with file path if image is uploaded
     const updateData = {}
-    if (req.body.status) updateData['puppies.$.status'] = req.body.status
     if (req.body.name) updateData['puppies.$.name'] = req.body.name
     if (req.body.color) updateData['puppies.$.color'] = req.body.color
     if (req.body.gender) updateData['puppies.$.gender'] = req.body.gender
-    if (req.body.image) updateData['puppies.$.image'] = req.body.image
+    if (req.body.status) updateData['puppies.$.status'] = req.body.status
+    if (req.file) {
+      updateData['puppies.$.image'] = `/uploads/puppy-images/${req.file.filename}`
+    }
 
     const litter = await Litter.findOneAndUpdate(
       {

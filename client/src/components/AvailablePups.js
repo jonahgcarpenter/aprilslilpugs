@@ -55,7 +55,7 @@ const AvailablePups = () => {
                         >
                             <div className="aspect-square w-full overflow-hidden">
                                 <img
-                                    src={puppy.image}
+                                    src={`/api/images${puppy.image}`}
                                     alt={puppy.name}
                                     className="w-full h-full object-cover"
                                 />

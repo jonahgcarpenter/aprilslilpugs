@@ -25,16 +25,26 @@ export const LitterProvider = ({ children }) => {
         return new Date(date).toISOString().split('T')[0];
     };
 
+    // Add API base URL utility
+    const getFullImageUrl = (relativePath) => {
+        return `${process.env.REACT_APP_API_URL || ''}${relativePath}`;
+    };
+
+    // Update formatLitterData to properly handle IDs and image paths
     const formatLitterData = (litter) => ({
         ...litter,
-        id: litter._id,
+        _id: litter._id, // Keep the original _id
+        id: litter._id,  // Add id alias for compatibility
         birthDate: formatDate(litter.birthDate),
         availableDate: formatDate(litter.availableDate),
         rawBirthDate: formatDateForInput(litter.birthDate),
         rawAvailableDate: formatDateForInput(litter.availableDate),
+        image: litter.image, // Keep the image path as is
         puppies: litter.puppies.map(puppy => ({
             ...puppy,
-            id: puppy._id
+            _id: puppy._id, // Keep the original _id
+            id: puppy._id,  // Add id alias for compatibility
+            image: puppy.image // Keep the image path as is
         }))
     });
 
@@ -58,20 +68,16 @@ export const LitterProvider = ({ children }) => {
         }
     };
 
+    // Update getLitter to properly handle the response
     const getLitter = async (litterId) => {
         try {
-            // First check if we already have the litter in state
-            const existingLitter = litters.find(l => l._id === litterId);
-            if (existingLitter) {
-                return existingLitter;
-            }
-
             const response = await fetch(`/api/litters/${litterId}`);
             if (!response.ok) {
                 throw new Error('Failed to fetch litter');
             }
             const data = await response.json();
-            return formatLitterData(data);
+            const formattedLitter = formatLitterData(data);
+            return formattedLitter;
         } catch (err) {
             setError('Failed to fetch litter details.');
             console.error('Fetch error:', err);
@@ -156,60 +162,86 @@ export const LitterProvider = ({ children }) => {
     /**
      * Puppy Management Operations
      */
+    // Update addPuppy to properly handle the response
     const addPuppy = async (litterId, puppyData) => {
         try {
             setError(null);
             const formData = new FormData();
+            
             Object.keys(puppyData).forEach(key => {
                 if (puppyData[key] !== undefined && puppyData[key] !== null) {
-                    formData.append(key, puppyData[key]);
+                    if (key === 'image' && puppyData[key] instanceof File) {
+                        formData.append('image', puppyData[key]);
+                    } else {
+                        formData.append(key, puppyData[key]);
+                    }
                 }
             });
-
+        
             const response = await fetch(`/api/litters/${litterId}/puppies`, {
                 method: 'POST',
                 body: formData
             });
-
+        
             if (!response.ok) {
-                throw new Error('Failed to add puppy');
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to add puppy');
             }
-
-            await fetchLitters();
+        
+            // Force a fresh fetch of litter data
+            const updatedLitter = await getLitter(litterId);
+            setLitters(prev => prev.map(l => 
+                l._id === litterId ? updatedLitter : l
+            ));
+        
             return true;
         } catch (err) {
-            setError('Failed to add puppy. Please try again.');
+            setError(err.message || 'Failed to add puppy. Please try again.');
             console.error('Add puppy error:', err);
             return false;
         }
     };
 
+    // Update updatePuppy to properly handle the response
     const updatePuppy = async (litterId, puppyId, puppyData) => {
         try {
             setError(null);
             const formData = new FormData();
+            
+            // Handle all form fields
             Object.keys(puppyData).forEach(key => {
-                if (puppyData[key] !== undefined && puppyData[key] !== null) {
-                    formData.append(key, puppyData[key]);
+              if (puppyData[key] !== undefined && puppyData[key] !== null) {
+                // If it's an image, append it directly
+                if (key === 'image' && puppyData[key] instanceof File) {
+                  formData.append('image', puppyData[key]);
+                } else {
+                  formData.append(key, puppyData[key]);
                 }
+              }
             });
-
+        
             const response = await fetch(`/api/litters/${litterId}/puppies/${puppyId}`, {
-                method: 'PATCH',
-                body: formData
+              method: 'PATCH',
+              body: formData
             });
-
+        
             if (!response.ok) {
-                throw new Error('Failed to update puppy');
+              const errorData = await response.json();
+              throw new Error(errorData.error || 'Failed to update puppy');
             }
-
-            await fetchLitters();
+        
+            // Force a fresh fetch of litter data to get updated image URLs
+            const updatedLitter = await getLitter(litterId);
+            setLitters(prev => prev.map(l => 
+              l._id === litterId ? updatedLitter : l
+            ));
+        
             return true;
-        } catch (err) {
-            setError('Failed to update puppy. Please try again.');
-            console.error('Update error:', err);
+          } catch (err) {
+            setError(err.message || 'Failed to update puppy. Please try again.');
+            console.error('Update puppy error:', err);
             return false;
-        }
+          }
     };
 
     const deletePuppy = async (litterId, puppyId) => {

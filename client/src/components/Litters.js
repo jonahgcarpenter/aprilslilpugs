@@ -58,7 +58,7 @@ const Litters = () => {
                 >
                   <div className="aspect-square w-full overflow-hidden">
                     <img
-                      src={litter.image}
+                      src={`/api/images${litter.image}`}
                       alt={litter.name}
                       className="w-full h-full object-cover"
                     />
@@ -110,7 +110,7 @@ const Litters = () => {
                 >
                   <div className="aspect-square w-full overflow-hidden">
                     <img
-                      src={puppy.image}
+                      src={`/api/images${puppy.image}`}
                       alt={puppy.name}
                       className="w-full h-full object-cover"
                     />

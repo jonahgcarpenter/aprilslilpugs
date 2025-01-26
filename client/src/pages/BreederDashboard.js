@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useLive } from '../context/LiveContext';
 import { LitterContext } from '../context/LitterContext';
 import BreederUpdateForm from '../components/BreederUpdateForm';
+import GrumbleUpdate from '../components/GrumbleUpdate';
 
 /**
  * Breeder Dashboard Component
@@ -28,6 +29,9 @@ const BreederDashboard = () => {
       <div className="grid gap-8">
         {/* Breeder Information Update Section */}
         <BreederUpdateForm />
+
+        {/* Grumble Management Section */}
+        <GrumbleUpdate />
 
         {/* Litter Management Section */}
         <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">

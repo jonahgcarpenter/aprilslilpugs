@@ -69,7 +69,7 @@ const Grumble = () => {
                         >
                             <div className="aspect-square w-full overflow-hidden">
                                 <img
-                                    src={pug.image}
+                                    src={pug.image.startsWith('/api/images') ? pug.image : `/api/images${pug.image}`}
                                     alt={pug.name}
                                     className="w-full h-full object-cover"
                                 />

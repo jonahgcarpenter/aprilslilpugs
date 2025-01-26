@@ -47,6 +47,9 @@ const LitterUpdate = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
 
+  // Add new state for form submission loading
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   // Fetch litter data on component mount
   useEffect(() => {
     const fetchLitterData = async () => {
@@ -62,10 +65,7 @@ const LitterUpdate = () => {
             availableDate: data.rawAvailableDate,
             image: null
           });
-          // Set preview URL if litter has an image
-          if (data.image) {
-            setLitterPreviewUrl(data.image);
-          }
+          // Remove this section - don't set preview URL for existing image
         }
       }
       setIsLoading(false);
@@ -78,22 +78,21 @@ const LitterUpdate = () => {
     const { name, value, files } = e.target;
     if (files) {
       const file = files[0];
+      if (!file) return;
+      
       if (file.size > 5 * 1024 * 1024) {
         alert('Image must be less than 5MB');
-        if (litterFileInputRef.current) {
-          litterFileInputRef.current.value = '';
-        }
+        litterFileInputRef.current.value = '';
         return;
       }
-      
-      // Revoke old preview URL if it exists and is a blob URL
-      if (litterPreviewUrl && !litterPreviewUrl.startsWith('http')) {
-        URL.revokeObjectURL(litterPreviewUrl);
-      }
-      
+
+      // Create preview URL
       const objectUrl = URL.createObjectURL(file);
       setLitterPreviewUrl(objectUrl);
       setLitterForm(prev => ({ ...prev, image: file }));
+      
+      // Cleanup old preview URL
+      return () => URL.revokeObjectURL(objectUrl);
     } else {
       setLitterForm(prev => ({ ...prev, [name]: value }));
     }
@@ -104,14 +103,21 @@ const LitterUpdate = () => {
     const { name, value, files } = e.target;
     if (files) {
       const file = files[0];
+      if (!file) return;
+      
       if (file.size > 5 * 1024 * 1024) {
         alert('Image must be less than 5MB');
         puppyFileInputRef.current.value = '';
         return;
       }
+
+      // Create preview URL
       const objectUrl = URL.createObjectURL(file);
       setPuppyPreviewUrl(objectUrl);
-      setPuppyForm(prev => ({ ...prev, [name]: file }));
+      setPuppyForm(prev => ({ ...prev, image: file }));
+      
+      // Cleanup old preview URL
+      return () => URL.revokeObjectURL(objectUrl);
     } else {
       setPuppyForm(prev => ({ ...prev, [name]: value }));
     }
@@ -120,27 +126,31 @@ const LitterUpdate = () => {
   // Handle litter submit (create or update)
   const handleLitterSubmit = async (e) => {
     e.preventDefault();
-    let success;
-    
-    if (isNewLitter) {
-      success = await createLitter(litterForm);
-      if (success) {
-        setSuccessMessage('Litter created successfully!');
-        setShowSuccessModal(true);
-        setTimeout(() => {
-          setShowSuccessModal(false);
-          navigate('/breeder-dashboard');
-        }, 2000);
+    setIsSubmitting(true);
+    try {
+      let success;
+      if (isNewLitter) {
+        success = await createLitter(litterForm);
+        if (success) {
+          setSuccessMessage('Litter created successfully!');
+          setShowSuccessModal(true);
+          setTimeout(() => {
+            setShowSuccessModal(false);
+            navigate('/breeder-dashboard');
+          }, 2000);
+        }
+      } else {
+        success = await updateLitter(litterId, litterForm);
+        if (success) {
+          const updatedLitter = await getLitter(litterId);
+          setLitter(updatedLitter);
+          setSuccessMessage('Litter updated successfully!');
+          setShowSuccessModal(true);
+          setTimeout(() => setShowSuccessModal(false), 2000);
+        }
       }
-    } else {
-      success = await updateLitter(litterId, litterForm);
-      if (success) {
-        const updatedLitter = await getLitter(litterId);
-        setLitter(updatedLitter);
-        setSuccessMessage('Litter updated successfully!');
-        setShowSuccessModal(true);
-        setTimeout(() => setShowSuccessModal(false), 2000);
-      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -153,46 +163,69 @@ const LitterUpdate = () => {
     }
   };
 
-  // Handle adding a new puppy
-  const handleAddPuppy = async (e) => {
-    e.preventDefault();
-    const success = await addPuppy(litterId, puppyForm);
-    if (success) {
-      const updatedLitter = await getLitter(litterId);
-      setLitter(updatedLitter);
-      setPuppyForm({
-        name: '',
-        color: '',
-        gender: 'Male',
-        status: 'Available',
-        image: null
-      });
-      setSuccessMessage('Puppy added successfully!');
-      setShowSuccessModal(true);
-      setTimeout(() => setShowSuccessModal(false), 2000);
+  // Add form reset function
+  const resetPuppyForm = () => {
+    setPuppyForm({
+      name: '',
+      color: '',
+      gender: 'Male',
+      status: 'Available',
+      image: null
+    });
+    setPuppyPreviewUrl(null);
+    if (puppyFileInputRef.current) {
+      puppyFileInputRef.current.value = '';
     }
   };
 
-  // Handle updating a puppy
+  // Update handleAddPuppy to handle the response properly
+  const handleAddPuppy = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      const success = await addPuppy(litterId, puppyForm);
+      if (success) {
+        // Reset form and preview before fetching updated data
+        resetPuppyForm();
+        setPuppyPreviewUrl(null);
+        
+        // Fetch updated litter data to get new image URLs
+        const updatedLitter = await getLitter(litterId);
+        setLitter(updatedLitter);
+        
+        setSuccessMessage('Puppy added successfully!');
+        setShowSuccessModal(true);
+        setTimeout(() => setShowSuccessModal(false), 2000);
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Update handlePuppyUpdate to handle the response properly
   const handlePuppyUpdate = async (e) => {
     e.preventDefault();
     if (!selectedPuppy) return;
     
-    const success = await updatePuppy(litterId, selectedPuppy.id, puppyForm);
-    if (success) {
-      const updatedLitter = await getLitter(litterId);
-      setLitter(updatedLitter);
-      setSelectedPuppy(null);
-      setPuppyForm({
-        name: '',
-        color: '',
-        gender: 'Male',
-        status: 'Available',
-        image: null
-      });
-      setSuccessMessage('Puppy updated successfully!');
-      setShowSuccessModal(true);
-      setTimeout(() => setShowSuccessModal(false), 2000);
+    setIsSubmitting(true);
+    try {
+      const success = await updatePuppy(litterId, selectedPuppy.id, puppyForm);
+      if (success) {
+        // Reset form and preview before fetching updated data
+        setSelectedPuppy(null);
+        resetPuppyForm();
+        setPuppyPreviewUrl(null);
+        
+        // Fetch updated litter data to get new image URLs
+        const updatedLitter = await getLitter(litterId);
+        setLitter(updatedLitter);
+        
+        setSuccessMessage('Puppy updated successfully!');
+        setShowSuccessModal(true);
+        setTimeout(() => setShowSuccessModal(false), 2000);
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -330,6 +363,7 @@ const LitterUpdate = () => {
                 ref={litterFileInputRef}
                 type="file"
                 name="image"
+                accept="image/*"
                 onChange={handleLitterChange}
                 className="w-full text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:bg-blue-500 file:text-white hover:file:bg-blue-600"
               />
@@ -338,9 +372,10 @@ const LitterUpdate = () => {
           <div className="flex space-x-4">
             <button
               type="submit"
-              className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition-all duration-200"
+              disabled={isSubmitting}
+              className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition-all duration-200 disabled:opacity-50"
             >
-              {isNewLitter ? 'Create Litter' : 'Update Litter'}
+              {isSubmitting ? 'Processing...' : (isNewLitter ? 'Create Litter' : 'Update Litter')}
             </button>
             {!isNewLitter && (
               <button
@@ -436,6 +471,7 @@ const LitterUpdate = () => {
                   ref={puppyFileInputRef}
                   type="file"
                   name="image"
+                  accept="image/*"
                   onChange={handlePuppyChange}
                   className="w-full text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:bg-blue-500 file:text-white hover:file:bg-blue-600"
                 />
@@ -444,22 +480,17 @@ const LitterUpdate = () => {
             <div className="flex space-x-4">
               <button
                 type="submit"
-                className="w-full sm:w-auto bg-gradient-to-r from-green-600 to-green-400 hover:from-green-700 hover:to-green-500 text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition-all duration-200"
+                disabled={isSubmitting}
+                className="w-full sm:w-auto bg-gradient-to-r from-green-600 to-green-400 hover:from-green-700 hover:to-green-500 text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition-all duration-200 disabled:opacity-50"
               >
-                {selectedPuppy ? 'Update Puppy' : 'Add Puppy'}
+                {isSubmitting ? 'Processing...' : (selectedPuppy ? 'Update Puppy' : 'Add Puppy')}
               </button>
               {selectedPuppy && (
                 <button
                   type="button"
                   onClick={() => {
                     setSelectedPuppy(null);
-                    setPuppyForm({
-                      name: '',
-                      color: '',
-                      gender: 'Male',
-                      status: 'Available',
-                      image: null
-                    });
+                    resetPuppyForm();
                   }}
                   className="w-full sm:w-auto bg-gray-500 text-white px-8 py-3 rounded-lg font-semibold shadow-lg hover:bg-gray-600 transition-all duration-200"
                 >
@@ -476,9 +507,9 @@ const LitterUpdate = () => {
               {litter.puppies.map((puppy) => (
                 <div key={puppy.id} className="border p-4 rounded-lg bg-slate-800 border-slate-700 hover:bg-slate-700 transition-all duration-200">
                   <img
-                    src={puppy.image}
+                    src={`/api/images${puppy.image}`}
                     alt={puppy.name}
-                    className="w-full h-48 object-cover rounded mb-2 border border-slate-600"
+                    className="w-full aspect-square object-cover rounded-lg shadow-lg border-2 border-slate-600/50 transition-transform hover:scale-105"
                   />
                   <h4 className="font-bold text-white">{puppy.name}</h4>
                   <p className="text-gray-400">Color: {puppy.color}</p>
