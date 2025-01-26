@@ -32,6 +32,10 @@ const LitterUpdate = () => {
     const litterFileInputRef = useRef(null);
     const puppyFileInputRef = useRef(null);
 
+    const [showDeleteLitterModal, setShowDeleteLitterModal] = useState(false);
+    const [showDeletePuppyModal, setShowDeletePuppyModal] = useState(false);
+    const [puppyToDelete, setPuppyToDelete] = useState(null);
+
     // Fetch litter data on component mount
     useEffect(() => {
         const fetchLitterData = async () => {
@@ -47,6 +51,10 @@ const LitterUpdate = () => {
                         availableDate: data.rawAvailableDate,
                         image: null
                     });
+                    // Set preview URL if litter has an image
+                    if (data.image) {
+                        setLitterPreviewUrl(data.image);
+                    }
                 }
             }
             setIsLoading(false);
@@ -61,12 +69,20 @@ const LitterUpdate = () => {
             const file = files[0];
             if (file.size > 5 * 1024 * 1024) {
                 alert('Image must be less than 5MB');
-                litterFileInputRef.current.value = '';
+                if (litterFileInputRef.current) {
+                    litterFileInputRef.current.value = '';
+                }
                 return;
             }
+            
+            // Revoke old preview URL if it exists and is a blob URL
+            if (litterPreviewUrl && !litterPreviewUrl.startsWith('http')) {
+                URL.revokeObjectURL(litterPreviewUrl);
+            }
+            
             const objectUrl = URL.createObjectURL(file);
             setLitterPreviewUrl(objectUrl);
-            setLitterForm(prev => ({ ...prev, [name]: file }));
+            setLitterForm(prev => ({ ...prev, image: file }));
         } else {
             setLitterForm(prev => ({ ...prev, [name]: value }));
         }
@@ -113,11 +129,10 @@ const LitterUpdate = () => {
 
     // Handle litter deletion
     const handleLitterDelete = async () => {
-        if (window.confirm('Are you sure you want to delete this litter?')) {
-            const success = await deleteLitter(litterId);
-            if (success) {
-                navigate('/breeder-dashboard');
-            }
+        const success = await deleteLitter(litterId);
+        if (success) {
+            setShowDeleteLitterModal(false);
+            navigate('/breeder-dashboard');
         }
     };
 
@@ -162,12 +177,12 @@ const LitterUpdate = () => {
 
     // Handle puppy deletion
     const handlePuppyDelete = async (puppyId) => {
-        if (window.confirm('Are you sure you want to delete this puppy?')) {
-            const success = await deletePuppy(litterId, puppyId);
-            if (success) {
-                const updatedLitter = await getLitter(litterId);
-                setLitter(updatedLitter);
-            }
+        const success = await deletePuppy(litterId, puppyId);
+        if (success) {
+            setShowDeletePuppyModal(false);
+            setPuppyToDelete(null);
+            const updatedLitter = await getLitter(litterId);
+            setLitter(updatedLitter);
         }
     };
 
@@ -185,10 +200,14 @@ const LitterUpdate = () => {
 
     useEffect(() => {
         return () => {
-            if (litterPreviewUrl) URL.revokeObjectURL(litterPreviewUrl);
-            if (puppyPreviewUrl) URL.revokeObjectURL(puppyPreviewUrl);
+            if (litterPreviewUrl && !litterPreviewUrl.startsWith('http')) {
+                URL.revokeObjectURL(litterPreviewUrl);
+            }
+            if (puppyPreviewUrl && !puppyPreviewUrl.startsWith('http')) {
+                URL.revokeObjectURL(puppyPreviewUrl);
+            }
         };
-    }, []);
+    }, [litterPreviewUrl, puppyPreviewUrl]);
 
     if (isLoading) return <div>Loading...</div>;
     if (!isNewLitter && !litter && !isLoading) return <div>Litter not found</div>;
@@ -305,7 +324,7 @@ const LitterUpdate = () => {
                         {!isNewLitter && (
                             <button
                                 type="button"
-                                onClick={handleLitterDelete}
+                                onClick={() => setShowDeleteLitterModal(true)}
                                 className="w-full sm:w-auto bg-red-500 text-white px-8 py-3 rounded-lg font-semibold shadow-lg hover:bg-red-600 transition-all duration-200"
                             >
                                 Delete Litter
@@ -452,7 +471,10 @@ const LitterUpdate = () => {
                                             Edit
                                         </button>
                                         <button
-                                            onClick={() => handlePuppyDelete(puppy.id)}
+                                            onClick={() => {
+                                                setPuppyToDelete(puppy.id);
+                                                setShowDeletePuppyModal(true);
+                                            }}
                                             className="bg-red-500 text-white px-2 py-1 rounded text-sm hover:bg-red-600 transition-all duration-200"
                                         >
                                             Delete
@@ -460,6 +482,81 @@ const LitterUpdate = () => {
                                     </div>
                                 </div>
                             ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Delete Litter Modal */}
+            {showDeleteLitterModal && (
+                <div 
+                    className="fixed inset-0 bg-slate-900/75 backdrop-blur-sm flex items-start justify-center p-4 z-[9999]"
+                    onClick={(e) => e.target === e.currentTarget && setShowDeleteLitterModal(false)}
+                >
+                    <div 
+                        className="mt-[15vh] bg-slate-900/90 backdrop-blur-sm rounded-xl p-8 max-w-md w-full border border-white/10"
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-red-500 to-red-600 mb-6">
+                            Delete Litter
+                        </h2>
+                        
+                        <p className="text-slate-300 mb-6">
+                            Are you sure you want to delete this litter? This action cannot be undone.
+                        </p>
+
+                        <div className="flex justify-end gap-4">
+                            <button
+                                onClick={() => setShowDeleteLitterModal(false)}
+                                className="px-6 py-2 text-sm text-white/70 hover:text-white transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleLitterDelete}
+                                className="bg-gradient-to-r from-red-600 to-red-400 hover:from-red-700 hover:to-red-500 text-white px-6 py-2 text-sm rounded-full font-semibold shadow-md hover:shadow-lg transition-all duration-200"
+                            >
+                                Delete Litter
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Delete Puppy Modal */}
+            {showDeletePuppyModal && (
+                <div 
+                    className="fixed inset-0 bg-slate-900/75 backdrop-blur-sm flex items-start justify-center p-4 z-[9999]"
+                    onClick={(e) => e.target === e.currentTarget && setShowDeletePuppyModal(false)}
+                >
+                    <div 
+                        className="mt-[15vh] bg-slate-900/90 backdrop-blur-sm rounded-xl p-8 max-w-md w-full border border-white/10"
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-red-500 to-red-600 mb-6">
+                            Delete Puppy
+                        </h2>
+                        
+                        <p className="text-slate-300 mb-6">
+                            Are you sure you want to delete this puppy? This action cannot be undone.
+                        </p>
+
+                        <div className="flex justify-end gap-4">
+                            <button
+                                onClick={() => {
+                                    setShowDeletePuppyModal(false);
+                                    setPuppyToDelete(null);
+                                }}
+                                className="px-6 py-2 text-sm text-white/70 hover:text-white transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => handlePuppyDelete(puppyToDelete)}
+                                className="bg-gradient-to-r from-red-600 to-red-400 hover:from-red-700 hover:to-red-500 text-white px-6 py-2 text-sm rounded-full font-semibold shadow-md hover:shadow-lg transition-all duration-200"
+                            >
+                                Delete Puppy
+                            </button>
                         </div>
                     </div>
                 </div>
