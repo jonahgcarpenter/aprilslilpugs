@@ -1,15 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useContext, useRef, useEffect } from 'react';
+import { WaitlistContext } from '../context/WaitlistContext';
 
 /**
  * Waitlist Component
  * Handles user registration for puppy waitlist
  */
 const Waitlist = () => {
+    const { createEntry } = useContext(WaitlistContext);
+    const notesRef = useRef(null);
     // State Management
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
         phoneNumber: '',
+        notes: '',
         submissionDate: ''
     });
     const [message, setMessage] = useState({ text: '', isError: false });
@@ -55,7 +59,7 @@ const Waitlist = () => {
         return phoneRegex.test(phoneNumber);
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (!formData.firstName || !formData.lastName || !formData.phoneNumber) {
             setMessage({ text: 'Please fill in all fields', isError: true });
@@ -67,22 +71,51 @@ const Waitlist = () => {
             return;
         }
 
-        const submissionDate = new Date().toISOString();
-        const submissionData = {
-            ...formData,
-            submissionDate
-        };
+        try {
+            const result = await createEntry({
+                firstName: formData.firstName,
+                lastName: formData.lastName,
+                phoneNumber: formData.phoneNumber,
+                notes: formData.notes,
+                status: 'waiting'
+            });
 
-        console.log('Waitlist submission:', submissionData);
-        setMessage({ text: 'Thank you for joining our waitlist!', isError: false });
-        
-        setFormData({
-            firstName: '',
-            lastName: '',
-            phoneNumber: '',
-            submissionDate: ''
-        });
+            setMessage({ 
+                text: `Thank you for joining our waitlist! Your position is #${result.position}`, 
+                isError: false 
+            });
+            setFormData({
+                firstName: '',
+                lastName: '',
+                phoneNumber: '',
+                notes: '',
+                submissionDate: ''
+            });
+        } catch (error) {
+            setMessage({ text: 'Error submitting to waitlist. Please try again.', isError: true });
+        }
     };
+
+    // Add auto-resize function
+    const autoResize = () => {
+        const textarea = notesRef.current;
+        if (textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = `${textarea.scrollHeight}px`;
+        }
+    };
+
+    // Handle text area changes
+    const handleNotesChange = (e) => {
+        const { value } = e.target;
+        setFormData(prev => ({ ...prev, notes: value }));
+        autoResize();
+    };
+
+    // Initialize height on component mount
+    useEffect(() => {
+        autoResize();
+    }, []);
 
     return (
         <>
@@ -164,6 +197,21 @@ const Waitlist = () => {
                                 />
                             </div>
 
+                            <div>
+                                <label htmlFor="notes" className="block text-slate-300 mb-2">
+                                    Preferences (optional)
+                                </label>
+                                <textarea
+                                    ref={notesRef}
+                                    id="notes"
+                                    name="notes"
+                                    value={formData.notes}
+                                    onChange={handleNotesChange}
+                                    className="w-full px-4 py-2 rounded-lg bg-slate-800/50 border border-slate-700/50 focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-slate-100 overflow-hidden resize-none min-h-[60px]"
+                                    placeholder="Enter your color/gender preferences..."
+                                />
+                            </div>
+
                             {message.text && (
                                 <div className={`text-center p-3 rounded-lg ${
                                     message.isError 
@@ -214,7 +262,7 @@ const Waitlist = () => {
                                 <li>Fill out the form with your contact information</li>
                                 <li>Your information will be added to our waitlist database</li>
                                 <li>We'll contact you when new puppies become available</li>
-                                <li>Priority is given based on your position in the waitlist</li>
+                                <li>Priority is given based on your position in the waitlist and your preferences</li>
                             </ol>
                             <p>We'll reach out via phone when puppies become available. Make sure your phone number is correct as this will be our primary method of contact.</p>
                             <p className="text-slate-400 text-sm">Your information is securely stored and will only be used for waitlist purposes.</p>

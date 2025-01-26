@@ -4,6 +4,7 @@ import { useLive } from '../context/LiveContext';
 import { LitterContext } from '../context/LitterContext';
 import BreederUpdateForm from '../components/BreederUpdateForm';
 import GrumbleUpdate from '../components/GrumbleUpdate';
+import WaitlistAdmin from '../components/WaitlistAdmin';
 
 /**
  * Breeder Dashboard Component
@@ -27,6 +28,10 @@ const BreederDashboard = () => {
       </div>
 
       <div className="grid gap-8">
+
+        {/* WaitList */}
+        <WaitlistAdmin />
+
         {/* Breeder Information Update Section */}
         <BreederUpdateForm />
 
