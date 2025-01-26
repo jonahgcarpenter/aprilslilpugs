@@ -164,7 +164,7 @@ const LitterUpdate = () => {
     if (!isNewLitter && !litter && !isLoading) return <div>Litter not found</div>;
 
     return (
-        <div className="litter-update mx-2 sm:mx-4">
+        <div className="litter-update mx-2 sm:mx-4 py-8">
             {error && (
                 <div className="mb-6 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500">
                     {error}
