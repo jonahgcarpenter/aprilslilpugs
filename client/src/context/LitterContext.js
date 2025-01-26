@@ -7,6 +7,31 @@ export const LitterProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    const formatDate = (date) => {
+        return new Date(date).toLocaleDateString('en-US', {
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric'
+        });
+    };
+
+    const formatDateForInput = (date) => {
+        return new Date(date).toISOString().split('T')[0];
+    };
+
+    const formatLitterData = (litter) => ({
+        ...litter,
+        id: litter._id,
+        birthDate: formatDate(litter.birthDate),
+        availableDate: formatDate(litter.availableDate),
+        rawBirthDate: formatDateForInput(litter.birthDate),
+        rawAvailableDate: formatDateForInput(litter.availableDate),
+        puppies: litter.puppies.map(puppy => ({
+            ...puppy,
+            id: puppy._id
+        }))
+    });
+
     const fetchLitters = async () => {
         setLoading(true);
         setError(null);
@@ -16,26 +41,7 @@ export const LitterProvider = ({ children }) => {
                 throw new Error('Failed to fetch litters');
             }
             const data = await response.json();
-            
-            const formattedLitters = data.map(litter => ({
-                ...litter,
-                id: litter._id,
-                birthDate: new Date(litter.birthDate).toLocaleDateString('en-US', {
-                    month: 'long',
-                    day: 'numeric',
-                    year: 'numeric'
-                }),
-                availableDate: new Date(litter.availableDate).toLocaleDateString('en-US', {
-                    month: 'long',
-                    day: 'numeric',
-                    year: 'numeric'
-                }),
-                puppies: litter.puppies.map(puppy => ({
-                    ...puppy,
-                    id: puppy._id
-                }))
-            }));
-            
+            const formattedLitters = data.map(formatLitterData);
             setLitters(formattedLitters);
         } catch (err) {
             setError('Failed to fetch litters. Please try again later.');
@@ -47,11 +53,18 @@ export const LitterProvider = ({ children }) => {
 
     const getLitter = async (litterId) => {
         try {
+            // First check if we already have the litter in state
+            const existingLitter = litters.find(l => l._id === litterId);
+            if (existingLitter) {
+                return existingLitter;
+            }
+
             const response = await fetch(`/api/litters/${litterId}`);
             if (!response.ok) {
                 throw new Error('Failed to fetch litter');
             }
-            return await response.json();
+            const data = await response.json();
+            return formatLitterData(data);
         } catch (err) {
             setError('Failed to fetch litter details.');
             console.error('Fetch error:', err);
@@ -61,6 +74,7 @@ export const LitterProvider = ({ children }) => {
 
     const createLitter = async (litterData) => {
         try {
+            setError(null);
             const formData = new FormData();
             Object.keys(litterData).forEach(key => {
                 formData.append(key, litterData[key]);
@@ -86,9 +100,12 @@ export const LitterProvider = ({ children }) => {
 
     const updateLitter = async (litterId, litterData) => {
         try {
+            setError(null);
             const formData = new FormData();
             Object.keys(litterData).forEach(key => {
-                formData.append(key, litterData[key]);
+                if (litterData[key] !== undefined && litterData[key] !== null) {
+                    formData.append(key, litterData[key]);
+                }
             });
 
             const response = await fetch(`/api/litters/${litterId}`, {
@@ -111,6 +128,7 @@ export const LitterProvider = ({ children }) => {
 
     const deleteLitter = async (litterId) => {
         try {
+            setError(null);
             const response = await fetch(`/api/litters/${litterId}`, {
                 method: 'DELETE'
             });
@@ -130,9 +148,12 @@ export const LitterProvider = ({ children }) => {
 
     const addPuppy = async (litterId, puppyData) => {
         try {
+            setError(null);
             const formData = new FormData();
             Object.keys(puppyData).forEach(key => {
-                formData.append(key, puppyData[key]);
+                if (puppyData[key] !== undefined && puppyData[key] !== null) {
+                    formData.append(key, puppyData[key]);
+                }
             });
 
             const response = await fetch(`/api/litters/${litterId}/puppies`, {
@@ -155,9 +176,12 @@ export const LitterProvider = ({ children }) => {
 
     const updatePuppy = async (litterId, puppyId, puppyData) => {
         try {
+            setError(null);
             const formData = new FormData();
             Object.keys(puppyData).forEach(key => {
-                formData.append(key, puppyData[key]);
+                if (puppyData[key] !== undefined && puppyData[key] !== null) {
+                    formData.append(key, puppyData[key]);
+                }
             });
 
             const response = await fetch(`/api/litters/${litterId}/puppies/${puppyId}`, {
@@ -180,6 +204,7 @@ export const LitterProvider = ({ children }) => {
 
     const deletePuppy = async (litterId, puppyId) => {
         try {
+            setError(null);
             const response = await fetch(`/api/litters/${litterId}/puppies/${puppyId}`, {
                 method: 'DELETE'
             });
@@ -197,6 +222,10 @@ export const LitterProvider = ({ children }) => {
         }
     };
 
+    const clearError = () => {
+        setError(null);
+    };
+
     useEffect(() => {
         fetchLitters();
     }, []);
@@ -206,6 +235,7 @@ export const LitterProvider = ({ children }) => {
             litters,
             loading,
             error,
+            clearError,
             fetchLitters,
             getLitter,
             createLitter,
@@ -219,3 +249,5 @@ export const LitterProvider = ({ children }) => {
         </LitterContext.Provider>
     );
 };
+
+export default LitterProvider;
