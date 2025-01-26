@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { LitterContext } from '../context/LitterContext';
 
@@ -27,6 +27,11 @@ const LitterUpdate = () => {
     const [selectedPuppy, setSelectedPuppy] = useState(null);
     const [isLoading, setIsLoading] = useState(!isNewLitter);
 
+    const [litterPreviewUrl, setLitterPreviewUrl] = useState(null);
+    const [puppyPreviewUrl, setPuppyPreviewUrl] = useState(null);
+    const litterFileInputRef = useRef(null);
+    const puppyFileInputRef = useRef(null);
+
     // Fetch litter data on component mount
     useEffect(() => {
         const fetchLitterData = async () => {
@@ -52,19 +57,37 @@ const LitterUpdate = () => {
     // Handle litter form changes
     const handleLitterChange = (e) => {
         const { name, value, files } = e.target;
-        setLitterForm(prev => ({
-            ...prev,
-            [name]: files ? files[0] : value
-        }));
+        if (files) {
+            const file = files[0];
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Image must be less than 5MB');
+                litterFileInputRef.current.value = '';
+                return;
+            }
+            const objectUrl = URL.createObjectURL(file);
+            setLitterPreviewUrl(objectUrl);
+            setLitterForm(prev => ({ ...prev, [name]: file }));
+        } else {
+            setLitterForm(prev => ({ ...prev, [name]: value }));
+        }
     };
 
     // Handle puppy form changes
     const handlePuppyChange = (e) => {
         const { name, value, files } = e.target;
-        setPuppyForm(prev => ({
-            ...prev,
-            [name]: files ? files[0] : value
-        }));
+        if (files) {
+            const file = files[0];
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Image must be less than 5MB');
+                puppyFileInputRef.current.value = '';
+                return;
+            }
+            const objectUrl = URL.createObjectURL(file);
+            setPuppyPreviewUrl(objectUrl);
+            setPuppyForm(prev => ({ ...prev, [name]: file }));
+        } else {
+            setPuppyForm(prev => ({ ...prev, [name]: value }));
+        }
     };
 
     // Handle litter submit (create or update)
@@ -160,6 +183,13 @@ const LitterUpdate = () => {
         });
     };
 
+    useEffect(() => {
+        return () => {
+            if (litterPreviewUrl) URL.revokeObjectURL(litterPreviewUrl);
+            if (puppyPreviewUrl) URL.revokeObjectURL(puppyPreviewUrl);
+        };
+    }, []);
+
     if (isLoading) return <div>Loading...</div>;
     if (!isNewLitter && !litter && !isLoading) return <div>Litter not found</div>;
 
@@ -236,7 +266,28 @@ const LitterUpdate = () => {
                         </div>
                         <div className="form-group sm:col-span-2">
                             <label className="block text-sm font-medium text-gray-300 mb-2">Litter Image</label>
+                            {litterPreviewUrl && (
+                                <div className="mb-4 relative w-32 h-32">
+                                    <img
+                                        src={litterPreviewUrl}
+                                        alt="Preview"
+                                        className="w-full h-full object-cover rounded-lg border border-slate-700"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setLitterPreviewUrl(null);
+                                            setLitterForm(prev => ({ ...prev, image: null }));
+                                            if (litterFileInputRef.current) litterFileInputRef.current.value = '';
+                                        }}
+                                        className="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-600"
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+                            )}
                             <input
+                                ref={litterFileInputRef}
                                 type="file"
                                 name="image"
                                 onChange={handleLitterChange}
@@ -321,7 +372,28 @@ const LitterUpdate = () => {
                             </div>
                             <div className="form-group sm:col-span-2">
                                 <label className="block text-sm font-medium text-gray-300 mb-2">Puppy Image</label>
+                                {puppyPreviewUrl && (
+                                    <div className="mb-4 relative w-32 h-32">
+                                        <img
+                                            src={puppyPreviewUrl}
+                                            alt="Preview"
+                                            className="w-full h-full object-cover rounded-lg border border-slate-700"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setPuppyPreviewUrl(null);
+                                                setPuppyForm(prev => ({ ...prev, image: null }));
+                                                if (puppyFileInputRef.current) puppyFileInputRef.current.value = '';
+                                            }}
+                                            className="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-600"
+                                        >
+                                            ×
+                                        </button>
+                                    </div>
+                                )}
                                 <input
+                                    ref={puppyFileInputRef}
                                     type="file"
                                     name="image"
                                     onChange={handlePuppyChange}
