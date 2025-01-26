@@ -15,6 +15,7 @@ import Puppies from './pages/Puppies';
 
 // COMPONENTS
 import Navbar from './components/Navbar';
+import LitterUpdate from './components/LitterUpdate';
 
 function App() {
   return (
@@ -36,14 +37,21 @@ function App() {
                       <Route path="/mygrumble" element={<MyGrumble />} />
                       <Route path="/puppies" element={<Puppies />} />
                       <Route path="/live" element={<Live />} />
-                      <Route 
-                        path="/breeder-dashboard" 
-                        element={
-                          <ProtectedRoute>
-                            <BreederDashboard />
-                          </ProtectedRoute>
-                        } 
-                      />
+                      <Route path="/breeder-dashboard" element={
+                        <ProtectedRoute>
+                          <BreederDashboard />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/breeder-dashboard/litters/new" element={
+                        <ProtectedRoute>
+                          <LitterUpdate />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/breeder-dashboard/litters/:litterId" element={
+                        <ProtectedRoute>
+                          <LitterUpdate />
+                        </ProtectedRoute>
+                      } />
                     </Routes>
                   </div>
                 </BrowserRouter>
