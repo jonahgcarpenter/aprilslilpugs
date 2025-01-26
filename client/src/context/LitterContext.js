@@ -1,12 +1,18 @@
+/**
+ * Litter Management Context
+ * Handles all litter-related operations and state management
+ */
 import { createContext, useState, useEffect } from 'react';
 
 export const LitterContext = createContext();
 
 export const LitterProvider = ({ children }) => {
+    // State Management
     const [litters, setLitters] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    // Utility Functions
     const formatDate = (date) => {
         return new Date(date).toLocaleDateString('en-US', {
             month: 'long',
@@ -32,6 +38,7 @@ export const LitterProvider = ({ children }) => {
         }))
     });
 
+    // CRUD Operations
     const fetchLitters = async () => {
         setLoading(true);
         setError(null);
@@ -146,6 +153,9 @@ export const LitterProvider = ({ children }) => {
         }
     };
 
+    /**
+     * Puppy Management Operations
+     */
     const addPuppy = async (litterId, puppyData) => {
         try {
             setError(null);
@@ -226,6 +236,7 @@ export const LitterProvider = ({ children }) => {
         setError(null);
     };
 
+    // Initialize data on mount
     useEffect(() => {
         fetchLitters();
     }, []);

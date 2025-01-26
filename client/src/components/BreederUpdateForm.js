@@ -1,7 +1,12 @@
 import { useState, useEffect, useRef, useContext } from "react"
 import { BreederContext } from '../context/BreederContext'
 
+/**
+ * BreederUpdateForm Component
+ * Form for updating breeder profile information and profile picture
+ */
 const BreederUpdateForm = () => {
+  // Context and State Management
   const { breeder, dispatch } = useContext(BreederContext);
   const [error, setError] = useState(null);
   const fileInputRef = useRef(null);
@@ -16,6 +21,7 @@ const BreederUpdateForm = () => {
   const [profilePicture, setProfilePicture] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
 
+  // Initialize form data when breeder data is available
   useEffect(() => {
     if (breeder) {
       setFormData({
@@ -29,6 +35,7 @@ const BreederUpdateForm = () => {
     }
   }, [breeder]);
 
+  // Form Handlers
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (name === 'phoneNumber') {

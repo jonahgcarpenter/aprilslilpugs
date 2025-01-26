@@ -1,13 +1,19 @@
 import React, { useContext, useEffect } from 'react';
 import { LitterContext } from '../context/LitterContext';
 
+/**
+ * AvailablePups Component
+ * Displays a grid of currently available puppies from all litters
+ */
 const AvailablePups = () => {
     const { litters, loading, error, fetchLitters } = useContext(LitterContext);
 
+    // Load litters data on mount
     useEffect(() => {
         fetchLitters();
     }, []);
 
+    // Loading state
     if (loading) {
         return (
             <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 border border-slate-800/50">
@@ -20,6 +26,7 @@ const AvailablePups = () => {
         );
     }
 
+    // Error state
     if (error) {
         return (
             <div className="mx-2 sm:mx-4 bg-slate-900 rounded-xl shadow-xl p-4 sm:p-8">
@@ -28,6 +35,7 @@ const AvailablePups = () => {
         );
     }
 
+    // Filter available puppies from all litters
     const availablePuppies = litters.reduce((acc, litter) => {
         return [...acc, ...litter.puppies.filter(puppy => puppy.status === "Available")];
     }, []);

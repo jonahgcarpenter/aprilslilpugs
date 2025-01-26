@@ -1,9 +1,13 @@
+/**
+ * Authentication Context
+ * Manages user authentication state and token handling
+ */
 import { createContext, useState, useContext, useEffect } from 'react';
 
 export const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  // Initialize state from localStorage
+  // State Management with localStorage persistence
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem('user');
     return savedUser ? JSON.parse(savedUser) : null;
@@ -12,7 +16,7 @@ export const AuthProvider = ({ children }) => {
   const [loginStatus, setLoginStatus] = useState({ message: '', type: '' });
   const [sessionTimeout, setSessionTimeout] = useState(null);
 
-  // Check token validity on mount
+  // Token validation and session management
   useEffect(() => {
     if (token) {
       try {
@@ -53,6 +57,7 @@ export const AuthProvider = ({ children }) => {
     };
   }, [token]);
 
+  // Authentication Operations
   const login = async (email, password) => {
     try {
       const response = await fetch('/api/breeders/login', {

@@ -17,7 +17,7 @@ const grumbleSchema = new Schema({
     },
     image: {
         type: String,
-        default: "/puppy-placeholder.jpg"
+        default: "/uploads/puppy-images/puppy-placeholder.jpg"
     },
     birthDate: {
         type: Date,

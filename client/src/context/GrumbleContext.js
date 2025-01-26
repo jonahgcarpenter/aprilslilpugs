@@ -1,12 +1,18 @@
+/**
+ * Grumble Management Context
+ * Handles state and operations for grumble (group of pugs) management
+ */
 import { createContext, useState, useEffect } from 'react';
 
 export const GrumbleContext = createContext();
 
 export const GrumbleProvider = ({ children }) => {
+    // State Management
     const [grumbles, setGrumbles] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    // CRUD Operations
     // Fetch all grumbles
     const fetchGrumbles = async () => {
         setLoading(true);
@@ -113,7 +119,7 @@ export const GrumbleProvider = ({ children }) => {
         }
     };
 
-    // Fetch grumbles when the component mounts
+    // Initialize data on mount
     useEffect(() => {
         fetchGrumbles();
     }, []);

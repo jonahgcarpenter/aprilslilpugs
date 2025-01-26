@@ -3,9 +3,15 @@ import videojs from 'video.js';
 import 'video.js/dist/video-js.css';
 import { FaInfoCircle, FaTimes } from 'react-icons/fa';
 
+/**
+ * Stream Component
+ * Handles live video streaming using Video.js
+ */
+
 // Configure your HLS stream URL here
 const HLS_STREAM_URL = process.env.REACT_APP_HLS_STREAM_URL;
 
+// Error Boundary Component
 class StreamErrorBoundary extends React.Component {
   state = { hasError: false };
 
@@ -30,18 +36,28 @@ class StreamErrorBoundary extends React.Component {
   }
 }
 
+// Main Stream Component
 const Stream = () => {
+  // State and Refs
   const videoRef = useRef(null);
   const playerRef = useRef(null);
   const [mounted, setMounted] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
 
+  // Stream Information
+  const streamInfo = {
+    title: "Welcome to our Puppy Livestream!",
+    description: "This livestream is locally maintained and hosted by us. It will only be available when we have puppies to show. We also do not include audio in the stream due to the location of the camera. Enjoy watching the puppies!"
+  };
+
+  // Component Lifecycle
   useEffect(() => {
     setMounted(true);
     return () => setMounted(false);
   }, []);
 
   useEffect(() => {
+    // Video.js initialization
     // Make sure Video.js player is only initialized once and after DOM is ready
     if (!playerRef.current && mounted && videoRef.current) {
       const player = videojs(videoRef.current, {
@@ -67,11 +83,7 @@ const Stream = () => {
     };
   }, [mounted]);
 
-  const streamInfo = {
-    title: "Welcome to our Puppy Livestream!",
-    description: "This livestream is locally maintained and hosted by us. It will only be available when we have puppies to show. We also do not include audio in the stream due to the location of the camera. Enjoy watching the puppies!"
-  };
-
+  // Loading State
   if (!mounted) {
     return (
       <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 border border-slate-800/50">

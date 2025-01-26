@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 
+/**
+ * Waitlist Component
+ * Handles user registration for puppy waitlist
+ */
 const Waitlist = () => {
+    // State Management
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -10,6 +15,7 @@ const Waitlist = () => {
     const [message, setMessage] = useState({ text: '', isError: false });
     const [showInfo, setShowInfo] = useState(false);
 
+    // Utility Functions
     const formatPhoneNumber = (value) => {
         const phoneNumber = value.replace(/\D/g, '');
         let formattedNumber = '';
@@ -25,6 +31,7 @@ const Waitlist = () => {
         return formattedNumber;
     };
 
+    // Form Handlers
     const handleChange = (e) => {
         const { name, value } = e.target;
         if (name === 'phoneNumber') {

@@ -9,19 +9,16 @@ const{
   loginBreeder,
 } = require('../controllers/breederController')
 
-// GET all breeders
-router.get('/', getBreeders)
+// Breeder authentication and management routes
+router.get('/', getBreeders)      // Get all breeders
+router.post('/login', loginBreeder)  // Breeder authentication
+router.get('/:id', getBreeder)    // Get single breeder profile
 
-// Login breeder
-router.post('/login', loginBreeder)
-
-// GET one breeder
-router.get('/:id', getBreeder)
-
-// Update breeder - update file handling middleware
+// Update breeder profile with image handling
 router.patch('/:id', 
   breederUpload.single('profilePicture'), 
   (req, res, next) => {
+    // Transform uploaded file path for storage
     if (req.file) {
       req.body.profilePicture = `/api/images/breeder-profiles/${req.file.filename}`;
     }

@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const LiveStatus = require('../models/liveModel');
 
-// Get live status
+// GET /api/live - Retrieve current live streaming status
 router.get('/', async (req, res) => {
   try {
     let status = await LiveStatus.findOne();
@@ -15,7 +15,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Update live status
+// POST /api/live - Update live streaming status
 router.post('/', async (req, res) => {
   try {
     let status = await LiveStatus.findOne();

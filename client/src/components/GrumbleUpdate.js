@@ -1,3 +1,8 @@
+/**
+ * GrumbleUpdate Component
+ * Component for updating grumble information
+ * TODO: Implement full functionality
+ */
 const GrumbleUpdate = () => {
     return (
         <div>

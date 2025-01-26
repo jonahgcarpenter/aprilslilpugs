@@ -1,6 +1,11 @@
 const Grumble = require('../models/grumbleModel')
 
-// Get all grumbles
+/**
+ * Grumble Controller Functions
+ * These functions manage the Grumble feature, which handles special breeding dogs
+ */
+
+// Retrieves all grumble members, sorted by most recent first
 const getGrumbles = async (req, res) => {
     try {
         const grumbles = await Grumble.find({}).sort({ createdAt: -1 })
@@ -10,7 +15,7 @@ const getGrumbles = async (req, res) => {
     }
 }
 
-// Get a single grumble
+// Fetches a single grumble member by ID
 const getGrumble = async (req, res) => {
     const { id } = req.params
 
@@ -25,12 +30,13 @@ const getGrumble = async (req, res) => {
     }
 }
 
-// Create a new grumble
+// Creates a new grumble member with optional image upload
+// Uses default placeholder image if no image is provided
 const createGrumble = async (req, res) => {
     try {
         const imageUrl = req.file 
-            ? `/api/images/uploads/grumble-images/${req.file.filename}` 
-            : '/puppy-placeholder.jpg'
+            ? `/uploads/grumble-images/${req.file.filename}` 
+            : '/uploads/puppy-images/puppy-placeholder.jpg'
             
         const grumbleData = {
             ...req.body,
@@ -44,7 +50,7 @@ const createGrumble = async (req, res) => {
     }
 }
 
-// Delete a grumble
+// Removes a grumble member from the database
 const deleteGrumble = async (req, res) => {
     const { id } = req.params
 
@@ -59,7 +65,7 @@ const deleteGrumble = async (req, res) => {
     }
 }
 
-// Update a grumble
+// Updates grumble member information including optional image
 const updateGrumble = async (req, res) => {
     const { id } = req.params
 

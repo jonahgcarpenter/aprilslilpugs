@@ -2,13 +2,19 @@ import { useEffect, useContext } from 'react'
 import { BreederContext } from '../context/BreederContext'
 import { FaFacebook, FaEnvelope, FaPhoneAlt, FaMapMarkerAlt, FaHeart } from 'react-icons/fa'
 
+/**
+ * BreederDetails Component
+ * Displays breeder profile information including contact details and story
+ */
 const BreederDetails = () => {
   const { breeder, loading, error, fetchBreeder } = useContext(BreederContext)
 
+  // Load breeder data on mount
   useEffect(() => {
     fetchBreeder()
   }, [])
 
+  // Loading state
   if (loading) {
     return (
       <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 border border-slate-800/50">
@@ -21,6 +27,7 @@ const BreederDetails = () => {
     );
   }
 
+  // Error state
   if (error) {
     return (
       <div className="mx-2 sm:mx-4 bg-slate-900 rounded-xl shadow-xl p-4 sm:p-8">

@@ -4,7 +4,12 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const path = require('path')
 
-// get all breeders
+/**
+ * Breeder Management and Authentication Controller
+ * Handles breeder CRUD operations and authentication
+ */
+
+// Retrieves all breeders with password data excluded for security
 const getBreeders = async (req, res) => {
   try {
     const breeders = await Breeder.find({})
@@ -16,7 +21,7 @@ const getBreeders = async (req, res) => {
   }
 }
 
-// get a single breeder
+// Fetches a single breeder's information securely (excludes password)
 const getBreeder = async (req, res) => {
   try {
     const { id } = req.params
@@ -36,7 +41,8 @@ const getBreeder = async (req, res) => {
   }
 }
 
-// update a breeder
+// Updates breeder information including profile picture handling
+// Ensures proper file path construction for profile images
 const updateBreeder = async (req, res) => {
   try {
     let updateData = { ...req.body };
@@ -59,7 +65,15 @@ const updateBreeder = async (req, res) => {
   }
 };
 
-// login breeder
+/**
+ * Authenticates a breeder with email and password
+ * Includes:
+ * - Input validation
+ * - Email format verification
+ * - Secure password comparison
+ * - JWT token generation with expiration
+ * - Error handling with generic messages for security
+ */
 const loginBreeder = async (req, res) => {
   try {
     const { email, password } = req.body;

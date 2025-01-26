@@ -1,14 +1,21 @@
 const Litter = require('../models/litterModel')
 const mongoose = require('mongoose')
 
-// Function to check if ObjectId is valid
+/**
+ * Utility Functions
+ */
+// Validates if a given ID matches MongoDB ObjectId format
 const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id)
 
-// Function to handle errors
+// Centralizes error handling across all controller functions
 const handleErrors = (res, error) => {
   res.status(error.status || 500).json({ error: error.message || 'Internal Server Error' })
 }
 
+/**
+ * Controller Functions
+ */
+// Retrieves all litters, sorted by creation date (newest first)
 const getLitters = async (req, res) => {
   try {
     const litters = await Litter.find({}).sort({ createdAt: -1 })
@@ -18,6 +25,7 @@ const getLitters = async (req, res) => {
   }
 }
 
+// Fetches a specific litter by ID with validation
 const getLitter = async (req, res) => {
   try {
     const { litterId } = req.params
@@ -37,11 +45,13 @@ const getLitter = async (req, res) => {
   }
 }
 
+// Creates a new litter with optional image upload
+// Handles both birthDate and availableDate conversion to Date objects
 const createLitter = async (req, res) => {
   try {
     const litterData = {
       ...req.body,
-      image: req.file ? `/uploads/litter-images/${req.file.filename}` : '/litter-placeholder.jpg',
+      image: req.file ? `/uploads/litter-images/${req.file.filename}` : '/uploads/litter-images/litter-placeholder.jpg',
       birthDate: new Date(req.body.birthDate),
       availableDate: new Date(req.body.availableDate)
     }
@@ -52,6 +62,8 @@ const createLitter = async (req, res) => {
   }
 }
 
+// Updates existing litter information including optional image update
+// Handles date conversions and validates litter existence
 const updateLitter = async (req, res) => {
   try {
     const { litterId } = req.params
@@ -86,6 +98,7 @@ const updateLitter = async (req, res) => {
   }
 }
 
+// Removes a litter from the database with validation
 const deleteLitter = async (req, res) => {
   try {
     const { litterId } = req.params
@@ -106,6 +119,8 @@ const deleteLitter = async (req, res) => {
   }
 }
 
+// Adds a new puppy to an existing litter
+// Includes optional puppy image handling
 const addPuppy = async (req, res) => {
   try {
     const { litterId } = req.params
@@ -116,7 +131,7 @@ const addPuppy = async (req, res) => {
 
     const puppyData = {
       ...req.body,
-      image: req.file ? `/uploads/puppy-images/${req.file.filename}` : '/puppy-placeholder.jpg'
+      image: req.file ? `/uploads/puppy-images/${req.file.filename}` : '/uploads/puppy-images/puppy-placeholder.jpg'
     }
 
     const litter = await Litter.findByIdAndUpdate(
@@ -135,6 +150,8 @@ const addPuppy = async (req, res) => {
   }
 }
 
+// Updates specific puppy information within a litter
+// Only updates fields that are provided in the request
 const updatePuppy = async (req, res) => {
   try {
     const { litterId, puppyId } = req.params
@@ -143,16 +160,13 @@ const updatePuppy = async (req, res) => {
       return res.status(400).json({ error: 'Invalid ID format' })
     }
 
-    const updateData = {
-      'puppies.$.status': req.body.status,
-      'puppies.$.name': req.body.name,
-      'puppies.$.color': req.body.color,
-      'puppies.$.gender': req.body.gender
-    }
-
-    if (req.file) {
-      updateData['puppies.$.image'] = `/uploads/puppy-images/${req.file.filename}`
-    }
+    // Only include fields that are present in the request body
+    const updateData = {}
+    if (req.body.status) updateData['puppies.$.status'] = req.body.status
+    if (req.body.name) updateData['puppies.$.name'] = req.body.name
+    if (req.body.color) updateData['puppies.$.color'] = req.body.color
+    if (req.body.gender) updateData['puppies.$.gender'] = req.body.gender
+    if (req.body.image) updateData['puppies.$.image'] = req.body.image
 
     const litter = await Litter.findOneAndUpdate(
       {
@@ -173,6 +187,7 @@ const updatePuppy = async (req, res) => {
   }
 }
 
+// Removes a specific puppy from a litter
 const deletePuppy = async (req, res) => {
   try {
     const { litterId, puppyId } = req.params
