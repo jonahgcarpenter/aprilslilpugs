@@ -4,6 +4,7 @@ import { useLive } from '../context/LiveContext';
 import BreederUpdateForm from '../components/BreederUpdateForm';
 import LitterUpdate from '../components/LitterUpdate';
 import GrumbleUpdate from '../components/GrumbleUpdate';
+import PuppyUpdate from '../components/PuppyUpdate';
 
 const BreederDashboard = () => {
   const { isLive, toggleLive } = useLive();
@@ -21,6 +22,7 @@ const BreederDashboard = () => {
       <div className="grid gap-8">
         <BreederUpdateForm />
         <LitterUpdate />
+        <PuppyUpdate />
         <GrumbleUpdate />
       </div>
     </div>
