@@ -1,69 +1,132 @@
-import { createContext, useState } from 'react';
+import { createContext, useState, useEffect } from 'react';
 
 export const GrumbleContext = createContext();
 
-export const PLACEHOLDER_GRUMBLE = [
-    {
-        id: "1",
-        name: "Winston",
-        gender: "Male",
-        description: "A pain in my ass",
-        image: "/puppy-placeholder.jpg",
-        birthDate: "2020-10-20",
-    },
-    {
-        id: "2",
-        name: "Hallie",
-        gender: "Female",
-        description: "A pain in my ass",
-        image: "/puppy-placeholder.jpg",
-        birthDate: "2020-10-20",
-    },
-    {
-        id: "3",
-        name: "Mille",
-        gender: "Female",
-        description: "A pain in my ass",
-        image: "/puppy-placeholder.jpg",
-        birthDate: "2020-10-20",
-    },
-    {
-        id: "4",
-        name: "Mardi",
-        gender: "Male",
-        description: "A pain in my ass",
-        image: "/puppy-placeholder.jpg",
-        birthDate: "2020-10-20",
-    },
-];
-
 export const GrumbleProvider = ({ children }) => {
-    const [grumbles, setGrumbles] = useState(PLACEHOLDER_GRUMBLE);
-    const [loading, setLoading] = useState(false);
+    const [grumbles, setGrumbles] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    // Fetch all grumbles
     const fetchGrumbles = async () => {
         setLoading(true);
         setError(null);
         try {
-            // Simulating an API call with the placeholder data
-            // Later you can replace this with a real API call
-            await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
-            setGrumbles(PLACEHOLDER_GRUMBLE);
+            const response = await fetch('/api/grumble');
+            if (!response.ok) {
+                throw new Error('Failed to fetch grumbles');
+            }
+            const data = await response.json();
+            setGrumbles(data);
         } catch (err) {
             setError('Failed to fetch grumbles. Please try again later.');
+            console.error('Error fetching grumbles:', err);
         } finally {
             setLoading(false);
         }
     };
 
+    // Add a new grumble
+    const addGrumble = async (grumbleData) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await fetch('/api/grumble', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(grumbleData),
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to add grumble');
+            }
+            
+            const newGrumble = await response.json();
+            setGrumbles(prevGrumbles => [...prevGrumbles, newGrumble]);
+            return newGrumble;
+        } catch (err) {
+            setError('Failed to add grumble. Please try again later.');
+            console.error('Error adding grumble:', err);
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Delete a grumble
+    const deleteGrumble = async (grumbleId) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await fetch(`/api/grumble/${grumbleId}`, {
+                method: 'DELETE',
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to delete grumble');
+            }
+            
+            setGrumbles(prevGrumbles => 
+                prevGrumbles.filter(grumble => grumble._id !== grumbleId)
+            );
+        } catch (err) {
+            setError('Failed to delete grumble. Please try again later.');
+            console.error('Error deleting grumble:', err);
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Update a grumble
+    const updateGrumble = async (grumbleId, updateData) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await fetch(`/api/grumble/${grumbleId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updateData),
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to update grumble');
+            }
+            
+            const updatedGrumble = await response.json();
+            setGrumbles(prevGrumbles =>
+                prevGrumbles.map(grumble =>
+                    grumble._id === grumbleId ? updatedGrumble : grumble
+                )
+            );
+            return updatedGrumble;
+        } catch (err) {
+            setError('Failed to update grumble. Please try again later.');
+            console.error('Error updating grumble:', err);
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Fetch grumbles when the component mounts
+    useEffect(() => {
+        fetchGrumbles();
+    }, []);
+
     return (
         <GrumbleContext.Provider value={{ 
             grumbles, 
-            setGrumbles, 
             loading, 
             error, 
-            fetchGrumbles 
+            fetchGrumbles,
+            addGrumble,
+            deleteGrumble,
+            updateGrumble
         }}>
             {children}
         </GrumbleContext.Provider>
