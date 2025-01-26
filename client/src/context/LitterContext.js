@@ -7,7 +7,6 @@ export const LitterProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Fetch all litters
     const fetchLitters = async () => {
         setLoading(true);
         setError(null);
@@ -18,10 +17,9 @@ export const LitterProvider = ({ children }) => {
             }
             const data = await response.json();
             
-            // Format dates for display
             const formattedLitters = data.map(litter => ({
                 ...litter,
-                id: litter._id, // Map MongoDB _id to id for frontend compatibility
+                id: litter._id,
                 birthDate: new Date(litter.birthDate).toLocaleDateString('en-US', {
                     month: 'long',
                     day: 'numeric',
@@ -34,7 +32,7 @@ export const LitterProvider = ({ children }) => {
                 }),
                 puppies: litter.puppies.map(puppy => ({
                     ...puppy,
-                    id: puppy._id // Map MongoDB _id to id for frontend compatibility
+                    id: puppy._id
                 }))
             }));
             
@@ -47,22 +45,36 @@ export const LitterProvider = ({ children }) => {
         }
     };
 
-    // Create new litter
+    const getLitter = async (litterId) => {
+        try {
+            const response = await fetch(`/api/litters/${litterId}`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch litter');
+            }
+            return await response.json();
+        } catch (err) {
+            setError('Failed to fetch litter details.');
+            console.error('Fetch error:', err);
+            return null;
+        }
+    };
+
     const createLitter = async (litterData) => {
         try {
+            const formData = new FormData();
+            Object.keys(litterData).forEach(key => {
+                formData.append(key, litterData[key]);
+            });
+
             const response = await fetch('/api/litters', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(litterData)
+                body: formData
             });
 
             if (!response.ok) {
                 throw new Error('Failed to create litter');
             }
 
-            // Refresh litters after creation
             await fetchLitters();
             return true;
         } catch (err) {
@@ -72,22 +84,66 @@ export const LitterProvider = ({ children }) => {
         }
     };
 
-    // Add puppy to litter
+    const updateLitter = async (litterId, litterData) => {
+        try {
+            const formData = new FormData();
+            Object.keys(litterData).forEach(key => {
+                formData.append(key, litterData[key]);
+            });
+
+            const response = await fetch(`/api/litters/${litterId}`, {
+                method: 'PATCH',
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update litter');
+            }
+
+            await fetchLitters();
+            return true;
+        } catch (err) {
+            setError('Failed to update litter. Please try again.');
+            console.error('Update error:', err);
+            return false;
+        }
+    };
+
+    const deleteLitter = async (litterId) => {
+        try {
+            const response = await fetch(`/api/litters/${litterId}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete litter');
+            }
+
+            await fetchLitters();
+            return true;
+        } catch (err) {
+            setError('Failed to delete litter. Please try again.');
+            console.error('Delete error:', err);
+            return false;
+        }
+    };
+
     const addPuppy = async (litterId, puppyData) => {
         try {
+            const formData = new FormData();
+            Object.keys(puppyData).forEach(key => {
+                formData.append(key, puppyData[key]);
+            });
+
             const response = await fetch(`/api/litters/${litterId}/puppies`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(puppyData)
+                body: formData
             });
 
             if (!response.ok) {
                 throw new Error('Failed to add puppy');
             }
 
-            // Refresh litters after adding puppy
             await fetchLitters();
             return true;
         } catch (err) {
@@ -97,22 +153,22 @@ export const LitterProvider = ({ children }) => {
         }
     };
 
-    // Update puppy status
-    const updatePuppy = async (litterId, puppyId, updateData) => {
+    const updatePuppy = async (litterId, puppyId, puppyData) => {
         try {
+            const formData = new FormData();
+            Object.keys(puppyData).forEach(key => {
+                formData.append(key, puppyData[key]);
+            });
+
             const response = await fetch(`/api/litters/${litterId}/puppies/${puppyId}`, {
                 method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(updateData)
+                body: formData
             });
 
             if (!response.ok) {
                 throw new Error('Failed to update puppy');
             }
 
-            // Refresh litters after update
             await fetchLitters();
             return true;
         } catch (err) {
@@ -122,20 +178,42 @@ export const LitterProvider = ({ children }) => {
         }
     };
 
-    // Fetch litters on component mount
+    const deletePuppy = async (litterId, puppyId) => {
+        try {
+            const response = await fetch(`/api/litters/${litterId}/puppies/${puppyId}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete puppy');
+            }
+
+            await fetchLitters();
+            return true;
+        } catch (err) {
+            setError('Failed to delete puppy. Please try again.');
+            console.error('Delete error:', err);
+            return false;
+        }
+    };
+
     useEffect(() => {
         fetchLitters();
     }, []);
 
     return (
         <LitterContext.Provider value={{ 
-            litters, 
-            loading, 
-            error, 
+            litters,
+            loading,
+            error,
             fetchLitters,
+            getLitter,
             createLitter,
+            updateLitter,
+            deleteLitter,
             addPuppy,
-            updatePuppy
+            updatePuppy,
+            deletePuppy
         }}>
             {children}
         </LitterContext.Provider>
