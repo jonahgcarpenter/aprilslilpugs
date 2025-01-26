@@ -6,6 +6,7 @@ const path = require('path')
 const breederRoutes = require('./routes/breeders')
 const liveRoutes = require('./routes/live')
 const littersRoutes = require('./routes/litters')
+const grumbleRoutes = require('./routes/grumble')
 
 // Create an express app
 const app = express();
@@ -25,6 +26,7 @@ app.use((req, _res, next) => {
 app.use('/api/breeders', breederRoutes)
 app.use('/api/live', liveRoutes)
 app.use('/api/litters', littersRoutes)
+app.use('/api/grumble', grumbleRoutes)
 
 // connect to mongodb
 mongoose.connect(process.env.MONGODB_URI)

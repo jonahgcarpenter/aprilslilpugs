@@ -32,4 +32,5 @@ module.exports = {
   breederUpload: createUploader('breeder-profiles'),
   littersUpload: createUploader('litter-images'),
   puppyUpload: createUploader('puppy-images'),
+  grumbleUpload: createUploader('grumble-images')
 };
