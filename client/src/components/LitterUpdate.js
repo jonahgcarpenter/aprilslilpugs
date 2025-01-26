@@ -1,227 +1,368 @@
-import React, { useState, useContext, useEffect, useRef } from 'react';
+import { useState, useEffect, useContext } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { LitterContext } from '../context/LitterContext';
 
-const LitterCard = ({ litter, onUpdate }) => {
-    const [isEditing, setIsEditing] = useState(false);
-    const fileInputRef = useRef(null);
-    const [formData, setFormData] = useState({
-        name: litter.name,
-        mother: litter.mother,
-        father: litter.father,
-        birthDate: litter.rawBirthDate,
-        availableDate: litter.rawAvailableDate,
-    });
-    const [image, setImage] = useState(null);
-    const [previewUrl, setPreviewUrl] = useState(litter.image);
+const LitterUpdate = () => {
+    const { litterId } = useParams();
+    const navigate = useNavigate();
+    const { getLitter, updateLitter, deleteLitter, addPuppy, updatePuppy, deletePuppy, error, clearError } = useContext(LitterContext);
 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({
+    const [litter, setLitter] = useState(null);
+    const [litterForm, setLitterForm] = useState({
+        name: '',
+        mother: '',
+        father: '',
+        birthDate: '',
+        availableDate: '',
+        image: null
+    });
+    const [puppyForm, setPuppyForm] = useState({
+        name: '',
+        color: '',
+        gender: 'Male',
+        status: 'Available',
+        image: null
+    });
+    const [selectedPuppy, setSelectedPuppy] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Fetch litter data on component mount
+    useEffect(() => {
+        const fetchLitterData = async () => {
+            if (litterId) {
+                const data = await getLitter(litterId);
+                if (data) {
+                    setLitter(data);
+                    setLitterForm({
+                        name: data.name,
+                        mother: data.mother,
+                        father: data.father,
+                        birthDate: data.rawBirthDate,
+                        availableDate: data.rawAvailableDate,
+                        image: null
+                    });
+                }
+            }
+            setIsLoading(false);
+        };
+        fetchLitterData();
+    }, [litterId, getLitter]);
+
+    // Handle litter form changes
+    const handleLitterChange = (e) => {
+        const { name, value, files } = e.target;
+        setLitterForm(prev => ({
             ...prev,
-            [name]: value
+            [name]: files ? files[0] : value
         }));
     };
 
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        
-        if (file.size > 5 * 1024 * 1024) {
-            alert('Image must be less than 5MB');
-            fileInputRef.current.value = '';
-            return;
-        }
-
-        const objectUrl = URL.createObjectURL(file);
-        setPreviewUrl(objectUrl);
-        setImage(file);
-
-        return () => URL.revokeObjectURL(objectUrl);
+    // Handle puppy form changes
+    const handlePuppyChange = (e) => {
+        const { name, value, files } = e.target;
+        setPuppyForm(prev => ({
+            ...prev,
+            [name]: files ? files[0] : value
+        }));
     };
 
-    const handleSubmit = async (e) => {
+    // Handle litter update
+    const handleLitterUpdate = async (e) => {
         e.preventDefault();
-        const updatedData = new FormData();
-        Object.keys(formData).forEach(key => {
-            updatedData.append(key, formData[key]);
-        });
-        if (image) {
-            updatedData.append('image', image);
+        const success = await updateLitter(litterId, litterForm);
+        if (success) {
+            const updatedLitter = await getLitter(litterId);
+            setLitter(updatedLitter);
+            alert('Litter updated successfully!');
         }
-
-        await onUpdate(litter.id, updatedData);
-        setIsEditing(false);
     };
 
-    if (!isEditing) {
-        return (
-            <div className="bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 border border-slate-800/50 shadow-xl">
-                <div className="flex flex-col sm:flex-row gap-4">
-                    <div className="w-full sm:w-1/3">
-                        <img 
-                            src={litter.image} 
-                            alt={litter.name}
-                            className="w-full aspect-square object-cover rounded-lg"
-                        />
-                    </div>
-                    <div className="flex-1">
-                        <h3 className="text-xl font-semibold text-white mb-2">{litter.name}</h3>
-                        <div className="space-y-1 text-gray-300">
-                            <p>Mother: {litter.mother}</p>
-                            <p>Father: {litter.father}</p>
-                            <p>Birth Date: {litter.birthDate}</p>
-                            <p>Available Date: {litter.availableDate}</p>
-                        </div>
-                        <button
-                            onClick={() => setIsEditing(true)}
-                            className="mt-4 bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-6 py-2 rounded-lg font-semibold shadow-lg transition-all duration-200"
-                        >
-                            Edit Litter
-                        </button>
-                    </div>
-                </div>
-            </div>
-        );
-    }
+    // Handle litter deletion
+    const handleLitterDelete = async () => {
+        if (window.confirm('Are you sure you want to delete this litter?')) {
+            const success = await deleteLitter(litterId);
+            if (success) {
+                navigate('/admin/litters');
+            }
+        }
+    };
+
+    // Handle adding a new puppy
+    const handleAddPuppy = async (e) => {
+        e.preventDefault();
+        const success = await addPuppy(litterId, puppyForm);
+        if (success) {
+            const updatedLitter = await getLitter(litterId);
+            setLitter(updatedLitter);
+            setPuppyForm({
+                name: '',
+                color: '',
+                gender: 'Male',
+                status: 'Available',
+                image: null
+            });
+            alert('Puppy added successfully!');
+        }
+    };
+
+    // Handle updating a puppy
+    const handlePuppyUpdate = async (e) => {
+        e.preventDefault();
+        if (!selectedPuppy) return;
+        
+        const success = await updatePuppy(litterId, selectedPuppy.id, puppyForm);
+        if (success) {
+            const updatedLitter = await getLitter(litterId);
+            setLitter(updatedLitter);
+            setSelectedPuppy(null);
+            setPuppyForm({
+                name: '',
+                color: '',
+                gender: 'Male',
+                status: 'Available',
+                image: null
+            });
+            alert('Puppy updated successfully!');
+        }
+    };
+
+    // Handle puppy deletion
+    const handlePuppyDelete = async (puppyId) => {
+        if (window.confirm('Are you sure you want to delete this puppy?')) {
+            const success = await deletePuppy(litterId, puppyId);
+            if (success) {
+                const updatedLitter = await getLitter(litterId);
+                setLitter(updatedLitter);
+            }
+        }
+    };
+
+    // Select puppy for editing
+    const selectPuppyForEdit = (puppy) => {
+        setSelectedPuppy(puppy);
+        setPuppyForm({
+            name: puppy.name,
+            color: puppy.color,
+            gender: puppy.gender,
+            status: puppy.status,
+            image: null
+        });
+    };
+
+    if (isLoading) return <div>Loading...</div>;
+    if (!litter && !isLoading) return <div>Litter not found</div>;
 
     return (
-        <form onSubmit={handleSubmit} className="bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 border border-slate-800/50 shadow-xl">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div className="sm:col-span-2">
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Litter Name</label>
-                    <input
-                        type="text"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleInputChange}
-                        className="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700 focus:ring-2 focus:ring-blue-500"
-                        required
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Mother</label>
-                    <input
-                        type="text"
-                        name="mother"
-                        value={formData.mother}
-                        onChange={handleInputChange}
-                        className="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700 focus:ring-2 focus:ring-blue-500"
-                        required
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Father</label>
-                    <input
-                        type="text"
-                        name="father"
-                        value={formData.father}
-                        onChange={handleInputChange}
-                        className="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700 focus:ring-2 focus:ring-blue-500"
-                        required
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Birth Date</label>
-                    <input
-                        type="date"
-                        name="birthDate"
-                        value={formData.birthDate}
-                        onChange={handleInputChange}
-                        className="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700 focus:ring-2 focus:ring-blue-500"
-                        required
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Available Date</label>
-                    <input
-                        type="date"
-                        name="availableDate"
-                        value={formData.availableDate}
-                        onChange={handleInputChange}
-                        className="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700 focus:ring-2 focus:ring-blue-500"
-                        required
-                    />
-                </div>
-
-                <div className="sm:col-span-2">
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Litter Image</label>
-                    {previewUrl && (
-                        <div className="mb-4 relative w-32 h-32">
-                            <img
-                                src={previewUrl}
-                                alt="Preview"
-                                className="w-full h-full object-cover rounded-lg border border-slate-700"
-                            />
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setPreviewUrl(litter.image);
-                                    setImage(null);
-                                    if (fileInputRef.current) fileInputRef.current.value = '';
-                                }}
-                                className="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-600"
-                            >
-                                x
-                            </button>
-                        </div>
-                    )}
-                    <input
-                        ref={fileInputRef}
-                        type="file"
-                        onChange={handleFileChange}
-                        accept="image/*"
-                        className="w-full text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:bg-blue-500 file:text-white hover:file:bg-blue-600"
-                    />
-                </div>
-            </div>
-
-            <div className="flex gap-4 mt-6">
-                <button
-                    type="submit"
-                    className="bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-6 py-2 rounded-lg font-semibold shadow-lg transition-all duration-200"
-                >
-                    Save Changes
-                </button>
-                <button
-                    type="button"
-                    onClick={() => setIsEditing(false)}
-                    className="bg-gradient-to-r from-gray-600 to-gray-400 hover:from-gray-700 hover:to-gray-500 text-white px-6 py-2 rounded-lg font-semibold shadow-lg transition-all duration-200"
-                >
-                    Cancel
-                </button>
-            </div>
-        </form>
-    );
-};
-
-const LitterUpdate = () => {
-    const { litters, updateLitter, error, clearError } = useContext(LitterContext);
-
-    return (
-        <div className="mx-2 sm:mx-4 my-8">
-            <h2 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-8">
-                Update Litters
-            </h2>
-
+        <div className="litter-update container mx-auto p-4">
             {error && (
-                <div className="mb-6 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500">
+                <div className="error-message bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
                     {error}
-                    <button onClick={clearError} className="ml-2 text-sm">Dismiss</button>
+                    <button onClick={clearError} className="float-right">&times;</button>
                 </div>
             )}
 
-            <div className="space-y-6">
-                {litters.map(litter => (
-                    <LitterCard
-                        key={litter.id}
-                        litter={litter}
-                        onUpdate={updateLitter}
-                    />
-                ))}
+            {/* Litter Update Form */}
+            <div className="mb-8 bg-white p-6 rounded-lg shadow">
+                <h2 className="text-2xl font-bold mb-4">Update Litter</h2>
+                <form onSubmit={handleLitterUpdate} className="space-y-4">
+                    <div>
+                        <label className="block mb-1">Name:</label>
+                        <input
+                            type="text"
+                            name="name"
+                            value={litterForm.name}
+                            onChange={handleLitterChange}
+                            className="w-full p-2 border rounded"
+                        />
+                    </div>
+                    <div>
+                        <label className="block mb-1">Mother:</label>
+                        <input
+                            type="text"
+                            name="mother"
+                            value={litterForm.mother}
+                            onChange={handleLitterChange}
+                            className="w-full p-2 border rounded"
+                        />
+                    </div>
+                    <div>
+                        <label className="block mb-1">Father:</label>
+                        <input
+                            type="text"
+                            name="father"
+                            value={litterForm.father}
+                            onChange={handleLitterChange}
+                            className="w-full p-2 border rounded"
+                        />
+                    </div>
+                    <div>
+                        <label className="block mb-1">Birth Date:</label>
+                        <input
+                            type="date"
+                            name="birthDate"
+                            value={litterForm.birthDate}
+                            onChange={handleLitterChange}
+                            className="w-full p-2 border rounded"
+                        />
+                    </div>
+                    <div>
+                        <label className="block mb-1">Available Date:</label>
+                        <input
+                            type="date"
+                            name="availableDate"
+                            value={litterForm.availableDate}
+                            onChange={handleLitterChange}
+                            className="w-full p-2 border rounded"
+                        />
+                    </div>
+                    <div>
+                        <label className="block mb-1">Litter Image:</label>
+                        <input
+                            type="file"
+                            name="image"
+                            onChange={handleLitterChange}
+                            className="w-full p-2 border rounded"
+                        />
+                    </div>
+                    <div className="flex space-x-4">
+                        <button
+                            type="submit"
+                            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                        >
+                            Update Litter
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleLitterDelete}
+                            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                        >
+                            Delete Litter
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            {/* Puppies Section */}
+            <div className="bg-white p-6 rounded-lg shadow">
+                <h2 className="text-2xl font-bold mb-4">
+                    {selectedPuppy ? 'Update Puppy' : 'Add New Puppy'}
+                </h2>
+                <form onSubmit={selectedPuppy ? handlePuppyUpdate : handleAddPuppy} className="space-y-4">
+                    <div>
+                        <label className="block mb-1">Name:</label>
+                        <input
+                            type="text"
+                            name="name"
+                            value={puppyForm.name}
+                            onChange={handlePuppyChange}
+                            className="w-full p-2 border rounded"
+                        />
+                    </div>
+                    <div>
+                        <label className="block mb-1">Color:</label>
+                        <input
+                            type="text"
+                            name="color"
+                            value={puppyForm.color}
+                            onChange={handlePuppyChange}
+                            className="w-full p-2 border rounded"
+                        />
+                    </div>
+                    <div>
+                        <label className="block mb-1">Gender:</label>
+                        <select
+                            name="gender"
+                            value={puppyForm.gender}
+                            onChange={handlePuppyChange}
+                            className="w-full p-2 border rounded"
+                        >
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block mb-1">Status:</label>
+                        <select
+                            name="status"
+                            value={puppyForm.status}
+                            onChange={handlePuppyChange}
+                            className="w-full p-2 border rounded"
+                        >
+                            <option value="Available">Available</option>
+                            <option value="Reserved">Reserved</option>
+                            <option value="Sold">Sold</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block mb-1">Puppy Image:</label>
+                        <input
+                            type="file"
+                            name="image"
+                            onChange={handlePuppyChange}
+                            className="w-full p-2 border rounded"
+                        />
+                    </div>
+                    <div className="flex space-x-4">
+                        <button
+                            type="submit"
+                            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                        >
+                            {selectedPuppy ? 'Update Puppy' : 'Add Puppy'}
+                        </button>
+                        {selectedPuppy && (
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setSelectedPuppy(null);
+                                    setPuppyForm({
+                                        name: '',
+                                        color: '',
+                                        gender: 'Male',
+                                        status: 'Available',
+                                        image: null
+                                    });
+                                }}
+                                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                            >
+                                Cancel Edit
+                            </button>
+                        )}
+                    </div>
+                </form>
+
+                {/* Puppies List */}
+                <div className="mt-8">
+                    <h3 className="text-xl font-bold mb-4">Current Puppies</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {litter.puppies.map((puppy) => (
+                            <div key={puppy.id} className="border p-4 rounded">
+                                <img
+                                    src={puppy.image}
+                                    alt={puppy.name}
+                                    className="w-full h-48 object-cover rounded mb-2"
+                                />
+                                <h4 className="font-bold">{puppy.name}</h4>
+                                <p>Color: {puppy.color}</p>
+                                <p>Gender: {puppy.gender}</p>
+                                <p>Status: {puppy.status}</p>
+                                <div className="mt-2 flex space-x-2">
+                                    <button
+                                        onClick={() => selectPuppyForEdit(puppy)}
+                                        className="bg-blue-500 text-white px-2 py-1 rounded text-sm hover:bg-blue-600"
+                                    >
+                                        Edit
+                                    </button>
+                                    <button
+                                        onClick={() => handlePuppyDelete(puppy.id)}
+                                        className="bg-red-500 text-white px-2 py-1 rounded text-sm hover:bg-red-600"
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
             </div>
         </div>
     );
