@@ -106,8 +106,8 @@ const GrumbleUpdate = () => {
     };
 
     return (
-        <div className="mx-2 sm:mx-4">
-            <form onSubmit={handleSubmit} className="bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">
+        <div className="mx-0 sm:mx-4">
+            <form onSubmit={handleSubmit} className="bg-slate-900/80 backdrop-blur-sm rounded-xl p-4 sm:p-8 border border-slate-800/50 shadow-xl">
                 <h2 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-8">
                     Grumble Management
                 </h2>
@@ -209,10 +209,10 @@ const GrumbleUpdate = () => {
                     </div>
                 </div>
 
-                <div className="flex gap-4">
+                <div className="flex flex-col sm:flex-row gap-4">
                     <button
                         type="submit"
-                        className="flex-1 bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition-all duration-200"
+                        className="w-full bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition-all duration-200"
                     >
                         {selectedGrumble ? 'Update Member' : 'Add Member'}
                     </button>
@@ -220,7 +220,7 @@ const GrumbleUpdate = () => {
                         <button
                             type="button"
                             onClick={() => setShowDeleteModal(true)}
-                            className="flex-1 bg-gradient-to-r from-red-600 to-red-400 hover:from-red-700 hover:to-red-500 text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition-all duration-200"
+                            className="w-full bg-gradient-to-r from-red-600 to-red-400 hover:from-red-700 hover:to-red-500 text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition-all duration-200"
                         >
                             Delete Member
                         </button>

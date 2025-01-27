@@ -292,7 +292,7 @@ const selectPuppyForEdit = (puppy) => {
   if (!isNewLitter && !litter && !isLoading) return <div>Litter not found</div>;
 
   return (
-    <div className="litter-update mx-2 sm:mx-4 py-8">
+    <div className="litter-update mx-0 sm:mx-4 py-4 sm:py-8">
       {error && (
         <div className="mb-6 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500">
           {error}
@@ -300,7 +300,7 @@ const selectPuppyForEdit = (puppy) => {
         </div>
       )}
 
-      <div className="mb-8 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">
+      <div className="mb-8 bg-slate-900/80 backdrop-blur-sm rounded-xl p-4 sm:p-8 border border-slate-800/50 shadow-xl">
         <h2 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-8">
           {isNewLitter ? 'Create New Litter' : 'Update Litter'}
         </h2>
@@ -393,11 +393,11 @@ const selectPuppyForEdit = (puppy) => {
               />
             </div>
           </div>
-          <div className="flex space-x-4">
+          <div className="flex flex-col sm:flex-row gap-4">
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition-all duration-200 disabled:opacity-50"
+              className="w-full bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition-all duration-200"
             >
               {isSubmitting ? 'Processing...' : (isNewLitter ? 'Create Litter' : 'Update Litter')}
             </button>
@@ -405,7 +405,7 @@ const selectPuppyForEdit = (puppy) => {
               <button
                 type="button"
                 onClick={() => setShowDeleteLitterModal(true)}
-                className="w-full sm:w-auto bg-red-500 text-white px-8 py-3 rounded-lg font-semibold shadow-lg hover:bg-red-600 transition-all duration-200"
+                className="w-full bg-red-500 text-white px-8 py-3 rounded-lg font-semibold shadow-lg hover:bg-red-600 transition-all duration-200"
               >
                 Delete Litter
               </button>

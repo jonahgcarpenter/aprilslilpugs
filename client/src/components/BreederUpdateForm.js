@@ -135,8 +135,8 @@ const BreederUpdateForm = () => {
   };
 
   return (
-    <div className="mx-2 sm:mx-4">
-      <form onSubmit={handleSubmit} className="bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">
+    <div className="mx-0 sm:mx-4">
+      <form onSubmit={handleSubmit} className="bg-slate-900/80 backdrop-blur-sm rounded-xl p-4 sm:p-8 border border-slate-800/50 shadow-xl">
         <h2 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-8">
           Update Profile
         </h2>
@@ -147,7 +147,7 @@ const BreederUpdateForm = () => {
           </div>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6">
           <div className="form-group">
             <label className="block text-sm font-medium text-gray-300 mb-2">First Name</label>
             <input
@@ -255,7 +255,7 @@ const BreederUpdateForm = () => {
 
         <button 
           type="submit"
-          className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition-all duration-200"
+          className="w-full bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition-all duration-200"
         >
           Update Profile
         </button>
