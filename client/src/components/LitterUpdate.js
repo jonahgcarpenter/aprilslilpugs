@@ -67,8 +67,8 @@ const LitterUpdate = () => {
           name: data.name,
           mother: data.mother,
           father: data.father,
-          birthDate: data.rawBirthDate,
-          availableDate: data.rawAvailableDate,
+          birthDate: new Date(data.birthDate).toISOString().split('T')[0],
+          availableDate: new Date(data.availableDate).toISOString().split('T')[0],
           image: null
         });
       } catch (error) {
