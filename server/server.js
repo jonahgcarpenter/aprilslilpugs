@@ -30,6 +30,14 @@ app.use('/api/litters', littersRoutes)
 app.use('/api/grumble', grumbleRoutes)
 app.use('/api/waitlist', waitlistRoutes)
 
+// Serve static files from the React build directory
+app.use(express.static(path.join(__dirname, 'build')))
+
+// Handle React routing by serving index.html for all routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'build', 'index.html'))
+})
+
 // connect to mongodb
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
