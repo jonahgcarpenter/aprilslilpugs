@@ -9,6 +9,7 @@ const LitterUpdate = () => {
   const { getLitter, createLitter, updateLitter, deleteLitter, addPuppy, updatePuppy, deletePuppy, error, clearError } = useContext(LitterContext);
   const litterFileInputRef = useRef(null);
   const puppyFileInputRef = useRef(null);
+  const puppyFormRef = useRef(null);
 
   const isNewLitter = !litterId;
   const [litter, setLitter] = useState(null);
@@ -275,6 +276,12 @@ const selectPuppyForEdit = (puppy) => {
     status: puppy.status,
     image: null
   });
+  
+  // Scroll to the puppy form with offset
+  const yOffset = -270; // Adjust this value as needed
+  const element = puppyFormRef.current;
+  const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+  window.scrollTo({ top: y, behavior: 'smooth' });
 };
 
   useEffect(() => {
@@ -419,7 +426,11 @@ const selectPuppyForEdit = (puppy) => {
           <h2 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-8">
             {selectedPuppy ? 'Update Puppy' : 'Add New Puppy'}
           </h2>
-          <form onSubmit={selectedPuppy ? handlePuppyUpdate : handleAddPuppy} className="space-y-6">
+          <form 
+            ref={puppyFormRef}
+            onSubmit={selectedPuppy ? handlePuppyUpdate : handleAddPuppy} 
+            className="space-y-6"
+          >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="form-group">
                 <label className="block text-sm font-medium text-gray-300 mb-2">Name</label>
