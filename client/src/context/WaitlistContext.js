@@ -34,7 +34,6 @@ export const WaitlistProvider = ({ children }) => {
     entries: []
   });
 
-  // Fetch all entries
   const fetchEntries = async () => {
     try {
       const response = await fetch('/api/waitlist');
@@ -48,7 +47,6 @@ export const WaitlistProvider = ({ children }) => {
     }
   };
 
-  // Create new entry
   const createEntry = async (entryData) => {
     try {
       const response = await fetch('/api/waitlist', {
@@ -70,7 +68,6 @@ export const WaitlistProvider = ({ children }) => {
     }
   };
 
-  // Update entry
   const updateEntry = async (id, updates) => {
     try {
       const response = await fetch(`/api/waitlist/${id}`, {
@@ -92,7 +89,6 @@ export const WaitlistProvider = ({ children }) => {
     }
   };
 
-  // Delete entry
   const deleteEntry = async (id) => {
     try {
       const response = await fetch(`/api/waitlist/${id}`, {

@@ -1,23 +1,21 @@
 import { useContext } from 'react';
 import { Link } from 'react-router-dom';
+
+// CONTEXT
 import { useLive } from '../context/LiveContext';
 import { LitterContext } from '../context/LitterContext';
+
+// COMPONENTS
 import BreederUpdateForm from '../components/BreederUpdateForm';
 import GrumbleUpdate from '../components/GrumbleUpdate';
 import WaitlistAdmin from '../components/WaitlistAdmin';
 
-/**
- * Breeder Dashboard Component
- * Central management interface for breeder operations
- */
 const BreederDashboard = () => {
-  // Context and State Management
   const { isLive, toggleLive } = useLive();
   const { litters, loading, error } = useContext(LitterContext);
 
   return (
     <div className="mx-2 sm:mx-4 space-y-6 py-8">
-      {/* Live Stream Toggle */}
       <div className="flex justify-center">
         <button
           onClick={toggleLive}
@@ -29,18 +27,13 @@ const BreederDashboard = () => {
 
       <div className="grid gap-8">
 
-        {/* WaitList */}
         <WaitlistAdmin />
 
-        {/* Breeder Information Update Section */}
         <BreederUpdateForm />
 
-        {/* Grumble Management Section */}
         <GrumbleUpdate />
 
-        {/* Litter Management Section */}
         <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">
-          {/* Section Header */}
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600">
               Litter Management
@@ -53,13 +46,11 @@ const BreederDashboard = () => {
             </Link>
           </div>
 
-          {/* Litters List Section */}
           {loading ? (
             <div className="text-gray-500">Loading litters...</div>
           ) : error ? (
             <div className="text-red-500">{error}</div>
           ) : (
-            // Litter Items
             <div className="grid gap-4">
               {litters.map(litter => (
                 <div 

@@ -2,21 +2,14 @@ import { useState, useEffect, useContext, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { LitterContext } from '../context/LitterContext';
 
-/**
- * LitterUpdate Component
- * Handles creation, updating, and deletion of litters and their puppies
- */
 const LitterUpdate = () => {
-  // URL Parameters and Navigation
   const { litterId } = useParams();
   const navigate = useNavigate();
   
-  // Context and Refs
   const { getLitter, createLitter, updateLitter, deleteLitter, addPuppy, updatePuppy, deletePuppy, error, clearError } = useContext(LitterContext);
   const litterFileInputRef = useRef(null);
   const puppyFileInputRef = useRef(null);
 
-  // State Management
   const isNewLitter = !litterId;
   const [litter, setLitter] = useState(null);
   const [litterForm, setLitterForm] = useState({
@@ -47,10 +40,8 @@ const LitterUpdate = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
 
-  // Add new state for form submission loading
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Fetch litter data on component mount
   useEffect(() => {
     const fetchLitterData = async () => {
       if (litterId) {
@@ -65,7 +56,6 @@ const LitterUpdate = () => {
             availableDate: data.rawAvailableDate,
             image: null
           });
-          // Remove this section - don't set preview URL for existing image
         }
       }
       setIsLoading(false);
@@ -73,7 +63,6 @@ const LitterUpdate = () => {
     fetchLitterData();
   }, [litterId, getLitter]);
 
-  // Handle litter form changes
   const handleLitterChange = (e) => {
     const { name, value, files } = e.target;
     if (files) {
@@ -86,19 +75,16 @@ const LitterUpdate = () => {
         return;
       }
 
-      // Create preview URL
       const objectUrl = URL.createObjectURL(file);
       setLitterPreviewUrl(objectUrl);
       setLitterForm(prev => ({ ...prev, image: file }));
       
-      // Cleanup old preview URL
       return () => URL.revokeObjectURL(objectUrl);
     } else {
       setLitterForm(prev => ({ ...prev, [name]: value }));
     }
   };
 
-  // Handle puppy form changes
   const handlePuppyChange = (e) => {
     const { name, value, files } = e.target;
     if (files) {
@@ -111,19 +97,16 @@ const LitterUpdate = () => {
         return;
       }
 
-      // Create preview URL
       const objectUrl = URL.createObjectURL(file);
       setPuppyPreviewUrl(objectUrl);
       setPuppyForm(prev => ({ ...prev, image: file }));
       
-      // Cleanup old preview URL
       return () => URL.revokeObjectURL(objectUrl);
     } else {
       setPuppyForm(prev => ({ ...prev, [name]: value }));
     }
   };
 
-  // Handle litter submit (create or update)
   const handleLitterSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -154,7 +137,6 @@ const LitterUpdate = () => {
     }
   };
 
-  // Handle litter deletion
   const handleLitterDelete = async () => {
     const success = await deleteLitter(litterId);
     if (success) {
@@ -163,7 +145,6 @@ const LitterUpdate = () => {
     }
   };
 
-  // Add form reset function
   const resetPuppyForm = () => {
     setPuppyForm({
       name: '',
@@ -178,18 +159,15 @@ const LitterUpdate = () => {
     }
   };
 
-  // Update handleAddPuppy to handle the response properly
   const handleAddPuppy = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
       const success = await addPuppy(litterId, puppyForm);
       if (success) {
-        // Reset form and preview before fetching updated data
         resetPuppyForm();
         setPuppyPreviewUrl(null);
         
-        // Fetch updated litter data to get new image URLs
         const updatedLitter = await getLitter(litterId);
         setLitter(updatedLitter);
         
@@ -202,7 +180,6 @@ const LitterUpdate = () => {
     }
   };
 
-  // Update handlePuppyUpdate to handle the response properly
   const handlePuppyUpdate = async (e) => {
     e.preventDefault();
     if (!selectedPuppy) return;
@@ -211,12 +188,10 @@ const LitterUpdate = () => {
     try {
       const success = await updatePuppy(litterId, selectedPuppy.id, puppyForm);
       if (success) {
-        // Reset form and preview before fetching updated data
         setSelectedPuppy(null);
         resetPuppyForm();
         setPuppyPreviewUrl(null);
         
-        // Fetch updated litter data to get new image URLs
         const updatedLitter = await getLitter(litterId);
         setLitter(updatedLitter);
         
@@ -229,7 +204,6 @@ const LitterUpdate = () => {
     }
   };
 
-  // Handle puppy deletion
   const handlePuppyDelete = async (puppyId) => {
     const success = await deletePuppy(litterId, puppyId);
     if (success) {
@@ -240,7 +214,6 @@ const LitterUpdate = () => {
     }
   };
 
-  // Select puppy for editing
   const selectPuppyForEdit = (puppy) => {
     setSelectedPuppy(puppy);
     setPuppyForm({
@@ -275,7 +248,6 @@ const LitterUpdate = () => {
         </div>
       )}
 
-      {/* Litter Form */}
       <div className="mb-8 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">
         <h2 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-8">
           {isNewLitter ? 'Create New Litter' : 'Update Litter'}
@@ -390,7 +362,6 @@ const LitterUpdate = () => {
         </form>
       </div>
 
-      {/* Puppies Section - Only show if not a new litter */}
       {!isNewLitter && (
         <div className="bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">
           <h2 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-8">
@@ -500,7 +471,6 @@ const LitterUpdate = () => {
             </div>
           </form>
 
-          {/* Puppies List */}
           <div className="mt-8">
             <h3 className="text-xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600">Current Puppies</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -539,7 +509,6 @@ const LitterUpdate = () => {
         </div>
       )}
 
-      {/* Delete Litter Modal */}
       {showDeleteLitterModal && (
         <div 
           className="fixed inset-0 bg-slate-900/75 backdrop-blur-sm flex items-start justify-center p-4 z-[9999]"
@@ -575,7 +544,6 @@ const LitterUpdate = () => {
         </div>
       )}
 
-      {/* Delete Puppy Modal */}
       {showDeletePuppyModal && (
         <div 
           className="fixed inset-0 bg-slate-900/75 backdrop-blur-sm flex items-start justify-center p-4 z-[9999]"
@@ -614,7 +582,6 @@ const LitterUpdate = () => {
         </div>
       )}
 
-      {/* Success Modal */}
       {showSuccessModal && (
         <div className="fixed inset-0 bg-slate-900/75 backdrop-blur-sm flex items-start justify-center p-4 z-[9999]">
           <div className="mt-[15vh] bg-slate-900/90 backdrop-blur-sm rounded-xl p-8 max-w-md w-full border border-white/10">

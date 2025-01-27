@@ -2,26 +2,19 @@ import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
-/**
- * LogoutButton Component
- * Handles user logout with confirmation modal
- */
 const LogoutButton = () => {
-  // State Management
   const [showModal, setShowModal] = useState(false);
   const { logout } = useAuth();
   const navigate = useNavigate();
 
-  // Logout Handler
   const handleLogout = () => {
     logout();
     setShowModal(false);
-    navigate('/'); // Redirect to home page after logout
+    navigate('/'); 
   };
 
   return (
     <>
-      {/* Logout Button */}
       <button
         onClick={() => setShowModal(true)}
         className="bg-gradient-to-r from-red-600 to-red-400 hover:from-red-700 hover:to-red-500 text-white px-6 py-2 text-sm rounded-full font-semibold shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
@@ -29,7 +22,6 @@ const LogoutButton = () => {
         Logout
       </button>
 
-      {/* Confirmation Modal */}
       {showModal && (
         <div 
           className="fixed inset-0 bg-slate-900/75 backdrop-blur-sm flex items-start justify-center p-4 z-[9999]"

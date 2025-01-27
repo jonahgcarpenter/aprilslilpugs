@@ -2,19 +2,13 @@ import { useEffect, useContext } from 'react'
 import { BreederContext } from '../context/BreederContext'
 import { FaFacebook, FaEnvelope, FaPhoneAlt, FaMapMarkerAlt, FaHeart } from 'react-icons/fa'
 
-/**
- * BreederDetails Component
- * Displays breeder profile information including contact details and story
- */
 const BreederDetails = () => {
   const { breeder, loading, error, fetchBreeder } = useContext(BreederContext)
 
-  // Load breeder data on mount
   useEffect(() => {
     fetchBreeder()
   }, [])
 
-  // Loading state
   if (loading) {
     return (
       <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 border border-slate-800/50">
@@ -27,7 +21,6 @@ const BreederDetails = () => {
     );
   }
 
-  // Error state
   if (error) {
     return (
       <div className="mx-2 sm:mx-4 bg-slate-900 rounded-xl shadow-xl p-4 sm:p-8">
@@ -40,7 +33,6 @@ const BreederDetails = () => {
     <>
       {breeder && (
         <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">
-          {/* Hero Section */}
           <div className="relative mb-8">
             <div className="flex flex-col md:flex-row gap-8 items-center">
               {breeder.profilePicture && (
@@ -65,7 +57,6 @@ const BreederDetails = () => {
             </div>
           </div>
 
-          {/* Contact Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             {breeder.location && (
               <a 
@@ -107,7 +98,6 @@ const BreederDetails = () => {
             </a>
           </div>
 
-          {/* Story Section */}
           {breeder.story && (
             <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 hover:border-white/20 transition-all duration-300">
               <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-6">My Journey with Pugs</h2>

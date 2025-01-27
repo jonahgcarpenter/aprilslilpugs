@@ -1,16 +1,10 @@
 import { useState, useContext, useEffect } from 'react';
 import { GrumbleContext } from '../context/GrumbleContext';
 
-// Replace date-fns format with native date formatting
 const formatDate = (date) => {
     return new Date(date).toISOString().split('T')[0];
 };
 
-/**
- * GrumbleUpdate Component
- * Component for updating grumble information
- * TODO: Implement full functionality
- */
 const GrumbleUpdate = () => {
     const { grumbles, addGrumble, updateGrumble, deleteGrumble } = useContext(GrumbleContext);
     const [selectedGrumble, setSelectedGrumble] = useState(null);
@@ -24,7 +18,6 @@ const GrumbleUpdate = () => {
     const [previewUrl, setPreviewUrl] = useState(null);
     const [message, setMessage] = useState({ text: '', type: '' });
 
-    // Add new state for modals
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
@@ -55,9 +48,7 @@ const GrumbleUpdate = () => {
         try {
             const formPayload = new FormData();
             
-            // Add all form fields to FormData
             Object.keys(formData).forEach(key => {
-                // Only append if the value exists and isn't null
                 if (formData[key] !== null && formData[key] !== '') {
                     formPayload.append(key, formData[key]);
                 }
@@ -237,7 +228,6 @@ const GrumbleUpdate = () => {
                 </div>
             </form>
 
-            {/* Delete Confirmation Modal */}
             {showDeleteModal && (
                 <div 
                     className="fixed inset-0 bg-slate-900/75 backdrop-blur-sm flex items-start justify-center p-4 z-[9999]"
@@ -273,7 +263,6 @@ const GrumbleUpdate = () => {
                 </div>
             )}
 
-            {/* Success Modal */}
             {showSuccessModal && (
                 <div className="fixed inset-0 bg-slate-900/75 backdrop-blur-sm flex items-start justify-center p-4 z-[9999]">
                     <div className="mt-[15vh] bg-slate-900/90 backdrop-blur-sm rounded-xl p-8 max-w-md w-full border border-white/10">

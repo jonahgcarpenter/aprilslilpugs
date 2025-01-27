@@ -1,14 +1,9 @@
 import React, { useState, useContext, useRef, useEffect } from 'react';
 import { WaitlistContext } from '../context/WaitlistContext';
 
-/**
- * Waitlist Component
- * Handles user registration for puppy waitlist
- */
 const Waitlist = () => {
     const { createEntry } = useContext(WaitlistContext);
     const notesRef = useRef(null);
-    // State Management
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -19,7 +14,6 @@ const Waitlist = () => {
     const [message, setMessage] = useState({ text: '', isError: false });
     const [showInfo, setShowInfo] = useState(false);
 
-    // Utility Functions
     const formatPhoneNumber = (value) => {
         const phoneNumber = value.replace(/\D/g, '');
         let formattedNumber = '';
@@ -35,7 +29,6 @@ const Waitlist = () => {
         return formattedNumber;
     };
 
-    // Form Handlers
     const handleChange = (e) => {
         const { name, value } = e.target;
         if (name === 'phoneNumber') {
@@ -96,7 +89,6 @@ const Waitlist = () => {
         }
     };
 
-    // Add auto-resize function
     const autoResize = () => {
         const textarea = notesRef.current;
         if (textarea) {
@@ -105,14 +97,12 @@ const Waitlist = () => {
         }
     };
 
-    // Handle text area changes
     const handleNotesChange = (e) => {
         const { value } = e.target;
         setFormData(prev => ({ ...prev, notes: value }));
         autoResize();
     };
 
-    // Initialize height on component mount
     useEffect(() => {
         autoResize();
     }, []);

@@ -1,19 +1,13 @@
-/**
- * Breeder Context
- * Manages breeder information and profile updates
- */
 import { createContext, useReducer } from 'react';
 
 export const BreederContext = createContext();
 
-// State Management
 const initialState = {
   breeder: null,
   loading: false,
   error: null
 };
 
-// Reducer Actions
 export const breederReducer = (state, action) => {
   switch (action.type) {
     case 'SET_BREEDER':

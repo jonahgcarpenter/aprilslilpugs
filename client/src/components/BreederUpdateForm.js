@@ -1,12 +1,7 @@
 import { useState, useEffect, useRef, useContext } from "react"
 import { BreederContext } from '../context/BreederContext'
 
-/**
- * BreederUpdateForm Component
- * Form for updating breeder profile information and profile picture
- */
 const BreederUpdateForm = () => {
-  // Context and State Management
   const { breeder, dispatch } = useContext(BreederContext);
   const [error, setError] = useState(null);
   const fileInputRef = useRef(null);
@@ -21,7 +16,6 @@ const BreederUpdateForm = () => {
   const [profilePicture, setProfilePicture] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
 
-  // Initialize form data when breeder data is available
   useEffect(() => {
     if (breeder) {
       setFormData({
@@ -35,11 +29,9 @@ const BreederUpdateForm = () => {
     }
   }, [breeder]);
 
-  // Form Handlers
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (name === 'phoneNumber') {
-      // Format phone number
       const formatted = value.replace(/\D/g, '').slice(0, 10);
       if (formatted.length > 6) {
         setFormData(prev => ({
@@ -69,13 +61,11 @@ const BreederUpdateForm = () => {
       return;
     }
 
-    // Create preview URL
     const objectUrl = URL.createObjectURL(file);
     setPreviewUrl(objectUrl);
     setProfilePicture(file);
     setError(null);
 
-    // Cleanup previous preview URL
     return () => URL.revokeObjectURL(objectUrl);
   };
 
@@ -94,14 +84,12 @@ const BreederUpdateForm = () => {
       return false;
     }
 
-    // Email format validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (formData.email && !emailRegex.test(formData.email)) {
       setError('Invalid email format');
       return false;
     }
 
-    // Phone format validation (if provided)
     if (formData.phoneNumber && formData.phoneNumber.replace(/\D/g, '').length !== 10) {
       setError('Phone number must be 10 digits');
       return false;

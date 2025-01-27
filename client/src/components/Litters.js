@@ -1,26 +1,18 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { LitterContext } from '../context/LitterContext';
 
-/**
- * Litters Component
- * Displays all litters with their details and puppies
- */
 const Litters = () => {
-  // Context and State
   const { litters, loading, error, fetchLitters } = useContext(LitterContext);
   const [selectedLitter, setSelectedLitter] = useState(null);
 
-  // Load litters on mount
   useEffect(() => {
     fetchLitters();
   }, []);
 
-  // Utility Functions
   const isDateInFuture = (dateString) => {
     return new Date(dateString) > new Date();
   };
 
-  // Loading and Error States
   if (loading) {
     return (
       <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 border border-slate-800/50">

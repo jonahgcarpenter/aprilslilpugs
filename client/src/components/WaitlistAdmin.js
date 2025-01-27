@@ -130,7 +130,6 @@ const WaitlistAdmin = () => {
                 </div>
             </div>
 
-            {/* Delete Confirmation Modal */}
             {showDeleteModal && (
                 <div 
                     className="fixed inset-0 bg-slate-900/75 backdrop-blur-sm flex items-start justify-center p-4 z-[9999]"

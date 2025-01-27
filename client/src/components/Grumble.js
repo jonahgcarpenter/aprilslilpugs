@@ -1,11 +1,6 @@
 import React, { useContext, useEffect } from 'react';
 import { GrumbleContext } from '../context/GrumbleContext';
 
-/**
- * Calculates age in years from a birth date
- * @param {string} birthDate - ISO date string
- * @returns {number} Age in years
- */
 const calculateAge = (birthDate) => {
     const today = new Date();
     const birth = new Date(birthDate);
@@ -19,19 +14,13 @@ const calculateAge = (birthDate) => {
     return age;
 }
 
-/**
- * Grumble Component
- * Displays a collection of pugs in a grid layout
- */
 const Grumble = () => {
     const { grumbles, loading, error, fetchGrumbles } = useContext(GrumbleContext);
 
-    // Load grumbles on mount
     useEffect(() => {
         fetchGrumbles();
     }, []);
 
-    // Loading state
     if (loading) {
         return (
             <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 border border-slate-800/50">
@@ -44,7 +33,6 @@ const Grumble = () => {
         );
     }
 
-    // Error state
     if (error) {
         return (
             <div className="mx-2 sm:mx-4 bg-slate-900 rounded-xl shadow-xl p-4 sm:p-8">
@@ -53,7 +41,6 @@ const Grumble = () => {
         );
     }
 
-    // Render grumble grid
     return (
         <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-12">

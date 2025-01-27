@@ -1,11 +1,12 @@
 import {BrowserRouter, Routes, Route} from 'react-router-dom';
+
+// CONTEXT
 import { AuthProvider } from './context/AuthContext';
 import { BreederContextProvider } from './context/BreederContext';
 import { LiveProvider } from './context/LiveContext';
 import { LitterProvider } from './context/LitterContext';
 import { GrumbleProvider } from './context/GrumbleContext';
 import { WaitlistProvider } from './context/WaitlistContext';
-import ProtectedRoute from './components/ProtectedRoute';
 
 // PAGES
 import Home from './pages/Home';
@@ -15,6 +16,7 @@ import MyGrumble from './pages/MyGrumble';
 import Puppies from './pages/Puppies';
 
 // COMPONENTS
+import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 import LitterUpdate from './components/LitterUpdate';
 

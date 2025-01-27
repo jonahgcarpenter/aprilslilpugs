@@ -1,13 +1,8 @@
-/**
- * Authentication Context
- * Manages user authentication state and token handling
- */
 import { createContext, useState, useContext, useEffect } from 'react';
 
 export const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  // State Management with localStorage persistence
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem('user');
     return savedUser ? JSON.parse(savedUser) : null;
@@ -16,7 +11,6 @@ export const AuthProvider = ({ children }) => {
   const [loginStatus, setLoginStatus] = useState({ message: '', type: '' });
   const [sessionTimeout, setSessionTimeout] = useState(null);
 
-  // Token validation and session management
   useEffect(() => {
     if (token) {
       try {
@@ -24,16 +18,13 @@ export const AuthProvider = ({ children }) => {
         const expiresIn = payload.exp * 1000 - Date.now();
         
         if (expiresIn <= 0) {
-          // Token has expired
           logout();
         } else {
-          // Ensure user data is set if token is valid
           const savedUser = localStorage.getItem('user');
           if (savedUser && !user) {
             setUser(JSON.parse(savedUser));
           }
 
-          // Set timeout for token expiration
           const timeoutId = setTimeout(() => {
             logout();
             setLoginStatus({
@@ -57,7 +48,6 @@ export const AuthProvider = ({ children }) => {
     };
   }, [token]);
 
-  // Authentication Operations
   const login = async (email, password) => {
     try {
       const response = await fetch('/api/breeders/login', {

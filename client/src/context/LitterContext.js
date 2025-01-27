@@ -1,18 +1,12 @@
-/**
- * Litter Management Context
- * Handles all litter-related operations and state management
- */
 import { createContext, useState, useEffect } from 'react';
 
 export const LitterContext = createContext();
 
 export const LitterProvider = ({ children }) => {
-    // State Management
     const [litters, setLitters] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Utility Functions
     const formatDate = (date) => {
         return new Date(date).toLocaleDateString('en-US', {
             month: 'long',
@@ -25,30 +19,27 @@ export const LitterProvider = ({ children }) => {
         return new Date(date).toISOString().split('T')[0];
     };
 
-    // Add API base URL utility
     const getFullImageUrl = (relativePath) => {
         return `${process.env.REACT_APP_API_URL || ''}${relativePath}`;
     };
 
-    // Update formatLitterData to properly handle IDs and image paths
     const formatLitterData = (litter) => ({
         ...litter,
-        _id: litter._id, // Keep the original _id
-        id: litter._id,  // Add id alias for compatibility
+        _id: litter._id,
+        id: litter._id,
         birthDate: formatDate(litter.birthDate),
         availableDate: formatDate(litter.availableDate),
         rawBirthDate: formatDateForInput(litter.birthDate),
         rawAvailableDate: formatDateForInput(litter.availableDate),
-        image: litter.image, // Keep the image path as is
+        image: litter.image,
         puppies: litter.puppies.map(puppy => ({
             ...puppy,
-            _id: puppy._id, // Keep the original _id
-            id: puppy._id,  // Add id alias for compatibility
-            image: puppy.image // Keep the image path as is
+            _id: puppy._id,
+            id: puppy._id,
+            image: puppy.image
         }))
     });
 
-    // CRUD Operations
     const fetchLitters = async () => {
         setLoading(true);
         setError(null);
@@ -68,7 +59,6 @@ export const LitterProvider = ({ children }) => {
         }
     };
 
-    // Update getLitter to properly handle the response
     const getLitter = async (litterId) => {
         try {
             const response = await fetch(`/api/litters/${litterId}`);
@@ -159,10 +149,6 @@ export const LitterProvider = ({ children }) => {
         }
     };
 
-    /**
-     * Puppy Management Operations
-     */
-    // Update addPuppy to properly handle the response
     const addPuppy = async (litterId, puppyData) => {
         try {
             setError(null);
@@ -188,7 +174,6 @@ export const LitterProvider = ({ children }) => {
                 throw new Error(errorData.error || 'Failed to add puppy');
             }
         
-            // Force a fresh fetch of litter data
             const updatedLitter = await getLitter(litterId);
             setLitters(prev => prev.map(l => 
                 l._id === litterId ? updatedLitter : l
@@ -202,16 +187,13 @@ export const LitterProvider = ({ children }) => {
         }
     };
 
-    // Update updatePuppy to properly handle the response
     const updatePuppy = async (litterId, puppyId, puppyData) => {
         try {
             setError(null);
             const formData = new FormData();
             
-            // Handle all form fields
             Object.keys(puppyData).forEach(key => {
               if (puppyData[key] !== undefined && puppyData[key] !== null) {
-                // If it's an image, append it directly
                 if (key === 'image' && puppyData[key] instanceof File) {
                   formData.append('image', puppyData[key]);
                 } else {
@@ -230,7 +212,6 @@ export const LitterProvider = ({ children }) => {
               throw new Error(errorData.error || 'Failed to update puppy');
             }
         
-            // Force a fresh fetch of litter data to get updated image URLs
             const updatedLitter = await getLitter(litterId);
             setLitters(prev => prev.map(l => 
               l._id === litterId ? updatedLitter : l
@@ -268,7 +249,6 @@ export const LitterProvider = ({ children }) => {
         setError(null);
     };
 
-    // Initialize data on mount
     useEffect(() => {
         fetchLitters();
     }, []);

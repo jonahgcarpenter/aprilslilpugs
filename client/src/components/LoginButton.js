@@ -1,28 +1,20 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
-/**
- * LoginButton Component
- * Handles user authentication with login modal
- */
 const LoginButton = () => {
-  // State Management
   const [showModal, setShowModal] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { login, loginStatus, clearLoginStatus, setLoginStatus } = useAuth();
 
-  // Form Validation
   const isFormValid = () => {
     return email.trim() !== '' && password.trim() !== '';
   };
 
-  // Form Submission Handler
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Frontend validation
     if (!email.trim()) {
       if (setLoginStatus) {
         setLoginStatus({
@@ -33,7 +25,6 @@ const LoginButton = () => {
       return;
     }
 
-    // Basic email format validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       if (setLoginStatus) {
@@ -69,7 +60,6 @@ const LoginButton = () => {
           });
         }
         
-        // Wait 1.5 seconds before closing modal
         setTimeout(() => {
           setEmail('');
           setPassword('');
@@ -77,7 +67,6 @@ const LoginButton = () => {
           if (clearLoginStatus) clearLoginStatus();
         }, 1500);
       } else {
-        // Handle specific error messages from backend
         if (setLoginStatus) {
           setLoginStatus({
             message: result.message || 'Login failed. Please try again.',
@@ -98,7 +87,6 @@ const LoginButton = () => {
     }
   };
 
-  // Modal Close Handler
   const closeModal = () => {
     setShowModal(false);
     setEmail('');
@@ -108,7 +96,6 @@ const LoginButton = () => {
 
   return (
     <>
-      {/* Login Button */}
       <button
         onClick={() => setShowModal(true)}
         className="bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-6 py-2 text-sm rounded-full font-semibold shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
@@ -116,7 +103,6 @@ const LoginButton = () => {
         Login
       </button>
 
-      {/* Login Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-slate-900/75 backdrop-blur-sm flex items-start justify-center p-4 z-[9999]">
           <div className="mt-[15vh] bg-slate-900/90 backdrop-blur-sm rounded-xl p-8 max-w-md w-full border border-white/10">

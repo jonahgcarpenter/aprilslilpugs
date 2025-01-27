@@ -1,26 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
+
+// CONTEXT
 import { useLive } from '../context/LiveContext';
+
+// COMPONENTS
 import UnderConstruction from '../components/UnderConstruction';
 import Stream from '../components/Stream';
 
-/**
- * Live Stream Page Component
- * Handles live streaming functionality and stream availability checks
- */
 const Live = () => {
-  // State Management
   const { isLive } = useLive();
   const [isStreamAvailable, setIsStreamAvailable] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Check stream availability on component mount
   useEffect(() => {
     let mounted = true;
 
-    /**
-     * Verifies if the stream endpoint is accessible
-     */
     const checkStreamAvailability = async () => {
       try {
         setIsLoading(true);
@@ -49,12 +44,10 @@ const Live = () => {
     };
   }, [isLive]);
 
-  // Redirect if live streaming is disabled
   if (!isLive) {
     return <Navigate to="/" />;
   }
 
-  // Loading state
   if (isLoading) {
     return (
       <div className="min-h-screen pt-8 pb-16 flex items-center justify-center">
@@ -67,11 +60,9 @@ const Live = () => {
     <div className="min-h-screen pt-8 pb-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-12">
         <UnderConstruction />
-        {/* Stream Display */}
         {isStreamAvailable ? (
           <Stream />
         ) : (
-          // Offline Stream Message
           <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">
             <div className="aspect-video relative">
               <img 

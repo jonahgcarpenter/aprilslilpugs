@@ -1,13 +1,8 @@
-/**
- * Grumble Management Context
- * Handles state and operations for grumble (group of pugs) management
- */
 import { createContext, useState, useEffect } from 'react';
 
 export const GrumbleContext = createContext();
 
 export const GrumbleProvider = ({ children }) => {
-    // State Management
     const [grumbles, setGrumbles] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -16,8 +11,6 @@ export const GrumbleProvider = ({ children }) => {
         return `${process.env.REACT_APP_API_URL || ''}${relativePath}`;
     };
 
-    // CRUD Operations
-    // Fetch all grumbles
     const fetchGrumbles = async () => {
         setLoading(true);
         setError(null);
@@ -27,7 +20,6 @@ export const GrumbleProvider = ({ children }) => {
                 throw new Error('Failed to fetch grumbles');
             }
             const data = await response.json();
-            // Remove image URL transformation, let components handle it
             setGrumbles(data);
         } catch (err) {
             setError('Failed to fetch grumbles. Please try again later.');
@@ -37,14 +29,13 @@ export const GrumbleProvider = ({ children }) => {
         }
     };
 
-    // Add a new grumble
     const addGrumble = async (formData) => {
         setLoading(true);
         setError(null);
         try {
             const response = await fetch('/api/grumble', {
                 method: 'POST',
-                body: formData  // Remove headers since we're sending FormData
+                body: formData
             });
             
             if (!response.ok) {
@@ -64,7 +55,6 @@ export const GrumbleProvider = ({ children }) => {
         }
     };
 
-    // Delete a grumble
     const deleteGrumble = async (grumbleId) => {
         setLoading(true);
         setError(null);
@@ -89,14 +79,13 @@ export const GrumbleProvider = ({ children }) => {
         }
     };
 
-    // Update a grumble
     const updateGrumble = async (grumbleId, formData) => {
         setLoading(true);
         setError(null);
         try {
             const response = await fetch(`/api/grumble/${grumbleId}`, {
                 method: 'PATCH',
-                body: formData  // Remove headers since we're sending FormData
+                body: formData
             });
             
             if (!response.ok) {
@@ -120,7 +109,6 @@ export const GrumbleProvider = ({ children }) => {
         }
     };
 
-    // Initialize data on mount
     useEffect(() => {
         fetchGrumbles();
     }, []);
