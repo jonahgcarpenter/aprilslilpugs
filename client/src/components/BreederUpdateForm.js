@@ -26,6 +26,9 @@ const BreederUpdateForm = () => {
         location: breeder.location || '',
         story: breeder.story || ''
       });
+      if (breeder.profilePicture) {
+        setPreviewUrl(`/api/images${breeder.profilePicture}`);
+      }
     }
   }, [breeder]);
 
