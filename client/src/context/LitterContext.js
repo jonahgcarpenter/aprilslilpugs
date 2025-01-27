@@ -228,18 +228,27 @@ export const LitterProvider = ({ children }) => {
         try {
             setError(null);
             const response = await fetch(`/api/litters/${litterId}/puppies/${puppyId}`, {
-                method: 'DELETE'
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
             });
 
             if (!response.ok) {
-                throw new Error('Failed to delete puppy');
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to delete puppy');
             }
 
-            await fetchLitters();
+            // Update the litters state to reflect the deletion
+            const updatedLitter = await getLitter(litterId);
+            setLitters(prev => prev.map(l => 
+                l._id === litterId ? updatedLitter : l
+            ));
+
             return true;
         } catch (err) {
-            setError('Failed to delete puppy. Please try again.');
-            console.error('Delete error:', err);
+            setError(err.message || 'Failed to delete puppy. Please try again.');
+            console.error('Delete puppy error:', err);
             return false;
         }
     };

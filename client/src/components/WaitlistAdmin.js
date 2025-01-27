@@ -140,20 +140,17 @@ const WaitlistAdmin = () => {
                         onClick={e => e.stopPropagation()}
                     >
                         <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-red-500 to-red-600 mb-6">
-                            Delete Entry
+                            Are You Sure?
                         </h2>
                         
                         <p className="text-slate-300 mb-6">
-                            Are you sure you want to delete this entry? This action cannot be undone.
+                            Are you sure you want to delete this waitlist entry? This action cannot be undone.
                         </p>
 
                         <div className="flex justify-end gap-4">
                             <button
-                                onClick={() => {
-                                    setShowDeleteModal(false);
-                                    setEntryToDelete(null);
-                                }}
-                                className="px-6 py-2 text-sm text-white/70 hover:text-white transition-colors"
+                                onClick={() => setShowDeleteModal(false)}
+                                className="px-6 py-2 rounded-full text-sm text-white/70 hover:text-white hover:bg-slate-700/50 transition-colors"
                             >
                                 Cancel
                             </button>

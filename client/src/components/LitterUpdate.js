@@ -219,7 +219,7 @@ const LitterUpdate = () => {
     
     setIsSubmitting(true);
     try {
-      const success = await updatePuppy(litterId, selectedPuppy.id, puppyForm);
+      const success = await updatePuppy(litterId, selectedPuppy._id, puppyForm);
       if (success) {
         setSelectedPuppy(null);
         resetPuppyForm();
@@ -237,26 +237,45 @@ const LitterUpdate = () => {
     }
   };
 
-  const handlePuppyDelete = async (puppyId) => {
-    const success = await deletePuppy(litterId, puppyId);
-    if (success) {
-      setShowDeletePuppyModal(false);
-      setPuppyToDelete(null);
-      const updatedLitter = await getLitter(litterId);
-      setLitter(updatedLitter);
+  const handlePuppyDelete = async () => {
+    if (!puppyToDelete || !litterId) return;
+    
+    setIsSubmitting(true);
+    try {
+        console.log('Deleting puppy:', puppyToDelete, 'from litter:', litterId); // Debug log
+        const success = await deletePuppy(litterId, puppyToDelete);
+        if (success) {
+            setShowDeletePuppyModal(false);
+            setPuppyToDelete(null);
+            const updatedLitter = await getLitter(litterId);
+            setLitter(updatedLitter);
+            setSuccessMessage('Puppy deleted successfully!');
+            setShowSuccessModal(true);
+            setTimeout(() => setShowSuccessModal(false), 2000);
+        }
+    } catch (error) {
+        console.error('Error deleting puppy:', error);
+    } finally {
+        setIsSubmitting(false);
     }
-  };
+};
 
-  const selectPuppyForEdit = (puppy) => {
-    setSelectedPuppy(puppy);
-    setPuppyForm({
-      name: puppy.name,
-      color: puppy.color,
-      gender: puppy.gender,
-      status: puppy.status,
-      image: null
-    });
-  };
+const selectPuppyForEdit = (puppy) => {
+  setSelectedPuppy({
+    _id: puppy._id,
+    name: puppy.name,
+    color: puppy.color,
+    gender: puppy.gender,
+    status: puppy.status
+  });
+  setPuppyForm({
+    name: puppy.name,
+    color: puppy.color,
+    gender: puppy.gender,
+    status: puppy.status,
+    image: null
+  });
+};
 
   useEffect(() => {
     return () => {
@@ -507,8 +526,8 @@ const LitterUpdate = () => {
           <div className="mt-8">
             <h3 className="text-xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600">Current Puppies</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {litter.puppies.map((puppy) => (
-                <div key={puppy.id} className="border p-4 rounded-lg bg-slate-800 border-slate-700 hover:bg-slate-700 transition-all duration-200">
+              {litter?.puppies?.map((puppy) => (
+                <div key={`puppy-${puppy._id}`} className="border p-4 rounded-lg bg-slate-800 border-slate-700 hover:bg-slate-700 transition-all duration-200">
                   <img
                     src={`/api/images${puppy.image}`}
                     alt={puppy.name}
@@ -527,7 +546,7 @@ const LitterUpdate = () => {
                     </button>
                     <button
                       onClick={() => {
-                        setPuppyToDelete(puppy.id);
+                        setPuppyToDelete(puppy._id);
                         setShowDeletePuppyModal(true);
                       }}
                       className="bg-red-500 text-white px-2 py-1 rounded text-sm hover:bg-red-600 transition-all duration-200"
@@ -605,7 +624,7 @@ const LitterUpdate = () => {
                 Cancel
               </button>
               <button
-                onClick={() => handlePuppyDelete(puppyToDelete)}
+                onClick={handlePuppyDelete}
                 className="bg-gradient-to-r from-red-600 to-red-400 hover:from-red-700 hover:to-red-500 text-white px-6 py-2 text-sm rounded-full font-semibold shadow-md hover:shadow-lg transition-all duration-200"
               >
                 Delete Puppy

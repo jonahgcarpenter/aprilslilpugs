@@ -238,7 +238,7 @@ const GrumbleUpdate = () => {
                         onClick={e => e.stopPropagation()}
                     >
                         <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-red-500 to-red-600 mb-6">
-                            Delete Grumble Member
+                            Are You Sure?
                         </h2>
                         
                         <p className="text-slate-300 mb-6">
@@ -248,7 +248,7 @@ const GrumbleUpdate = () => {
                         <div className="flex justify-end gap-4">
                             <button
                                 onClick={() => setShowDeleteModal(false)}
-                                className="px-6 py-2 text-sm text-white/70 hover:text-white transition-colors"
+                                className="px-6 py-2 rounded-full text-sm text-white/70 hover:text-white hover:bg-slate-700/50 transition-colors"
                             >
                                 Cancel
                             </button>
@@ -267,11 +267,19 @@ const GrumbleUpdate = () => {
                 <div className="fixed inset-0 bg-slate-900/75 backdrop-blur-sm flex items-start justify-center p-4 z-[9999]">
                     <div className="mt-[15vh] bg-slate-900/90 backdrop-blur-sm rounded-xl p-8 max-w-md w-full border border-white/10">
                         <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-green-500 to-green-600 mb-6">
-                            Success
+                            Success!
                         </h2>
                         <p className="text-slate-300 mb-6">
                             {successMessage}
                         </p>
+                        <div className="flex justify-end">
+                            <button
+                                onClick={() => setShowSuccessModal(false)}
+                                className="bg-gradient-to-r from-green-600 to-green-400 hover:from-green-700 hover:to-green-500 text-white px-6 py-2 text-sm rounded-full font-semibold shadow-md hover:shadow-lg transition-all duration-200"
+                            >
+                                Close
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
