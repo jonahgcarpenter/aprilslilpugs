@@ -119,16 +119,39 @@ const GrumbleUpdate = () => {
                 )}
 
                 <div className="mb-6">
-                    <select
-                        className="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700 focus:ring-2 focus:ring-blue-500"
-                        onChange={(e) => setSelectedGrumble(grumbles.find(g => g._id === e.target.value) || null)}
-                        value={selectedGrumble?._id || ''}
-                    >
-                        <option value="">Select a grumble member to edit or leave blank for new</option>
-                        {grumbles.map(grumble => (
-                            <option key={grumble._id} value={grumble._id}>{grumble.name}</option>
-                        ))}
-                    </select>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                        {selectedGrumble ? 'Currently Editing' : 'Select Member to Edit'}
+                    </label>
+                    <div className="relative">
+                        <select
+                            className="w-full p-4 text-base rounded-lg bg-slate-800 text-white border border-slate-700 focus:ring-2 focus:ring-blue-500 appearance-none cursor-pointer"
+                            onChange={(e) => {
+                                const selected = grumbles.find(g => g._id === e.target.value);
+                                if (!selected) {
+                                    resetForm();
+                                } else {
+                                    setSelectedGrumble(selected);
+                                }
+                            }}
+                            value={selectedGrumble?._id || ''}
+                        >
+                            <option value="" className="bg-slate-800">Add New Grumble Member</option>
+                            {grumbles.length > 0 && (
+                                <optgroup label="Edit Existing Member" className="bg-slate-800">
+                                    {grumbles.map(grumble => (
+                                        <option key={grumble._id} value={grumble._id} className="py-2">
+                                            {grumble.name}
+                                        </option>
+                                    ))}
+                                </optgroup>
+                            )}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-white">
+                            <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
+                            </svg>
+                        </div>
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
