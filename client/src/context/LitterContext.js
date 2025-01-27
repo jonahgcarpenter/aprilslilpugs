@@ -59,19 +59,20 @@ export const LitterProvider = ({ children }) => {
         }
     };
 
-    const getLitter = async (litterId) => {
+    const getLitter = async (id) => {
         try {
-            const response = await fetch(`/api/litters/${litterId}`);
+            const response = await fetch(`/api/litters/${id}`);
+            if (response.status === 404) {
+                return null;
+            }
             if (!response.ok) {
                 throw new Error('Failed to fetch litter');
             }
-            const data = await response.json();
-            const formattedLitter = formatLitterData(data);
-            return formattedLitter;
-        } catch (err) {
-            setError('Failed to fetch litter details.');
-            console.error('Fetch error:', err);
-            return null;
+            const json = await response.json();
+            return json;
+        } catch (error) {
+            console.error('Fetch error:', error);
+            throw error;
         }
     };
 
@@ -129,23 +130,21 @@ export const LitterProvider = ({ children }) => {
         }
     };
 
-    const deleteLitter = async (litterId) => {
+    const deleteLitter = async (id) => {
         try {
-            setError(null);
-            const response = await fetch(`/api/litters/${litterId}`, {
+            const response = await fetch(`/api/litters/${id}`, {
                 method: 'DELETE'
             });
-
+            
             if (!response.ok) {
                 throw new Error('Failed to delete litter');
             }
-
-            await fetchLitters();
+            
+            setLitters(prev => prev.filter(litter => litter._id !== id));
             return true;
-        } catch (err) {
-            setError('Failed to delete litter. Please try again.');
-            console.error('Delete error:', err);
-            return false;
+        } catch (error) {
+            console.error('Delete error:', error);
+            throw error;
         }
     };
 

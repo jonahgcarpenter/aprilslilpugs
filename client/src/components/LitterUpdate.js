@@ -43,25 +43,50 @@ const LitterUpdate = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
+    const controller = new AbortController();
+
     const fetchLitterData = async () => {
-      if (litterId) {
+      if (!litterId) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
         const data = await getLitter(litterId);
-        if (data) {
-          setLitter(data);
-          setLitterForm({
-            name: data.name,
-            mother: data.mother,
-            father: data.father,
-            birthDate: data.rawBirthDate,
-            availableDate: data.rawAvailableDate,
-            image: null
-          });
+        if (!isMounted) return;
+
+        if (data === null) {
+          navigate('/breeder-dashboard', { replace: true });
+          return;
+        }
+
+        setLitter(data);
+        setLitterForm({
+          name: data.name,
+          mother: data.mother,
+          father: data.father,
+          birthDate: data.rawBirthDate,
+          availableDate: data.rawAvailableDate,
+          image: null
+        });
+      } catch (error) {
+        if (!isMounted) return;
+        console.error('Error fetching litter:', error);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
         }
       }
-      setIsLoading(false);
     };
+
     fetchLitterData();
-  }, [litterId, getLitter]);
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
+  }, [litterId, getLitter, navigate]);
 
   const handleLitterChange = (e) => {
     const { name, value, files } = e.target;
@@ -138,10 +163,18 @@ const LitterUpdate = () => {
   };
 
   const handleLitterDelete = async () => {
-    const success = await deleteLitter(litterId);
-    if (success) {
-      setShowDeleteLitterModal(false);
-      navigate('/breeder-dashboard');
+    setIsSubmitting(true);
+    try {
+      const success = await deleteLitter(litterId);
+      if (success) {
+        setShowDeleteLitterModal(false);
+        navigate('/breeder-dashboard', { replace: true });
+        return;
+      }
+    } catch (error) {
+      console.error('Error deleting litter:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
