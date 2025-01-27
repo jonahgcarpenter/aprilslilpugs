@@ -71,6 +71,8 @@ const LitterUpdate = () => {
           availableDate: new Date(data.availableDate).toISOString().split('T')[0],
           image: null
         });
+        // Add this line to show existing litter image
+        setLitterPreviewUrl(data.image ? `/api/images${data.image}` : null);
       } catch (error) {
         if (!isMounted) return;
         console.error('Error fetching litter:', error);
@@ -276,6 +278,8 @@ const selectPuppyForEdit = (puppy) => {
     status: puppy.status,
     image: null
   });
+  // Add this line to show existing puppy image
+  setPuppyPreviewUrl(puppy.image ? `/api/images${puppy.image}` : null);
   
   // Scroll to the puppy form with offset
   const yOffset = -270; // Adjust this value as needed
