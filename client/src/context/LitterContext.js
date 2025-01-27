@@ -239,7 +239,6 @@ export const LitterProvider = ({ children }) => {
                 throw new Error(errorData.message || 'Failed to delete puppy');
             }
 
-            // Update the litters state to reflect the deletion
             const updatedLitter = await getLitter(litterId);
             setLitters(prev => prev.map(l => 
                 l._id === litterId ? updatedLitter : l

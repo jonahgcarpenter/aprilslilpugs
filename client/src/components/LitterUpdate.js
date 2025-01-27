@@ -71,7 +71,6 @@ const LitterUpdate = () => {
           availableDate: new Date(data.availableDate).toISOString().split('T')[0],
           image: null
         });
-        // Add this line to show existing litter image
         setLitterPreviewUrl(data.image ? `/api/images${data.image}` : null);
       } catch (error) {
         if (!isMounted) return;
@@ -245,7 +244,7 @@ const LitterUpdate = () => {
     
     setIsSubmitting(true);
     try {
-        console.log('Deleting puppy:', puppyToDelete, 'from litter:', litterId); // Debug log
+        console.log('Deleting puppy:', puppyToDelete, 'from litter:', litterId);
         const success = await deletePuppy(litterId, puppyToDelete);
         if (success) {
             setShowDeletePuppyModal(false);
@@ -278,11 +277,9 @@ const selectPuppyForEdit = (puppy) => {
     status: puppy.status,
     image: null
   });
-  // Add this line to show existing puppy image
   setPuppyPreviewUrl(puppy.image ? `/api/images${puppy.image}` : null);
   
-  // Scroll to the puppy form with offset
-  const yOffset = -270; // Adjust this value as needed
+  const yOffset = -270;
   const element = puppyFormRef.current;
   const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
   window.scrollTo({ top: y, behavior: 'smooth' });
