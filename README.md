@@ -15,4 +15,3 @@ A website for my moms buisness, in which I have tailored to her request.
 # TODO
 
 - notifications for stream down
-- dockerize as single container
