@@ -6,7 +6,7 @@ const BreederDetails = () => {
   const { breeder, loading, error, fetchBreeder } = useContext(BreederContext)
 
   useEffect(() => {
-    fetchBreeder()
+    fetchBreeder('677055fb44cadf75392cf7a3')
   }, [])
 
   if (loading) {

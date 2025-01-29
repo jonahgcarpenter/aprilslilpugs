@@ -37,18 +37,13 @@ export const breederReducer = (state, action) => {
 export const BreederContextProvider = ({ children }) => {
   const [state, dispatch] = useReducer(breederReducer, initialState);
 
-  const fetchBreeder = async () => {
+  const fetchBreeder = async (breederId) => {
     dispatch({ type: 'SET_LOADING' });
     try {
-      const response = await fetch('/api/breeders');
+      const response = await fetch(`/api/breeders/${breederId}`);
       if (!response.ok) throw Error('Failed to fetch breeder info');
       const json = await response.json();
-      const april = json.find(b => b.firstName.toLowerCase() === 'april');
-      if (april) {
-        dispatch({ type: 'SET_BREEDER', payload: april });
-      } else {
-        throw Error('Breeder not found');
-      }
+      dispatch({ type: 'SET_BREEDER', payload: json });
     } catch (error) {
       dispatch({ type: 'SET_ERROR', payload: error.message });
     }

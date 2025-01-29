@@ -11,3 +11,8 @@ A website for my moms buisness, in which I have tailored to her request.
 - Node.js
 
 ### HLS STREAM
+
+# TODO
+
+- notifications for stream down
+- dockerize as single container
