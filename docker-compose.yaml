@@ -13,4 +13,9 @@ services:
       - MONGODB_URI=${MONGODB_URI}
       - JWT_SECRET=${JWT_SECRET}
       - REACT_APP_HLS_STREAM_URL=${REACT_APP_HLS_STREAM_URL}
+    networks:
+      - proxynet
 
+networks:
+  proxynet:
+    external: true
