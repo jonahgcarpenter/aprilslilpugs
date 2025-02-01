@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const { convertToCentralTime } = require('../util/timezone')
 
 const Schema = mongoose.Schema
 
@@ -21,8 +22,16 @@ const grumbleSchema = new Schema({
     },
     birthDate: {
         type: Date,
-        required: true
+        required: true,
+        get: function(date) {
+            if (!date) return null;
+            const d = new Date(date);
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        }
     }
-}, { timestamps: true })
+}, { 
+    timestamps: true,
+    toJSON: { getters: true }
+})
 
 module.exports = mongoose.model('Grumble', grumbleSchema)

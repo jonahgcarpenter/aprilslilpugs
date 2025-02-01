@@ -46,8 +46,12 @@ const GrumbleUpdate = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            // Validate date format
+            if (!formData.birthDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                throw new Error('Invalid date format. Please use YYYY-MM-DD format.');
+            }
+
             const formPayload = new FormData();
-            
             Object.keys(formData).forEach(key => {
                 if (formData[key] !== null && formData[key] !== '') {
                     formPayload.append(key, formData[key]);

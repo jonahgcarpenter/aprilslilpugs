@@ -88,21 +88,22 @@ export const GrumbleProvider = ({ children }) => {
                 body: formData
             });
             
+            const data = await response.json();
+            
             if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'Failed to update grumble');
+                console.error('Server error:', data);
+                throw new Error(data.error || 'Failed to update grumble');
             }
             
-            const updatedGrumble = await response.json();
             setGrumbles(prevGrumbles =>
                 prevGrumbles.map(grumble =>
-                    grumble._id === grumbleId ? updatedGrumble : grumble
+                    grumble._id === grumbleId ? data : grumble
                 )
             );
-            return updatedGrumble;
+            return data;
         } catch (err) {
-            setError('Failed to update grumble. Please try again later.');
-            console.error('Error updating grumble:', err);
+            console.error('Update error details:', err);
+            setError(err.message || 'Failed to update grumble');
             throw err;
         } finally {
             setLoading(false);

@@ -1,16 +1,26 @@
 import React, { useContext, useEffect } from 'react';
 import { GrumbleContext } from '../context/GrumbleContext';
 
-const calculateAge = (birthDate) => {
-    const today = new Date();
-    const birth = new Date(birthDate);
-    let age = today.getFullYear() - birth.getFullYear();
-    const monthDiff = today.getMonth() - birth.getMonth();
-
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+const calculateAge = (birthDateString) => {
+    // Parse the ISO date string (YYYY-MM-DD)
+    const [birthYear, birthMonth, birthDay] = birthDateString.split('-').map(Number);
+    
+    // Get current date in Central Time
+    const now = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' });
+    const currentDate = new Date(now);
+    
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth() + 1; // JavaScript months are 0-based
+    const currentDay = currentDate.getDate();
+    
+    let age = currentYear - birthYear;
+    
+    // Check if birthday hasn't occurred this year
+    if (currentMonth < birthMonth || 
+        (currentMonth === birthMonth && currentDay < birthDay)) {
         age--;
     }
-
+    
     return age;
 }
 
@@ -51,7 +61,7 @@ const Grumble = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                     {grumbles.map((pug) => (
                         <div
-                            key={pug.id}
+                            key={pug._id}
                             className="bg-slate-800/50 rounded-xl overflow-hidden hover:transform hover:scale-[1.02] transition-all duration-300 border border-slate-700/50"
                         >
                             <div className="aspect-square w-full overflow-hidden">

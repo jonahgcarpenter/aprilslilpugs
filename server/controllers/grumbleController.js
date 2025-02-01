@@ -1,4 +1,5 @@
 const Grumble = require('../models/grumbleModel')
+const { parseCentralTime } = require('../util/timezone')
 
 /**
  * Grumble Controller Functions
@@ -42,7 +43,7 @@ const createGrumble = async (req, res) => {
         const grumbleData = {
             ...req.body,
             image: imageUrl,  // This will store the correct path format
-            birthDate: new Date(req.body.birthDate) // Convert birthDate string to Date object
+            birthDate: parseCentralTime(req.body.birthDate) // Convert birthDate string to Date object
         }
         
         const grumble = await Grumble.create(grumbleData)
@@ -77,20 +78,29 @@ const updateGrumble = async (req, res) => {
     const { id } = req.params
 
     try {
-        const updateData = {
-            ...req.body,
-            birthDate: new Date(req.body.birthDate)
-        };
+        const updateData = { ...req.body };
+
+        if (req.body.birthDate) {
+            const parsedDate = parseCentralTime(req.body.birthDate);
+            
+            if (!parsedDate) {
+                return res.status(400).json({ 
+                    error: 'Invalid date format',
+                    details: 'Could not parse the provided date'
+                });
+            }
+            
+            updateData.birthDate = parsedDate;
+        }
 
         if (req.file) {
-            // Store clean path without /api/images prefix
             updateData.image = `/uploads/grumble-images/${req.file.filename}`;
         }
 
         const grumble = await Grumble.findOneAndUpdate(
             { _id: id },
             updateData,
-            { new: true, runValidators: true }  // Added runValidators for schema validation
+            { new: true, runValidators: true }
         );
 
         if (!grumble) {
@@ -99,12 +109,10 @@ const updateGrumble = async (req, res) => {
 
         res.status(200).json(grumble);
     } catch (error) {
-        // More detailed error handling
-        if (error.name === 'ValidationError') {
-            res.status(400).json({ error: 'Invalid data provided', details: error.message });
-        } else {
-            res.status(400).json({ error: error.message });
-        }
+        res.status(400).json({ 
+            error: 'Update failed',
+            details: error.message
+        });
     }
 }
 
