@@ -8,6 +8,7 @@ const liveRoutes = require('./routes/live')
 const littersRoutes = require('./routes/litters')
 const grumbleRoutes = require('./routes/grumble')
 const waitlistRoutes = require('./routes/waitlist')
+const settingsRoutes = require('./routes/settings')
 
 // Create an express app
 const app = express();
@@ -29,6 +30,7 @@ app.use('/api/live', liveRoutes)
 app.use('/api/litters', littersRoutes)
 app.use('/api/grumble', grumbleRoutes)
 app.use('/api/waitlist', waitlistRoutes)
+app.use('/api/settings', settingsRoutes)
 
 // Serve static files from the React build directory
 app.use(express.static(path.join(__dirname, 'build')))

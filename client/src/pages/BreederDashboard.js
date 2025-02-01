@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 // CONTEXT
 import { useLive } from '../context/LiveContext';
 import { LitterContext } from '../context/LitterContext';
+import { useSettings } from '../context/SettingsContext';
 
 // COMPONENTS
 import BreederUpdateForm from '../components/BreederUpdateForm';
@@ -12,6 +13,7 @@ import WaitlistAdmin from '../components/WaitlistAdmin';
 
 const BreederDashboard = () => {
   const { isLive, toggleLive } = useLive();
+  const { waitlistEnabled, toggleWaitlist } = useSettings();
   const { litters, loading, error } = useContext(LitterContext);
 
   return (
@@ -22,6 +24,13 @@ const BreederDashboard = () => {
           className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-4 sm:px-6 py-2.5 text-sm rounded-full font-semibold shadow-md hover:shadow-lg transform hover:scale-105 transition-transform duration-200"
         >
           {isLive ? 'Disable Live Page' : 'Enable Live Page'}
+        </button>
+
+        <button
+          onClick={toggleWaitlist}
+          className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-purple-400 hover:from-purple-700 hover:to-purple-500 text-white px-4 sm:px-6 py-2.5 text-sm rounded-full font-semibold shadow-md"
+        >
+          {waitlistEnabled ? 'Disable Waitlist' : 'Enable Waitlist'}
         </button>
       </div>
 

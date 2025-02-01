@@ -1,8 +1,10 @@
 import React, { useState, useContext, useRef, useEffect } from 'react';
 import { WaitlistContext } from '../context/WaitlistContext';
+import { useSettings } from '../context/SettingsContext';
 
 const Waitlist = () => {
     const { createEntry } = useContext(WaitlistContext);
+    const { waitlistEnabled } = useSettings();
     const notesRef = useRef(null);
     const [formData, setFormData] = useState({
         firstName: '',
