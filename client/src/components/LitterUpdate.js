@@ -1,6 +1,7 @@
 import { useState, useEffect, useContext, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { LitterContext } from '../context/LitterContext';
+import LoadingAnimation from './LoadingAnimation';
 
 const LitterUpdate = () => {
   const { litterId } = useParams();
@@ -296,7 +297,15 @@ const selectPuppyForEdit = (puppy) => {
     };
   }, [litterPreviewUrl, puppyPreviewUrl]);
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return (
+    <div className="mx-2 sm:mx-4">
+      <div className="bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl text-center text-slate-300">
+        <LoadingAnimation containerClassName="my-4" />
+        Loading litter data...
+      </div>
+    </div>
+  );
+
   if (!isNewLitter && !litter && !isLoading) return <div>Litter not found</div>;
 
   return (

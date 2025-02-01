@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { WaitlistContext } from '../context/WaitlistContext';
+import LoadingAnimation from './LoadingAnimation';
 
 const WaitlistAdmin = () => {
     const { entries, fetchEntries, updateEntry, deleteEntry } = useContext(WaitlistContext);
@@ -43,6 +44,7 @@ const WaitlistAdmin = () => {
     if (loading) return (
         <div className="mx-2 sm:mx-4">
             <div className="bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl text-center text-slate-300">
+                <LoadingAnimation containerClassName="my-4" />
                 Loading waitlist...
             </div>
         </div>

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import videojs from 'video.js';
 import 'video.js/dist/video-js.css';
 import { FaInfoCircle, FaTimes } from 'react-icons/fa';
+import LoadingAnimation from './LoadingAnimation';
 
 const HLS_STREAM_URL = process.env.REACT_APP_HLS_STREAM_URL;
 
@@ -73,11 +74,7 @@ const Stream = () => {
   if (!mounted) {
     return (
       <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 border border-slate-800/50">
-        <div className="flex items-center justify-center space-x-2">
-          <div className="w-4 h-4 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
-          <div className="w-4 h-4 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-          <div className="w-4 h-4 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
-        </div>
+        <LoadingAnimation />
       </div>
     );
   }

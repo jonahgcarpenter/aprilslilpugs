@@ -7,36 +7,50 @@ import { useLive } from '../context/LiveContext';
 // COMPONENTS
 import UnderConstruction from '../components/UnderConstruction';
 import Stream from '../components/Stream';
+import LoadingAnimation from '../components/LoadingAnimation';
 
 const Live = () => {
   const { isLive } = useLive();
   const [isStreamAvailable, setIsStreamAvailable] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
 
+  const preloadImage = (src) => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.src = src;
+      img.onload = resolve;
+      img.onerror = reject;
+    });
+  };
+
   useEffect(() => {
     let mounted = true;
 
-    const checkStreamAvailability = async () => {
+    const initialize = async () => {
       try {
         setIsLoading(true);
+        // Check stream availability
         const response = await fetch(process.env.REACT_APP_HLS_STREAM_URL);
+        const streamAvailable = response.ok;
+        
+        // Preload offline placeholder image regardless of stream status
+        await preloadImage('/placeholder-live.png');
+        
         if (mounted) {
-          setIsStreamAvailable(response.ok);
+          setIsStreamAvailable(streamAvailable);
+          setIsLoading(false);
         }
       } catch (error) {
         if (mounted) {
           console.error('Failed to check stream status');
           setIsStreamAvailable(false);
-        }
-      } finally {
-        if (mounted) {
           setIsLoading(false);
         }
       }
     };
 
     if (isLive) {
-      checkStreamAvailability();
+      initialize();
     }
 
     return () => {
@@ -51,7 +65,7 @@ const Live = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen pt-8 pb-16 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+        <LoadingAnimation />
       </div>
     );
   }

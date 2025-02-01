@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useContext } from "react"
 import { BreederContext } from '../context/BreederContext'
+import LoadingAnimation from './LoadingAnimation';
 
 const BreederUpdateForm = () => {
   const { breeder, dispatch } = useContext(BreederContext);
@@ -15,6 +16,7 @@ const BreederUpdateForm = () => {
   });
   const [profilePicture, setProfilePicture] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (breeder) {
@@ -104,10 +106,17 @@ const BreederUpdateForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+    setIsSubmitting(true);
 
-    if (!validateForm()) return;
+    if (!validateForm()) {
+      setIsSubmitting(false);
+      return;
+    }
 
-    if (!breeder?._id) return;
+    if (!breeder?._id) {
+      setIsSubmitting(false);
+      return;
+    }
 
     const formDataToSend = new FormData();
     Object.keys(formData).forEach(key => {
@@ -134,6 +143,8 @@ const BreederUpdateForm = () => {
 
     } catch (err) {
       setError(err.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -258,9 +269,14 @@ const BreederUpdateForm = () => {
 
         <button 
           type="submit"
-          className="w-full bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition-all duration-200"
+          disabled={isSubmitting}
+          className="w-full bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition-all duration-200 disabled:opacity-50"
         >
-          Update Profile
+          {isSubmitting ? (
+            <LoadingAnimation containerClassName="h-6" />
+          ) : (
+            'Update Profile'
+          )}
         </button>
       </form>
     </div>

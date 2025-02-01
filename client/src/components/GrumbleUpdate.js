@@ -1,5 +1,6 @@
 import { useState, useContext, useEffect } from 'react';
 import { GrumbleContext } from '../context/GrumbleContext';
+import LoadingAnimation from './LoadingAnimation';
 
 const formatDate = (date) => {
     return new Date(date).toISOString().split('T')[0];
@@ -21,6 +22,7 @@ const GrumbleUpdate = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         if (selectedGrumble) {
@@ -45,6 +47,7 @@ const GrumbleUpdate = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setIsSubmitting(true);
         try {
             // Validate date format
             if (!formData.birthDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
@@ -81,6 +84,8 @@ const GrumbleUpdate = () => {
             }
         } catch (error) {
             setMessage({ text: error.message || 'An error occurred', type: 'error' });
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -239,9 +244,14 @@ const GrumbleUpdate = () => {
                 <div className="flex flex-col sm:flex-row gap-4">
                     <button
                         type="submit"
-                        className="w-full bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition-all duration-200"
+                        disabled={isSubmitting}
+                        className="w-full bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition-all duration-200 disabled:opacity-50"
                     >
-                        {selectedGrumble ? 'Update Member' : 'Add Member'}
+                        {isSubmitting ? (
+                            <LoadingAnimation containerClassName="h-6" />
+                        ) : (
+                            selectedGrumble ? 'Update Member' : 'Add Member'
+                        )}
                     </button>
                     {selectedGrumble && (
                         <button
