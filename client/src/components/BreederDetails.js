@@ -1,21 +1,50 @@
-import { useEffect, useContext } from 'react'
+import { useEffect, useContext, useState } from 'react'
 import { BreederContext } from '../context/BreederContext'
 import { FaFacebook, FaEnvelope, FaPhoneAlt, FaMapMarkerAlt, FaHeart } from 'react-icons/fa'
+import LoadingAnimation from './LoadingAnimation'
 
 const BreederDetails = () => {
-  const { breeder, loading, error, fetchBreeder } = useContext(BreederContext)
+  const { breeder, loading: fetchLoading, error, fetchBreeder } = useContext(BreederContext)
+  const [loading, setLoading] = useState(true)
+
+  const preloadBreederImage = async (imageUrl) => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.src = `/api/images/uploads/breeder-profiles/${imageUrl.split('/').pop()}`;
+      img.onload = resolve;
+      img.onerror = reject;
+    });
+  };
 
   useEffect(() => {
-    fetchBreeder('677055fb44cadf75392cf7a3')
-  }, [])
+    const loadData = async () => {
+      setLoading(true);
+      await fetchBreeder('677055fb44cadf75392cf7a3');
+    };
+    loadData();
+  }, []);
 
-  if (loading) {
+  useEffect(() => {
+    const loadImage = async () => {
+      if (breeder?.profilePicture) {
+        try {
+          await preloadBreederImage(breeder.profilePicture);
+        } catch (error) {
+          console.error('Error preloading breeder image:', error);
+        }
+        setLoading(false);
+      }
+    };
+    loadImage();
+  }, [breeder]);
+
+  if (loading || fetchLoading) {
     return (
-      <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 border border-slate-800/50">
-        <div className="flex items-center justify-center space-x-2">
-          <div className="w-4 h-4 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
-          <div className="w-4 h-4 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-          <div className="w-4 h-4 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+      <div className={`transition-all duration-500 ease-in-out`}>
+        <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50">
+          <div className="h-20 flex items-center justify-center">
+            <LoadingAnimation />
+          </div>
         </div>
       </div>
     );

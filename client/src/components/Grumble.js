@@ -1,5 +1,6 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { GrumbleContext } from '../context/GrumbleContext';
+import LoadingAnimation from './LoadingAnimation';
 
 const calculateAge = (birthDateString) => {
     // Parse the ISO date string (YYYY-MM-DD)
@@ -25,19 +26,56 @@ const calculateAge = (birthDateString) => {
 }
 
 const Grumble = () => {
-    const { grumbles, loading, error, fetchGrumbles } = useContext(GrumbleContext);
+    const { grumbles, loading: fetchLoading, error, fetchGrumbles } = useContext(GrumbleContext);
+    const [loading, setLoading] = useState(true);
+
+    const preloadGrumbleImages = async (grumbles) => {
+        const loadImage = (src) => {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.src = src.startsWith('/api/images') ? src : `/api/images${src}`;
+                img.onload = resolve;
+                img.onerror = reject;
+            });
+        };
+
+        try {
+            await Promise.all(grumbles.map(pug => loadImage(pug.image)));
+        } catch (error) {
+            console.error('Error preloading grumble images:', error);
+        }
+    };
 
     useEffect(() => {
-        fetchGrumbles();
+        const loadData = async () => {
+            setLoading(true);
+            await fetchGrumbles();
+        };
+        loadData();
     }, []);
 
-    if (loading) {
+    useEffect(() => {
+        const loadImages = async () => {
+            if (grumbles.length > 0) {
+                await preloadGrumbleImages(grumbles);
+                setLoading(false);
+            }
+        };
+        loadImages();
+    }, [grumbles]);
+
+    if (loading || fetchLoading) {
         return (
-            <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 border border-slate-800/50">
-                <div className="flex items-center justify-center space-x-2">
-                    <div className="w-4 h-4 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
-                    <div className="w-4 h-4 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                    <div className="w-4 h-4 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+            <div className={`transition-all duration-500 ease-in-out`}>
+                <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-12">
+                        <h1 className="text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 text-center tracking-wider px-4">
+                            Meet my Grumble
+                        </h1>
+                        <div className="h-20 flex items-center justify-center">
+                            <LoadingAnimation />
+                        </div>
+                    </div>
                 </div>
             </div>
         );

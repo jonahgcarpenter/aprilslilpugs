@@ -1,20 +1,64 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { LitterContext } from '../context/LitterContext';
+import LoadingAnimation from './LoadingAnimation';
 
 const AvailablePups = () => {
-    const { litters, loading, error, fetchLitters } = useContext(LitterContext);
+    const { litters, loading: fetchLoading, error, fetchLitters } = useContext(LitterContext);
+    const [loading, setLoading] = useState(true);
+
+    const preloadPuppyImages = async (puppies) => {
+        const loadImage = (src) => {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.src = `/api/images${src}`;
+                img.onload = resolve;
+                img.onerror = reject;
+            });
+        };
+
+        try {
+            await Promise.all(puppies.map(puppy => loadImage(puppy.image)));
+        } catch (error) {
+            console.error('Error preloading puppy images:', error);
+        }
+    };
 
     useEffect(() => {
-        fetchLitters();
+        const loadData = async () => {
+            setLoading(true);
+            await fetchLitters();
+        };
+        loadData();
     }, []);
 
-    if (loading) {
+    useEffect(() => {
+        const loadImages = async () => {
+            if (litters.length > 0) {
+                const availablePuppies = litters.reduce((acc, litter) => {
+                    return [...acc, ...litter.puppies.filter(puppy => puppy.status === "Available")];
+                }, []);
+                
+                if (availablePuppies.length > 0) {
+                    await preloadPuppyImages(availablePuppies);
+                }
+                setLoading(false);
+            }
+        };
+        loadImages();
+    }, [litters]);
+
+    if (loading || fetchLoading) {
         return (
-            <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 border border-slate-800/50">
-                <div className="flex items-center justify-center space-x-2">
-                    <div className="w-4 h-4 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
-                    <div className="w-4 h-4 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                    <div className="w-4 h-4 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+            <div className={`transition-all duration-500 ease-in-out`}>
+                <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-12">
+                        <h1 className="text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 text-center tracking-wider px-4">
+                            Available Puppies
+                        </h1>
+                        <div className="h-20 flex items-center justify-center">
+                            <LoadingAnimation />
+                        </div>
+                    </div>
                 </div>
             </div>
         );
