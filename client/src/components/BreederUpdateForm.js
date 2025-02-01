@@ -19,6 +19,17 @@ const BreederUpdateForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
+    const loadData = async () => {
+      const response = await fetch('/api/breeders/677055fb44cadf75392cf7a3');
+      const json = await response.json();
+      if (response.ok) {
+        dispatch({ type: 'SET_BREEDER', payload: json });
+      }
+    };
+    loadData();
+  }, [dispatch]);
+
+  useEffect(() => {
     if (breeder) {
       setFormData({
         firstName: breeder.firstName || '',

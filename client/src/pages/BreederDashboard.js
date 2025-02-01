@@ -16,6 +16,19 @@ const BreederDashboard = () => {
   const { waitlistEnabled, toggleWaitlist } = useSettings();
   const { litters, loading, error } = useContext(LitterContext);
 
+  const isDateInFuture = (dateString) => {
+    try {
+      const inputDate = new Date(dateString);
+      const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' }));
+      inputDate.setHours(0, 0, 0, 0);
+      now.setHours(0, 0, 0, 0);
+      return inputDate > now;
+    } catch (error) {
+      console.error('Error comparing dates:', error);
+      return false;
+    }
+  };
+
   return (
     <div className="px-4 sm:px-6 lg:px-8 space-y-6 py-4 sm:py-8">
       <div className="flex justify-center gap-4">
@@ -42,7 +55,7 @@ const BreederDashboard = () => {
 
         <GrumbleUpdate />
 
-        <div className="bg-slate-900/80 backdrop-blur-sm rounded-xl p-4 sm:p-8 border border-slate-800/50 shadow-xl">
+        <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <h2 className="text-xl sm:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600">
               Litter Management
@@ -69,7 +82,7 @@ const BreederDashboard = () => {
                   <div>
                     <h4 className="font-semibold text-white mb-1">{litter.name}</h4>
                     <p className="text-sm text-gray-400">
-                      Born: {new Date(litter.birthDate).toLocaleDateString()}
+                      {isDateInFuture(litter.birthDate) ? 'Expected on:' : 'Born on:'} {new Date(litter.birthDate).toLocaleDateString()}
                       <br className="sm:hidden" />
                       <span className="hidden sm:inline"> · </span>
                       Puppies: {litter.puppies.length}

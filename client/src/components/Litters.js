@@ -44,19 +44,22 @@ const Litters = () => {
   }, [litters]);
 
   const isDateInFuture = (dateString) => {
-    // Parse the ISO date string (YYYY-MM-DD)
-    const [year, month, day] = dateString.split('-').map(Number);
-    const date = new Date(year, month - 1, day); // month is 0-based in Date constructor
-    
-    // Get current date in Central Time
-    const now = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' });
-    const currentDate = new Date(now);
-    
-    // Set both dates to start of day for accurate comparison
-    date.setHours(0, 0, 0, 0);
-    currentDate.setHours(0, 0, 0, 0);
-    
-    return date > currentDate;
+    try {
+      // Parse the date string into a Date object
+      const inputDate = new Date(dateString);
+      
+      // Get current date in Central Time
+      const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' }));
+      
+      // Set both dates to start of day for accurate comparison
+      inputDate.setHours(0, 0, 0, 0);
+      now.setHours(0, 0, 0, 0);
+      
+      return inputDate > now;
+    } catch (error) {
+      console.error('Error comparing dates:', error);
+      return false;
+    }
   };
 
   const preloadImages = async (puppies) => {
@@ -121,7 +124,7 @@ const Litters = () => {
                     <h2 className="text-2xl font-semibold text-slate-100">{litter.name}</h2>
                     <div className="space-y-2 text-slate-300">
                       <p>
-                        {isDateInFuture(litter.birthDate) ? 'Expected' : 'Born'} on {litter.birthDate}
+                        {isDateInFuture(litter.birthDate) ? 'Expected on:' : 'Born on:'} {litter.birthDate}
                       </p>
                       <p>Available on {litter.availableDate}</p>
                       <p>Mother: {litter.mother}</p>
