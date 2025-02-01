@@ -1,5 +1,6 @@
 const Litter = require('../models/litterModel')
 const mongoose = require('mongoose')
+const { parseCentralTime } = require('../util/timezone')
 
 /**
  * Utility Functions
@@ -52,8 +53,8 @@ const createLitter = async (req, res) => {
     const litterData = {
       ...req.body,
       image: req.file ? `/uploads/litter-images/${req.file.filename}` : '/uploads/litter-images/litter-placeholder.jpg',
-      birthDate: new Date(req.body.birthDate),
-      availableDate: new Date(req.body.availableDate)
+      birthDate: parseCentralTime(req.body.birthDate),
+      availableDate: parseCentralTime(req.body.availableDate)
     }
     const litter = await Litter.create(litterData)
     res.status(201).json(litter)
@@ -79,11 +80,11 @@ const updateLitter = async (req, res) => {
     }
 
     if (req.body.birthDate) {
-      updateData.birthDate = new Date(req.body.birthDate)
+      updateData.birthDate = parseCentralTime(req.body.birthDate)
     }
 
     if (req.body.availableDate) {
-      updateData.availableDate = new Date(req.body.availableDate)
+      updateData.availableDate = parseCentralTime(req.body.availableDate)
     }
 
     const litter = await Litter.findByIdAndUpdate(litterId, updateData, { new: true })

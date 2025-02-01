@@ -1,5 +1,13 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
+const { convertToCentralTime } = require('../util/timezone')
+
+// Shared date getter function
+const dateGetter = function(date) {
+  if (!date) return null;
+  const d = new Date(date);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
 
 const puppySchema = new Schema({
   name: {
@@ -26,9 +34,10 @@ const puppySchema = new Schema({
   },
   createdAt: {
     type: Date,
-    default: Date.now
+    default: Date.now,
+    get: dateGetter
   }
-});
+}, { toJSON: { getters: true } });
 
 const litterSchema = new Schema({
   name: {
@@ -45,11 +54,13 @@ const litterSchema = new Schema({
   },
   birthDate: {
     type: Date,
-    required: true
+    required: true,
+    get: dateGetter
   },
   availableDate: {
     type: Date,
-    required: true
+    required: true,
+    get: dateGetter
   },
   image: {
     type: String,
@@ -60,6 +71,9 @@ const litterSchema = new Schema({
     type: Date,
     default: Date.now
   }
-}, { timestamps: true });
+}, { 
+  timestamps: true,
+  toJSON: { getters: true }
+});
 
 module.exports = mongoose.model('Litter', litterSchema)

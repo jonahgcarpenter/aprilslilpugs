@@ -10,7 +10,19 @@ const Litters = () => {
   }, []);
 
   const isDateInFuture = (dateString) => {
-    return new Date(dateString) > new Date();
+    // Parse the ISO date string (YYYY-MM-DD)
+    const [year, month, day] = dateString.split('-').map(Number);
+    const date = new Date(year, month - 1, day); // month is 0-based in Date constructor
+    
+    // Get current date in Central Time
+    const now = new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' });
+    const currentDate = new Date(now);
+    
+    // Set both dates to start of day for accurate comparison
+    date.setHours(0, 0, 0, 0);
+    currentDate.setHours(0, 0, 0, 0);
+    
+    return date > currentDate;
   };
 
   if (loading) {

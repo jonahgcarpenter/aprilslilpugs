@@ -7,16 +7,19 @@ export const LitterProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const formatDate = (date) => {
-        return new Date(date).toLocaleDateString('en-US', {
+    const formatDate = (dateString) => {
+        // Parse the ISO date string (YYYY-MM-DD)
+        const [year, month, day] = dateString.split('-').map(Number);
+        const date = new Date(year, month - 1, day); // month is 0-based in Date constructor
+        return date.toLocaleDateString('en-US', {
             month: 'long',
             day: 'numeric',
             year: 'numeric'
         });
     };
 
-    const formatDateForInput = (date) => {
-        return new Date(date).toISOString().split('T')[0];
+    const formatDateForInput = (dateString) => {
+        return dateString; // Already in YYYY-MM-DD format
     };
 
     const getFullImageUrl = (relativePath) => {
@@ -29,8 +32,8 @@ export const LitterProvider = ({ children }) => {
         id: litter._id,
         birthDate: formatDate(litter.birthDate),
         availableDate: formatDate(litter.availableDate),
-        rawBirthDate: formatDateForInput(litter.birthDate),
-        rawAvailableDate: formatDateForInput(litter.availableDate),
+        rawBirthDate: litter.birthDate, // Store original format
+        rawAvailableDate: litter.availableDate, // Store original format
         image: litter.image,
         puppies: litter.puppies.map(puppy => ({
             ...puppy,
