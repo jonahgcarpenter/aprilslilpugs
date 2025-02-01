@@ -110,124 +110,137 @@ const Waitlist = () => {
     }, []);
 
     return (
-        <>
+           <>
             <div className={`transition-all duration-300 ${showInfo ? 'blur-sm' : ''}`}>
                 <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl mb-8">
                     <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="flex items-center justify-center mb-8 relative">
                             <h2 className="text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 text-center tracking-wider px-4">
-                                Join Our Waitlist
+                                {waitlistEnabled ? 'Join Our Waitlist' : 'Waitlist Currently Closed'}
                             </h2>
-                            <button
-                                onClick={() => setShowInfo(true)}
-                                className="absolute right-0 text-slate-400 hover:text-blue-400 transition-colors"
-                                aria-label="Show waitlist information"
-                            >
-                                <svg 
-                                    className="w-6 h-6" 
-                                    fill="none" 
-                                    stroke="currentColor" 
-                                    viewBox="0 0 24 24"
+                            {waitlistEnabled && (
+                                <button
+                                    onClick={() => setShowInfo(true)}
+                                    className="absolute right-0 text-slate-400 hover:text-blue-400 transition-colors"
+                                    aria-label="Show waitlist information"
                                 >
-                                    <path 
-                                        strokeLinecap="round" 
-                                        strokeLinejoin="round" 
-                                        strokeWidth={2} 
-                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
-                                    />
-                                </svg>
-                            </button>
+                                    <svg 
+                                        className="w-6 h-6" 
+                                        fill="none" 
+                                        stroke="currentColor" 
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path 
+                                            strokeLinecap="round" 
+                                            strokeLinejoin="round" 
+                                            strokeWidth={2} 
+                                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
+                                        />
+                                    </svg>
+                                </button>
+                            )}
                         </div>
 
-                        <form onSubmit={handleSubmit} className="space-y-6">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        {waitlistEnabled ? (
+                            <form onSubmit={handleSubmit} className="space-y-6">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                    <div>
+                                        <label htmlFor="firstName" className="block text-slate-300 mb-2">
+                                            First Name
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="firstName"
+                                            name="firstName"
+                                            value={formData.firstName}
+                                            onChange={handleChange}
+                                            className="w-full px-4 py-2 rounded-lg bg-slate-800/50 border border-slate-700/50 focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-slate-100"
+                                            placeholder="Enter your first name"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="lastName" className="block text-slate-300 mb-2">
+                                            Last Name
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="lastName"
+                                            name="lastName"
+                                            value={formData.lastName}
+                                            onChange={handleChange}
+                                            className="w-full px-4 py-2 rounded-lg bg-slate-800/50 border border-slate-700/50 focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-slate-100"
+                                            placeholder="Enter your last name"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                                
                                 <div>
-                                    <label htmlFor="firstName" className="block text-slate-300 mb-2">
-                                        First Name
+                                    <label htmlFor="phoneNumber" className="block text-slate-300 mb-2">
+                                        Phone Number
                                     </label>
                                     <input
-                                        type="text"
-                                        id="firstName"
-                                        name="firstName"
-                                        value={formData.firstName}
+                                        type="tel"
+                                        id="phoneNumber"
+                                        name="phoneNumber"
+                                        value={formData.phoneNumber}
                                         onChange={handleChange}
                                         className="w-full px-4 py-2 rounded-lg bg-slate-800/50 border border-slate-700/50 focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-slate-100"
-                                        placeholder="Enter your first name"
+                                        placeholder="(XXX) XXX-XXXX"
                                         required
                                     />
                                 </div>
+
                                 <div>
-                                    <label htmlFor="lastName" className="block text-slate-300 mb-2">
-                                        Last Name
+                                    <label htmlFor="notes" className="block text-slate-300 mb-2">
+                                        Preferences (optional)
                                     </label>
-                                    <input
-                                        type="text"
-                                        id="lastName"
-                                        name="lastName"
-                                        value={formData.lastName}
-                                        onChange={handleChange}
-                                        className="w-full px-4 py-2 rounded-lg bg-slate-800/50 border border-slate-700/50 focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-slate-100"
-                                        placeholder="Enter your last name"
-                                        required
+                                    <textarea
+                                        ref={notesRef}
+                                        id="notes"
+                                        name="notes"
+                                        value={formData.notes}
+                                        onChange={handleNotesChange}
+                                        className="w-full px-4 py-2 rounded-lg bg-slate-800/50 border border-slate-700/50 focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-slate-100 overflow-hidden resize-none min-h-[60px]"
+                                        placeholder="Enter your color/gender preferences..."
                                     />
                                 </div>
-                            </div>
-                            
-                            <div>
-                                <label htmlFor="phoneNumber" className="block text-slate-300 mb-2">
-                                    Phone Number
-                                </label>
-                                <input
-                                    type="tel"
-                                    id="phoneNumber"
-                                    name="phoneNumber"
-                                    value={formData.phoneNumber}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-2 rounded-lg bg-slate-800/50 border border-slate-700/50 focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-slate-100"
-                                    placeholder="(XXX) XXX-XXXX"
-                                    required
-                                />
-                            </div>
 
-                            <div>
-                                <label htmlFor="notes" className="block text-slate-300 mb-2">
-                                    Preferences (optional)
-                                </label>
-                                <textarea
-                                    ref={notesRef}
-                                    id="notes"
-                                    name="notes"
-                                    value={formData.notes}
-                                    onChange={handleNotesChange}
-                                    className="w-full px-4 py-2 rounded-lg bg-slate-800/50 border border-slate-700/50 focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-slate-100 overflow-hidden resize-none min-h-[60px]"
-                                    placeholder="Enter your color/gender preferences..."
-                                />
-                            </div>
+                                {message.text && (
+                                    <div className={`text-center p-3 rounded-lg ${
+                                        message.isError 
+                                            ? 'bg-red-500/20 text-red-400' 
+                                            : 'bg-green-500/20 text-green-400'
+                                    }`}>
+                                        {message.text}
+                                    </div>
+                                )}
 
-                            {message.text && (
-                                <div className={`text-center p-3 rounded-lg ${
-                                    message.isError 
-                                        ? 'bg-red-500/20 text-red-400' 
-                                        : 'bg-green-500/20 text-green-400'
-                                }`}>
-                                    {message.text}
+                                <div className="text-center">
+                                    <button
+                                        type="submit"
+                                        className="px-8 py-3 rounded-lg bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 text-white font-semibold hover:from-blue-500 hover:via-blue-600 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-blue-500/25"
+                                    >
+                                        Join Waitlist
+                                    </button>
                                 </div>
-                            )}
-
-                            <div className="text-center">
-                                <button
-                                    type="submit"
-                                    className="px-8 py-3 rounded-lg bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 text-white font-semibold hover:from-blue-500 hover:via-blue-600 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-blue-500/25"
-                                >
-                                    Join Waitlist
-                                </button>
+                            </form>
+                        ) : (
+                            <div className="text-center py-8">
+                                <p className="text-slate-300 text-lg mb-4">
+                                    We are not currently accepting new waitlist entries.
+                                </p>
+                                <p className="text-slate-400">
+                                    Please check back later or follow us on Facebook for updates.
+                                </p>
                             </div>
-                        </form>
+                        )}
                     </div>
                 </div>
             </div>
 
-            {showInfo && (
+            {showInfo && waitlistEnabled && (
                 <div className="fixed inset-0 z-[9999] flex items-center justify-center">
                     <div 
                         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
@@ -262,8 +275,8 @@ const Waitlist = () => {
                     </div>
                 </div>
             )}
-        </>
-    );
+        </> 
+        );
 };
 
 export default Waitlist;

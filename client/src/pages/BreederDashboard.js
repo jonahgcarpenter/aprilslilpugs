@@ -18,17 +18,17 @@ const BreederDashboard = () => {
 
   return (
     <div className="px-4 sm:px-6 lg:px-8 space-y-6 py-4 sm:py-8">
-      <div className="flex justify-center">
+      <div className="flex justify-center gap-4">
         <button
           onClick={toggleLive}
           className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-4 sm:px-6 py-2.5 text-sm rounded-full font-semibold shadow-md hover:shadow-lg transform hover:scale-105 transition-transform duration-200"
         >
           {isLive ? 'Disable Live Page' : 'Enable Live Page'}
-        </button>
+        </button> 
 
         <button
           onClick={toggleWaitlist}
-          className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-purple-400 hover:from-purple-700 hover:to-purple-500 text-white px-4 sm:px-6 py-2.5 text-sm rounded-full font-semibold shadow-md"
+          className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-4 sm:px-6 py-2.5 text-sm rounded-full font-semibold shadow-md hover:shadow-lg transform hover:scale-105 transition-transform duration-200"
         >
           {waitlistEnabled ? 'Disable Waitlist' : 'Enable Waitlist'}
         </button>

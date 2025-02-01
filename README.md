@@ -15,3 +15,4 @@ A website for my moms buisness, in which I have tailored to her request.
 # TODO
 
 - notifications for stream down
+- litter birthdates are not displayed correctly compared to whats in the DB
