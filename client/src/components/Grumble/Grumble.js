@@ -43,9 +43,7 @@ const Grumble = () => {
                     <h1 className="text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 text-center tracking-wider px-4">
                         Meet my Grumble
                     </h1>
-                    <div className="h-20 flex items-center justify-center">
-                        <LoadingAnimation />
-                    </div>
+                    <LoadingAnimation containerClassName="h-20" />
                 </div>
             </div>
         );
@@ -53,8 +51,8 @@ const Grumble = () => {
 
     if (error) {
         return (
-            <div className="mx-2 sm:mx-4 bg-slate-900 rounded-xl shadow-xl p-4 sm:p-8">
-                <p className="text-red-500 text-center">{error}</p>
+            <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50">
+                <div className="text-red-500 text-center">{error}</div>
             </div>
         );
     }
@@ -106,7 +104,7 @@ const Grumble = () => {
                 </div>
             </div>      
         </div>
-    );
+    )
 };
 
 export default Grumble;
