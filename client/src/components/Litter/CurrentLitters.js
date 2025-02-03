@@ -24,21 +24,39 @@ const CurrentLitters = () => {
     }
   };
 
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: '2-digit',
+      timeZone: 'UTC'
+    });
+  };
+
+  const isFutureDate = (dateString) => {
+    const date = new Date(dateString);
+    const today = new Date();
+    return date > today;
+  };
+
   useEffect(() => {
     if (litters.length > 0) {
       const filtered = litters.filter(litter => 
-        litter.puppies && 
+        // Include litters with no puppies or litters with available/reserved puppies
+        !litter.puppies || 
+        litter.puppies.length === 0 ||
         litter.puppies.some(puppy => 
           puppy.status === 'Available' || puppy.status === 'Reserved'
         )
       );
       setAvailableLitters(filtered);
 
-      // Preload all litter images
+      // Preload images only for litters that have puppies
       const litterImages = filtered.map(litter => litter.profilePicture);
-      const puppyImages = filtered.flatMap(litter => 
-        litter.puppies.map(puppy => puppy.profilePicture)
-      );
+      const puppyImages = filtered
+        .filter(litter => litter.puppies)
+        .flatMap(litter => litter.puppies.map(puppy => puppy.profilePicture));
       preloadImages([...litterImages, ...puppyImages]);
     }
   }, [litters]);
@@ -139,13 +157,13 @@ const CurrentLitters = () => {
                           <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                           </svg>
-                          <span>Born on: {litter.birthDate}</span>
+                          <span>{isFutureDate(litter.birthDate) ? 'Expected by: ' : 'Born on: '}{formatDate(litter.birthDate)}</span>
                         </p>
                         <p className="flex items-center gap-2">
                           <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
-                          <span>Available on: {litter.availableDate}</span>
+                          <span>Available on: {formatDate(litter.availableDate)}</span>
                         </p>
                         <p className="flex items-center gap-2">
                           <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -196,40 +214,55 @@ const CurrentLitters = () => {
                 </svg>
               </button>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {selectedLitter.puppies.map((puppy) => (
-                <div 
-                  key={puppy.id}
-                  className="bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700/50"
-                >
-                  <div className="aspect-square w-full overflow-hidden">
-                    <img
-                      src={`/api/images/uploads/puppy-images/${puppy.profilePicture}`}
-                      alt={puppy.name}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="p-6 space-y-4">
-                    <h4 className="text-2xl font-semibold text-slate-100">
-                      {puppy.name}
-                    </h4>
-                    <div className="space-y-2 text-slate-300">
-                      <p>Color: {puppy.color}</p>
-                      <p>Gender: {puppy.gender}</p>
-                      <p className={`inline-block px-3 py-1 rounded-full text-sm ${
-                        puppy.status === 'Available' 
-                          ? 'bg-green-500/20 text-green-400'
-                          : puppy.status === 'Reserved'
-                          ? 'bg-yellow-500/20 text-yellow-400'
-                          : 'bg-red-500/20 text-red-400'
-                      }`}>
-                        {puppy.status}
-                      </p>
+            {(!selectedLitter.puppies || selectedLitter.puppies.length === 0) ? (
+              <div className="flex flex-col items-center justify-center p-12 text-center">
+                <div className="w-24 h-24 mb-6 rounded-full bg-blue-500/10 flex items-center justify-center">
+                  <svg className="w-12 h-12 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                </div>
+                <h4 className="text-2xl font-bold text-slate-100 mb-4">Puppies Coming Soon!</h4>
+                <p className="text-slate-300 max-w-md">
+                  We're excited to announce that puppies will be arriving soon for this litter. 
+                  Check back later for updates and photos of the new arrivals!
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                {selectedLitter.puppies.map((puppy) => (
+                  <div 
+                    key={puppy.id}
+                    className="bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700/50"
+                  >
+                    <div className="aspect-square w-full overflow-hidden">
+                      <img
+                        src={`/api/images/uploads/puppy-images/${puppy.profilePicture}`}
+                        alt={puppy.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="p-6 space-y-4">
+                      <h4 className="text-2xl font-semibold text-slate-100">
+                        {puppy.name}
+                      </h4>
+                      <div className="space-y-2 text-slate-300">
+                        <p>Color: {puppy.color}</p>
+                        <p>Gender: {puppy.gender}</p>
+                        <p className={`inline-block px-3 py-1 rounded-full text-sm ${
+                          puppy.status === 'Available' 
+                            ? 'bg-green-500/20 text-green-400'
+                            : puppy.status === 'Reserved'
+                            ? 'bg-yellow-500/20 text-yellow-400'
+                            : 'bg-red-500/20 text-red-400'
+                        }`}>
+                          {puppy.status}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
