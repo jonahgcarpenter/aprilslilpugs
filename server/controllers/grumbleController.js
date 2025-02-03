@@ -56,16 +56,16 @@ const createGrumble = async (req, res) => {
     try {
         const grumbleData = {
             ...req.body,
-            profilePicture: req.file ? req.file.filename : 'grumble-placeholder.jpg',
-            birthDate: parseCentralTime(req.body.birthDate) // Convert birthDate string to Date object
+            profilePicture: req.files?.profilePicture?.[0]?.filename || 'grumble-placeholder.jpg',
+            birthDate: parseCentralTime(req.body.birthDate)
         }
         
         const grumble = await Grumble.create(grumbleData);
         res.status(200).json(grumble);
     } catch (error) {
         // Delete uploaded file if creation fails
-        if (req.file) {
-            await deleteFile(req.file.filename);
+        if (req.files?.profilePicture?.[0]) {
+            await deleteFile(req.files.profilePicture[0].filename);
         }
         res.status(400).json({ error: error.message })
     }
