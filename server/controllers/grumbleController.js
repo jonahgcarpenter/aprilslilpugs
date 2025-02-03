@@ -10,18 +10,13 @@ const path = require('path')
 /**
  * Deletes an image file from the filesystem
  * Skips deletion if the image is a placeholder or doesn't exist
- * @param {string} imagePath - The path to the image file
+ * @param {string} filename - The filename of the image
  */
-const deleteImageFile = async (imagePath) => {
+const deleteFile = async (filename) => {
     try {
-        if (!imagePath || imagePath.includes('placeholder')) return;
+        if (!filename || filename === 'grumble-placeholder.jpg') return;
         
-        // Remove leading slash if present
-        const relativePath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
-        console.log('Original filepath:', imagePath);
-        console.log('Relative path:', relativePath);
-        
-        const absolutePath = path.join('public', relativePath);
+        const absolutePath = path.join('public', 'uploads', 'grumble-images', filename);
         console.log('Attempting to delete:', absolutePath);
         
         await fs.access(absolutePath);
@@ -29,7 +24,7 @@ const deleteImageFile = async (imagePath) => {
         console.log('Successfully deleted file:', absolutePath);
     } catch (error) {
         if (error.code === 'ENOENT') {
-            console.log('File not found at path:', absolutePath);
+            console.log('File not found at path:', error.path);
         } else {
             console.error('Error deleting file:', error);
         }
@@ -39,12 +34,10 @@ const deleteImageFile = async (imagePath) => {
 /**
  * Processes uploaded files and returns formatted paths
  * @param {Object} file - The file object from multer
- * @returns {string} Path to the profile picture
+ * @returns {string} Filename of the profile picture
  */
 const processUploadedFiles = (file) => {
-    return file ? 
-        `/uploads/grumble-images/${file.filename}` : 
-        '/uploads/grumble-images/grumble-placeholder.jpg';
+    return file ? file.filename : 'grumble-placeholder.jpg';
 }
 
 /**
@@ -60,10 +53,15 @@ const processUploadedFiles = (file) => {
  */
 const getGrumbles = async (req, res) => {
     try {
-        const grumbles = await Grumble.find({}).sort({ createdAt: -1 })
-        res.status(200).json(grumbles)
+        const grumbles = await Grumble.find({}).sort({ createdAt: -1 });
+        const response = grumbles.map(grumble => {
+            const grumbleObj = grumble.toObject();
+            grumbleObj.profilePicture = `/uploads/grumble-images/${grumbleObj.profilePicture}`;
+            return grumbleObj;
+        });
+        res.status(200).json(response);
     } catch (error) {
-        res.status(400).json({ error: error.message })
+        res.status(400).json({ error: error.message });
     }
 }
 
@@ -80,7 +78,9 @@ const getGrumble = async (req, res) => {
         if (!grumble) {
             return res.status(404).json({ error: 'No such grumble member found' })
         }
-        res.status(200).json(grumble)
+        const response = grumble.toObject();
+        response.profilePicture = `/uploads/grumble-images/${response.profilePicture}`;
+        res.status(200).json(response);
     } catch (error) {
         res.status(400).json({ error: error.message })
     }
@@ -95,20 +95,21 @@ const getGrumble = async (req, res) => {
  */
 const createGrumble = async (req, res) => {
     try {
-        const profilePicture = processUploadedFiles(req.file);
-        
         const grumbleData = {
             ...req.body,
-            profilePicture,
+            profilePicture: req.file ? req.file.filename : 'grumble-placeholder.jpg',
             birthDate: parseCentralTime(req.body.birthDate) // Convert birthDate string to Date object
         }
         
-        const grumble = await Grumble.create(grumbleData)
-        res.status(200).json(grumble)
+        const grumble = await Grumble.create(grumbleData);
+        const response = grumble.toObject();
+        response.profilePicture = `/uploads/grumble-images/${response.profilePicture}`;
+        
+        res.status(200).json(response);
     } catch (error) {
         // Delete uploaded file if creation fails
         if (req.file) {
-            await deleteImageFile(`/uploads/grumble-images/${req.file.filename}`);
+            await deleteFile(req.file.filename);
         }
         res.status(400).json({ error: error.message })
     }
@@ -131,7 +132,7 @@ const deleteGrumble = async (req, res) => {
         }
 
         // Delete profile picture
-        await deleteImageFile(grumble.profilePicture)
+        await deleteFile(grumble.profilePicture)
 
         const deletedGrumble = await grumble.deleteOne()
         if (!deletedGrumble) {
@@ -165,9 +166,8 @@ const updateGrumble = async (req, res) => {
         const updateData = { ...req.body }
 
         if (req.file) {
-            const profilePicture = processUploadedFiles(req.file);
-            await deleteImageFile(grumble.profilePicture);
-            updateData.profilePicture = profilePicture;
+            await deleteFile(grumble.profilePicture);
+            updateData.profilePicture = req.file.filename;
         }
 
         if (req.body.birthDate) {
@@ -178,13 +178,16 @@ const updateGrumble = async (req, res) => {
             id,
             updateData,
             { new: true, runValidators: true }
-        )
+        );
 
-        res.status(200).json(updatedGrumble)
+        const response = updatedGrumble.toObject();
+        response.profilePicture = `/uploads/grumble-images/${response.profilePicture}`;
+
+        res.status(200).json(response);
     } catch (error) {
         // Delete newly uploaded file if update fails
         if (req.file) {
-            await deleteImageFile(`/uploads/grumble-images/${req.file.filename}`);
+            await deleteFile(req.file.filename);
         }
         res.status(400).json({ error: error.message })
     }
@@ -205,16 +208,19 @@ const updateProfilePicture = async (req, res) => {
         }
 
         // Delete old profile picture
-        await deleteImageFile(grumble.profilePicture);
+        await deleteFile(grumble.profilePicture);
 
         // Update with new profile picture
         const updatedGrumble = await Grumble.findByIdAndUpdate(
             id,
-            { profilePicture: `/uploads/grumble-images/${req.file.filename}` },
+            { profilePicture: req.file.filename },
             { new: true }
         );
 
-        res.status(200).json(updatedGrumble);
+        const responseGrumble = updatedGrumble.toObject();
+        responseGrumble.profilePicture = `/uploads/grumble-images/${responseGrumble.profilePicture}`;
+
+        res.status(200).json(responseGrumble);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }

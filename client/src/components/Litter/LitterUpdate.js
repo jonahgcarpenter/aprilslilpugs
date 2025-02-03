@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { LitterContext } from '../context/LitterContext';
-import LoadingAnimation from './LoadingAnimation';
+import { LitterContext } from '../../context/LitterContext';
+import LoadingAnimation from '../LoadingAnimation';
 
 const LitterUpdate = () => {
   const { litterId } = useParams();

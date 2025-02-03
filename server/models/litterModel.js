@@ -19,7 +19,7 @@ const puppySchema = new Schema({
   },
   profilePicture: {
     type: String,
-    default: '/uploads/puppy-images/puppy-placeholder.jpg'
+    default: 'puppy-placeholder.jpg' // Store only filename
   },
   gender: {
     type: String,
@@ -68,7 +68,7 @@ const litterSchema = new Schema({
   },
   profilePicture: {
     type: String,
-    default: '/uploads/litter-images/litter-placeholder.jpg'
+    default: 'litter-placeholder.jpg' // Store only filename
   },
   puppies: [puppySchema],
   createdAt: {

@@ -11,36 +11,130 @@ export const useSettings = () => {
 };
 
 export const SettingsProvider = ({ children }) => {
-  const [waitlistEnabled, setWaitlistEnabled] = useState(true);
+  const [settings, setSettings] = useState({
+    waitlistEnabled: true,
+    liveEnabled: false,
+    isLoading: true,
+    error: null
+  });
 
-  // Fetch initial settings
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+    return {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    };
+  };
+
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const response = await fetch('/api/settings');
+        setSettings(prev => ({ ...prev, isLoading: true }));
+        const token = localStorage.getItem('token');
+        if (!token) {
+          setSettings(prev => ({
+            ...prev,
+            isLoading: false,
+            error: 'Authentication token not found'
+          }));
+          return;
+        }
+
+        const response = await fetch('/api/settings', {
+          headers: getAuthHeaders()
+        });
+
+        if (!response.ok) {
+          const data = await response.json();
+          throw new Error(data.message || 'Failed to fetch settings');
+        }
+
         const data = await response.json();
-        setWaitlistEnabled(data.waitlistEnabled);
+        setSettings({
+          waitlistEnabled: data.waitlistEnabled,
+          liveEnabled: data.liveEnabled,
+          isLoading: false,
+          error: null
+        });
       } catch (error) {
         console.error('Error fetching settings:', error);
+        setSettings(prev => ({
+          ...prev,
+          isLoading: false,
+          error: error.message
+        }));
       }
     };
+
     fetchSettings();
   }, []);
 
   const toggleWaitlist = async () => {
     try {
       const response = await fetch('/api/settings/toggle-waitlist', {
-        method: 'POST'
+        method: 'POST',
+        headers: getAuthHeaders()
       });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || 'Failed to toggle waitlist');
+      }
+
       const data = await response.json();
-      setWaitlistEnabled(data.waitlistEnabled);
+      setSettings(prev => ({
+        ...prev,
+        waitlistEnabled: data.waitlistEnabled,
+        error: null
+      }));
     } catch (error) {
       console.error('Error toggling waitlist:', error);
+      setSettings(prev => ({
+        ...prev,
+        error: error.message
+      }));
+    }
+  };
+
+  const toggleLive = async () => {
+    try {
+      const response = await fetch('/api/settings/toggle-live', {
+        method: 'POST',
+        headers: getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || 'Failed to toggle live status');
+      }
+
+      const data = await response.json();
+      setSettings(prev => ({
+        ...prev,
+        liveEnabled: data.liveEnabled,
+        error: null
+      }));
+    } catch (error) {
+      console.error('Error toggling live status:', error);
+      setSettings(prev => ({
+        ...prev,
+        error: error.message
+      }));
     }
   };
 
   return (
-    <SettingsContext.Provider value={{ waitlistEnabled, toggleWaitlist }}>
+    <SettingsContext.Provider value={{ 
+      waitlistEnabled: settings.waitlistEnabled,
+      liveEnabled: settings.liveEnabled,
+      isLoading: settings.isLoading,
+      error: settings.error,
+      toggleWaitlist,
+      toggleLive
+    }}>
       {children}
     </SettingsContext.Provider>
   );

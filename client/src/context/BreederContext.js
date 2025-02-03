@@ -1,108 +1,85 @@
-import { createContext, useReducer, useContext } from 'react';
-import { AuthContext } from './AuthContext';
+import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 
 export const BreederContext = createContext();
 
-const initialState = {
-  breeder: null,
-  loading: false,
-  error: null
-};
-
-export const breederReducer = (state, action) => {
-  switch (action.type) {
-    case 'SET_BREEDER':
-      return {
-        ...state,
-        breeder: action.payload,
-        loading: false
-      };
-    case 'SET_LOADING':
-      return { ...state, loading: true, error: null };
-    case 'SET_ERROR':
-      return { ...state, error: action.payload, loading: false };
-    case 'UPDATE_PROFILE_PICTURE':
-      return {
-        ...state,
-        breeder: {
-          ...state.breeder,
-          profilePicture: action.payload
-        },
-        loading: false
-      };
-    case 'UPDATE_BREEDER_IMAGE':
-      return {
-        ...state,
-        breeder: {
-          ...state.breeder,
-          images: action.payload
-        },
-        loading: false
-      };
-    default:
-      return state;
+export const useBreeder = () => {
+  const context = useContext(BreederContext);
+  if (!context) {
+    throw new Error('useBreeder must be used within a BreederProvider');
   }
+  return context;
 };
 
-export const BreederContextProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(breederReducer, initialState);
-  const { token } = useContext(AuthContext);
+const BREEDER_ID = "679fd1587f2c7fe4601d3f2e";
 
-  const fetchBreederProfile = async () => {
-    dispatch({ type: 'SET_LOADING' });
+export const BreederProvider = ({ children }) => {
+  const [breeder, setBreeder] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchBreederProfile = useCallback(async () => {
+    setLoading(true);
+    setError(null);
     try {
       const response = await fetch('/api/breeder/profile');
-      if (!response.ok) throw Error('Failed to fetch breeder info');
       const json = await response.json();
-      dispatch({ type: 'SET_BREEDER', payload: json });
+
+      if (!response.ok) {
+        throw new Error(json.error);
+      }
+
+      // The backend already sends the relative paths, so no transformation needed here
+      setBreeder(json);
     } catch (error) {
-      dispatch({ type: 'SET_ERROR', payload: error.message });
+      setError(error.message);
+    } finally {
+      setLoading(false);
     }
-  };
+  }, []);
+
+  // Initial fetch on mount
+  useEffect(() => {
+    fetchBreederProfile();
+  }, [fetchBreederProfile]);
 
   const updateBreederProfile = async (formData) => {
-    dispatch({ type: 'SET_LOADING' });
+    setLoading(true);
+    setError(null);
     try {
       const response = await fetch('/api/breeder/profile', {
         method: 'PATCH',
+        body: formData,
         headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: formData
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
       });
-      if (!response.ok) throw Error('Failed to update profile');
       const json = await response.json();
-      dispatch({ type: 'SET_BREEDER', payload: json });
-    } catch (error) {
-      dispatch({ type: 'SET_ERROR', payload: error.message });
-    }
-  };
 
-  const updateBreederImage = async (index, formData) => {
-    dispatch({ type: 'SET_LOADING' });
-    try {
-      const response = await fetch(`/api/breeder/images/${index}`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: formData
+      if (!response.ok) {
+        throw new Error(json.error);
+      }
+
+      // Ensure _id is set in the updated data
+      setBreeder({
+        ...json,
+        _id: "679fd1587f2c7fe4601d3f2e"
       });
-      if (!response.ok) throw Error('Failed to update image');
-      const json = await response.json();
-      dispatch({ type: 'UPDATE_BREEDER_IMAGE', payload: json.images });
+      return { success: true, data: json };
     } catch (error) {
-      dispatch({ type: 'SET_ERROR', payload: error.message });
+      setError(error.message);
+      return { success: false, error: error.message };
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <BreederContext.Provider value={{
-      ...state,
-      dispatch,
+      breeder,
+      loading,
+      error,
       fetchBreederProfile,
-      updateBreederProfile,
-      updateBreederImage
+      updateBreederProfile
     }}>
       {children}
     </BreederContext.Provider>

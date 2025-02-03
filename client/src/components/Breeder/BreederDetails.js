@@ -1,57 +1,19 @@
-import { useEffect, useContext, useState } from 'react'
-
-// CONTEXT
-import { BreederContext } from '../context/BreederContext'
-
-// COMPONENTS
-import { FaFacebook, FaEnvelope, FaPhoneAlt, FaMapMarkerAlt, FaHeart } from 'react-icons/fa'
-import LoadingAnimation from './LoadingAnimation'
+import { useState } from 'react'
+import { useBreeder } from '../../context/BreederContext'
+import LoadingAnimation from '../LoadingAnimation'
+import { FaHeart, FaMapMarkerAlt, FaEnvelope, FaPhoneAlt, FaFacebook } from 'react-icons/fa'
 
 const BreederDetails = () => {
-  const { breeder, loading: fetchLoading, error, fetchBreederProfile } = useContext(BreederContext)
-  const [loading, setLoading] = useState(true)
+  const { breeder, loading, error } = useBreeder();
+  const [imageLoadError, setImageLoadError] = useState(false);
 
-  const preloadBreederImage = async (imageUrl) => {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.src = `/api/images/uploads/breeder-profiles/${imageUrl.split('/').pop()}`;
-      img.onload = resolve;
-      img.onerror = reject;
-    });
+  // Add error handling for images
+  const handleImageError = () => {
+    setImageLoadError(true);
   };
 
-  useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-      await fetchBreederProfile();
-    };
-    loadData();
-  }, []);
-
-  useEffect(() => {
-    const loadImage = async () => {
-      if (breeder?.profilePicture) {
-        try {
-          await preloadBreederImage(breeder.profilePicture);
-        } catch (error) {
-          console.error('Error preloading breeder image:', error);
-        }
-        setLoading(false);
-      }
-    };
-    loadImage();
-  }, [breeder]);
-
-  if (loading || fetchLoading) {
-    return (
-      <div className={`transition-all duration-500 ease-in-out`}>
-        <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50">
-          <div className="h-20 flex items-center justify-center">
-            <LoadingAnimation />
-          </div>
-        </div>
-      </div>
-    );
+  if (loading) {
+    return <LoadingAnimation />;
   }
 
   if (error) {
@@ -68,12 +30,13 @@ const BreederDetails = () => {
         <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">
           <div className="relative mb-8">
             <div className="flex flex-col md:flex-row gap-8 items-center">
-              {breeder.profilePicture && (
+              {breeder.profilePicture && !imageLoadError && (
                 <div className="relative w-48 h-48 md:w-64 md:h-64">
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl transform rotate-6 opacity-20"></div>
                   <img 
-                    src={`/api/images/uploads/breeder-profiles/${breeder.profilePicture.split('/').pop()}`}
+                    src={`/api/images/uploads/breeder-profiles/${breeder.profilePicture}`}
                     alt={`${breeder.firstName} ${breeder.lastName}`}
+                    onError={handleImageError}
                     className="relative w-full h-full object-cover rounded-xl border-2 border-white/10 shadow-xl transform transition-transform duration-300 hover:scale-[1.02]"
                   />
                 </div>
@@ -147,14 +110,16 @@ const BreederDetails = () => {
               <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-6">My Gallery</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 {breeder.images.map((image, index) => (
-                  <div key={index} className="relative group">
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl transform rotate-3 opacity-20 group-hover:opacity-30 transition-opacity duration-300"></div>
-                    <img
-                      src={`/api/images${image}`}
-                      alt={`Breeder gallery ${index + 1}`}
-                      className="relative w-full h-72 sm:h-64 object-cover rounded-xl border-2 border-white/10 shadow-xl transform transition-all duration-300 hover:scale-[1.02]"
-                    />
-                  </div>
+                  image && (
+                    <div key={index} className="relative group">
+                      <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl transform rotate-3 opacity-20 group-hover:opacity-30 transition-opacity duration-300"></div>
+                      <img
+                        src={`/api/images/uploads/breeder-profiles/${image}`}
+                        alt={`Breeder gallery ${index + 1}`}
+                        className="relative w-full h-72 sm:h-64 object-cover rounded-xl border-2 border-white/10 shadow-xl transform transition-all duration-300 hover:scale-[1.02]"
+                      />
+                    </div>
+                  )
                 ))}
               </div>
             </div>

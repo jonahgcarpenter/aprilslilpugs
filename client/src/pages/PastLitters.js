@@ -1,5 +1,5 @@
 // COMPONENTS
-import OldLitters from '../components/OldLitters';
+import OldLitters from '../components/Litter/OldLitters';
 import UnderConstruction from '../components/UnderConstruction';
 
 const PastLitters = () => {

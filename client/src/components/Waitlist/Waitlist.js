@@ -1,10 +1,9 @@
 import React, { useState, useContext, useRef, useEffect } from 'react';
-import { WaitlistContext } from '../context/WaitlistContext';
-import { useSettings } from '../context/SettingsContext';
+import { WaitlistContext } from '../../context/WaitlistContext';
+import LoadingAnimation from '../LoadingAnimation';
 
 const Waitlist = () => {
-    const { createEntry } = useContext(WaitlistContext);
-    const { waitlistEnabled } = useSettings();
+    const { createEntry, entries, isEnabled } = useContext(WaitlistContext);
     const notesRef = useRef(null);
     const [formData, setFormData] = useState({
         firstName: '',
@@ -15,6 +14,7 @@ const Waitlist = () => {
     });
     const [message, setMessage] = useState({ text: '', isError: false });
     const [showInfo, setShowInfo] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const formatPhoneNumber = (value) => {
         const phoneNumber = value.replace(/\D/g, '');
@@ -67,12 +67,14 @@ const Waitlist = () => {
         }
 
         try {
+            setIsSubmitting(true);
             const result = await createEntry({
                 firstName: formData.firstName,
                 lastName: formData.lastName,
                 phoneNumber: formData.phoneNumber,
                 notes: formData.notes,
-                status: 'waiting'
+                status: 'waiting',
+                position: (entries?.length || 0) + 1
             });
 
             setMessage({ 
@@ -88,6 +90,8 @@ const Waitlist = () => {
             });
         } catch (error) {
             setMessage({ text: 'Error submitting to waitlist. Please try again.', isError: true });
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -110,38 +114,39 @@ const Waitlist = () => {
     }, []);
 
     return (
-           <>
-            <div className={`transition-all duration-300 ${showInfo ? 'blur-sm' : ''}`}>
-                <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl mb-8">
-                    <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="flex items-center justify-center mb-8 relative">
-                            <h2 className="text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 text-center tracking-wider px-4">
-                                {waitlistEnabled ? 'Join Our Waitlist' : 'Waitlist Currently Closed'}
-                            </h2>
-                            {waitlistEnabled && (
-                                <button
-                                    onClick={() => setShowInfo(true)}
-                                    className="absolute right-0 text-slate-400 hover:text-blue-400 transition-colors"
-                                    aria-label="Show waitlist information"
-                                >
-                                    <svg 
-                                        className="w-6 h-6" 
-                                        fill="none" 
-                                        stroke="currentColor" 
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path 
-                                            strokeLinecap="round" 
-                                            strokeLinejoin="round" 
-                                            strokeWidth={2} 
-                                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
-                                        />
-                                    </svg>
-                                </button>
-                            )}
-                        </div>
+        <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">
+            <h2 className="text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 text-center tracking-wider px-4 mb-8">
+                {isEnabled ? 'Join Our Waitlist' : 'Waitlist Currently Closed'}
+            </h2>
 
-                        {waitlistEnabled ? (
+            {isEnabled ? (
+                <>
+                    <div className={`transition-all duration-300 ${showInfo ? 'blur-sm' : ''}`}>
+                        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="flex items-center justify-center mb-8 relative">
+                                {isEnabled && (
+                                    <button
+                                        onClick={() => setShowInfo(true)}
+                                        className="absolute right-0 text-slate-400 hover:text-blue-400 transition-colors"
+                                        aria-label="Show waitlist information"
+                                    >
+                                        <svg 
+                                            className="w-6 h-6" 
+                                            fill="none" 
+                                            stroke="currentColor" 
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path 
+                                                strokeLinecap="round" 
+                                                strokeLinejoin="round" 
+                                                strokeWidth={2} 
+                                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
+                                            />
+                                        </svg>
+                                    </button>
+                                )}
+                            </div>
+
                             <form onSubmit={handleSubmit} className="space-y-6">
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                     <div>
@@ -220,63 +225,70 @@ const Waitlist = () => {
                                 <div className="text-center">
                                     <button
                                         type="submit"
-                                        className="px-8 py-3 rounded-lg bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 text-white font-semibold hover:from-blue-500 hover:via-blue-600 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-blue-500/25"
+                                        disabled={isSubmitting}
+                                        className={`px-8 py-3 rounded-lg bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 text-white font-semibold hover:from-blue-500 hover:via-blue-600 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-blue-500/25 ${
+                                            isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+                                        }`}
                                     >
-                                        Join Waitlist
+                                        {isSubmitting ? (
+                                            <LoadingAnimation containerClassName="h-6" />
+                                        ) : (
+                                            'Join Waitlist'
+                                        )}
                                     </button>
                                 </div>
                             </form>
-                        ) : (
-                            <div className="text-center py-8">
-                                <p className="text-slate-300 text-lg mb-4">
-                                    We are not currently accepting new waitlist entries.
-                                </p>
-                                <p className="text-slate-400">
-                                    Please check back later or follow us on Facebook for updates.
-                                </p>
-                            </div>
-                        )}
+                        </div>
                     </div>
-                </div>
-            </div>
 
-            {showInfo && waitlistEnabled && (
-                <div className="fixed inset-0 z-[9999] flex items-center justify-center">
-                    <div 
-                        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-                        onClick={() => setShowInfo(false)}
-                    />
-                    <div className="relative z-[10000] bg-slate-900 rounded-xl p-6 max-w-lg mx-4 border border-slate-800/50 shadow-xl">
-                        <div className="flex justify-between items-start mb-4">
-                            <h3 className="text-xl font-semibold text-slate-100">
-                                How the Waitlist Works
-                            </h3>
-                            <button
+                    {showInfo && isEnabled && (
+                        <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+                            <div 
+                                className="absolute inset-0 bg-black/50 backdrop-blur-sm"
                                 onClick={() => setShowInfo(false)}
-                                className="text-slate-400 hover:text-slate-200 transition-colors"
-                                aria-label="Close information modal"
-                            >
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
+                            />
+                            <div className="relative z-[10000] bg-slate-900 rounded-xl p-6 max-w-lg mx-4 border border-slate-800/50 shadow-xl">
+                                <div className="flex justify-between items-start mb-4">
+                                    <h3 className="text-xl font-semibold text-slate-100">
+                                        How the Waitlist Works
+                                    </h3>
+                                    <button
+                                        onClick={() => setShowInfo(false)}
+                                        className="text-slate-400 hover:text-slate-200 transition-colors"
+                                        aria-label="Close information modal"
+                                    >
+                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div className="space-y-4 text-slate-300">
+                                    <p>Our waitlist system helps you secure your spot for upcoming puppy litters. Here's how it works:</p>
+                                    <ol className="list-decimal list-inside space-y-2 pl-4">
+                                        <li>Fill out the form with your contact information</li>
+                                        <li>Your information will be added to our waitlist database</li>
+                                        <li>We'll contact you when new puppies become available</li>
+                                        <li>Priority is given based on your position in the waitlist and your preferences</li>
+                                    </ol>
+                                    <p>We'll reach out via phone when puppies become available. Make sure your phone number is correct as this will be our primary method of contact.</p>
+                                    <p className="text-slate-400 text-sm">Your information is securely stored and will only be used for waitlist purposes.</p>
+                                </div>
+                            </div>
                         </div>
-                        <div className="space-y-4 text-slate-300">
-                            <p>Our waitlist system helps you secure your spot for upcoming puppy litters. Here's how it works:</p>
-                            <ol className="list-decimal list-inside space-y-2 pl-4">
-                                <li>Fill out the form with your contact information</li>
-                                <li>Your information will be added to our waitlist database</li>
-                                <li>We'll contact you when new puppies become available</li>
-                                <li>Priority is given based on your position in the waitlist and your preferences</li>
-                            </ol>
-                            <p>We'll reach out via phone when puppies become available. Make sure your phone number is correct as this will be our primary method of contact.</p>
-                            <p className="text-slate-400 text-sm">Your information is securely stored and will only be used for waitlist purposes.</p>
-                        </div>
-                    </div>
+                    )}
+                </>
+            ) : (
+                <div className="text-center py-8">
+                    <p className="text-slate-300 text-lg mb-4">
+                        We are not currently accepting new waitlist entries.
+                    </p>
+                    <p className="text-slate-400">
+                        Please check back later or follow us on Facebook for updates.
+                    </p>
                 </div>
             )}
-        </> 
-        );
+        </div>
+    );
 };
 
 export default Waitlist;

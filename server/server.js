@@ -4,7 +4,6 @@ const express = require('express')
 const mongoose = require('mongoose')
 const path = require('path')
 const breederRoutes = require('./routes/breeder')
-const liveRoutes = require('./routes/live')
 const littersRoutes = require('./routes/litters')
 const grumbleRoutes = require('./routes/grumble')
 const waitlistRoutes = require('./routes/waitlist')
@@ -16,7 +15,7 @@ const app = express();
 // middleware
 app.use(express.json())
 
-// Serve images from public/uploads directory
+// Serve images from public directory
 app.use('/api/images', express.static(path.join(__dirname, 'public')))
 
 app.use((req, _res, next) => {
@@ -26,7 +25,6 @@ app.use((req, _res, next) => {
 
 // routes
 app.use('/api/breeder', breederRoutes)
-app.use('/api/live', liveRoutes)
 app.use('/api/litters', littersRoutes)
 app.use('/api/grumble', grumbleRoutes)
 app.use('/api/waitlist', waitlistRoutes)

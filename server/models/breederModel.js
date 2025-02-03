@@ -28,12 +28,12 @@ const breederSchema = new Schema({
   },
   profilePicture: {
     type: String,
-    required: false
+    required: false,
+    // Stores: "1234567890-profile.jpg"
   },
   images: {
     type: [String],
-    default: [null, null],
-    validate: [array => array.length <= 2, 'Cannot have more than 2 images']
+    // Stores: ["1234567890-gallery1.jpg", "1234567890-gallery2.jpg"]
   },
   password: {
     type: String,

@@ -4,16 +4,11 @@ const settingsSchema = new mongoose.Schema({
   waitlistEnabled: {
     type: Boolean,
     default: true
+  },
+  liveEnabled: {
+    type: Boolean,
+    default: false
   }
-});
-
-// Ensure we only ever have one settings document
-settingsSchema.statics.getInstance = async function() {
-  let settings = await this.findOne();
-  if (!settings) {
-    settings = await this.create({ waitlistEnabled: true });
-  }
-  return settings;
-};
+}, { timestamps: true });
 
 module.exports = mongoose.model('Settings', settingsSchema);

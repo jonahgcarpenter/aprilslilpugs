@@ -1,4 +1,6 @@
-import { createContext, useReducer } from 'react';
+import { createContext, useReducer, useCallback, useEffect } from 'react';
+import { useAuth } from './AuthContext';
+import { useSettings } from './SettingsContext';
 
 export const WaitlistContext = createContext();
 
@@ -6,44 +8,69 @@ export const waitlistReducer = (state, action) => {
   switch (action.type) {
     case 'SET_ENTRIES':
       return {
-        entries: action.payload.sort((a, b) => a.position - b.position)
+        entries: action.payload.sort((a, b) => a.position - b.position),
+        isLoading: false,
+        error: null
       };
     case 'CREATE_ENTRY':
       return {
+        ...state,
         entries: [...state.entries, action.payload].sort((a, b) => a.position - b.position)
       };
     case 'UPDATE_ENTRY':
       return {
+        ...state,
         entries: state.entries.map(entry =>
-          entry._id === action.payload._id 
-            ? { ...entry, ...action.payload }
-            : entry
+          entry._id === action.payload._id ? action.payload : entry
         ).sort((a, b) => a.position - b.position)
       };
     case 'DELETE_ENTRY':
       return {
+        ...state,
         entries: state.entries.filter(entry => entry._id !== action.payload._id)
       };
+    case 'SET_ERROR':
+      return { ...state, error: action.payload };
     default:
       return state;
   }
 };
 
 export const WaitlistProvider = ({ children }) => {
+  const { token } = useAuth();
+  const { waitlistEnabled } = useSettings();
   const [state, dispatch] = useReducer(waitlistReducer, {
-    entries: []
+    entries: [],
+    error: null
   });
 
-  const fetchEntries = async () => {
-    try {
-      const response = await fetch('/api/waitlist');
-      const json = await response.json();
+  const getAuthHeaders = useCallback(() => ({
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  }), [token]);
 
-      if (response.ok) {
-        dispatch({ type: 'SET_ENTRIES', payload: json });
-      }
+  // Add effect to handle waitlist enabled/disabled state
+  useEffect(() => {
+    if (waitlistEnabled && token) {
+      fetchEntries();
+    } else {
+      dispatch({ type: 'SET_ENTRIES', payload: [] });
+    }
+  }, [waitlistEnabled, token]);
+
+  const fetchEntries = async () => {
+    if (!waitlistEnabled) return;
+    
+    try {
+      const response = await fetch('/api/waitlist', {
+        headers: getAuthHeaders()
+      });
+      const data = await response.json();
+      
+      if (!response.ok) throw new Error(data.error);
+      dispatch({ type: 'SET_ENTRIES', payload: data });
     } catch (error) {
-      console.error('Error fetching waitlist entries:', error);
+      dispatch({ type: 'SET_ERROR', payload: error.message });
     }
   };
 
@@ -51,19 +78,16 @@ export const WaitlistProvider = ({ children }) => {
     try {
       const response = await fetch('/api/waitlist', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(entryData)
       });
-      const json = await response.json();
-
-      if (response.ok) {
-        dispatch({ type: 'CREATE_ENTRY', payload: json });
-        return json;
-      }
+      const data = await response.json();
+      
+      if (!response.ok) throw new Error(data.error);
+      dispatch({ type: 'CREATE_ENTRY', payload: data });
+      return data;
     } catch (error) {
-      console.error('Error creating waitlist entry:', error);
+      dispatch({ type: 'SET_ERROR', payload: error.message });
       throw error;
     }
   };
@@ -72,19 +96,16 @@ export const WaitlistProvider = ({ children }) => {
     try {
       const response = await fetch(`/api/waitlist/${id}`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(updates)
       });
-      const json = await response.json();
-
-      if (response.ok) {
-        dispatch({ type: 'UPDATE_ENTRY', payload: json });
-        return json;
-      }
+      const data = await response.json();
+      
+      if (!response.ok) throw new Error(data.error);
+      dispatch({ type: 'UPDATE_ENTRY', payload: data });
+      return data;
     } catch (error) {
-      console.error('Error updating waitlist entry:', error);
+      dispatch({ type: 'SET_ERROR', payload: error.message });
       throw error;
     }
   };
@@ -92,16 +113,16 @@ export const WaitlistProvider = ({ children }) => {
   const deleteEntry = async (id) => {
     try {
       const response = await fetch(`/api/waitlist/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: getAuthHeaders()
       });
-      const json = await response.json();
-
-      if (response.ok) {
-        dispatch({ type: 'DELETE_ENTRY', payload: json });
-        return json;
-      }
+      const data = await response.json();
+      
+      if (!response.ok) throw new Error(data.error);
+      dispatch({ type: 'DELETE_ENTRY', payload: data });
+      return data;
     } catch (error) {
-      console.error('Error deleting waitlist entry:', error);
+      dispatch({ type: 'SET_ERROR', payload: error.message });
       throw error;
     }
   };
@@ -112,7 +133,8 @@ export const WaitlistProvider = ({ children }) => {
       fetchEntries,
       createEntry,
       updateEntry,
-      deleteEntry
+      deleteEntry,
+      isEnabled: waitlistEnabled
     }}>
       {children}
     </WaitlistContext.Provider>

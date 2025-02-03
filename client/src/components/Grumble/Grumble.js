@@ -1,10 +1,6 @@
-import React, { useContext, useEffect, useState } from 'react';
-
-// CONTEXT
-import { GrumbleContext } from '../context/GrumbleContext';
-
-// COMPONENTS
-import LoadingAnimation from './LoadingAnimation';
+import React, { useContext, useState } from 'react';
+import { GrumbleContext } from '../../context/GrumbleContext';
+import LoadingAnimation from '../LoadingAnimation';
 
 const calculateAge = (birthDateString) => {
     // Parse the ISO date string (YYYY-MM-DD)
@@ -30,58 +26,25 @@ const calculateAge = (birthDateString) => {
 }
 
 const Grumble = () => {
-    const { grumbles, loading: fetchLoading, error, fetchGrumbles, getFullImageUrl } = useContext(GrumbleContext);
-    const [loading, setLoading] = useState(true);
-    
-    const preloadGrumbleImages = async (grumbles) => {
-        const loadImage = (src) => {
-            if (!src) return Promise.resolve();
-            return new Promise((resolve, reject) => {
-                const img = new Image();
-                img.src = getFullImageUrl(src);
-                img.onload = resolve;
-                img.onerror = reject;
-            });
-        };
+    const { grumbles, loading, error, getFullImageUrl } = useContext(GrumbleContext);
+    const [imageLoadError, setImageLoadError] = useState({});
 
-        try {
-            await Promise.all(grumbles.map(grumble => 
-                loadImage(grumble.profilePicture)
-            ));
-        } catch (error) {
-            console.error('Error preloading images:', error);
-        }
+    const handleImageError = (pugId) => {
+        setImageLoadError(prev => ({
+            ...prev,
+            [pugId]: true
+        }));
     };
 
-    useEffect(() => {
-        const loadData = async () => {
-            setLoading(true);
-            await fetchGrumbles();
-        };
-        loadData();
-    }, []);
-
-    useEffect(() => {
-        const loadImages = async () => {
-            if (grumbles.length > 0) {
-                await preloadGrumbleImages(grumbles);
-                setLoading(false);
-            }
-        };
-        loadImages();
-    }, [grumbles]);
-
-    if (loading || fetchLoading) {
+    if (loading) {
         return (
-            <div className={`transition-all duration-500 ease-in-out`}>
-                <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-12">
-                        <h1 className="text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 text-center tracking-wider px-4">
-                            Meet my Grumble
-                        </h1>
-                        <div className="h-20 flex items-center justify-center">
-                            <LoadingAnimation />
-                        </div>
+            <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-12">
+                    <h1 className="text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 text-center tracking-wider px-4">
+                        Meet my Grumble
+                    </h1>
+                    <div className="h-20 flex items-center justify-center">
+                        <LoadingAnimation />
                     </div>
                 </div>
             </div>
@@ -113,8 +76,12 @@ const Grumble = () => {
                         >
                             <div className="aspect-square w-full overflow-hidden">
                                 <img
-                                    src={getFullImageUrl(pug.profilePicture)}
+                                    src={imageLoadError[pug._id] 
+                                        ? '/fallback-pug-image.png' 
+                                        : getFullImageUrl(pug.profilePicture)
+                                    }
                                     alt={pug.name}
+                                    onError={() => handleImageError(pug._id)}
                                     className="w-full h-full object-cover"
                                 />
                             </div>

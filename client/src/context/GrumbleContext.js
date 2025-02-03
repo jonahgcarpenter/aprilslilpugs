@@ -8,9 +8,33 @@ export const GrumbleProvider = ({ children }) => {
     const [error, setError] = useState(null);
 
     const getFullImageUrl = (relativePath) => {
-        if (!relativePath) return '';
-        // Match the breeder pattern using /api/images prefix
-        return `/api/images${relativePath}`;
+        if (!relativePath || typeof relativePath !== 'string') return '';
+        // Ensure path starts with a slash
+        const normalizedPath = relativePath.startsWith('/') ? relativePath : `/${relativePath}`;
+        return `/api/images${normalizedPath}`;
+    };
+
+    const validateImage = (file) => {
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        if (file.size > maxSize) {
+            throw new Error('Image must be less than 5MB');
+        }
+        
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        if (!allowedTypes.includes(file.type)) {
+            throw new Error('Image must be in JPG, PNG, or WebP format');
+        }
+    };
+
+    const validateDate = (dateString) => {
+        if (!dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+            throw new Error('Invalid date format. Use YYYY-MM-DD');
+        }
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) {
+            throw new Error('Invalid date');
+        }
+        return true;
     };
 
     const fetchGrumbles = async () => {
@@ -35,6 +59,18 @@ export const GrumbleProvider = ({ children }) => {
         setLoading(true);
         setError(null);
         try {
+            // Validate date if present in FormData
+            const birthDate = formData.get('birthDate');
+            if (birthDate) {
+                validateDate(birthDate);
+            }
+
+            // Validate image if present
+            const image = formData.get('profilePicture');
+            if (image instanceof File) {
+                validateImage(image);
+            }
+
             const response = await fetch('/api/grumble', {
                 method: 'POST',
                 headers: {
@@ -52,7 +88,7 @@ export const GrumbleProvider = ({ children }) => {
             setGrumbles(prevGrumbles => [...prevGrumbles, newGrumble]);
             return newGrumble;
         } catch (err) {
-            setError('Failed to add grumble. Please try again later.');
+            setError(err.message || 'Failed to add grumble');
             console.error('Error adding grumble:', err);
             throw err;
         } finally {
@@ -92,6 +128,18 @@ export const GrumbleProvider = ({ children }) => {
         setLoading(true);
         setError(null);
         try {
+            // Validate date if present in FormData
+            const birthDate = formData.get('birthDate');
+            if (birthDate) {
+                validateDate(birthDate);
+            }
+
+            // Validate image if present
+            const image = formData.get('profilePicture');
+            if (image instanceof File) {
+                validateImage(image);
+            }
+
             const response = await fetch(`/api/grumble/${grumbleId}`, {
                 method: 'PATCH',
                 headers: {

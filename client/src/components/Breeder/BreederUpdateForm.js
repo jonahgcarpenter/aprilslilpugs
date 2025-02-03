@@ -1,15 +1,9 @@
-import { useState, useEffect, useRef, useContext } from "react"
-
-// CONTEXT
-import { BreederContext } from '../context/BreederContext'
-
-// COMPONENTS
-import LoadingAnimation from './LoadingAnimation';
+import { useState, useEffect, useRef } from "react"
+import { useBreeder } from '../../context/BreederContext'
+import LoadingAnimation from '../LoadingAnimation';
 
 const BreederUpdateForm = () => {
-  const { breeder, dispatch, updateBreederProfile, updateBreederImage } = useContext(BreederContext);
-  const [error, setError] = useState(null);
-  const fileInputRef = useRef(null);
+  const { breeder, updateBreederProfile, fetchBreederProfile } = useBreeder();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -19,24 +13,16 @@ const BreederUpdateForm = () => {
     story: ''
   });
   const [profilePicture, setProfilePicture] = useState(null);
+  const [galleryImages, setGalleryImages] = useState([null, null]);
   const [previewUrl, setPreviewUrl] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [galleryPreviews, setGalleryPreviews] = useState([null, null]);
-  const galleryFileInputRefs = [useRef(null), useRef(null)];
-  const [pendingGalleryImages, setPendingGalleryImages] = useState([null, null]);
+  const [error, setError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
-
-  useEffect(() => {
-    const loadData = async () => {
-      const response = await fetch('/api/breeders/profile');
-      const json = await response.json();
-      if (response.ok) {
-        dispatch({ type: 'SET_BREEDER', payload: json });
-      }
-    };
-    loadData();
-  }, [dispatch]);
+  
+  const fileInputRef = useRef(null);
+  const galleryFileInputRefs = [useRef(null), useRef(null)];
 
   useEffect(() => {
     if (breeder) {
@@ -48,164 +34,102 @@ const BreederUpdateForm = () => {
         location: breeder.location || '',
         story: breeder.story || ''
       });
+      
+      // Update preview URLs to include full path
       if (breeder.profilePicture) {
-        setPreviewUrl(`/api/images${breeder.profilePicture}`);
+        setPreviewUrl(`/api/images/uploads/breeder-profiles/${breeder.profilePicture}`);
       }
-    }
-  }, [breeder]);
-
-  useEffect(() => {
-    if (breeder?.images) {
-      setGalleryPreviews(
-        breeder.images.map(image => image ? `/api/images${image}` : null)
-      );
+      if (breeder.images) {
+        setGalleryPreviews(breeder.images.map(img => 
+          img ? `/api/images/uploads/breeder-profiles/${img}` : null
+        ));
+      }
     }
   }, [breeder]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    if (name === 'phoneNumber') {
-      const formatted = value.replace(/\D/g, '').slice(0, 10);
-      if (formatted.length > 6) {
-        setFormData(prev => ({
-          ...prev,
-          [name]: `(${formatted.slice(0,3)}) ${formatted.slice(3,6)}-${formatted.slice(6)}`
-        }));
-      } else if (formatted.length > 3) {
-        setFormData(prev => ({
-          ...prev,
-          [name]: `(${formatted.slice(0,3)}) ${formatted.slice(3)}`
-        }));
-      } else {
-        setFormData(prev => ({ ...prev, [name]: formatted }));
-      }
-    } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
-    }
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    if (!file) return;
-    
-    if (file.size > 5 * 1024 * 1024) {
-      setError('Image must be less than 5MB');
-      fileInputRef.current.value = '';
-      return;
+    if (file) {
+      setProfilePicture(file);
+      setPreviewUrl(URL.createObjectURL(file));
     }
-
-    const objectUrl = URL.createObjectURL(file);
-    setPreviewUrl(objectUrl);
-    setProfilePicture(file);
-    setError(null);
-
-    return () => URL.revokeObjectURL(objectUrl);
   };
 
   const handleGalleryImageChange = (index, e) => {
     const file = e.target.files[0];
-    if (!file) return;
-    
-    if (file.size > 5 * 1024 * 1024) {
-      setError('Image must be less than 5MB');
-      galleryFileInputRefs[index].current.value = '';
-      return;
+    if (file) {
+      setGalleryImages(prev => {
+        const newImages = [...prev];
+        newImages[index] = file;
+        return newImages;
+      });
+      setGalleryPreviews(prev => {
+        const newPreviews = [...prev];
+        newPreviews[index] = URL.createObjectURL(file);
+        return newPreviews;
+      });
     }
-
-    const objectUrl = URL.createObjectURL(file);
-    setGalleryPreviews(prev => {
-      const newPreviews = [...prev];
-      newPreviews[index] = objectUrl;
-      return newPreviews;
-    });
-
-    setPendingGalleryImages(prev => {
-      const newPending = [...prev];
-      newPending[index] = file;
-      return newPending;
-    });
-
-    setError(null);
   };
 
   const preventDefaultValidation = (e) => {
     e.preventDefault();
   };
 
-  const validateForm = () => {
-    const missingFields = [];
-    if (!formData.firstName.trim()) missingFields.push('First Name');
-    if (!formData.lastName.trim()) missingFields.push('Last Name');
-    if (!formData.email.trim()) missingFields.push('Email');
-    
-    if (missingFields.length > 0) {
-      setError(`Please fill in the following required fields: ${missingFields.join(', ')}`);
-      return false;
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (formData.email && !emailRegex.test(formData.email)) {
-      setError('Invalid email format');
-      return false;
-    }
-
-    if (formData.phoneNumber && formData.phoneNumber.replace(/\D/g, '').length !== 10) {
-      setError('Phone number must be 10 digits');
-      return false;
-    }
-
-    return true;
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null);
     setIsSubmitting(true);
-
-    if (!validateForm()) {
-      setIsSubmitting(false);
-      return;
-    }
+    setError(null);
 
     try {
-      // First update the profile
       const formDataToSend = new FormData();
       Object.keys(formData).forEach(key => {
-        formDataToSend.append(key, formData[key]);
+        if (formData[key] !== null && formData[key] !== undefined) {
+          formDataToSend.append(key, formData[key]);
+        }
       });
       
       if (profilePicture) {
         formDataToSend.append('profilePicture', profilePicture);
       }
 
-      await updateBreederProfile(formDataToSend);
-
-      // Then update gallery images if there are any pending changes
-      for (let i = 0; i < pendingGalleryImages.length; i++) {
-        if (pendingGalleryImages[i]) {
-          const imageFormData = new FormData();
-          imageFormData.append('image', pendingGalleryImages[i]);
-          await updateBreederImage(i, imageFormData);
+      galleryImages.forEach((file, index) => {
+        if (file) {
+          formDataToSend.append(`galleryImage${index}`, file);
         }
+      });
+
+      const response = await fetch('/api/breeder/profile', {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: formDataToSend
+      });
+
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error);
       }
 
-      setError(null);
-      if (fileInputRef.current) fileInputRef.current.value = '';
+      await fetchBreederProfile(); // Refresh breeder data
+      setShowSuccessModal(true);
+      setSuccessMessage('Profile updated successfully!');
+      
+      // Clear file inputs
+      setGalleryImages([null, null]);
       setProfilePicture(null);
-      setPendingGalleryImages([null, null]);
+      if (fileInputRef.current) fileInputRef.current.value = '';
       galleryFileInputRefs.forEach(ref => {
         if (ref.current) ref.current.value = '';
       });
-
-      // Add success modal handling
-      setSuccessMessage('Profile updated successfully!');
-      setShowSuccessModal(true);
-      setTimeout(() => {
-        setShowSuccessModal(false);
-      }, 2000);
-
-    } catch (err) {
-      setError(err.message);
+    } catch (error) {
+      setError(error.message);
     } finally {
       setIsSubmitting(false);
     }

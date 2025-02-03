@@ -16,7 +16,7 @@ const grumbleSchema = new Schema({
     },
     profilePicture: {
         type: String,
-        default: "/uploads/grumble-images/grumble-placeholder.jpg"
+        default: 'grumble-placeholder.jpg' // Store only filename
     },
     birthDate: {
         type: Date,
@@ -31,7 +31,7 @@ const grumbleSchema = new Schema({
     timestamps: true,
     toJSON: { 
         getters: true,
-        virtuals: false  // Add this line to disable virtuals
+        virtuals: false
     }
 })
 

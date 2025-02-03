@@ -1,7 +1,7 @@
 // COMPONENTS
 import UnderConstruction from '../components/UnderConstruction';
-import CurrentLitters from '../components/CurrentLitters';
-import Waitlist from '../components/Waitlist';
+import CurrentLitters from '../components/Litter/CurrentLitters';
+import Waitlist from '../components/Waitlist/Waitlist';
 
 const Nursery = () => {
   return (

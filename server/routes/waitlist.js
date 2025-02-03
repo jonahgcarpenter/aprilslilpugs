@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const requireAuth = require('../middleware/auth');
 const {
   getAllEntries,
   createEntry,
@@ -8,11 +9,13 @@ const {
   deleteEntry
 } = require('../controllers/waitlistController');
 
-// CRUD routes
-router.get('/', getAllEntries);
+// Public route
 router.post('/', createEntry);
-router.get('/:id', getEntry);
-router.patch('/:id', updateEntry);
-router.delete('/:id', deleteEntry);
+
+// Protected routes
+router.get('/', requireAuth, getAllEntries);
+router.get('/:id', requireAuth, getEntry);
+router.patch('/:id', requireAuth, updateEntry);
+router.delete('/:id', requireAuth, deleteEntry);
 
 module.exports = router;

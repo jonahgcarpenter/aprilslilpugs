@@ -1,6 +1,6 @@
 // COMPONENTS
 import UnderConstruction from '../components/UnderConstruction';
-import Grumble from '../components/Grumble';
+import Grumble from '../components/Grumble/Grumble';
 
 const OurAdults = () => {
   return (

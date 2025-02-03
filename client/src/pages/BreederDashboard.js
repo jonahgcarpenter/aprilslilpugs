@@ -2,19 +2,18 @@ import { useContext } from 'react';
 import { Link } from 'react-router-dom';
 
 // CONTEXT
-import { useLive } from '../context/LiveContext';
 import { LitterContext } from '../context/LitterContext';
-import { useSettings } from '../context/SettingsContext';
 
 // COMPONENTS
-import BreederUpdateForm from '../components/BreederUpdateForm';
-import GrumbleUpdate from '../components/GrumbleUpdate';
-import WaitlistAdmin from '../components/WaitlistAdmin';
+import BreederUpdateForm from '../components/Breeder/BreederUpdateForm';
+import GrumbleUpdate from '../components/Grumble/GrumbleUpdate';
+import WaitlistAdmin from '../components/Waitlist/WaitlistAdmin';
+import LoadingAnimation from '../components/LoadingAnimation';
+import ToggleStream from '../components/LiveStream/ToggleStream';
+import ToggleWaitlist from '../components/Waitlist/ToggleWaitlist';
 
 const BreederDashboard = () => {
-  const { isLive, toggleLive } = useLive();
-  const { waitlistEnabled, toggleWaitlist } = useSettings();
-  const { litters, loading, error } = useContext(LitterContext);
+  const { litters, loading: littersLoading, error: littersError } = useContext(LitterContext);
 
   const isDateInFuture = (dateString) => {
     try {
@@ -29,32 +28,19 @@ const BreederDashboard = () => {
     }
   };
 
+  if (littersLoading) return <LoadingAnimation />;
+
   return (
     <div className="px-4 sm:px-6 lg:px-8 space-y-6 py-4 sm:py-8">
       <div className="flex justify-center gap-4">
-        <button
-          onClick={toggleLive}
-          className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-4 sm:px-6 py-2.5 text-sm rounded-full font-semibold shadow-md hover:shadow-lg transform hover:scale-105 transition-transform duration-200"
-        >
-          {isLive ? 'Disable Live Page' : 'Enable Live Page'}
-        </button> 
-
-        <button
-          onClick={toggleWaitlist}
-          className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-4 sm:px-6 py-2.5 text-sm rounded-full font-semibold shadow-md hover:shadow-lg transform hover:scale-105 transition-transform duration-200"
-        >
-          {waitlistEnabled ? 'Disable Waitlist' : 'Enable Waitlist'}
-        </button>
+        <ToggleStream />
+        <ToggleWaitlist />
       </div>
 
       <div className="grid gap-4 sm:gap-8">
-
         <WaitlistAdmin />
-
         <BreederUpdateForm />
-
         <GrumbleUpdate />
-
         <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <h2 className="text-xl sm:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600">
@@ -68,10 +54,10 @@ const BreederDashboard = () => {
             </Link>
           </div>
 
-          {loading ? (
+          {littersLoading ? (
             <div className="text-gray-500">Loading litters...</div>
-          ) : error ? (
-            <div className="text-red-500">{error}</div>
+          ) : littersError ? (
+            <div className="text-red-500">{littersError}</div>
           ) : (
             <div className="grid gap-3">
               {litters.map(litter => (

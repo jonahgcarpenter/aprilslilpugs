@@ -8,12 +8,13 @@ const path = require('path');
 const createStorage = (uploadDir) => multer.diskStorage({
   // Set the destination directory for file uploads
   destination: (req, file, cb) => {
-    // Create upload directory if it doesn't exist
+    // Creates: public/uploads/breeder-profiles/
     fs.mkdirSync(`public/uploads/${uploadDir}`, { recursive: true });
     cb(null, `public/uploads/${uploadDir}`);
   },
   // Generate unique filename with timestamp
   filename: (req, file, cb) => {
+    // Creates: 1234567890-originalname.jpg
     const timestamp = Date.now();
     const ext = path.extname(file.originalname);
     cb(null, `${timestamp}-${file.originalname.replace(ext, '')}${ext}`);

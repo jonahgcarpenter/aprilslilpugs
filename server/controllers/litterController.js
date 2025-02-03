@@ -15,19 +15,19 @@ const handleErrors = (res, error) => {
   res.status(error.status || 500).json({ error: error.message || 'Internal Server Error' })
 }
 
-const deleteImageFile = async (imagePath) => {
+const deleteImageFile = async (filename, type = 'litter') => {
     try {
-        if (!imagePath || imagePath.includes('placeholder')) return;
+        if (!filename || filename.includes('placeholder')) return;
         
-        const relativePath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
-        const absolutePath = path.join('public', relativePath);
+        const folder = type === 'puppy' ? 'puppy-images' : 'litter-images';
+        const absolutePath = path.join('public', 'uploads', folder, filename);
         
         await fs.access(absolutePath);
         await fs.unlink(absolutePath);
         console.log('Successfully deleted file:', absolutePath);
     } catch (error) {
         if (error.code === 'ENOENT') {
-            console.log('File not found at path:', absolutePath);
+            console.log('File not found at path:', error.path);
         } else {
             console.error('Error deleting file:', error);
         }
@@ -73,12 +73,21 @@ const createLitter = async (req, res) => {
   try {
     const litterData = {
       ...req.body,
-      profilePicture: req.file ? `/uploads/litter-images/${req.file.filename}` : '/uploads/litter-images/litter-placeholder.jpg',
+      profilePicture: req.file ? req.file.filename : 'litter-placeholder.jpg',
       birthDate: parseCentralTime(req.body.birthDate),
       availableDate: parseCentralTime(req.body.availableDate)
     }
     const litter = await Litter.create(litterData)
-    res.status(201).json(litter)
+    
+    // Transform response to include full paths
+    const response = litter.toObject();
+    response.profilePicture = `/uploads/litter-images/${response.profilePicture}`;
+    response.puppies = response.puppies.map(puppy => ({
+      ...puppy,
+      profilePicture: `/uploads/puppy-images/${puppy.profilePicture}`
+    }));
+    
+    res.status(201).json(response)
   } catch (error) {
     handleErrors(res, error)
   }
@@ -87,7 +96,7 @@ const createLitter = async (req, res) => {
 // Updates existing litter information including optional image update
 // Handles date conversions and validates litter existence
 const updateLitter = async (req, res) => {
-  let newFilePath = null;
+  let newFilename = null;
   try {
     const { litterId } = req.params
 
@@ -103,14 +112,9 @@ const updateLitter = async (req, res) => {
     const updateData = { ...req.body }
 
     if (req.file) {
-      newFilePath = `/uploads/litter-images/${req.file.filename}`;
-      try {
-        await deleteImageFile(litter.profilePicture);
-        updateData.profilePicture = newFilePath;
-      } catch (error) {
-        console.error('Error deleting old image:', error);
-        // Continue with update even if old image deletion fails
-      }
+      newFilename = req.file.filename;
+      await deleteImageFile(litter.profilePicture, 'litter');
+      updateData.profilePicture = newFilename;
     }
 
     if (req.body.birthDate) {
@@ -127,19 +131,18 @@ const updateLitter = async (req, res) => {
       { new: true }
     )
 
-    if (!updatedLitter) {
-      throw new Error('Failed to update litter')
-    }
+    // Transform response to include full paths
+    const response = updatedLitter.toObject();
+    response.profilePicture = `/uploads/litter-images/${response.profilePicture}`;
+    response.puppies = response.puppies.map(puppy => ({
+      ...puppy,
+      profilePicture: `/uploads/puppy-images/${puppy.profilePicture}`
+    }));
 
-    res.status(200).json(updatedLitter)
+    res.status(200).json(response)
   } catch (error) {
-    // If there was an error and we uploaded a new file, clean it up
-    if (newFilePath) {
-      try {
-        await deleteImageFile(newFilePath);
-      } catch (cleanupError) {
-        console.error('Error cleaning up new file:', cleanupError);
-      }
+    if (newFilename) {
+      await deleteImageFile(newFilename, 'litter');
     }
     handleErrors(res, error)
   }
@@ -186,7 +189,7 @@ const addPuppy = async (req, res) => {
 
     const puppyData = {
       ...req.body,
-      profilePicture: req.file ? `/uploads/puppy-images/${req.file.filename}` : '/uploads/puppy-images/puppy-placeholder.jpg'
+      profilePicture: req.file ? req.file.filename : 'puppy-placeholder.jpg'
     }
 
     const litter = await Litter.findByIdAndUpdate(
@@ -195,11 +198,15 @@ const addPuppy = async (req, res) => {
       { new: true }
     )
 
-    if (!litter) {
-      return res.status(404).json({ error: 'Litter not found' })
-    }
+    // Transform response to include full paths
+    const response = litter.toObject();
+    response.profilePicture = `/uploads/litter-images/${response.profilePicture}`;
+    response.puppies = response.puppies.map(puppy => ({
+      ...puppy,
+      profilePicture: `/uploads/puppy-images/${puppy.profilePicture}`
+    }));
 
-    res.status(200).json(litter)
+    res.status(200).json(response)
   } catch (error) {
     handleErrors(res, error)
   }
@@ -232,8 +239,8 @@ const updatePuppy = async (req, res) => {
     if (req.body.gender) updateData['puppies.$.gender'] = req.body.gender
     if (req.body.status) updateData['puppies.$.status'] = req.body.status
     if (req.file) {
-      await deleteImageFile(puppy.profilePicture)
-      updateData['puppies.$.profilePicture'] = `/uploads/puppy-images/${req.file.filename}`
+      await deleteImageFile(puppy.profilePicture, 'puppy');
+      updateData['puppies.$.profilePicture'] = req.file.filename;
     }
 
     const updatedLitter = await Litter.findOneAndUpdate(
@@ -245,10 +252,18 @@ const updatePuppy = async (req, res) => {
       { new: true }
     )
 
-    res.status(200).json(updatedLitter)
+    // Transform response to include full paths
+    const response = updatedLitter.toObject();
+    response.profilePicture = `/uploads/litter-images/${response.profilePicture}`;
+    response.puppies = response.puppies.map(puppy => ({
+      ...puppy,
+      profilePicture: `/uploads/puppy-images/${puppy.profilePicture}`
+    }));
+
+    res.status(200).json(response)
   } catch (error) {
     if (req.file) {
-      await deleteImageFile(`/uploads/puppy-images/${req.file.filename}`)
+      await deleteImageFile(req.file.filename, 'puppy');
     }
     handleErrors(res, error)
   }

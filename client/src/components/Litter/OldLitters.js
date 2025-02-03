@@ -1,15 +1,13 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { LitterContext } from '../context/LitterContext';
-import LoadingAnimation from './LoadingAnimation';
+import { LitterContext } from '../../context/LitterContext';
+import LoadingAnimation from '../LoadingAnimation';
 
 const OldLitters = () => {
-  const { litters, loading: fetchLoading, error, fetchLitters } = useContext(LitterContext);
+  const { litters, loading: fetchLoading, error } = useContext(LitterContext);
   const [selectedLitter, setSelectedLitter] = useState(null);
-  const [loadingPuppies, setLoadingPuppies] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [pastLitters, setPastLitters] = useState([]);
 
-  const preloadLitterImages = async (litters) => {
+  const preloadImages = async (images) => {
     const loadImage = (src) => {
       return new Promise((resolve, reject) => {
         const img = new Image();
@@ -20,84 +18,32 @@ const OldLitters = () => {
     };
 
     try {
-      await Promise.all(litters.map(litter => loadImage(litter.profilePicture)));
+      await Promise.all(images.map(src => loadImage(src)));
     } catch (error) {
-      console.error('Error preloading litter images:', error);
+      console.error('Error preloading images:', error);
     }
   };
 
   useEffect(() => {
-    const loadAllData = async () => {
-      setLoading(true);
-      await fetchLitters();
-    };
-    loadAllData();
-  }, []);
-
-  useEffect(() => {
-    const filterPastLitters = () => {
+    if (litters.length > 0) {
       const filtered = litters.filter(litter => 
         litter.puppies && 
         litter.puppies.length > 0 && 
         litter.puppies.every(puppy => puppy.status === 'Sold')
       );
       setPastLitters(filtered);
-    };
 
-    const loadImages = async () => {
-      if (litters.length > 0) {
-        filterPastLitters();
-        await preloadLitterImages(litters);
-        setLoading(false);
-      }
-    };
-    loadImages();
+      // Preload all litter images
+      const litterImages = filtered.map(litter => litter.profilePicture);
+      const puppyImages = filtered.flatMap(litter => 
+        litter.puppies.map(puppy => puppy.profilePicture)
+      );
+      preloadImages([...litterImages, ...puppyImages]);
+    }
   }, [litters]);
-
-  const isDateInFuture = (dateString) => {
-    try {
-      // Parse the date string into a Date object
-      const inputDate = new Date(dateString);
-      
-      // Get current date in Central Time
-      const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' }));
-      
-      // Set both dates to start of day for accurate comparison
-      inputDate.setHours(0, 0, 0, 0);
-      now.setHours(0, 0, 0, 0);
-      
-      return inputDate > now;
-    } catch (error) {
-      console.error('Error comparing dates:', error);
-      return false;
-    }
-  };
-
-  const preloadImages = async (puppies) => {
-    const loadImage = (src) => {
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.src = `/api/images${src}`;
-        img.onload = resolve;
-        img.onerror = reject;
-      });
-    };
-
-    try {
-      await Promise.all(puppies.map(puppy => loadImage(puppy.profilePicture)));
-    } catch (error) {
-      console.error('Error preloading images:', error);
-    }
-  };
 
   const handleLitterClick = async (litter) => {
     setSelectedLitter(litter);
-    if (litter.puppies && litter.puppies.length > 0) {
-      setLoadingPuppies(true);
-      // Preload all puppy images
-      await preloadImages(litter.puppies);
-      setLoadingPuppies(false);
-    }
   };
 
   return (
@@ -108,7 +54,7 @@ const OldLitters = () => {
             Past Litters
           </h1>
           
-          {loading || fetchLoading ? (
+          {fetchLoading ? (
             <div className="h-20 flex items-center justify-center">
               <LoadingAnimation />
             </div>
@@ -124,7 +70,7 @@ const OldLitters = () => {
             <div className="space-y-8">
               {pastLitters.map((litter) => (
                 <div 
-                  key={litter.id} 
+                  key={litter._id} 
                   className="bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700/50"
                 >
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -202,42 +148,38 @@ const OldLitters = () => {
               </button>
             </div>
             {selectedLitter.puppies && selectedLitter.puppies.length > 0 ? (
-              loadingPuppies ? (
-                <LoadingAnimation containerClassName="p-12" />
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {selectedLitter.puppies.map((puppy) => (
-                    <div 
-                      key={puppy.id}
-                      className="bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700/50"
-                    >
-                      <div className="aspect-square w-full overflow-hidden">
-                        <img
-                          src={`/api/images${puppy.profilePicture}`}
-                          alt={puppy.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div className="p-6 space-y-4">
-                        <h4 className="text-2xl font-semibold text-slate-100">
-                          {puppy.name}
-                        </h4>
-                        <div className="space-y-2 text-slate-300">
-                          <p>Color: {puppy.color}</p>
-                          <p>Gender: {puppy.gender}</p>
-                          <p className={`inline-block px-3 py-1 rounded-full text-sm ${
-                            puppy.status === 'Available' 
-                              ? 'bg-green-500/20 text-green-400' 
-                              : 'bg-red-500/20 text-red-400'
-                          }`}>
-                            {puppy.status}
-                          </p>
-                        </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                {selectedLitter.puppies.map((puppy) => (
+                  <div 
+                    key={puppy._id}
+                    className="bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700/50"
+                  >
+                    <div className="aspect-square w-full overflow-hidden">
+                      <img
+                        src={`/api/images${puppy.profilePicture}`}
+                        alt={puppy.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="p-6 space-y-4">
+                      <h4 className="text-2xl font-semibold text-slate-100">
+                        {puppy.name}
+                      </h4>
+                      <div className="space-y-2 text-slate-300">
+                        <p>Color: {puppy.color}</p>
+                        <p>Gender: {puppy.gender}</p>
+                        <p className={`inline-block px-3 py-1 rounded-full text-sm ${
+                          puppy.status === 'Available' 
+                            ? 'bg-green-500/20 text-green-400' 
+                            : 'bg-red-500/20 text-red-400'
+                        }`}>
+                          {puppy.status}
+                        </p>
                       </div>
                     </div>
-                  ))}
-                </div>
-              )
+                  </div>
+                ))}
+              </div>
             ) : (
               <div className="flex flex-col items-center justify-center p-12 text-center">
                 <h4 className="text-3xl font-bold text-blue-400 mb-4">COMING SOON</h4>

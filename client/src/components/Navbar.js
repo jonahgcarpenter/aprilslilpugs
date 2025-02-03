@@ -2,15 +2,15 @@ import { Link } from 'react-router-dom'
 
 // CONTEXT
 import { useAuth } from '../context/AuthContext'
-import { useLive } from '../context/LiveContext'
+import { useSettings } from '../context/SettingsContext'
 
 // COMPONENTS
-import LoginButton from './LoginButton'
-import LogoutButton from './LogoutButton'
+import LoginButton from './Auth/LoginButton'
+import LogoutButton from './Auth/LogoutButton'
 
 const Navbar = () => {
   const { user } = useAuth();
-  const { isLive } = useLive();
+  const { liveEnabled } = useSettings();
 
   return (
     <div className="bg-slate-900/95 backdrop-blur-sm border-b border-slate-800/50 sticky top-0 z-50">
@@ -35,7 +35,7 @@ const Navbar = () => {
                     Nursery
                 </button>
             </Link>
-            {isLive && (
+            {liveEnabled && (
               <Link to="/live">
                 <button className="bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-4 sm:px-6 py-2 text-sm rounded-full font-semibold shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 flex items-center gap-2">
                   <span>Live Puppy Cam</span>

@@ -1,5 +1,5 @@
 import { useState, useContext, useEffect, useRef } from 'react';
-import { GrumbleContext } from '../context/GrumbleContext';
+import { GrumbleContext } from '../../context/GrumbleContext';
 
 const formatDate = (date) => {
     return new Date(date).toISOString().split('T')[0];

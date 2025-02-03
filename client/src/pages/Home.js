@@ -1,5 +1,5 @@
 // COMPONENTS
-import BreederDetails from '../components/BreederDetails';
+import BreederDetails from '../components/Breeder/BreederDetails';
 import UnderConstruction from '../components/UnderConstruction';
 
 const Home = () => {

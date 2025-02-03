@@ -5,10 +5,11 @@ const mongoose = require('mongoose');
 const getAllEntries = async (req, res) => {
   try {
     const entries = await Waitlist.find({})
-      .sort({ createdAt: -1 });
+      .sort({ position: 1 });
+    
     res.status(200).json(entries);
   } catch (error) {
-    res.status(500).json({ error: error.message, code: error.code });
+    res.status(500).json({ error: error.message });
   }
 };
 
