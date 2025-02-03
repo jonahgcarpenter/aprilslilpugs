@@ -1,5 +1,4 @@
 const mongoose = require('mongoose')
-const { convertToCentralTime } = require('../util/timezone')
 
 const Schema = mongoose.Schema
 
@@ -16,7 +15,7 @@ const grumbleSchema = new Schema({
         type: String,
         required: true
     },
-    image: {
+    profilePicture: {
         type: String,
         default: "/uploads/grumble-images/grumble-placeholder.jpg"
     },
@@ -31,7 +30,10 @@ const grumbleSchema = new Schema({
     }
 }, { 
     timestamps: true,
-    toJSON: { getters: true }
+    toJSON: { 
+        getters: true,
+        virtuals: false  // Add this line to disable virtuals
+    }
 })
 
 module.exports = mongoose.model('Grumble', grumbleSchema)

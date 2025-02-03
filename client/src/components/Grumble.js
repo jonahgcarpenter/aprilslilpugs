@@ -30,23 +30,26 @@ const calculateAge = (birthDateString) => {
 }
 
 const Grumble = () => {
-    const { grumbles, loading: fetchLoading, error, fetchGrumbles } = useContext(GrumbleContext);
+    const { grumbles, loading: fetchLoading, error, fetchGrumbles, getFullImageUrl } = useContext(GrumbleContext);
     const [loading, setLoading] = useState(true);
-
+    
     const preloadGrumbleImages = async (grumbles) => {
         const loadImage = (src) => {
+            if (!src) return Promise.resolve();
             return new Promise((resolve, reject) => {
                 const img = new Image();
-                img.src = src.startsWith('/api/images') ? src : `/api/images${src}`;
+                img.src = getFullImageUrl(src);
                 img.onload = resolve;
                 img.onerror = reject;
             });
         };
 
         try {
-            await Promise.all(grumbles.map(pug => loadImage(pug.image)));
+            await Promise.all(grumbles.map(grumble => 
+                loadImage(grumble.profilePicture)
+            ));
         } catch (error) {
-            console.error('Error preloading grumble images:', error);
+            console.error('Error preloading images:', error);
         }
     };
 
@@ -110,7 +113,7 @@ const Grumble = () => {
                         >
                             <div className="aspect-square w-full overflow-hidden">
                                 <img
-                                    src={pug.image.startsWith('/api/images') ? pug.image : `/api/images${pug.image}`}
+                                    src={getFullImageUrl(pug.profilePicture)}
                                     alt={pug.name}
                                     className="w-full h-full object-cover"
                                 />

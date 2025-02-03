@@ -1,28 +1,30 @@
-import { useState, useContext, useEffect } from 'react';
+import { useState, useContext, useEffect, useRef } from 'react';
 import { GrumbleContext } from '../context/GrumbleContext';
-import LoadingAnimation from './LoadingAnimation';
 
 const formatDate = (date) => {
     return new Date(date).toISOString().split('T')[0];
 };
 
 const GrumbleUpdate = () => {
-    const { grumbles, addGrumble, updateGrumble, deleteGrumble } = useContext(GrumbleContext);
+    const { grumbles, addGrumble, updateGrumble, deleteGrumble, getFullImageUrl } = useContext(GrumbleContext);
     const [selectedGrumble, setSelectedGrumble] = useState(null);
     const [formData, setFormData] = useState({
         name: '',
         gender: '',
         description: '',
         birthDate: '',
-        image: null
+        profilePicture: null
     });
-    const [previewUrl, setPreviewUrl] = useState(null);
+    const [previewUrls, setPreviewUrls] = useState({
+        profilePicture: null
+    });
     const [message, setMessage] = useState({ text: '', type: '' });
 
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const formRef = useRef(null);
 
     useEffect(() => {
         if (selectedGrumble) {
@@ -31,18 +33,28 @@ const GrumbleUpdate = () => {
                 gender: selectedGrumble.gender,
                 description: selectedGrumble.description,
                 birthDate: formatDate(selectedGrumble.birthDate),
-                image: null
+                profilePicture: null
             });
-            setPreviewUrl(`/api/images${selectedGrumble.image}`);
+            setPreviewUrls({
+                profilePicture: selectedGrumble.profilePicture ? getFullImageUrl(selectedGrumble.profilePicture) : null
+            });
         }
     }, [selectedGrumble]);
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            setFormData(prev => ({ ...prev, image: file }));
-            setPreviewUrl(URL.createObjectURL(file));
+            setFormData(prev => ({ ...prev, profilePicture: file }));
+            setPreviewUrls(prev => ({
+                ...prev,
+                profilePicture: URL.createObjectURL(file)
+            }));
         }
+    };
+
+    const removeImage = () => {
+        setFormData(prev => ({ ...prev, profilePicture: null }));
+        setPreviewUrls(prev => ({ ...prev, profilePicture: null }));
     };
 
     const handleSubmit = async (e) => {
@@ -103,20 +115,39 @@ const GrumbleUpdate = () => {
     };
 
     const resetForm = () => {
+        // Reset state
         setSelectedGrumble(null);
         setFormData({
             name: '',
             gender: '',
             description: '',
             birthDate: '',
-            image: null
+            profilePicture: null
         });
-        setPreviewUrl(null);
+        setPreviewUrls({
+            profilePicture: null
+        });
+        
+        // Scroll to form with offset
+        if (formRef.current) {
+            const yOffset = -250; // Adjust this value to scroll higher or lower
+            const element = formRef.current;
+            const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+            
+            window.scrollTo({
+                top: y,
+                behavior: 'smooth'
+            });
+        }
     };
 
     return (
         <div className="mx-0 sm:mx-4">
-            <form onSubmit={handleSubmit} className="bg-slate-900/80 backdrop-blur-sm rounded-xl p-4 sm:p-8 border border-slate-800/50 shadow-xl">
+            <form 
+                ref={formRef}
+                onSubmit={handleSubmit} 
+                className="bg-slate-900/80 backdrop-blur-sm rounded-xl p-4 sm:p-8 border border-slate-800/50 shadow-xl"
+            >
                 <h2 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-8">
                     Grumble Management
                 </h2>
@@ -212,20 +243,17 @@ const GrumbleUpdate = () => {
                     </div>
 
                     <div className="form-group sm:col-span-2">
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Image</label>
-                        {previewUrl && (
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Profile Picture</label>
+                        {previewUrls.profilePicture && (
                             <div className="mb-4 relative w-32 h-32">
                                 <img
-                                    src={previewUrl}
+                                    src={previewUrls.profilePicture}
                                     alt="Preview"
                                     className="w-full h-full object-cover rounded-lg border border-slate-700"
                                 />
                                 <button
                                     type="button"
-                                    onClick={() => {
-                                        setPreviewUrl(null);
-                                        setFormData(prev => ({ ...prev, image: null }));
-                                    }}
+                                    onClick={() => removeImage()}
                                     className="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-600"
                                 >
                                     ×
@@ -234,89 +262,81 @@ const GrumbleUpdate = () => {
                         )}
                         <input
                             type="file"
-                            onChange={handleImageChange}
+                            onChange={(e) => handleImageChange(e)}
                             className="w-full text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:bg-blue-500 file:text-white hover:file:bg-blue-600"
                             accept="image/*"
                         />
                     </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex justify-between mt-8">
                     <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="w-full bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition-all duration-200 disabled:opacity-50"
+                        type="button"
+                        onClick={resetForm}
+                        className="px-6 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition-colors"
                     >
-                        {isSubmitting ? (
-                            <LoadingAnimation containerClassName="h-6" />
-                        ) : (
-                            selectedGrumble ? 'Update Member' : 'Add Member'
-                        )}
+                        Reset
                     </button>
-                    {selectedGrumble && (
+                    
+                    <div className="space-x-4">
+                        {selectedGrumble && (
+                            <button
+                                type="button"
+                                onClick={() => setShowDeleteModal(true)}
+                                className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-500 transition-colors"
+                            >
+                                Delete
+                            </button>
+                        )}
                         <button
-                            type="button"
-                            onClick={() => setShowDeleteModal(true)}
-                            className="w-full bg-gradient-to-r from-red-600 to-red-400 hover:from-red-700 hover:to-red-500 text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition-all duration-200"
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition-colors disabled:opacity-50"
                         >
-                            Delete Member
+                            {isSubmitting ? 'Saving...' : (selectedGrumble ? 'Update' : 'Add')}
                         </button>
-                    )}
+                    </div>
                 </div>
             </form>
 
+            {/* Delete Confirmation Modal */}
             {showDeleteModal && (
-                <div 
-                    className="fixed inset-0 bg-slate-900/75 backdrop-blur-sm flex items-start justify-center p-4 z-[9999]"
-                    onClick={(e) => e.target === e.currentTarget && setShowDeleteModal(false)}
-                >
-                    <div 
-                        className="mt-[15vh] bg-slate-900/90 backdrop-blur-sm rounded-xl p-8 max-w-md w-full border border-white/10"
-                        onClick={e => e.stopPropagation()}
-                    >
+                <div className="fixed inset-0 bg-slate-900/75 backdrop-blur-sm flex items-start justify-center p-4 z-[9999]">
+                    <div className="mt-[15vh] bg-slate-900/90 backdrop-blur-sm rounded-xl p-8 max-w-md w-full border border-white/10">
                         <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-red-500 to-red-600 mb-6">
-                            Are You Sure?
+                            Confirm Deletion
                         </h2>
-                        
                         <p className="text-slate-300 mb-6">
-                            Are you sure you want to delete this grumble member? This action cannot be undone.
+                            Are you sure you want to delete {selectedGrumble?.name}? This action cannot be undone.
                         </p>
-
-                        <div className="flex justify-end gap-4">
+                        <div className="flex justify-end space-x-4">
                             <button
                                 onClick={() => setShowDeleteModal(false)}
-                                className="px-6 py-2 rounded-full text-sm text-white/70 hover:text-white hover:bg-slate-700/50 transition-colors"
+                                className="px-6 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition-colors"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleDelete}
-                                className="bg-gradient-to-r from-red-600 to-red-400 hover:from-red-700 hover:to-red-500 text-white px-6 py-2 text-sm rounded-full font-semibold shadow-md hover:shadow-lg transition-all duration-200"
+                                className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-500 transition-colors"
                             >
-                                Delete Member
+                                Delete
                             </button>
                         </div>
                     </div>
                 </div>
             )}
 
+            {/* Success Modal */}
             {showSuccessModal && (
                 <div className="fixed inset-0 bg-slate-900/75 backdrop-blur-sm flex items-start justify-center p-4 z-[9999]">
                     <div className="mt-[15vh] bg-slate-900/90 backdrop-blur-sm rounded-xl p-8 max-w-md w-full border border-white/10">
                         <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-green-500 to-green-600 mb-6">
                             Success!
                         </h2>
-                        <p className="text-slate-300 mb-6">
+                        <p className="text-slate-300">
                             {successMessage}
                         </p>
-                        <div className="flex justify-end">
-                            <button
-                                onClick={() => setShowSuccessModal(false)}
-                                className="bg-gradient-to-r from-green-600 to-green-400 hover:from-green-700 hover:to-green-500 text-white px-6 py-2 text-sm rounded-full font-semibold shadow-md hover:shadow-lg transition-all duration-200"
-                            >
-                                Close
-                            </button>
-                        </div>
                     </div>
                 </div>
             )}

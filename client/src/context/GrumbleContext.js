@@ -8,7 +8,9 @@ export const GrumbleProvider = ({ children }) => {
     const [error, setError] = useState(null);
 
     const getFullImageUrl = (relativePath) => {
-        return `${process.env.REACT_APP_API_URL || ''}${relativePath}`;
+        if (!relativePath) return '';
+        // Match the breeder pattern using /api/images prefix
+        return `/api/images${relativePath}`;
     };
 
     const fetchGrumbles = async () => {
@@ -35,6 +37,9 @@ export const GrumbleProvider = ({ children }) => {
         try {
             const response = await fetch('/api/grumble', {
                 method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 body: formData
             });
             
@@ -61,10 +66,14 @@ export const GrumbleProvider = ({ children }) => {
         try {
             const response = await fetch(`/api/grumble/${grumbleId}`, {
                 method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
             });
             
             if (!response.ok) {
-                throw new Error('Failed to delete grumble');
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to delete grumble');
             }
             
             setGrumbles(prevGrumbles => 
@@ -85,6 +94,9 @@ export const GrumbleProvider = ({ children }) => {
         try {
             const response = await fetch(`/api/grumble/${grumbleId}`, {
                 method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 body: formData
             });
             
@@ -122,7 +134,8 @@ export const GrumbleProvider = ({ children }) => {
             fetchGrumbles,
             addGrumble,
             deleteGrumble,
-            updateGrumble
+            updateGrumble,
+            getFullImageUrl
         }}>
             {children}
         </GrumbleContext.Provider>
