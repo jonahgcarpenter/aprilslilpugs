@@ -20,14 +20,14 @@ const LitterUpdate = () => {
     father: '',
     birthDate: '',
     availableDate: '',
-    image: null
+    profilePicture: null
   });
   const [puppyForm, setPuppyForm] = useState({
     name: '',
     color: '',
     gender: 'Male',
     status: 'Available',
-    image: null
+    profilePicture: null
   });
   const [selectedPuppy, setSelectedPuppy] = useState(null);
   const [isLoading, setIsLoading] = useState(!isNewLitter);
@@ -70,9 +70,9 @@ const LitterUpdate = () => {
           father: data.father,
           birthDate: new Date(data.birthDate).toISOString().split('T')[0],
           availableDate: new Date(data.availableDate).toISOString().split('T')[0],
-          image: null
+          profilePicture: null
         });
-        setLitterPreviewUrl(data.image ? `/api/images${data.image}` : null);
+        setLitterPreviewUrl(data.profilePicture ? `/api/images${data.profilePicture}` : null);
       } catch (error) {
         if (!isMounted) return;
         console.error('Error fetching litter:', error);
@@ -105,7 +105,7 @@ const LitterUpdate = () => {
 
       const objectUrl = URL.createObjectURL(file);
       setLitterPreviewUrl(objectUrl);
-      setLitterForm(prev => ({ ...prev, image: file }));
+      setLitterForm(prev => ({ ...prev, profilePicture: file }));
       
       return () => URL.revokeObjectURL(objectUrl);
     } else {
@@ -127,7 +127,7 @@ const LitterUpdate = () => {
 
       const objectUrl = URL.createObjectURL(file);
       setPuppyPreviewUrl(objectUrl);
-      setPuppyForm(prev => ({ ...prev, image: file }));
+      setPuppyForm(prev => ({ ...prev, profilePicture: file }));
       
       return () => URL.revokeObjectURL(objectUrl);
     } else {
@@ -139,19 +139,18 @@ const LitterUpdate = () => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      let success;
       if (isNewLitter) {
-        success = await createLitter(litterForm);
-        if (success) {
+        const newLitter = await createLitter(litterForm);
+        if (newLitter && newLitter._id) {
           setSuccessMessage('Litter created successfully!');
           setShowSuccessModal(true);
           setTimeout(() => {
             setShowSuccessModal(false);
-            navigate('/breeder-dashboard');
+            navigate(`/breeder-dashboard/litters/${newLitter._id}`);  // Updated path to match route config
           }, 2000);
         }
       } else {
-        success = await updateLitter(litterId, litterForm);
+        const success = await updateLitter(litterId, litterForm);
         if (success) {
           const updatedLitter = await getLitter(litterId);
           setLitter(updatedLitter);
@@ -187,7 +186,7 @@ const LitterUpdate = () => {
       color: '',
       gender: 'Male',
       status: 'Available',
-      image: null
+      profilePicture: null
     });
     setPuppyPreviewUrl(null);
     if (puppyFileInputRef.current) {
@@ -276,9 +275,9 @@ const selectPuppyForEdit = (puppy) => {
     color: puppy.color,
     gender: puppy.gender,
     status: puppy.status,
-    image: null
+    profilePicture: null
   });
-  setPuppyPreviewUrl(puppy.image ? `/api/images${puppy.image}` : null);
+  setPuppyPreviewUrl(puppy.profilePicture ? `/api/images${puppy.profilePicture}` : null);
   
   const yOffset = -270;
   const element = puppyFormRef.current;
@@ -391,7 +390,7 @@ const selectPuppyForEdit = (puppy) => {
                     type="button"
                     onClick={() => {
                       setLitterPreviewUrl(null);
-                      setLitterForm(prev => ({ ...prev, image: null }));
+                      setLitterForm(prev => ({ ...prev, profilePicture: null }));
                       if (litterFileInputRef.current) litterFileInputRef.current.value = '';
                     }}
                     className="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-600"
@@ -403,7 +402,7 @@ const selectPuppyForEdit = (puppy) => {
               <input
                 ref={litterFileInputRef}
                 type="file"
-                name="image"
+                name="profilePicture"  // Change from 'image' to 'profilePicture'
                 accept="image/*"
                 onChange={handleLitterChange}
                 className="w-full text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:bg-blue-500 file:text-white hover:file:bg-blue-600"
@@ -502,7 +501,7 @@ const selectPuppyForEdit = (puppy) => {
                       type="button"
                       onClick={() => {
                         setPuppyPreviewUrl(null);
-                        setPuppyForm(prev => ({ ...prev, image: null }));
+                        setPuppyForm(prev => ({ ...prev, profilePicture: null }));
                         if (puppyFileInputRef.current) puppyFileInputRef.current.value = '';
                       }}
                       className="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-600"
@@ -514,7 +513,7 @@ const selectPuppyForEdit = (puppy) => {
                 <input
                   ref={puppyFileInputRef}
                   type="file"
-                  name="image"
+                  name="profilePicture"  // Change from 'image' to 'profilePicture'
                   accept="image/*"
                   onChange={handlePuppyChange}
                   className="w-full text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:bg-blue-500 file:text-white hover:file:bg-blue-600"
@@ -550,7 +549,7 @@ const selectPuppyForEdit = (puppy) => {
               {litter?.puppies?.map((puppy) => (
                 <div key={`puppy-${puppy._id}`} className="border p-4 rounded-lg bg-slate-800 border-slate-700 hover:bg-slate-700 transition-all duration-200">
                   <img
-                    src={`/api/images${puppy.image}`}
+                    src={`/api/images${puppy.profilePicture}`}
                     alt={puppy.name}
                     className="w-full aspect-square object-cover rounded-lg shadow-lg border-2 border-slate-600/50 transition-transform hover:scale-105"
                   />

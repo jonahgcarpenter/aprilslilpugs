@@ -18,28 +18,16 @@ export const LitterProvider = ({ children }) => {
         });
     };
 
-    const formatDateForInput = (dateString) => {
-        return dateString; // Already in YYYY-MM-DD format
-    };
-
-    const getFullImageUrl = (relativePath) => {
-        return `${process.env.REACT_APP_API_URL || ''}${relativePath}`;
-    };
-
     const formatLitterData = (litter) => ({
         ...litter,
-        _id: litter._id,
-        id: litter._id,
         birthDate: formatDate(litter.birthDate),
         availableDate: formatDate(litter.availableDate),
         rawBirthDate: litter.birthDate, // Store original format
         rawAvailableDate: litter.availableDate, // Store original format
-        image: litter.image,
+        profilePicture: litter.profilePicture,
         puppies: litter.puppies.map(puppy => ({
             ...puppy,
-            _id: puppy._id,
-            id: puppy._id,
-            image: puppy.image
+            _id: puppy._id // Keep only _id, remove id
         }))
     });
 
@@ -89,6 +77,9 @@ export const LitterProvider = ({ children }) => {
 
             const response = await fetch('/api/litters', {
                 method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 body: formData
             });
 
@@ -96,8 +87,9 @@ export const LitterProvider = ({ children }) => {
                 throw new Error('Failed to create litter');
             }
 
+            const newLitter = await response.json();
             await fetchLitters();
-            return true;
+            return newLitter; // Return the new litter data including _id
         } catch (err) {
             setError('Failed to create litter. Please try again.');
             console.error('Create error:', err);
@@ -110,13 +102,20 @@ export const LitterProvider = ({ children }) => {
             setError(null);
             const formData = new FormData();
             Object.keys(litterData).forEach(key => {
-                if (litterData[key] !== undefined && litterData[key] !== null) {
-                    formData.append(key, litterData[key]);
+                if (litterData[key] !== undefined && litterData[key] !== null && litterData[key] !== '') {
+                    if (key === 'profilePicture' && litterData[key] instanceof File) {
+                        formData.append('profilePicture', litterData[key]);
+                    } else {
+                        formData.append(key, litterData[key]);
+                    }
                 }
             });
 
             const response = await fetch(`/api/litters/${litterId}`, {
                 method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 body: formData
             });
 
@@ -136,7 +135,10 @@ export const LitterProvider = ({ children }) => {
     const deleteLitter = async (id) => {
         try {
             const response = await fetch(`/api/litters/${id}`, {
-                method: 'DELETE'
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
             });
             
             if (!response.ok) {
@@ -157,9 +159,9 @@ export const LitterProvider = ({ children }) => {
             const formData = new FormData();
             
             Object.keys(puppyData).forEach(key => {
-                if (puppyData[key] !== undefined && puppyData[key] !== null) {
-                    if (key === 'image' && puppyData[key] instanceof File) {
-                        formData.append('image', puppyData[key]);
+                if (puppyData[key] !== undefined && puppyData[key] !== null && puppyData[key] !== '') {
+                    if (key === 'profilePicture' && puppyData[key] instanceof File) {
+                        formData.append('profilePicture', puppyData[key]);
                     } else {
                         formData.append(key, puppyData[key]);
                     }
@@ -168,6 +170,9 @@ export const LitterProvider = ({ children }) => {
         
             const response = await fetch(`/api/litters/${litterId}/puppies`, {
                 method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 body: formData
             });
         
@@ -195,9 +200,9 @@ export const LitterProvider = ({ children }) => {
             const formData = new FormData();
             
             Object.keys(puppyData).forEach(key => {
-              if (puppyData[key] !== undefined && puppyData[key] !== null) {
-                if (key === 'image' && puppyData[key] instanceof File) {
-                  formData.append('image', puppyData[key]);
+              if (puppyData[key] !== undefined && puppyData[key] !== null && puppyData[key] !== '') {
+                if (key === 'profilePicture' && puppyData[key] instanceof File) {
+                  formData.append('profilePicture', puppyData[key]);
                 } else {
                   formData.append(key, puppyData[key]);
                 }
@@ -206,6 +211,9 @@ export const LitterProvider = ({ children }) => {
         
             const response = await fetch(`/api/litters/${litterId}/puppies/${puppyId}`, {
               method: 'PATCH',
+              headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+              },
               body: formData
             });
         
@@ -233,7 +241,7 @@ export const LitterProvider = ({ children }) => {
             const response = await fetch(`/api/litters/${litterId}/puppies/${puppyId}`, {
                 method: 'DELETE',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
                 }
             });
 

@@ -1,6 +1,6 @@
-// Import dependencies
 const express = require('express');
 const router = express.Router();
+const requireAuth = require('../middleware/auth');
 const { 
   getLitters,
   getLitter,
@@ -13,16 +13,18 @@ const {
 } = require('../controllers/litterController');
 const { littersUpload, puppyUpload } = require('../middleware/multerConfig');
 
-// Litter management routes
-router.get('/', getLitters);                    // Get all litters
-router.get('/:litterId', getLitter);           // Get specific litter
-router.post('/', littersUpload.single('image'), createLitter);  // Create new litter
-router.patch('/:litterId', littersUpload.single('image'), updateLitter);  // Update litter
-router.delete('/:litterId', deleteLitter);     // Delete litter
+// Public routes
+router.get('/', getLitters);
+router.get('/:litterId', getLitter);
 
-// Puppy management routes within litters
-router.post('/:litterId/puppies', puppyUpload.single('image'), addPuppy);  // Add puppy to litter
-router.patch('/:litterId/puppies/:puppyId', puppyUpload.single('image'), updatePuppy);  // Update puppy
-router.delete('/:litterId/puppies/:puppyId', deletePuppy);  // Remove puppy from litter
+// Protected routes
+router.post('/', requireAuth, littersUpload.single('profilePicture'), createLitter);
+router.patch('/:litterId', requireAuth, littersUpload.single('profilePicture'), updateLitter);
+router.delete('/:litterId', requireAuth, deleteLitter);
+
+// Protected puppy routes
+router.post('/:litterId/puppies', requireAuth, puppyUpload.single('profilePicture'), addPuppy);
+router.patch('/:litterId/puppies/:puppyId', requireAuth, puppyUpload.single('profilePicture'), updatePuppy);
+router.delete('/:litterId/puppies/:puppyId', requireAuth, deletePuppy);
 
 module.exports = router;

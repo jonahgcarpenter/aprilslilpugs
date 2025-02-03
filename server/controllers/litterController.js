@@ -1,6 +1,8 @@
 const Litter = require('../models/litterModel')
 const mongoose = require('mongoose')
 const { parseCentralTime } = require('../util/timezone')
+const fs = require('fs').promises
+const path = require('path')
 
 /**
  * Utility Functions
@@ -11,6 +13,25 @@ const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id)
 // Centralizes error handling across all controller functions
 const handleErrors = (res, error) => {
   res.status(error.status || 500).json({ error: error.message || 'Internal Server Error' })
+}
+
+const deleteImageFile = async (imagePath) => {
+    try {
+        if (!imagePath || imagePath.includes('placeholder')) return;
+        
+        const relativePath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
+        const absolutePath = path.join('public', relativePath);
+        
+        await fs.access(absolutePath);
+        await fs.unlink(absolutePath);
+        console.log('Successfully deleted file:', absolutePath);
+    } catch (error) {
+        if (error.code === 'ENOENT') {
+            console.log('File not found at path:', absolutePath);
+        } else {
+            console.error('Error deleting file:', error);
+        }
+    }
 }
 
 /**
@@ -52,7 +73,7 @@ const createLitter = async (req, res) => {
   try {
     const litterData = {
       ...req.body,
-      image: req.file ? `/uploads/litter-images/${req.file.filename}` : '/uploads/litter-images/litter-placeholder.jpg',
+      profilePicture: req.file ? `/uploads/litter-images/${req.file.filename}` : '/uploads/litter-images/litter-placeholder.jpg',
       birthDate: parseCentralTime(req.body.birthDate),
       availableDate: parseCentralTime(req.body.availableDate)
     }
@@ -66,6 +87,7 @@ const createLitter = async (req, res) => {
 // Updates existing litter information including optional image update
 // Handles date conversions and validates litter existence
 const updateLitter = async (req, res) => {
+  let newFilePath = null;
   try {
     const { litterId } = req.params
 
@@ -73,10 +95,22 @@ const updateLitter = async (req, res) => {
       return res.status(400).json({ error: 'Invalid litter ID format' })
     }
 
+    const litter = await Litter.findById(litterId)
+    if (!litter) {
+      return res.status(404).json({ error: 'Litter not found' })
+    }
+
     const updateData = { ...req.body }
 
     if (req.file) {
-      updateData.image = `/uploads/litter-images/${req.file.filename}`
+      newFilePath = `/uploads/litter-images/${req.file.filename}`;
+      try {
+        await deleteImageFile(litter.profilePicture);
+        updateData.profilePicture = newFilePath;
+      } catch (error) {
+        console.error('Error deleting old image:', error);
+        // Continue with update even if old image deletion fails
+      }
     }
 
     if (req.body.birthDate) {
@@ -87,14 +121,26 @@ const updateLitter = async (req, res) => {
       updateData.availableDate = parseCentralTime(req.body.availableDate)
     }
 
-    const litter = await Litter.findByIdAndUpdate(litterId, updateData, { new: true })
+    const updatedLitter = await Litter.findByIdAndUpdate(
+      litterId,
+      updateData,
+      { new: true }
+    )
 
-    if (!litter) {
-      return res.status(404).json({ error: 'Litter not found' })
+    if (!updatedLitter) {
+      throw new Error('Failed to update litter')
     }
 
-    res.status(200).json(litter)
+    res.status(200).json(updatedLitter)
   } catch (error) {
+    // If there was an error and we uploaded a new file, clean it up
+    if (newFilePath) {
+      try {
+        await deleteImageFile(newFilePath);
+      } catch (cleanupError) {
+        console.error('Error cleaning up new file:', cleanupError);
+      }
+    }
     handleErrors(res, error)
   }
 }
@@ -108,12 +154,20 @@ const deleteLitter = async (req, res) => {
       return res.status(400).json({ error: 'Invalid litter ID format' })
     }
 
-    const litter = await Litter.findByIdAndDelete(litterId)
-
+    const litter = await Litter.findById(litterId)
     if (!litter) {
       return res.status(404).json({ error: 'Litter not found' })
     }
 
+    // Delete litter's profile picture
+    await deleteImageFile(litter.profilePicture)
+
+    // Delete all puppy profile pictures
+    for (const puppy of litter.puppies) {
+      await deleteImageFile(puppy.profilePicture)
+    }
+
+    await litter.deleteOne()
     res.status(200).json({ message: 'Litter deleted successfully', litter })
   } catch (error) {
     handleErrors(res, error)
@@ -132,7 +186,7 @@ const addPuppy = async (req, res) => {
 
     const puppyData = {
       ...req.body,
-      image: req.file ? `/uploads/puppy-images/${req.file.filename}` : '/uploads/puppy-images/puppy-placeholder.jpg'
+      profilePicture: req.file ? `/uploads/puppy-images/${req.file.filename}` : '/uploads/puppy-images/puppy-placeholder.jpg'
     }
 
     const litter = await Litter.findByIdAndUpdate(
@@ -161,17 +215,28 @@ const updatePuppy = async (req, res) => {
       return res.status(400).json({ error: 'Invalid ID format' })
     }
 
-    // Create update data with file path if image is uploaded
+    const litter = await Litter.findOne({
+      _id: litterId,
+      'puppies._id': puppyId
+    })
+
+    if (!litter) {
+      return res.status(404).json({ error: 'Litter or puppy not found' })
+    }
+
+    const puppy = litter.puppies.id(puppyId)
+
     const updateData = {}
     if (req.body.name) updateData['puppies.$.name'] = req.body.name
     if (req.body.color) updateData['puppies.$.color'] = req.body.color
     if (req.body.gender) updateData['puppies.$.gender'] = req.body.gender
     if (req.body.status) updateData['puppies.$.status'] = req.body.status
     if (req.file) {
-      updateData['puppies.$.image'] = `/uploads/puppy-images/${req.file.filename}`
+      await deleteImageFile(puppy.profilePicture)
+      updateData['puppies.$.profilePicture'] = `/uploads/puppy-images/${req.file.filename}`
     }
 
-    const litter = await Litter.findOneAndUpdate(
+    const updatedLitter = await Litter.findOneAndUpdate(
       {
         _id: litterId,
         'puppies._id': puppyId
@@ -180,12 +245,11 @@ const updatePuppy = async (req, res) => {
       { new: true }
     )
 
-    if (!litter) {
-      return res.status(404).json({ error: 'Litter or puppy not found' })
-    }
-
-    res.status(200).json(litter)
+    res.status(200).json(updatedLitter)
   } catch (error) {
+    if (req.file) {
+      await deleteImageFile(`/uploads/puppy-images/${req.file.filename}`)
+    }
     handleErrors(res, error)
   }
 }
@@ -199,17 +263,26 @@ const deletePuppy = async (req, res) => {
       return res.status(400).json({ error: 'Invalid ID format' })
     }
 
-    const litter = await Litter.findByIdAndUpdate(
+    const litter = await Litter.findById(litterId)
+    if (!litter) {
+      return res.status(404).json({ error: 'Litter not found' })
+    }
+
+    const puppy = litter.puppies.id(puppyId)
+    if (!puppy) {
+      return res.status(404).json({ error: 'Puppy not found' })
+    }
+
+    // Delete puppy's profile picture
+    await deleteImageFile(puppy.profilePicture)
+
+    const updatedLitter = await Litter.findByIdAndUpdate(
       litterId,
       { $pull: { puppies: { _id: puppyId } } },
       { new: true }
     )
 
-    if (!litter) {
-      return res.status(404).json({ error: 'Litter or puppy not found' })
-    }
-
-    res.status(200).json(litter)
+    res.status(200).json(updatedLitter)
   } catch (error) {
     handleErrors(res, error)
   }

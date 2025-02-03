@@ -20,7 +20,7 @@ const OldLitters = () => {
     };
 
     try {
-      await Promise.all(litters.map(litter => loadImage(litter.image)));
+      await Promise.all(litters.map(litter => loadImage(litter.profilePicture)));
     } catch (error) {
       console.error('Error preloading litter images:', error);
     }
@@ -84,7 +84,7 @@ const OldLitters = () => {
     };
 
     try {
-      await Promise.all(puppies.map(puppy => loadImage(puppy.image)));
+      await Promise.all(puppies.map(puppy => loadImage(puppy.profilePicture)));
     } catch (error) {
       console.error('Error preloading images:', error);
     }
@@ -130,7 +130,7 @@ const OldLitters = () => {
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div className="aspect-[4/3] sm:aspect-[16/9] lg:aspect-square w-full overflow-hidden">
                       <img
-                        src={`/api/images${litter.image}`}
+                        src={`/api/images${litter.profilePicture}`}
                         alt={litter.name}
                         className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                       />
@@ -213,7 +213,7 @@ const OldLitters = () => {
                     >
                       <div className="aspect-square w-full overflow-hidden">
                         <img
-                          src={`/api/images${puppy.image}`}
+                          src={`/api/images${puppy.profilePicture}`}
                           alt={puppy.name}
                           className="w-full h-full object-cover"
                         />
