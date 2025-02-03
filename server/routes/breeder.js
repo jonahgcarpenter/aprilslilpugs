@@ -4,8 +4,7 @@ const {
   loginBreeder, 
   getBreederProfile, 
   updateBreederProfile,
-  logoutBreeder,
-  uploadBreederImages 
+  logoutBreeder
 } = require('../controllers/breederController');
 const requireAuth = require('../middleware/auth');
 const { breederUpload } = require('../middleware/multerConfig');

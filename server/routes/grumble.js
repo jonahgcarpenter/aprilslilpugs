@@ -17,6 +17,8 @@ router.get('/:id', getGrumble)
 // Protected routes - require authentication
 router.post('/', requireAuth, grumbleUpload.single('profilePicture'), createGrumble)
 router.delete('/:id', requireAuth, deleteGrumble)
-router.patch('/:id', requireAuth, grumbleUpload.single('profilePicture'), updateGrumble)
+router.patch('/:id', requireAuth, grumbleUpload.fields([
+    { name: 'profilePicture', maxCount: 1 }
+]), updateGrumble)
 
 module.exports = router

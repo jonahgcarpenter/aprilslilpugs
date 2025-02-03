@@ -3,15 +3,7 @@ const { parseCentralTime } = require('../util/timezone')
 const fs = require('fs').promises
 const path = require('path')
 
-/**
- * Helper Functions
- */
-
-/**
- * Deletes an image file from the filesystem
- * Skips deletion if the image is a placeholder or doesn't exist
- * @param {string} filename - The filename of the image
- */
+// delete file helper
 const deleteFile = async (filename) => {
     try {
         if (!filename || filename === 'grumble-placeholder.jpg') return;
@@ -31,45 +23,20 @@ const deleteFile = async (filename) => {
     }
 };
 
-/**
- * Processes uploaded files and returns formatted paths
- * @param {Object} file - The file object from multer
- * @returns {string} Filename of the profile picture
- */
-const processUploadedFiles = (file) => {
-    return file ? file.filename : 'grumble-placeholder.jpg';
-}
-
-/**
- * Grumble Controller Functions
- * These functions manage the Grumble feature, which handles breeding dogs
- * including their profile information and multiple image galleries
- */
-
-/**
- * GET all grumbles
- * Public access
- * Returns all grumbles sorted by most recent first
- */
+// get all grumbles
 const getGrumbles = async (req, res) => {
     try {
         const grumbles = await Grumble.find({}).sort({ createdAt: -1 });
-        const response = grumbles.map(grumble => {
-            const grumbleObj = grumble.toObject();
-            grumbleObj.profilePicture = `/uploads/grumble-images/${grumbleObj.profilePicture}`;
-            return grumbleObj;
-        });
-        res.status(200).json(response);
+        if (!grumbles) {
+            return res.status(404).json({ error: 'No Grumble Members found' });
+        }
+        res.status(200).json(grumbles);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
 }
 
-/**
- * GET single grumble
- * Public access
- * Returns detailed information for a specific grumble member
- */
+// get single grumble
 const getGrumble = async (req, res) => {
     const { id } = req.params
 
@@ -78,21 +45,13 @@ const getGrumble = async (req, res) => {
         if (!grumble) {
             return res.status(404).json({ error: 'No such grumble member found' })
         }
-        const response = grumble.toObject();
-        response.profilePicture = `/uploads/grumble-images/${response.profilePicture}`;
-        res.status(200).json(response);
+        res.status(200).json(grumble);
     } catch (error) {
         res.status(400).json({ error: error.message })
     }
 }
 
-/**
- * POST new grumble
- * Private access
- * Creates a new grumble member with:
- * - Single profile picture (required, uses placeholder if none provided)
- * - Automatically handles file storage and cleanup on failure
- */
+// create new grumble
 const createGrumble = async (req, res) => {
     try {
         const grumbleData = {
@@ -102,10 +61,7 @@ const createGrumble = async (req, res) => {
         }
         
         const grumble = await Grumble.create(grumbleData);
-        const response = grumble.toObject();
-        response.profilePicture = `/uploads/grumble-images/${response.profilePicture}`;
-        
-        res.status(200).json(response);
+        res.status(200).json(grumble);
     } catch (error) {
         // Delete uploaded file if creation fails
         if (req.file) {
@@ -115,13 +71,7 @@ const createGrumble = async (req, res) => {
     }
 }
 
-/**
- * DELETE grumble
- * Private access
- * Removes a grumble member and:
- * - Deletes associated profile picture
- * - Cleans up all files from storage
- */
+// delete grumble
 const deleteGrumble = async (req, res) => {
     const { id } = req.params
 
@@ -134,26 +84,16 @@ const deleteGrumble = async (req, res) => {
         // Delete profile picture
         await deleteFile(grumble.profilePicture)
 
-        const deletedGrumble = await grumble.deleteOne()
-        if (!deletedGrumble) {
-            throw new Error('Failed to delete grumble member')
-        }
+        await grumble.deleteOne();
         
-        res.status(200).json({ message: 'Grumble member deleted successfully' })
+        res.status(200).json({ message: 'Grumble member deleted successfully' });
     } catch (error) {
         console.error('Delete error:', error);
         res.status(400).json({ error: error.message || 'Error deleting grumble member' })
     }
 }
 
-/**
- * PATCH update grumble
- * Private access
- * Updates a grumble member with support for:
- * - Updating profile picture (handles old image deletion)
- * - Updating basic information
- * - Handles cleanup of files on failure
- */
+// update grumble
 const updateGrumble = async (req, res) => {
     const { id } = req.params
 
@@ -165,9 +105,10 @@ const updateGrumble = async (req, res) => {
 
         const updateData = { ...req.body }
 
-        if (req.file) {
+        // Handle profile picture if uploaded
+        if (req.files && req.files.profilePicture && req.files.profilePicture[0]) {
             await deleteFile(grumble.profilePicture);
-            updateData.profilePicture = req.file.filename;
+            updateData.profilePicture = req.files.profilePicture[0].filename;
         }
 
         if (req.body.birthDate) {
@@ -180,57 +121,20 @@ const updateGrumble = async (req, res) => {
             { new: true, runValidators: true }
         );
 
-        const response = updatedGrumble.toObject();
-        response.profilePicture = `/uploads/grumble-images/${response.profilePicture}`;
-
-        res.status(200).json(response);
+        res.status(200).json(updatedGrumble);
     } catch (error) {
-        // Delete newly uploaded file if update fails
-        if (req.file) {
-            await deleteFile(req.file.filename);
+        // Delete newly uploaded files if update fails
+        if (req.files && req.files.profilePicture) {
+            await deleteFile(req.files.profilePicture[0].filename);
         }
         res.status(400).json({ error: error.message })
     }
 }
-
-// New controller function for updating profile picture
-const updateProfilePicture = async (req, res) => {
-    const { id } = req.params;
-
-    try {
-        const grumble = await Grumble.findById(id);
-        if (!grumble) {
-            return res.status(404).json({ error: 'No such grumble member found' });
-        }
-
-        if (!req.file) {
-            return res.status(400).json({ error: 'No image file provided' });
-        }
-
-        // Delete old profile picture
-        await deleteFile(grumble.profilePicture);
-
-        // Update with new profile picture
-        const updatedGrumble = await Grumble.findByIdAndUpdate(
-            id,
-            { profilePicture: req.file.filename },
-            { new: true }
-        );
-
-        const responseGrumble = updatedGrumble.toObject();
-        responseGrumble.profilePicture = `/uploads/grumble-images/${responseGrumble.profilePicture}`;
-
-        res.status(200).json(responseGrumble);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-};
 
 module.exports = {
     getGrumbles,
     getGrumble,
     createGrumble,
     deleteGrumble,
-    updateGrumble,
-    updateProfilePicture
+    updateGrumble
 }

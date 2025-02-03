@@ -138,47 +138,6 @@ const updateBreederProfile = async (req, res) => {
   }
 };
 
-// upload breeder images
-const uploadBreederImages = async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ error: 'No image provided' });
-    }
-
-    const imageIndex = parseInt(req.params.index);
-    if (imageIndex !== 0 && imageIndex !== 1) {
-      return res.status(400).json({ error: 'Invalid image index. Must be 0 or 1' });
-    }
-
-    const breeder = await Breeder.findById(BREEDER_ID);
-    if (!breeder) {
-      return res.status(404).json({ error: 'Breeder not found' });
-    }
-
-    // Delete old image if it exists
-    if (breeder.images[imageIndex]) {
-      await deleteFile(breeder.images[imageIndex]);
-    }
-
-    // Store only filename
-    breeder.images[imageIndex] = req.file.filename;
-    
-    await breeder.save();
-    
-    // Transform response to include full paths
-    const responseImages = breeder.images.map(filename => 
-      filename ? `/uploads/breeder-profiles/${filename}` : null
-    );
-    
-    res.status(200).json({ 
-      message: 'Image updated successfully',
-      images: responseImages 
-    });
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-};
-
 // logout breeder
 const logoutBreeder = async (req, res) => {
   // Since JWT is stateless, we just return success
@@ -190,6 +149,5 @@ module.exports = {
   loginBreeder,
   getBreederProfile,
   updateBreederProfile,
-  logoutBreeder,
-  uploadBreederImages
+  logoutBreeder
 };

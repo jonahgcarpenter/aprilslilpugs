@@ -29,11 +29,9 @@ const breederSchema = new Schema({
   profilePicture: {
     type: String,
     required: false,
-    // Stores: "1234567890-profile.jpg"
   },
   images: {
     type: [String],
-    // Stores: ["1234567890-gallery1.jpg", "1234567890-gallery2.jpg"]
   },
   password: {
     type: String,

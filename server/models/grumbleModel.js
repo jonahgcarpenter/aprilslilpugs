@@ -16,7 +16,7 @@ const grumbleSchema = new Schema({
     },
     profilePicture: {
         type: String,
-        default: 'grumble-placeholder.jpg' // Store only filename
+        default: 'grumble-placeholder.jpg'
     },
     birthDate: {
         type: Date,
