@@ -2,7 +2,7 @@
 import UnderConstruction from '../components/UnderConstruction';
 import Grumble from '../components/Grumble';
 
-const MyGrumble = () => {
+const OurAdults = () => {
   return (
     <div className="min-h-screen pt-8 pb-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-12">
@@ -15,4 +15,4 @@ const MyGrumble = () => {
   )
 }
 
-export default MyGrumble;
+export default OurAdults;

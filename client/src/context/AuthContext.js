@@ -50,7 +50,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await fetch('/api/breeders/login', {
+      const response = await fetch('/api/breeder/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -62,13 +62,19 @@ export const AuthProvider = ({ children }) => {
       const data = await response.json();
       
       if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
+        throw new Error(data.error || 'Login failed');
       }
 
-      setUser(data.user);
+      const userData = {
+        email: data.email,
+        firstName: data.firstName,
+        lastName: data.lastName
+      };
+
+      setUser(userData);
       setToken(data.token);
       localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      localStorage.setItem('user', JSON.stringify(userData));
       
       setLoginStatus({
         message: 'Login successful!',
@@ -90,13 +96,26 @@ export const AuthProvider = ({ children }) => {
     setLoginStatus({ message: '', type: '' });
   };
 
-  const logout = () => {
-    setUser(null);
-    setToken(null);
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    if (sessionTimeout) {
-      clearTimeout(sessionTimeout);
+  const logout = async () => {
+    try {
+      if (token) {
+        await fetch('/api/breeder/logout', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setUser(null);
+      setToken(null);
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      if (sessionTimeout) {
+        clearTimeout(sessionTimeout);
+      }
     }
   };
 

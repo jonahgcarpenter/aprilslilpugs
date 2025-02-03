@@ -1,6 +1,10 @@
 import { Link } from 'react-router-dom'
+
+// CONTEXT
 import { useAuth } from '../context/AuthContext'
 import { useLive } from '../context/LiveContext'
+
+// COMPONENTS
 import LoginButton from './LoginButton'
 import LogoutButton from './LogoutButton'
 
@@ -21,24 +25,34 @@ const Navbar = () => {
                 Home
               </button>
             </Link>
-            <Link to="/mygrumble">
+            <Link to="/ouradults">
                 <button className="bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-4 sm:px-6 py-2 text-sm rounded-full font-semibold shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200">
-                    My Grumble
+                    Our Adults
                 </button>
             </Link>
-            <Link to="/puppies">
+            <Link to="/nursery">
                 <button className="bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-4 sm:px-6 py-2 text-sm rounded-full font-semibold shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200">
-                    Puppies
+                    Nursery
                 </button>
             </Link>
             {isLive && (
               <Link to="/live">
                 <button className="bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-4 sm:px-6 py-2 text-sm rounded-full font-semibold shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 flex items-center gap-2">
-                  <span>Live</span>
+                  <span>Live Puppy Cam</span>
                   <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
                 </button>
               </Link>
             )}
+            <Link to="/past-litters">
+                <button className="bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-4 sm:px-6 py-2 text-sm rounded-full font-semibold shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+                    Past Litters
+                </button>
+            </Link>
+            <Link to="/gallery">
+                <button className="bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-4 sm:px-6 py-2 text-sm rounded-full font-semibold shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+                    Gallery
+                </button>
+            </Link>
             {user && (
               <Link to="/breeder-dashboard">
                 <button className="bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-4 sm:px-6 py-2 text-sm rounded-full font-semibold shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200">

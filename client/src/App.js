@@ -13,8 +13,10 @@ import { SettingsProvider } from './context/SettingsContext';
 import Home from './pages/Home';
 import BreederDashboard from './pages/BreederDashboard';
 import Live from './pages/Live';
-import MyGrumble from './pages/MyGrumble';
-import Puppies from './pages/Puppies';
+import OurAdults from './pages/OurAdults';
+import Nursery from './pages/Nursery';
+import PastLitters from './pages/PastLitters';
+import Gallery from './pages/Gallery';
 
 // COMPONENTS
 import ProtectedRoute from './components/ProtectedRoute';
@@ -40,9 +42,11 @@ function App() {
                         <div className="container mx-auto px-4 max-w-7xl relative">
                           <Routes>
                             <Route path="/" element={<Home />} />
-                            <Route path="/mygrumble" element={<MyGrumble />} />
-                            <Route path="/puppies" element={<Puppies />} />
+                            <Route path="/ouradults" element={<OurAdults />} />
+                            <Route path="/nursery" element={<Nursery />} />
                             <Route path="/live" element={<Live />} />
+                            <Route path="/past-litters" element={<PastLitters />} />
+                            <Route path="/gallery" element={<Gallery />} />
                             <Route path="/breeder-dashboard" element={
                               <ProtectedRoute>
                                 <BreederDashboard />

@@ -1,10 +1,14 @@
 import { useEffect, useContext, useState } from 'react'
+
+// CONTEXT
 import { BreederContext } from '../context/BreederContext'
+
+// COMPONENTS
 import { FaFacebook, FaEnvelope, FaPhoneAlt, FaMapMarkerAlt, FaHeart } from 'react-icons/fa'
 import LoadingAnimation from './LoadingAnimation'
 
 const BreederDetails = () => {
-  const { breeder, loading: fetchLoading, error, fetchBreeder } = useContext(BreederContext)
+  const { breeder, loading: fetchLoading, error, fetchBreederProfile } = useContext(BreederContext)
   const [loading, setLoading] = useState(true)
 
   const preloadBreederImage = async (imageUrl) => {
@@ -19,7 +23,7 @@ const BreederDetails = () => {
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      await fetchBreeder('677055fb44cadf75392cf7a3');
+      await fetchBreederProfile();
     };
     loadData();
   }, []);
@@ -134,6 +138,24 @@ const BreederDetails = () => {
                 <p className="text-white/90 whitespace-pre-line leading-relaxed text-base">
                   {breeder.story}
                 </p>
+              </div>
+            </div>
+          )}
+
+          {breeder.images && breeder.images.length > 0 && (
+            <div className="mt-8">
+              <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-6">My Gallery</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                {breeder.images.map((image, index) => (
+                  <div key={index} className="relative group">
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl transform rotate-3 opacity-20 group-hover:opacity-30 transition-opacity duration-300"></div>
+                    <img
+                      src={`/api/images${image}`}
+                      alt={`Breeder gallery ${index + 1}`}
+                      className="relative w-full h-72 sm:h-64 object-cover rounded-xl border-2 border-white/10 shadow-xl transform transition-all duration-300 hover:scale-[1.02]"
+                    />
+                  </div>
+                ))}
               </div>
             </div>
           )}

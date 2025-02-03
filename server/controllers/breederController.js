@@ -1,169 +1,168 @@
-const Breeder = require('../models/breederModel')
-const mongoose = require('mongoose')
-const bcrypt = require('bcryptjs')
-const jwt = require('jsonwebtoken')
-const path = require('path')
+const Breeder = require('../models/breederModel');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+const fs = require('fs').promises;
+const path = require('path');
 
-/**
- * Breeder Management and Authentication Controller
- * Handles breeder CRUD operations and authentication
- */
+const createToken = (_id) => {
+  return jwt.sign({ _id }, process.env.JWT_SECRET, { expiresIn: '3d' });
+};
 
-// Retrieves all breeders with password data excluded for security
-const getBreeders = async (req, res) => {
+const deleteFile = async (filepath) => {
   try {
-    const breeders = await Breeder.find({})
-      .select('-password')  // Exclude password
-      .sort({createdAt: -1})
-    res.status(200).json(breeders)
+    if (!filepath) return;
+    
+    // Remove leading slash if present
+    const relativePath = filepath.startsWith('/') ? filepath.slice(1) : filepath;
+    console.log('Original filepath:', filepath);
+    console.log('Relative path:', relativePath);
+    
+    const absolutePath = path.join('public', relativePath);
+    console.log('Attempting to delete:', absolutePath);
+    
+    await fs.access(absolutePath);
+    await fs.unlink(absolutePath);
+    console.log('Successfully deleted file:', absolutePath);
   } catch (error) {
-    res.status(500).json({ error: error.message, code: error.code })
-  }
-}
-
-// Fetches a single breeder's information securely (excludes password)
-const getBreeder = async (req, res) => {
-  try {
-    const { id } = req.params
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({error: 'Invalid ID format'})
+    if (error.code === 'ENOENT') {
+      console.log('File not found at path:', absolutePath);
+    } else {
+      console.error('Error deleting file:', error);
     }
+  }
+};
 
-    const breeder = await Breeder.findById(id).select('-password')  // Exclude password
+// login breeder
+const loginBreeder = async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email and password are required' });
+  }
+
+  try {
+    const breeder = await Breeder.findOne({ email });
     if (!breeder) {
-      return res.status(404).json({error: 'Breeder not found'})
+      throw Error('Incorrect email');
+    }
+    
+    const match = await bcrypt.compare(password, breeder.password);
+    if (!match) {
+      throw Error('Incorrect password');
     }
 
-    res.status(200).json(breeder)
+    const token = createToken(breeder._id);
+    res.status(200).json({ 
+      email, 
+      token,
+      firstName: breeder.firstName,
+      lastName: breeder.lastName 
+    });
   } catch (error) {
-    res.status(500).json({ error: error.message, code: error.code })
+    res.status(400).json({ error: error.message });
   }
-}
+};
 
-// Updates breeder information including profile picture handling
-// Ensures proper file path construction for profile images
-const updateBreeder = async (req, res) => {
+// get breeder profile
+const getBreederProfile = async (req, res) => {
   try {
-    let updateData = { ...req.body };
-    
-    if (req.file) {
-      // Fix the URL path to avoid duplication
-      const filename = path.basename(req.file.path);
-      updateData.profilePicture = `/uploads/breeder-profiles/${filename}`;
+    const breeder = await Breeder.findOne().select('-password');
+    if (!breeder) {
+      return res.status(404).json({ error: 'No breeder profile found' });
     }
-    
-    const breeder = await Breeder.findOneAndUpdate(
-      { _id: req.params.id },
-      updateData,
-      { new: true }
-    );
-    
     res.status(200).json(breeder);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 };
 
-/**
- * Authenticates a breeder with email and password
- * Includes:
- * - Input validation
- * - Email format verification
- * - Secure password comparison
- * - JWT token generation with expiration
- * - Error handling with generic messages for security
- */
-const loginBreeder = async (req, res) => {
+// update breeder profile
+const updateBreederProfile = async (req, res) => {
   try {
-    const { email, password } = req.body;
-
-    // Input validation
-    if (!email) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Email is required'
-      });
-    }
-
-    if (!password) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Password is required'
-      });
-    }
-
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Invalid email format'
-      });
-    }
-
-    // Find breeder by email
-    const breeder = await Breeder.findOne({ email });
-    
-    // Generic message for security
-    const invalidCredentialsMessage = 'Invalid email or password';
-
+    const breeder = await Breeder.findById(req.breeder._id);
     if (!breeder) {
-      return res.status(401).json({
-        status: 'error',
-        message: invalidCredentialsMessage
-      });
+      return res.status(404).json({ error: 'Breeder not found' });
     }
 
-    // Verify password
-    const isValidPassword = await bcrypt.compare(
-      String(password),
-      String(breeder.password)
-    );
+    const updates = req.body;
+    if (req.file) {
+      // Delete old profile picture if it exists
+      if (breeder.profilePicture) {
+        await deleteFile(breeder.profilePicture);
+      }
+      updates.profilePicture = `/uploads/breeder-profiles/${req.file.filename}`;
+    }
+
+    // Hash password if it's being updated
+    if (updates.password) {
+      const salt = await bcrypt.genSalt(10);
+      updates.password = await bcrypt.hash(updates.password, salt);
+    }
+
+    Object.keys(updates).forEach((key) => {
+      breeder[key] = updates[key];
+    });
+
+    await breeder.save();
     
-    if (!isValidPassword) {
-      return res.status(401).json({
-        status: 'error',
-        message: invalidCredentialsMessage
-      });
-    }
-
-    // Create token with explicit expiration
-    const expiresIn = '1h'; // Configure as needed
-    const token = jwt.sign(
-      { 
-        id: breeder._id,
-        exp: Math.floor(Date.now() / 1000) + (60 * 60) // 1 hour from now
-      },
-      process.env.JWT_SECRET
-    );
-
-    // Send success response with expiration
-    res.status(200).json({
-      status: 'success',
-      message: 'Login successful',
-      user: {
-        id: breeder._id,
-        email: breeder.email,
-        firstName: breeder.firstName,
-        lastName: breeder.lastName
-      },
-      token,
-      expiresIn
-    });
-
+    // Remove password from response
+    const breederResponse = breeder.toObject();
+    delete breederResponse.password;
+    
+    res.status(200).json(breederResponse);
   } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({
-      status: 'error',
-      message: 'An unexpected error occurred. Please try again later.'
-    });
+    res.status(400).json({ error: error.message });
   }
 };
 
+// upload breeder images
+const uploadBreederImages = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No image provided' });
+    }
+
+    const imageIndex = parseInt(req.params.index);
+    if (imageIndex !== 0 && imageIndex !== 1) {
+      return res.status(400).json({ error: 'Invalid image index. Must be 0 or 1' });
+    }
+
+    const breeder = await Breeder.findById(req.breeder._id);
+    if (!breeder) {
+      return res.status(404).json({ error: 'Breeder not found' });
+    }
+
+    // Delete old image if it exists
+    if (breeder.images[imageIndex]) {
+      await deleteFile(breeder.images[imageIndex]);
+    }
+
+    // Update the specific image slot
+    const newImagePath = `/uploads/breeder-profiles/${req.file.filename}`;
+    breeder.images[imageIndex] = newImagePath;
+    
+    await breeder.save();
+    
+    res.status(200).json({ 
+      message: 'Image updated successfully',
+      images: breeder.images 
+    });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+// logout breeder
+const logoutBreeder = async (req, res) => {
+  // Since JWT is stateless, we just return success
+  // The client should remove the token
+  res.status(200).json({ message: 'Logged out successfully' });
+};
+
 module.exports = {
-  getBreeders,
-  getBreeder,
-  updateBreeder,
-  loginBreeder
-}
+  loginBreeder,
+  getBreederProfile,
+  updateBreederProfile,
+  logoutBreeder,
+  uploadBreederImages
+};

@@ -3,7 +3,7 @@ require('dotenv').config()
 const express = require('express')
 const mongoose = require('mongoose')
 const path = require('path')
-const breederRoutes = require('./routes/breeders')
+const breederRoutes = require('./routes/breeder')
 const liveRoutes = require('./routes/live')
 const littersRoutes = require('./routes/litters')
 const grumbleRoutes = require('./routes/grumble')
@@ -25,7 +25,7 @@ app.use((req, _res, next) => {
 })
 
 // routes
-app.use('/api/breeders', breederRoutes)
+app.use('/api/breeder', breederRoutes)
 app.use('/api/live', liveRoutes)
 app.use('/api/litters', littersRoutes)
 app.use('/api/grumble', grumbleRoutes)

@@ -1,5 +1,9 @@
 import React, { useContext, useEffect, useState } from 'react';
+
+// CONTEXT
 import { GrumbleContext } from '../context/GrumbleContext';
+
+// COMPONENTS
 import LoadingAnimation from './LoadingAnimation';
 
 const calculateAge = (birthDateString) => {
@@ -97,7 +101,9 @@ const Grumble = () => {
                 </h1>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {grumbles.map((pug) => (
+                    {grumbles
+                        .sort((a, b) => calculateAge(b.birthDate) - calculateAge(a.birthDate))
+                        .map((pug) => (
                         <div
                             key={pug._id}
                             className="bg-slate-800/50 rounded-xl overflow-hidden hover:transform hover:scale-[1.02] transition-all duration-300 border border-slate-700/50"
@@ -109,7 +115,6 @@ const Grumble = () => {
                                     className="w-full h-full object-cover"
                                 />
                             </div>
-
                             <div className="p-6 space-y-4">
                                 <div className="space-y-2">
                                     <h3 className="text-2xl font-semibold text-slate-100">

@@ -1,5 +1,4 @@
 const mongoose = require('mongoose')
-
 const Schema = mongoose.Schema
 
 const breederSchema = new Schema({
@@ -17,8 +16,7 @@ const breederSchema = new Schema({
   },
   email: {
     type: String,
-    required: true,
-    unique: true
+    required: true
   },
   location: {
     type: String,
@@ -32,10 +30,14 @@ const breederSchema = new Schema({
     type: String,
     required: false
   },
+  images: {
+    type: [String],
+    default: [null, null],
+    validate: [array => array.length <= 2, 'Cannot have more than 2 images']
+  },
   password: {
     type: String,
-    required: true,
-    minlength: [6, 'Password must be at least 6 characters long']
+    required: true
   }
 }, {timestamps: true})
 

@@ -16,75 +16,36 @@ const LoginButton = () => {
     e.preventDefault();
     
     if (!email.trim()) {
-      if (setLoginStatus) {
-        setLoginStatus({
-          message: 'Email is required',
-          type: 'error'
-        });
-      }
-      return;
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      if (setLoginStatus) {
-        setLoginStatus({
-          message: 'Please enter a valid email address',
-          type: 'error'
-        });
-      }
+      setLoginStatus({
+        message: 'Please enter your email',
+        type: 'error'
+      });
       return;
     }
 
     if (!password) {
-      if (setLoginStatus) {
-        setLoginStatus({
-          message: 'Password is required',
-          type: 'error'
-        });
-      }
+      setLoginStatus({
+        message: 'Password is required',
+        type: 'error'
+      });
       return;
     }
     
     setIsLoading(true);
     if (clearLoginStatus) clearLoginStatus();
     
-    try {
-      const result = await login(email, password);
-      
-      if (result.success) {
-        if (setLoginStatus) {
-          setLoginStatus({
-            message: 'Login successful! Redirecting...',
-            type: 'success'
-          });
-        }
-        
-        setTimeout(() => {
-          setEmail('');
-          setPassword('');
-          setShowModal(false);
-          if (clearLoginStatus) clearLoginStatus();
-        }, 1500);
-      } else {
-        if (setLoginStatus) {
-          setLoginStatus({
-            message: result.message || 'Login failed. Please try again.',
-            type: 'error'
-          });
-        }
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-      if (setLoginStatus) {
-        setLoginStatus({
-          message: 'Network error. Please check your connection and try again.',
-          type: 'error'
-        });
-      }
-    } finally {
-      setIsLoading(false);
+    const result = await login(email, password);
+    
+    if (result.success) {
+      setTimeout(() => {
+        setEmail('');
+        setPassword('');
+        setShowModal(false);
+        if (clearLoginStatus) clearLoginStatus();
+      }, 1500);
     }
+    
+    setIsLoading(false);
   };
 
   const closeModal = () => {

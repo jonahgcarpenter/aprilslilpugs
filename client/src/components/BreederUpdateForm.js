@@ -1,9 +1,13 @@
 import { useState, useEffect, useRef, useContext } from "react"
+
+// CONTEXT
 import { BreederContext } from '../context/BreederContext'
+
+// COMPONENTS
 import LoadingAnimation from './LoadingAnimation';
 
 const BreederUpdateForm = () => {
-  const { breeder, dispatch } = useContext(BreederContext);
+  const { breeder, dispatch, updateBreederProfile, updateBreederImage } = useContext(BreederContext);
   const [error, setError] = useState(null);
   const fileInputRef = useRef(null);
   const [formData, setFormData] = useState({
@@ -17,10 +21,15 @@ const BreederUpdateForm = () => {
   const [profilePicture, setProfilePicture] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [galleryPreviews, setGalleryPreviews] = useState([null, null]);
+  const galleryFileInputRefs = [useRef(null), useRef(null)];
+  const [pendingGalleryImages, setPendingGalleryImages] = useState([null, null]);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
     const loadData = async () => {
-      const response = await fetch('/api/breeders/677055fb44cadf75392cf7a3');
+      const response = await fetch('/api/breeders/profile');
       const json = await response.json();
       if (response.ok) {
         dispatch({ type: 'SET_BREEDER', payload: json });
@@ -42,6 +51,14 @@ const BreederUpdateForm = () => {
       if (breeder.profilePicture) {
         setPreviewUrl(`/api/images${breeder.profilePicture}`);
       }
+    }
+  }, [breeder]);
+
+  useEffect(() => {
+    if (breeder?.images) {
+      setGalleryPreviews(
+        breeder.images.map(image => image ? `/api/images${image}` : null)
+      );
     }
   }, [breeder]);
 
@@ -85,6 +102,32 @@ const BreederUpdateForm = () => {
     return () => URL.revokeObjectURL(objectUrl);
   };
 
+  const handleGalleryImageChange = (index, e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Image must be less than 5MB');
+      galleryFileInputRefs[index].current.value = '';
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(file);
+    setGalleryPreviews(prev => {
+      const newPreviews = [...prev];
+      newPreviews[index] = objectUrl;
+      return newPreviews;
+    });
+
+    setPendingGalleryImages(prev => {
+      const newPending = [...prev];
+      newPending[index] = file;
+      return newPending;
+    });
+
+    setError(null);
+  };
+
   const preventDefaultValidation = (e) => {
     e.preventDefault();
   };
@@ -124,33 +167,42 @@ const BreederUpdateForm = () => {
       return;
     }
 
-    if (!breeder?._id) {
-      setIsSubmitting(false);
-      return;
-    }
-
-    const formDataToSend = new FormData();
-    Object.keys(formData).forEach(key => {
-      formDataToSend.append(key, formData[key]);
-    });
-    
-    if (profilePicture) {
-      formDataToSend.append('profilePicture', profilePicture);
-    }
-
     try {
-      const response = await fetch('/api/breeders/' + breeder._id, {
-        method: 'PATCH',
-        body: formDataToSend
+      // First update the profile
+      const formDataToSend = new FormData();
+      Object.keys(formData).forEach(key => {
+        formDataToSend.append(key, formData[key]);
       });
+      
+      if (profilePicture) {
+        formDataToSend.append('profilePicture', profilePicture);
+      }
 
-      const json = await response.json();
-      if (!response.ok) throw new Error(json.error || 'Update failed');
+      await updateBreederProfile(formDataToSend);
 
-      dispatch({ type: 'UPDATE_BREEDER', payload: json });
+      // Then update gallery images if there are any pending changes
+      for (let i = 0; i < pendingGalleryImages.length; i++) {
+        if (pendingGalleryImages[i]) {
+          const imageFormData = new FormData();
+          imageFormData.append('image', pendingGalleryImages[i]);
+          await updateBreederImage(i, imageFormData);
+        }
+      }
+
       setError(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
       setProfilePicture(null);
+      setPendingGalleryImages([null, null]);
+      galleryFileInputRefs.forEach(ref => {
+        if (ref.current) ref.current.value = '';
+      });
+
+      // Add success modal handling
+      setSuccessMessage('Profile updated successfully!');
+      setShowSuccessModal(true);
+      setTimeout(() => {
+        setShowSuccessModal(false);
+      }, 2000);
 
     } catch (err) {
       setError(err.message);
@@ -276,6 +328,53 @@ const BreederUpdateForm = () => {
               className="w-full text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:bg-blue-500 file:text-white hover:file:bg-blue-600"
             />
           </div>
+
+          <div className="form-group sm:col-span-2 mt-8">
+            <h3 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-4">
+              Gallery Images
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {[0, 1].map((index) => (
+                <div key={index} className="space-y-4">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Gallery Image {index + 1}
+                  </label>
+                  {galleryPreviews[index] && (
+                    <div className="mb-4 relative w-full h-48">
+                      <img
+                        src={galleryPreviews[index]}
+                        alt={`Gallery ${index + 1}`}
+                        className="w-full h-full object-cover rounded-lg border border-slate-700"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setGalleryPreviews(prev => {
+                            const newPreviews = [...prev];
+                            newPreviews[index] = null;
+                            return newPreviews;
+                          });
+                          if (galleryFileInputRefs[index].current) {
+                            galleryFileInputRefs[index].current.value = '';
+                          }
+                        }}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-600"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  )}
+                  <input
+                    ref={galleryFileInputRefs[index]}
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleGalleryImageChange(index, e)}
+                    className="w-full text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:bg-blue-500 file:text-white hover:file:bg-blue-600"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
         <button 
@@ -290,6 +389,28 @@ const BreederUpdateForm = () => {
           )}
         </button>
       </form>
+
+      {/* Add success modal at the end of the component */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-slate-900/75 backdrop-blur-sm flex items-start justify-center p-4 z-[9999]">
+          <div className="mt-[15vh] bg-slate-900/90 backdrop-blur-sm rounded-xl p-8 max-w-md w-full border border-white/10">
+            <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-green-500 to-green-600 mb-6">
+              Success!
+            </h2>
+            <p className="text-slate-300 mb-6">
+              {successMessage}
+            </p>
+            <div className="flex justify-end">
+              <button
+                onClick={() => setShowSuccessModal(false)}
+                className="bg-gradient-to-r from-green-600 to-green-400 hover:from-green-700 hover:to-green-500 text-white px-6 py-2 text-sm rounded-full font-semibold shadow-md hover:shadow-lg transition-all duration-200"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
