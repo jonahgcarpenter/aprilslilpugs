@@ -1,5 +1,8 @@
 import { useState, useContext, useEffect, useRef } from 'react';
 import { GrumbleContext } from '../../context/GrumbleContext';
+import DeleteModal from '../Modals/DeleteModal';
+import SuccessModal from '../Modals/SuccessModal';
+import ErrorModal from '../Modals/ErrorModal';
 
 const formatDate = (date) => {
     return new Date(date).toISOString().split('T')[0];
@@ -25,6 +28,7 @@ const GrumbleUpdate = () => {
     const [successMessage, setSuccessMessage] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const formRef = useRef(null);
+    const [errorModal, setErrorModal] = useState({ show: false, message: '' });
 
     useEffect(() => {
         if (selectedGrumble) {
@@ -55,6 +59,10 @@ const GrumbleUpdate = () => {
     const removeImage = () => {
         setFormData(prev => ({ ...prev, profilePicture: null }));
         setPreviewUrls(prev => ({ ...prev, profilePicture: null }));
+    };
+
+    const showError = (message) => {
+        setErrorModal({ show: true, message });
     };
 
     const handleSubmit = async (e) => {
@@ -95,7 +103,7 @@ const GrumbleUpdate = () => {
                 }
             }
         } catch (error) {
-            setMessage({ text: error.message || 'An error occurred', type: 'error' });
+            showError(error.message || 'An error occurred');
         } finally {
             setIsSubmitting(false);
         }
@@ -110,7 +118,7 @@ const GrumbleUpdate = () => {
             setShowDeleteModal(false);
             resetForm();
         } catch (error) {
-            setMessage({ text: error.message, type: 'error' });
+            showError(error.message);
         }
     };
 
@@ -300,46 +308,24 @@ const GrumbleUpdate = () => {
             </form>
 
             {/* Delete Confirmation Modal */}
-            {showDeleteModal && (
-                <div className="fixed inset-0 bg-slate-900/75 backdrop-blur-sm flex items-start justify-center p-4 z-[9999]">
-                    <div className="mt-[15vh] bg-slate-900/90 backdrop-blur-sm rounded-xl p-8 max-w-md w-full border border-white/10">
-                        <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-red-500 to-red-600 mb-6">
-                            Confirm Deletion
-                        </h2>
-                        <p className="text-slate-300 mb-6">
-                            Are you sure you want to delete {selectedGrumble?.name}? This action cannot be undone.
-                        </p>
-                        <div className="flex justify-end space-x-4">
-                            <button
-                                onClick={() => setShowDeleteModal(false)}
-                                className="px-6 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition-colors"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleDelete}
-                                className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-500 transition-colors"
-                            >
-                                Delete
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <DeleteModal 
+                isOpen={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
+                onDelete={handleDelete}
+                itemName={`${selectedGrumble?.name || 'this grumble member'}`}
+            />
 
-            {/* Success Modal */}
-            {showSuccessModal && (
-                <div className="fixed inset-0 bg-slate-900/75 backdrop-blur-sm flex items-start justify-center p-4 z-[9999]">
-                    <div className="mt-[15vh] bg-slate-900/90 backdrop-blur-sm rounded-xl p-8 max-w-md w-full border border-white/10">
-                        <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-green-500 to-green-600 mb-6">
-                            Success!
-                        </h2>
-                        <p className="text-slate-300">
-                            {successMessage}
-                        </p>
-                    </div>
-                </div>
-            )}
+            <SuccessModal
+                isOpen={showSuccessModal}
+                onClose={() => setShowSuccessModal(false)}
+                message={successMessage}
+            />
+
+            <ErrorModal
+                isOpen={errorModal.show}
+                onClose={() => setErrorModal({ show: false, message: '' })}
+                message={errorModal.message}
+            />
         </div>
     );
 };

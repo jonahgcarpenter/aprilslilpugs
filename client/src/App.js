@@ -21,7 +21,6 @@ import Gallery from './pages/Gallery';
 // COMPONENTS
 import ProtectedRoute from './components/Auth/ProtectedRoute';
 import Navbar from './components/Navbar';
-import LitterUpdate from './components/Litter/LitterUpdate';
 
 function App() {
   return (
@@ -50,16 +49,6 @@ function App() {
                           <Route path="/breeder-dashboard" element={
                             <ProtectedRoute>
                               <BreederDashboard />
-                            </ProtectedRoute>
-                          } />
-                          <Route path="/breeder-dashboard/litters/new" element={
-                            <ProtectedRoute>
-                              <LitterUpdate />
-                            </ProtectedRoute>
-                          } />
-                          <Route path="/breeder-dashboard/litters/:litterId" element={
-                            <ProtectedRoute>
-                              <LitterUpdate />
                             </ProtectedRoute>
                           } />
                         </Routes>

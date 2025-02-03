@@ -2,668 +2,473 @@ import { useState, useEffect, useContext, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { LitterContext } from '../../context/LitterContext';
 import LoadingAnimation from '../LoadingAnimation';
+import DeleteModal from '../Modals/DeleteModal';
+import SuccessModal from '../Modals/SuccessModal';
+import ErrorModal from '../Modals/ErrorModal';
 
 const LitterUpdate = () => {
   const { litterId } = useParams();
   const navigate = useNavigate();
+  const { getLitter, updateLitter, deleteLitter, addPuppy, updatePuppy, deletePuppy, error, clearError } = useContext(LitterContext);
   
-  const { getLitter, createLitter, updateLitter, deleteLitter, addPuppy, updatePuppy, deletePuppy, error, clearError } = useContext(LitterContext);
-  const litterFileInputRef = useRef(null);
-  const puppyFileInputRef = useRef(null);
-  const puppyFormRef = useRef(null);
-
-  const isNewLitter = !litterId;
+  // State management
   const [litter, setLitter] = useState(null);
-  const [litterForm, setLitterForm] = useState({
-    name: '',
-    mother: '',
-    father: '',
-    birthDate: '',
-    availableDate: '',
-    profilePicture: null
-  });
-  const [puppyForm, setPuppyForm] = useState({
-    name: '',
-    color: '',
-    gender: 'Male',
-    status: 'Available',
-    profilePicture: null
-  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('litter'); // 'litter' or 'puppies'
+  const [showPuppyModal, setShowPuppyModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState({ show: false, type: '', id: null });
   const [selectedPuppy, setSelectedPuppy] = useState(null);
-  const [isLoading, setIsLoading] = useState(!isNewLitter);
-
-  const [litterPreviewUrl, setLitterPreviewUrl] = useState(null);
-  const [puppyPreviewUrl, setPuppyPreviewUrl] = useState(null);
-
-  const [showDeleteLitterModal, setShowDeleteLitterModal] = useState(false);
-  const [showDeletePuppyModal, setShowDeletePuppyModal] = useState(false);
-  const [puppyToDelete, setPuppyToDelete] = useState(null);
-
+  const [notification, setNotification] = useState({ show: false, message: '', type: '' });
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [errorModal, setErrorModal] = useState({ show: false, message: '' });
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  // Form states
+  const [litterForm, setLitterForm] = useState({
+    name: '', mother: '', father: '', birthDate: '', availableDate: '', profilePicture: null
+  });
+  const [puppyForm, setPuppyForm] = useState({
+    name: '', color: '', gender: '', price: '', status: 'available', profilePicture: null
+  });
+
+  // File preview states
+  const [litterPreview, setLitterPreview] = useState(null);
+  const [puppyPreview, setPuppyPreview] = useState(null);
+  
+  // File input refs
+  const litterFileRef = useRef(null);
+  const puppyFileRef = useRef(null);
 
   useEffect(() => {
-    let isMounted = true;
-    const controller = new AbortController();
-
-    const fetchLitterData = async () => {
-      if (!litterId) {
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        const data = await getLitter(litterId);
-        if (!isMounted) return;
-
-        if (data === null) {
-          navigate('/breeder-dashboard', { replace: true });
-          return;
-        }
-
-        setLitter(data);
-        setLitterForm({
-          name: data.name,
-          mother: data.mother,
-          father: data.father,
-          birthDate: new Date(data.birthDate).toISOString().split('T')[0],
-          availableDate: new Date(data.availableDate).toISOString().split('T')[0],
-          profilePicture: null
-        });
-        setLitterPreviewUrl(data.profilePicture ? `/api/images${data.profilePicture}` : null);
-      } catch (error) {
-        if (!isMounted) return;
-        console.error('Error fetching litter:', error);
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
     fetchLitterData();
+  }, [litterId]);
 
-    return () => {
-      isMounted = false;
-      controller.abort();
-    };
-  }, [litterId, getLitter, navigate]);
-
-  const handleLitterChange = (e) => {
-    const { name, value, files } = e.target;
-    if (files) {
-      const file = files[0];
-      if (!file) return;
-      
-      if (file.size > 5 * 1024 * 1024) {
-        alert('Image must be less than 5MB');
-        litterFileInputRef.current.value = '';
+  const fetchLitterData = async () => {
+    try {
+      const data = await getLitter(litterId);
+      if (!data) {
+        navigate('/breeder-dashboard');
         return;
       }
-
-      const objectUrl = URL.createObjectURL(file);
-      setLitterPreviewUrl(objectUrl);
-      setLitterForm(prev => ({ ...prev, profilePicture: file }));
-      
-      return () => URL.revokeObjectURL(objectUrl);
-    } else {
-      setLitterForm(prev => ({ ...prev, [name]: value }));
+      setLitter(data);
+      setLitterForm({
+        name: data.name,
+        mother: data.mother,
+        father: data.father,
+        birthDate: new Date(data.birthDate).toISOString().split('T')[0],
+        availableDate: new Date(data.availableDate).toISOString().split('T')[0],
+        profilePicture: null
+      });
+      setLitterPreview(data.profilePicture ? `/api/images${data.profilePicture}` : null);
+    } catch (error) {
+      showError('Error loading litter data');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handlePuppyChange = (e) => {
-    const { name, value, files } = e.target;
-    if (files) {
-      const file = files[0];
-      if (!file) return;
-      
-      if (file.size > 5 * 1024 * 1024) {
-        alert('Image must be less than 5MB');
-        puppyFileInputRef.current.value = '';
-        return;
-      }
+  const handleFileChange = (e, type) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
-      const objectUrl = URL.createObjectURL(file);
-      setPuppyPreviewUrl(objectUrl);
-      setPuppyForm(prev => ({ ...prev, profilePicture: file }));
-      
-      return () => URL.revokeObjectURL(objectUrl);
+    if (file.size > 5 * 1024 * 1024) {
+      showError('Image must be less than 5MB');
+      e.target.value = '';
+      return;
+    }
+
+    const preview = URL.createObjectURL(file);
+    if (type === 'litter') {
+      setLitterForm(prev => ({ ...prev, profilePicture: file }));
+      setLitterPreview(preview);
     } else {
-      setPuppyForm(prev => ({ ...prev, [name]: value }));
+      setPuppyForm(prev => ({ ...prev, profilePicture: file }));
+      setPuppyPreview(preview);
     }
   };
 
   const handleLitterSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
     try {
-      if (isNewLitter) {
-        const newLitter = await createLitter(litterForm);
-        if (newLitter && newLitter._id) {
-          setSuccessMessage('Litter created successfully!');
-          setShowSuccessModal(true);
-          setTimeout(() => {
-            setShowSuccessModal(false);
-            navigate(`/breeder-dashboard/litters/${newLitter._id}`);  // Updated path to match route config
-          }, 2000);
-        }
-      } else {
-        const success = await updateLitter(litterId, litterForm);
-        if (success) {
-          const updatedLitter = await getLitter(litterId);
-          setLitter(updatedLitter);
-          setSuccessMessage('Litter updated successfully!');
-          setShowSuccessModal(true);
-          setTimeout(() => setShowSuccessModal(false), 2000);
-        }
+      const success = await updateLitter(litterId, litterForm);
+      if (success) {
+        await fetchLitterData();
+        showSuccessNotification('Litter updated successfully');
       }
-    } finally {
-      setIsSubmitting(false);
+    } catch (error) {
+      showError('Failed to update litter');
     }
   };
 
-  const handleLitterDelete = async () => {
-    setIsSubmitting(true);
+  const handlePuppySubmit = async (e) => {
+    e.preventDefault();
     try {
-      const success = await deleteLitter(litterId);
+      const success = selectedPuppy
+        ? await updatePuppy(litterId, selectedPuppy._id, puppyForm)
+        : await addPuppy(litterId, puppyForm);
+      
       if (success) {
-        setShowDeleteLitterModal(false);
-        navigate('/breeder-dashboard', { replace: true });
-        return;
+        await fetchLitterData();
+        setShowPuppyModal(false);
+        showSuccessNotification(`Puppy ${selectedPuppy ? 'updated' : 'added'} successfully`);
+        resetPuppyForm();
       }
     } catch (error) {
-      console.error('Error deleting litter:', error);
-    } finally {
-      setIsSubmitting(false);
+      showError(`Failed to ${selectedPuppy ? 'update' : 'add'} puppy`);
     }
+  };
+
+  const handleDelete = async () => {
+    const { type, id } = showDeleteModal;
+    try {
+      const success = type === 'litter'
+        ? await deleteLitter(litterId)
+        : await deletePuppy(litterId, id);
+      
+      if (success) {
+        if (type === 'litter') {
+          navigate('/breeder-dashboard');
+        } else {
+          await fetchLitterData();
+          showSuccessNotification('Puppy deleted successfully');
+        }
+      }
+    } catch (error) {
+      showError(`Failed to delete ${type}`);
+    } finally {
+      setShowDeleteModal({ show: false, type: '', id: null });
+    }
+  };
+
+  const showError = (message) => {
+    setErrorModal({ show: true, message });
+  };
+
+  const showNotification = (message, type) => {
+    setNotification({ show: true, message, type });
+    setTimeout(() => setNotification({ show: false, message: '', type: '' }), 3000);
+  };
+
+  const showSuccessNotification = (message) => {
+    setSuccessMessage(message);
+    setShowSuccessModal(true);
+    setTimeout(() => setShowSuccessModal(false), 2000);
   };
 
   const resetPuppyForm = () => {
     setPuppyForm({
-      name: '',
-      color: '',
-      gender: 'Male',
-      status: 'Available',
-      profilePicture: null
+      name: '', color: '', gender: '', price: '', status: 'available', profilePicture: null
     });
-    setPuppyPreviewUrl(null);
-    if (puppyFileInputRef.current) {
-      puppyFileInputRef.current.value = '';
-    }
+    setPuppyPreview(null);
+    setSelectedPuppy(null);
+    if (puppyFileRef.current) puppyFileRef.current.value = '';
   };
 
-  const handleAddPuppy = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    try {
-      const success = await addPuppy(litterId, puppyForm);
-      if (success) {
-        resetPuppyForm();
-        setPuppyPreviewUrl(null);
-        
-        const updatedLitter = await getLitter(litterId);
-        setLitter(updatedLitter);
-        
-        setSuccessMessage('Puppy added successfully!');
-        setShowSuccessModal(true);
-        setTimeout(() => setShowSuccessModal(false), 2000);
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handlePuppyUpdate = async (e) => {
-    e.preventDefault();
-    if (!selectedPuppy) return;
-    
-    setIsSubmitting(true);
-    try {
-      const success = await updatePuppy(litterId, selectedPuppy._id, puppyForm);
-      if (success) {
-        setSelectedPuppy(null);
-        resetPuppyForm();
-        setPuppyPreviewUrl(null);
-        
-        const updatedLitter = await getLitter(litterId);
-        setLitter(updatedLitter);
-        
-        setSuccessMessage('Puppy updated successfully!');
-        setShowSuccessModal(true);
-        setTimeout(() => setShowSuccessModal(false), 2000);
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handlePuppyDelete = async () => {
-    if (!puppyToDelete || !litterId) return;
-    
-    setIsSubmitting(true);
-    try {
-        console.log('Deleting puppy:', puppyToDelete, 'from litter:', litterId);
-        const success = await deletePuppy(litterId, puppyToDelete);
-        if (success) {
-            setShowDeletePuppyModal(false);
-            setPuppyToDelete(null);
-            const updatedLitter = await getLitter(litterId);
-            setLitter(updatedLitter);
-            setSuccessMessage('Puppy deleted successfully!');
-            setShowSuccessModal(true);
-            setTimeout(() => setShowSuccessModal(false), 2000);
-        }
-    } catch (error) {
-        console.error('Error deleting puppy:', error);
-    } finally {
-        setIsSubmitting(false);
-    }
-};
-
-const selectPuppyForEdit = (puppy) => {
-  setSelectedPuppy({
-    _id: puppy._id,
-    name: puppy.name,
-    color: puppy.color,
-    gender: puppy.gender,
-    status: puppy.status
-  });
-  setPuppyForm({
-    name: puppy.name,
-    color: puppy.color,
-    gender: puppy.gender,
-    status: puppy.status,
-    profilePicture: null
-  });
-  setPuppyPreviewUrl(puppy.profilePicture ? `/api/images${puppy.profilePicture}` : null);
-  
-  const yOffset = -270;
-  const element = puppyFormRef.current;
-  const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-  window.scrollTo({ top: y, behavior: 'smooth' });
-};
-
-  useEffect(() => {
-    return () => {
-      if (litterPreviewUrl && !litterPreviewUrl.startsWith('http')) {
-        URL.revokeObjectURL(litterPreviewUrl);
-      }
-      if (puppyPreviewUrl && !puppyPreviewUrl.startsWith('http')) {
-        URL.revokeObjectURL(puppyPreviewUrl);
-      }
-    };
-  }, [litterPreviewUrl, puppyPreviewUrl]);
-
-  if (isLoading) return (
-    <div className="mx-2 sm:mx-4">
-      <div className="bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl text-center text-slate-300">
-        <LoadingAnimation containerClassName="my-4" />
-        Loading litter data...
-      </div>
-    </div>
-  );
-
-  if (!isNewLitter && !litter && !isLoading) return <div>Litter not found</div>;
+  if (isLoading) return <LoadingAnimation />;
 
   return (
-    <div className="litter-update mx-0 sm:mx-4 py-4 sm:py-8">
-      {error && (
-        <div className="mb-6 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500">
-          {error}
-          <button onClick={clearError} className="float-right">&times;</button>
-        </div>
-      )}
-
-      <div className="mb-8 bg-slate-900/80 backdrop-blur-sm rounded-xl p-4 sm:p-8 border border-slate-800/50 shadow-xl">
-        <h2 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-8">
-          {isNewLitter ? 'Create New Litter' : 'Update Litter'}
-        </h2>
-        <form onSubmit={handleLitterSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div className="form-group">
-              <label className="block text-sm font-medium text-gray-300 mb-2">Name</label>
-              <input
-                type="text"
-                name="name"
-                value={litterForm.name}
-                onChange={handleLitterChange}
-                className="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700 focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label className="block text-sm font-medium text-gray-300 mb-2">Mother</label>
-              <input
-                type="text"
-                name="mother"
-                value={litterForm.mother}
-                onChange={handleLitterChange}
-                className="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700 focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label className="block text-sm font-medium text-gray-300 mb-2">Father</label>
-              <input
-                type="text"
-                name="father"
-                value={litterForm.father}
-                onChange={handleLitterChange}
-                className="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700 focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label className="block text-sm font-medium text-gray-300 mb-2">Birth Date</label>
-              <input
-                type="date"
-                name="birthDate"
-                value={litterForm.birthDate}
-                onChange={handleLitterChange}
-                className="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700 focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label className="block text-sm font-medium text-gray-300 mb-2">Available Date</label>
-              <input
-                type="date"
-                name="availableDate"
-                value={litterForm.availableDate}
-                onChange={handleLitterChange}
-                className="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700 focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            </div>
-            <div className="form-group sm:col-span-2">
-              <label className="block text-sm font-medium text-gray-300 mb-2">Litter Image</label>
-              {litterPreviewUrl && (
-                <div className="mb-4 relative w-32 h-32">
-                  <img
-                    src={litterPreviewUrl}
-                    alt="Preview"
-                    className="w-full h-full object-cover rounded-lg border border-slate-700"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setLitterPreviewUrl(null);
-                      setLitterForm(prev => ({ ...prev, profilePicture: null }));
-                      if (litterFileInputRef.current) litterFileInputRef.current.value = '';
-                    }}
-                    className="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-600"
-                  >
-                    ×
-                  </button>
-                </div>
-              )}
-              <input
-                ref={litterFileInputRef}
-                type="file"
-                name="profilePicture"  // Change from 'image' to 'profilePicture'
-                accept="image/*"
-                onChange={handleLitterChange}
-                className="w-full text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:bg-blue-500 file:text-white hover:file:bg-blue-600"
-              />
-            </div>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition-all duration-200"
-            >
-              {isSubmitting ? 'Processing...' : (isNewLitter ? 'Create Litter' : 'Update Litter')}
-            </button>
-            {!isNewLitter && (
-              <button
-                type="button"
-                onClick={() => setShowDeleteLitterModal(true)}
-                className="w-full bg-red-500 text-white px-8 py-3 rounded-lg font-semibold shadow-lg hover:bg-red-600 transition-all duration-200"
-              >
-                Delete Litter
-              </button>
-            )}
-          </div>
-        </form>
+    <div className="container mx-auto p-4">
+      {/* Tabs */}
+      <div className="flex mb-6 bg-slate-800 rounded-lg p-1">
+        <button
+          onClick={() => setActiveTab('litter')}
+          className={`flex-1 py-2 px-4 rounded ${activeTab === 'litter' ? 'bg-blue-500' : ''}`}
+        >
+          Litter Details
+        </button>
+        <button
+          onClick={() => setActiveTab('puppies')}
+          className={`flex-1 py-2 px-4 rounded ${activeTab === 'puppies' ? 'bg-blue-500' : ''}`}
+        >
+          Puppies ({litter?.puppies?.length || 0})
+        </button>
       </div>
 
-      {!isNewLitter && (
-        <div className="bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">
-          <h2 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-8">
-            {selectedPuppy ? 'Update Puppy' : 'Add New Puppy'}
-          </h2>
-          <form 
-            ref={puppyFormRef}
-            onSubmit={selectedPuppy ? handlePuppyUpdate : handleAddPuppy} 
-            className="space-y-6"
-          >
+      {/* Litter Form */}
+      {activeTab === 'litter' && (
+        <div className="bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 border border-slate-800/50 shadow-xl">
+          <form onSubmit={handleLitterSubmit} className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="form-group">
-                <label className="block text-sm font-medium text-gray-300 mb-2">Name</label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Litter Name</label>
                 <input
                   type="text"
                   name="name"
-                  value={puppyForm.name}
-                  onChange={handlePuppyChange}
+                  value={litterForm.name}
+                  onChange={(e) => setLitterForm(prev => ({ ...prev, name: e.target.value }))}
                   className="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700 focus:ring-2 focus:ring-blue-500"
                   required
                 />
               </div>
               <div className="form-group">
-                <label className="block text-sm font-medium text-gray-300 mb-2">Color</label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Mother</label>
                 <input
                   type="text"
-                  name="color"
-                  value={puppyForm.color}
-                  onChange={handlePuppyChange}
+                  name="mother"
+                  value={litterForm.mother}
+                  onChange={(e) => setLitterForm(prev => ({ ...prev, mother: e.target.value }))}
                   className="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700 focus:ring-2 focus:ring-blue-500"
                   required
                 />
               </div>
               <div className="form-group">
-                <label className="block text-sm font-medium text-gray-300 mb-2">Gender</label>
-                <select
-                  name="gender"
-                  value={puppyForm.gender}
-                  onChange={handlePuppyChange}
-                  className="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700 focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <label className="block text-sm font-medium text-gray-300 mb-2">Status</label>
-                <select
-                  name="status"
-                  value={puppyForm.status}
-                  onChange={handlePuppyChange}
-                  className="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700 focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="Available">Available</option>
-                  <option value="Reserved">Reserved</option>
-                  <option value="Sold">Sold</option>
-                </select>
-              </div>
-              <div className="form-group sm:col-span-2">
-                <label className="block text-sm font-medium text-gray-300 mb-2">Puppy Image</label>
-                {puppyPreviewUrl && (
-                  <div className="mb-4 relative w-32 h-32">
-                    <img
-                      src={puppyPreviewUrl}
-                      alt="Preview"
-                      className="w-full h-full object-cover rounded-lg border border-slate-700"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setPuppyPreviewUrl(null);
-                        setPuppyForm(prev => ({ ...prev, profilePicture: null }));
-                        if (puppyFileInputRef.current) puppyFileInputRef.current.value = '';
-                      }}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-600"
-                    >
-                      ×
-                    </button>
-                  </div>
-                )}
+                <label className="block text-sm font-medium text-gray-300 mb-2">Father</label>
                 <input
-                  ref={puppyFileInputRef}
-                  type="file"
-                  name="profilePicture"  // Change from 'image' to 'profilePicture'
-                  accept="image/*"
-                  onChange={handlePuppyChange}
-                  className="w-full text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:bg-blue-500 file:text-white hover:file:bg-blue-600"
+                  type="text"
+                  name="father"
+                  value={litterForm.father}
+                  onChange={(e) => setLitterForm(prev => ({ ...prev, father: e.target.value }))}
+                  className="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700 focus:ring-2 focus:ring-blue-500"
+                  required
                 />
               </div>
-            </div>
-            <div className="flex space-x-4">
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full sm:w-auto bg-gradient-to-r from-green-600 to-green-400 hover:from-green-700 hover:to-green-500 text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition-all duration-200 disabled:opacity-50"
-              >
-                {isSubmitting ? 'Processing...' : (selectedPuppy ? 'Update Puppy' : 'Add Puppy')}
-              </button>
-              {selectedPuppy && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedPuppy(null);
-                    resetPuppyForm();
-                  }}
-                  className="w-full sm:w-auto bg-gray-500 text-white px-8 py-3 rounded-lg font-semibold shadow-lg hover:bg-gray-600 transition-all duration-200"
-                >
-                  Cancel Edit
-                </button>
-              )}
-            </div>
-          </form>
-
-          <div className="mt-8">
-            <h3 className="text-xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600">Current Puppies</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {litter?.puppies?.map((puppy) => (
-                <div key={`puppy-${puppy._id}`} className="border p-4 rounded-lg bg-slate-800 border-slate-700 hover:bg-slate-700 transition-all duration-200">
-                  <img
-                    src={`/api/images${puppy.profilePicture}`}
-                    alt={puppy.name}
-                    className="w-full aspect-square object-cover rounded-lg shadow-lg border-2 border-slate-600/50 transition-transform hover:scale-105"
+              <div className="form-group">
+                <label className="block text-sm font-medium text-gray-300 mb-2">Birth Date</label>
+                <input
+                  type="date"
+                  name="birthDate"
+                  value={litterForm.birthDate}
+                  onChange={(e) => setLitterForm(prev => ({ ...prev, birthDate: e.target.value }))}
+                  className="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700 focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label className="block text-sm font-medium text-gray-300 mb-2">Available Date</label>
+                <input
+                  type="date"
+                  name="availableDate"
+                  value={litterForm.availableDate}
+                  onChange={(e) => setLitterForm(prev => ({ ...prev, availableDate: e.target.value }))}
+                  className="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700 focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label className="block text-sm font-medium text-gray-300 mb-2">Litter Image</label>
+                <div className="flex items-center space-x-4">
+                  {litterPreview && (
+                    <div className="relative w-24 h-24">
+                      <img
+                        src={litterPreview}
+                        alt="Litter preview"
+                        className="w-full h-full object-cover rounded-lg border border-slate-700"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setLitterPreview(null);
+                          setLitterForm(prev => ({ ...prev, profilePicture: null }));
+                          if (litterFileRef.current) litterFileRef.current.value = '';
+                        }}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-600"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  )}
+                  <input
+                    ref={litterFileRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleFileChange(e, 'litter')}
+                    className="flex-1 text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:bg-blue-500 file:text-white hover:file:bg-blue-600"
                   />
-                  <h4 className="font-bold text-white">{puppy.name}</h4>
-                  <p className="text-gray-400">Color: {puppy.color}</p>
-                  <p className="text-gray-400">Gender: {puppy.gender}</p>
-                  <p className="text-gray-400">Status: {puppy.status}</p>
-                  <div className="mt-2 flex space-x-2">
-                    <button
-                      onClick={() => selectPuppyForEdit(puppy)}
-                      className="bg-blue-500 text-white px-2 py-1 rounded text-sm hover:bg-blue-600 transition-all duration-200"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => {
-                        setPuppyToDelete(puppy._id);
-                        setShowDeletePuppyModal(true);
-                      }}
-                      className="bg-red-500 text-white px-2 py-1 rounded text-sm hover:bg-red-600 transition-all duration-200"
-                    >
-                      Delete
-                    </button>
-                  </div>
                 </div>
-              ))}
+              </div>
             </div>
-          </div>
-        </div>
-      )}
-
-      {showDeleteLitterModal && (
-        <div 
-          className="fixed inset-0 bg-slate-900/75 backdrop-blur-sm flex items-start justify-center p-4 z-[9999]"
-          onClick={(e) => e.target === e.currentTarget && setShowDeleteLitterModal(false)}
-        >
-          <div 
-            className="mt-[15vh] bg-slate-900/90 backdrop-blur-sm rounded-xl p-8 max-w-md w-full border border-white/10"
-            onClick={e => e.stopPropagation()}
-          >
-            <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-red-500 to-red-600 mb-6">
-              Delete Litter
-            </h2>
-            
-            <p className="text-slate-300 mb-6">
-              Are you sure you want to delete this litter? This action cannot be undone.
-            </p>
-
-            <div className="flex justify-end gap-4">
+            <div className="flex justify-end space-x-4">
               <button
-                onClick={() => setShowDeleteLitterModal(false)}
-                className="px-6 py-2 text-sm text-white/70 hover:text-white transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleLitterDelete}
-                className="bg-gradient-to-r from-red-600 to-red-400 hover:from-red-700 hover:to-red-500 text-white px-6 py-2 text-sm rounded-full font-semibold shadow-md hover:shadow-lg transition-all duration-200"
+                type="button"
+                onClick={() => setShowDeleteModal({ show: true, type: 'litter', id: litterId })}
+                className="px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
               >
                 Delete Litter
               </button>
+              <button
+                type="submit"
+                className="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
+              >
+                Update Litter
+              </button>
             </div>
-          </div>
+          </form>
         </div>
       )}
 
-      {showDeletePuppyModal && (
-        <div 
-          className="fixed inset-0 bg-slate-900/75 backdrop-blur-sm flex items-start justify-center p-4 z-[9999]"
-          onClick={(e) => e.target === e.currentTarget && setShowDeletePuppyModal(false)}
-        >
-          <div 
-            className="mt-[15vh] bg-slate-900/90 backdrop-blur-sm rounded-xl p-8 max-w-md w-full border border-white/10"
-            onClick={e => e.stopPropagation()}
+      {/* Puppies List */}
+      {activeTab === 'puppies' && (
+        <div className="bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 border border-slate-800/50 shadow-xl">
+          <button
+            onClick={() => {
+              resetPuppyForm();
+              setShowPuppyModal(true);
+            }}
+            className="mb-4 bg-blue-500 px-4 py-2 rounded hover:bg-blue-600 text-white"
           >
-            <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-red-500 to-red-600 mb-6">
-              Delete Puppy
-            </h2>
-            
-            <p className="text-slate-300 mb-6">
-              Are you sure you want to delete this puppy? This action cannot be undone.
-            </p>
+            Add New Puppy
+          </button>
 
-            <div className="flex justify-end gap-4">
-              <button
-                onClick={() => {
-                  setShowDeletePuppyModal(false);
-                  setPuppyToDelete(null);
-                }}
-                className="px-6 py-2 text-sm text-white/70 hover:text-white transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handlePuppyDelete}
-                className="bg-gradient-to-r from-red-600 to-red-400 hover:from-red-700 hover:to-red-500 text-white px-6 py-2 text-sm rounded-full font-semibold shadow-md hover:shadow-lg transition-all duration-200"
-              >
-                Delete Puppy
-              </button>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {litter?.puppies?.map(puppy => (
+              <div key={puppy._id} className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-4 border border-slate-700/50">
+                <div className="relative h-48 mb-4">
+                  <img
+                    src={puppy.profilePicture ? `/api/images${puppy.profilePicture}` : '/placeholder-puppy.jpg'}
+                    alt={puppy.name}
+                    className="w-full h-full object-cover rounded-lg"
+                  />
+                  <div className="absolute top-2 right-2 space-x-2">
+                    <button
+                      onClick={() => {
+                        setSelectedPuppy(puppy);
+                        setPuppyForm({
+                          name: puppy.name,
+                          color: puppy.color,
+                          gender: puppy.gender,
+                          price: puppy.price,
+                          status: puppy.status,
+                          profilePicture: null
+                        });
+                        setPuppyPreview(`/api/images${puppy.profilePicture}`);
+                        setShowPuppyModal(true);
+                      }}
+                      className="bg-blue-500 p-2 rounded-lg hover:bg-blue-600 transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => setShowDeleteModal({ show: true, type: 'puppy', id: puppy._id })}
+                      className="bg-red-500 p-2 rounded-lg hover:bg-red-600 transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-lg font-semibold text-white">{puppy.name}</h3>
+                  <div className="text-sm text-gray-400">
+                    <p>Color: {puppy.color}</p>
+                    <p>Gender: {puppy.gender}</p>
+                    <p>Price: ${puppy.price}</p>
+                    <p className="capitalize">Status: {puppy.status}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
 
-      {showSuccessModal && (
-        <div className="fixed inset-0 bg-slate-900/75 backdrop-blur-sm flex items-start justify-center p-4 z-[9999]">
-          <div className="mt-[15vh] bg-slate-900/90 backdrop-blur-sm rounded-xl p-8 max-w-md w-full border border-white/10">
-            <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-green-500 to-green-600 mb-6">
-              Success
-            </h2>
-            <p className="text-slate-300 mb-6">
-              {successMessage}
-            </p>
+      {/* Puppy Modal */}
+      {showPuppyModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-slate-900 rounded-xl p-6 max-w-md w-full border border-slate-800">
+            <h3 className="text-xl font-bold mb-4">{selectedPuppy ? 'Edit Puppy' : 'Add New Puppy'}</h3>
+            <form onSubmit={handlePuppySubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Name</label>
+                <input
+                  type="text"
+                  value={puppyForm.name}
+                  onChange={(e) => setPuppyForm(prev => ({ ...prev, name: e.target.value }))}
+                  className="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Color</label>
+                <input
+                  type="text"
+                  value={puppyForm.color}
+                  onChange={(e) => setPuppyForm(prev => ({ ...prev, color: e.target.value }))}
+                  className="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Gender</label>
+                <select
+                  value={puppyForm.gender}
+                  onChange={(e) => setPuppyForm(prev => ({ ...prev, gender: e.target.value }))}
+                  className="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700"
+                  required
+                >
+                  <option value="">Select Gender</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Price</label>
+                <input
+                  type="number"
+                  value={puppyForm.price}
+                  onChange={(e) => setPuppyForm(prev => ({ ...prev, price: e.target.value }))}
+                  className="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Status</label>
+                <select
+                  value={puppyForm.status}
+                  onChange={(e) => setPuppyForm(prev => ({ ...prev, status: e.target.value }))}
+                  className="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700"
+                  required
+                >
+                  <option value="available">Available</option>
+                  <option value="reserved">Reserved</option>
+                  <option value="sold">Sold</option>
+                </select>
+              </div>
+              <div className="mt-4 flex justify-end space-x-4">
+                <button
+                  type="button"
+                  onClick={() => setShowPuppyModal(false)}
+                  className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
+                >
+                  {selectedPuppy ? 'Update' : 'Add'} Puppy
+                </button>
+              </div>
+            </form>
           </div>
+        </div>
+      )}
+
+      <DeleteModal 
+        isOpen={showDeleteModal.show}
+        onClose={() => setShowDeleteModal({ show: false, type: '', id: null })}
+        onDelete={handleDelete}
+        itemName={showDeleteModal.type === 'litter' ? 'this litter' : 'this puppy'}
+      />
+
+      <SuccessModal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        message={successMessage}
+      />
+
+      <ErrorModal
+        isOpen={errorModal.show}
+        onClose={() => setErrorModal({ show: false, message: '' })}
+        message={errorModal.message}
+      />
+
+      {/* Keep error notifications */}
+      {notification.show && notification.type === 'error' && (
+        <div className="fixed bottom-4 right-4 p-4 rounded bg-red-500">
+          {notification.message}
         </div>
       )}
     </div>

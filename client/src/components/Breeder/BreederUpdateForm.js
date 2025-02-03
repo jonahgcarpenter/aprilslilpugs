@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from "react"
 import { useBreeder } from '../../context/BreederContext'
-import LoadingAnimation from '../LoadingAnimation';
+import LoadingAnimation from '../LoadingAnimation'
+import SuccessModal from '../Modals/SuccessModal'
+import ErrorModal from '../Modals/ErrorModal'
 
 const BreederUpdateForm = () => {
-  const { breeder, updateBreederProfile, fetchBreederProfile } = useBreeder();
+  const { breeder, updateBreederProfile } = useBreeder();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -20,6 +22,7 @@ const BreederUpdateForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [errorModal, setErrorModal] = useState({ show: false, message: '' });
   
   const fileInputRef = useRef(null);
   const galleryFileInputRefs = [useRef(null), useRef(null)];
@@ -80,6 +83,10 @@ const BreederUpdateForm = () => {
     e.preventDefault();
   };
 
+  const showError = (message) => {
+    setErrorModal({ show: true, message });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -103,21 +110,12 @@ const BreederUpdateForm = () => {
         }
       });
 
-      const response = await fetch('/api/breeder/profile', {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: formDataToSend
-      });
-
-      const result = await response.json();
+      const result = await updateBreederProfile(formDataToSend);
       
-      if (!response.ok) {
+      if (!result.success) {
         throw new Error(result.error);
       }
 
-      await fetchBreederProfile(); // Refresh breeder data
       setShowSuccessModal(true);
       setSuccessMessage('Profile updated successfully!');
       
@@ -129,7 +127,7 @@ const BreederUpdateForm = () => {
         if (ref.current) ref.current.value = '';
       });
     } catch (error) {
-      setError(error.message);
+      showError(error.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -314,27 +312,16 @@ const BreederUpdateForm = () => {
         </button>
       </form>
 
-      {/* Add success modal at the end of the component */}
-      {showSuccessModal && (
-        <div className="fixed inset-0 bg-slate-900/75 backdrop-blur-sm flex items-start justify-center p-4 z-[9999]">
-          <div className="mt-[15vh] bg-slate-900/90 backdrop-blur-sm rounded-xl p-8 max-w-md w-full border border-white/10">
-            <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-green-500 to-green-600 mb-6">
-              Success!
-            </h2>
-            <p className="text-slate-300 mb-6">
-              {successMessage}
-            </p>
-            <div className="flex justify-end">
-              <button
-                onClick={() => setShowSuccessModal(false)}
-                className="bg-gradient-to-r from-green-600 to-green-400 hover:from-green-700 hover:to-green-500 text-white px-6 py-2 text-sm rounded-full font-semibold shadow-md hover:shadow-lg transition-all duration-200"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <SuccessModal
+        isOpen={showSuccessModal}
+        message={successMessage}
+      />
+
+      <ErrorModal
+        isOpen={errorModal.show}
+        onClose={() => setErrorModal({ show: false, message: '' })}
+        message={errorModal.message}
+      />
     </div>
   );
 };

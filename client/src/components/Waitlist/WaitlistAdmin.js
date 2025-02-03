@@ -1,5 +1,6 @@
 import React, { useState, useContext, memo } from 'react';
 import { WaitlistContext } from '../../context/WaitlistContext';
+import DeleteModal from '../Modals/DeleteModal';
 
 const WaitlistAdmin = memo(() => {
     const { updateEntry, deleteEntry, entries, isEnabled } = useContext(WaitlistContext);
@@ -118,40 +119,12 @@ const WaitlistAdmin = memo(() => {
                 </table>
             </div>
 
-            {showDeleteModal && (
-                <div 
-                    className="fixed inset-0 bg-slate-900/75 backdrop-blur-sm flex items-start justify-center p-4 z-[9999]"
-                    onClick={(e) => e.target === e.currentTarget && setShowDeleteModal(false)}
-                >
-                    <div 
-                        className="mt-[15vh] bg-slate-900/90 backdrop-blur-sm rounded-xl p-8 max-w-md w-full border border-white/10"
-                        onClick={e => e.stopPropagation()}
-                    >
-                        <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-red-500 to-red-600 mb-6">
-                            Are You Sure?
-                        </h2>
-                        
-                        <p className="text-slate-300 mb-6">
-                            Are you sure you want to delete this waitlist entry? This action cannot be undone.
-                        </p>
-
-                        <div className="flex justify-end gap-4">
-                            <button
-                                onClick={() => setShowDeleteModal(false)}
-                                className="px-6 py-2 rounded-full text-sm text-white/70 hover:text-white hover:bg-slate-700/50 transition-colors"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={() => handleDelete(entryToDelete)}
-                                className="bg-gradient-to-r from-red-600 to-red-400 hover:from-red-700 hover:to-red-500 text-white px-6 py-2 text-sm rounded-full font-semibold shadow-md hover:shadow-lg transition-all duration-200"
-                            >
-                                Delete Entry
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <DeleteModal 
+                isOpen={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
+                onDelete={() => handleDelete(entryToDelete)}
+                itemName="this waitlist entry"
+            />
         </div>
     );
 });
