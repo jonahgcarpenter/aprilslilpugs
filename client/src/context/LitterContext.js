@@ -7,73 +7,87 @@ export const LitterProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const formatDate = (dateString) => {
-        // Parse the ISO date string (YYYY-MM-DD)
-        const [year, month, day] = dateString.split('-').map(Number);
-        const date = new Date(year, month - 1, day); // month is 0-based in Date constructor
-        return date.toLocaleDateString('en-US', {
-            month: 'long',
-            day: 'numeric',
-            year: 'numeric'
-        });
+    // Validation functions
+    const validateImage = (file) => {
+        const maxSize = 2 * 1024 * 1024; // 2MB
+        if (file.size > maxSize) {
+            throw new Error('Image must be less than 2MB');
+        }
+        
+        const allowedTypes = ['image/jpeg', 'image/png'];
+        if (!allowedTypes.includes(file.type)) {
+            throw new Error('Image must be in JPG or PNG format');
+        }
     };
 
-    const formatLitterData = (litter) => ({
-        ...litter,
-        birthDate: formatDate(litter.birthDate),
-        availableDate: formatDate(litter.availableDate),
-        rawBirthDate: litter.birthDate, // Store original format
-        rawAvailableDate: litter.availableDate, // Store original format
-        profilePicture: litter.profilePicture,
-        puppies: litter.puppies.map(puppy => ({
-            ...puppy,
-            _id: puppy._id // Keep only _id, remove id
-        }))
-    });
+    const validateDate = (dateString) => {
+        if (!dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+            throw new Error('Invalid date format. Use YYYY-MM-DD');
+        }
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) {
+            throw new Error('Invalid date');
+        }
+        return true;
+    };
 
     const fetchLitters = async () => {
         setLoading(true);
         setError(null);
         try {
             const response = await fetch('/api/litters');
-            if (!response.ok) {
-                throw new Error('Failed to fetch litters');
-            }
             const data = await response.json();
-            const formattedLitters = data.map(formatLitterData);
-            setLitters(formattedLitters);
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to fetch litters');
+            }
+            setLitters(data);
         } catch (err) {
-            setError('Failed to fetch litters. Please try again later.');
-            console.error('Fetch error:', err);
+            setError(err.message || 'Failed to fetch litters');
+            console.error('Error fetching litters:', err);
         } finally {
             setLoading(false);
         }
     };
 
-    const getLitter = async (id) => {
+    const getLitter = async (litterId) => {
+        setLoading(true);
+        setError(null);
         try {
-            const response = await fetch(`/api/litters/${id}`);
-            if (response.status === 404) {
-                return null;
-            }
+            const response = await fetch(`/api/litters/${litterId}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            
+            const data = await response.json();
             if (!response.ok) {
-                throw new Error('Failed to fetch litter');
+                throw new Error(data.error || 'Failed to fetch litter');
             }
-            const json = await response.json();
-            return json;
-        } catch (error) {
-            console.error('Fetch error:', error);
-            throw error;
+            return data;
+        } catch (err) {
+            setError('Failed to fetch litter details');
+            console.error('Error fetching litter:', err);
+            throw err;
+        } finally {
+            setLoading(false);
         }
     };
 
-    const createLitter = async (litterData) => {
+    const createLitter = async (formData) => {
+        setLoading(true);
+        setError(null);
         try {
-            setError(null);
-            const formData = new FormData();
-            Object.keys(litterData).forEach(key => {
-                formData.append(key, litterData[key]);
-            });
+            // Validate date if present in FormData
+            const birthDate = formData.get('birthDate');
+            const availableDate = formData.get('availableDate');
+            if (birthDate) validateDate(birthDate);
+            if (availableDate) validateDate(availableDate);
+
+            // Validate image if present
+            const image = formData.get('profilePicture');
+            if (image instanceof File) {
+                validateImage(image);
+            }
 
             const response = await fetch('/api/litters', {
                 method: 'POST',
@@ -82,34 +96,39 @@ export const LitterProvider = ({ children }) => {
                 },
                 body: formData
             });
-
+            
+            const data = await response.json();
             if (!response.ok) {
-                throw new Error('Failed to create litter');
+                throw new Error(data.error || 'Failed to add litter');
             }
-
-            const newLitter = await response.json();
-            await fetchLitters();
-            return newLitter; // Return the new litter data including _id
+            
+            setLitters(prevLitters => [...prevLitters, data]);
+            return data;
         } catch (err) {
-            setError('Failed to create litter. Please try again.');
-            console.error('Create error:', err);
-            return false;
+            setError(err.message || 'Failed to add litter');
+            console.error('Error adding litter:', err);
+            throw err;
+        } finally {
+            setLoading(false);
         }
     };
 
-    const updateLitter = async (litterId, litterData) => {
+    const updateLitter = async (litterId, formData) => {
+        setLoading(true);
+        setError(null);
         try {
-            setError(null);
-            const formData = new FormData();
-            Object.keys(litterData).forEach(key => {
-                if (litterData[key] !== undefined && litterData[key] !== null && litterData[key] !== '') {
-                    if (key === 'profilePicture' && litterData[key] instanceof File) {
-                        formData.append('profilePicture', litterData[key]);
-                    } else {
-                        formData.append(key, litterData[key]);
-                    }
-                }
-            });
+            // Parse the JSON data from FormData
+            const jsonData = JSON.parse(formData.get('data'));
+            
+            // Validate dates
+            if (jsonData.birthDate) validateDate(jsonData.birthDate);
+            if (jsonData.availableDate) validateDate(jsonData.availableDate);
+
+            // Validate image if present
+            const image = formData.get('profilePicture');
+            if (image instanceof File) {
+                validateImage(image);
+            }
 
             const response = await fetch(`/api/litters/${litterId}`, {
                 method: 'PATCH',
@@ -118,23 +137,33 @@ export const LitterProvider = ({ children }) => {
                 },
                 body: formData
             });
-
+            
+            const data = await response.json();
             if (!response.ok) {
-                throw new Error('Failed to update litter');
+                console.error('Server error:', data);
+                throw new Error(data.error || 'Failed to update litter');
             }
-
-            await fetchLitters();
-            return true;
+            
+            setLitters(prevLitters =>
+                prevLitters.map(litter =>
+                    litter._id === litterId ? data : litter
+                )
+            );
+            return data;
         } catch (err) {
-            setError('Failed to update litter. Please try again.');
-            console.error('Update error:', err);
-            return false;
+            console.error('Update error details:', err);
+            setError(err.message || 'Failed to update litter');
+            throw err;
+        } finally {
+            setLoading(false);
         }
     };
 
-    const deleteLitter = async (id) => {
+    const deleteLitter = async (litterId) => {
+        setLoading(true);
+        setError(null);
         try {
-            const response = await fetch(`/api/litters/${id}`, {
+            const response = await fetch(`/api/litters/${litterId}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -142,32 +171,39 @@ export const LitterProvider = ({ children }) => {
             });
             
             if (!response.ok) {
-                throw new Error('Failed to delete litter');
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to delete litter');
             }
             
-            setLitters(prev => prev.filter(litter => litter._id !== id));
-            return true;
-        } catch (error) {
-            console.error('Delete error:', error);
-            throw error;
+            setLitters(prevLitters => 
+                prevLitters.filter(litter => litter._id !== litterId)
+            );
+        } catch (err) {
+            setError('Failed to delete litter. Please try again later.');
+            console.error('Error deleting litter:', err);
+            throw err;
+        } finally {
+            setLoading(false);
         }
     };
 
-    const addPuppy = async (litterId, puppyData) => {
+    const addPuppy = async (litterId, puppyData, puppyImage = null) => {
+        setLoading(true);
+        setError(null);
         try {
-            setError(null);
             const formData = new FormData();
             
+            // Add puppy data
             Object.keys(puppyData).forEach(key => {
-                if (puppyData[key] !== undefined && puppyData[key] !== null && puppyData[key] !== '') {
-                    if (key === 'profilePicture' && puppyData[key] instanceof File) {
-                        formData.append('profilePicture', puppyData[key]);
-                    } else {
-                        formData.append(key, puppyData[key]);
-                    }
-                }
+                formData.append(key, puppyData[key]);
             });
-        
+            
+            // Add puppy image if provided
+            if (puppyImage) {
+                validateImage(puppyImage);
+                formData.append('profilePicture', puppyImage);
+            }
+
             const response = await fetch(`/api/litters/${litterId}/puppies`, {
                 method: 'POST',
                 headers: {
@@ -175,96 +211,125 @@ export const LitterProvider = ({ children }) => {
                 },
                 body: formData
             });
-        
+            
+            const data = await response.json();
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Failed to add puppy');
+                throw new Error(data.error || 'Failed to add puppy');
             }
-        
-            const updatedLitter = await getLitter(litterId);
-            setLitters(prev => prev.map(l => 
-                l._id === litterId ? updatedLitter : l
-            ));
-        
-            return true;
+            
+            setLitters(prevLitters =>
+                prevLitters.map(litter =>
+                    litter._id === litterId ? data : litter
+                )
+            );
+            return data;
         } catch (err) {
-            setError(err.message || 'Failed to add puppy. Please try again.');
-            console.error('Add puppy error:', err);
-            return false;
+            setError(err.message || 'Failed to add puppy');
+            throw err;
+        } finally {
+            setLoading(false);
         }
     };
 
-    const updatePuppy = async (litterId, puppyId, puppyData) => {
+    const updatePuppy = async (litterId, puppyId, puppyData, puppyImage = null) => {
+        setLoading(true);
+        setError(null);
         try {
-            setError(null);
             const formData = new FormData();
             
+            // Add puppy data
             Object.keys(puppyData).forEach(key => {
-              if (puppyData[key] !== undefined && puppyData[key] !== null && puppyData[key] !== '') {
-                if (key === 'profilePicture' && puppyData[key] instanceof File) {
-                  formData.append('profilePicture', puppyData[key]);
-                } else {
-                  formData.append(key, puppyData[key]);
-                }
-              }
+                formData.append(key, puppyData[key]);
             });
-        
-            const response = await fetch(`/api/litters/${litterId}/puppies/${puppyId}`, {
-              method: 'PATCH',
-              headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-              },
-              body: formData
-            });
-        
-            if (!response.ok) {
-              const errorData = await response.json();
-              throw new Error(errorData.error || 'Failed to update puppy');
+            
+            // Add puppy image if provided
+            if (puppyImage) {
+                validateImage(puppyImage);
+                formData.append('profilePicture', puppyImage);
             }
-        
-            const updatedLitter = await getLitter(litterId);
-            setLitters(prev => prev.map(l => 
-              l._id === litterId ? updatedLitter : l
-            ));
-        
-            return true;
-          } catch (err) {
-            setError(err.message || 'Failed to update puppy. Please try again.');
-            console.error('Update puppy error:', err);
-            return false;
-          }
+
+            const response = await fetch(`/api/litters/${litterId}/puppies/${puppyId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: formData
+            });
+            
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to update puppy');
+            }
+            
+            setLitters(prevLitters =>
+                prevLitters.map(litter =>
+                    litter._id === litterId ? data : litter
+                )
+            );
+            return data;
+        } catch (err) {
+            setError(err.message || 'Failed to update puppy');
+            throw err;
+        } finally {
+            setLoading(false);
+        }
     };
 
     const deletePuppy = async (litterId, puppyId) => {
+        setLoading(true);
+        setError(null);
         try {
-            setError(null);
             const response = await fetch(`/api/litters/${litterId}/puppies/${puppyId}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 }
             });
-
+            
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Failed to delete puppy');
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to delete puppy');
             }
 
-            const updatedLitter = await getLitter(litterId);
-            setLitters(prev => prev.map(l => 
-                l._id === litterId ? updatedLitter : l
-            ));
-
-            return true;
+            const data = await response.json();
+            setLitters(prevLitters =>
+                prevLitters.map(litter =>
+                    litter._id === litterId ? data : litter
+                )
+            );
+            
+            return data;
         } catch (err) {
-            setError(err.message || 'Failed to delete puppy. Please try again.');
-            console.error('Delete puppy error:', err);
-            return false;
+            setError('Failed to delete puppy. Please try again later.');
+            console.error('Error deleting puppy:', err);
+            throw err;
+        } finally {
+            setLoading(false);
         }
     };
 
-    const clearError = () => {
+    const getPuppies = async (litterId) => {        setLoading(true);
         setError(null);
+        try {
+            const response = await fetch(`/api/litters/${litterId}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to fetch puppies');
+            }
+            
+            return data.puppies || [];
+        } catch (err) {
+            setError('Failed to fetch puppies. Please try again later.');
+            console.error('Error fetching puppies:', err);
+            throw err;
+        } finally {
+            setLoading(false);
+        }
     };
 
     useEffect(() => {
@@ -276,7 +341,6 @@ export const LitterProvider = ({ children }) => {
             litters,
             loading,
             error,
-            clearError,
             fetchLitters,
             getLitter,
             createLitter,
@@ -284,7 +348,8 @@ export const LitterProvider = ({ children }) => {
             deleteLitter,
             addPuppy,
             updatePuppy,
-            deletePuppy
+            deletePuppy,
+            getPuppies
         }}>
             {children}
         </LitterContext.Provider>

@@ -4,7 +4,7 @@ import GrumbleUpdate from '../components/Grumble/GrumbleUpdate';
 import WaitlistAdmin from '../components/Waitlist/WaitlistAdmin';
 import ToggleStream from '../components/LiveStream/ToggleStream';
 import ToggleWaitlist from '../components/Waitlist/ToggleWaitlist';
-import LitterUpdate from '../components/Litter/LitterUpdate';
+import LitterManagement from '../components/Litter/LitterManagement';
 
 const BreederDashboard = () => {
 
@@ -18,7 +18,7 @@ const BreederDashboard = () => {
         <WaitlistAdmin />
         <BreederUpdateForm />
         <GrumbleUpdate />
-        <LitterUpdate />
+        <LitterManagement />
       </div>
     </div>
   )

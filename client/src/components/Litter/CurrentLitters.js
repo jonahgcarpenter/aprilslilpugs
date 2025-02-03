@@ -3,7 +3,7 @@ import { LitterContext } from '../../context/LitterContext';
 import LoadingAnimation from '../LoadingAnimation';
 
 const CurrentLitters = () => {
-  const { litters, loading: fetchLoading, error } = useContext(LitterContext);
+  const { litters, loading, error } = useContext(LitterContext);
   const [selectedLitter, setSelectedLitter] = useState(null);
   const [availableLitters, setAvailableLitters] = useState([]);
 
@@ -30,8 +30,7 @@ const CurrentLitters = () => {
         litter.puppies && 
         litter.puppies.some(puppy => 
           puppy.status === 'Available' || puppy.status === 'Reserved'
-        ) &&
-        !litter.puppies.every(puppy => puppy.status === 'Sold')
+        )
       );
       setAvailableLitters(filtered);
 
@@ -56,7 +55,7 @@ const CurrentLitters = () => {
             Current Litters
           </h1>
           
-          {fetchLoading ? (
+          {loading ? (
             <div className="h-20 flex items-center justify-center">
               <LoadingAnimation />
             </div>
@@ -126,7 +125,7 @@ const CurrentLitters = () => {
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div className="aspect-[4/3] sm:aspect-[16/9] lg:aspect-square w-full overflow-hidden">
                       <img
-                        src={`/api/images${litter.profilePicture}`}
+                        src={`/api/images/uploads/litter-images/${litter.profilePicture}`}
                         alt={litter.name}
                         className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                       />
@@ -205,7 +204,7 @@ const CurrentLitters = () => {
                 >
                   <div className="aspect-square w-full overflow-hidden">
                     <img
-                      src={`/api/images${puppy.profilePicture}`}
+                      src={`/api/images/uploads/puppy-images/${puppy.profilePicture}`}
                       alt={puppy.name}
                       className="w-full h-full object-cover"
                     />
