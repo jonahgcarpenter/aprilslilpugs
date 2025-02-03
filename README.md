@@ -16,3 +16,4 @@ A website for my moms buisness, in which I have tailored to her request.
 
 - notifications for stream down
 - fix white space on mobile
+- sort litters by birthdate
