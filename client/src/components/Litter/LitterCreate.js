@@ -78,7 +78,7 @@ const LitterCreate = () => {
   }
 
   return (
-    <div className="mx-0 sm:mx-4">
+    <div className="mx-0 sm:mx-4 px-4 sm:px-0 py-8">
       <form onSubmit={handleSubmit} className="bg-slate-900/80 backdrop-blur-sm rounded-xl p-4 sm:p-8 border border-slate-800/50 shadow-xl">
         <h2 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-8">
           Create New Litter

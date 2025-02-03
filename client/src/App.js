@@ -23,6 +23,8 @@ import ProtectedRoute from './components/Auth/ProtectedRoute';
 import Navbar from './components/Navbar';
 import LitterCreate from './components/Litter/LitterCreate';
 import LitterUpdate from './components/Litter/LitterUpdate';
+import PuppysCreate from './components/Puppy/PuppyCreate';
+import PuppysUpdate from './components/Puppy/PuppyUpdate';
 
 function App() {
   return (
@@ -56,11 +58,13 @@ function App() {
                           <Route path="/breeder/litter/create" element={
                             <ProtectedRoute>
                               <LitterCreate />
+                              <PuppysCreate />
                             </ProtectedRoute>
                           } />
                           <Route path="/breeder/litter/update/:id" element={
                             <ProtectedRoute>
                               <LitterUpdate />
+                              <PuppysUpdate />
                             </ProtectedRoute>
                           } />
                         </Routes>

@@ -5,12 +5,10 @@ import LoadingAnimation from '../LoadingAnimation';
 import DeleteModal from '../Modals/DeleteModal';
 import SuccessModal from '../Modals/SuccessModal';
 import ErrorModal from '../Modals/ErrorModal';
-import Puppys from './Puppys';
 
 const LitterUpdate = () => {
   const { id } = useParams();
   const [litter, setLitter] = useState(null);
-  const [puppies, setPuppies] = useState([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [errorModal, setErrorModal] = useState({ show: false, message: '' });
@@ -18,7 +16,7 @@ const LitterUpdate = () => {
   const fileInputRef = useRef();
   const [successMessage, setSuccessMessage] = useState('');
 
-  const { litters, updateLitter, deleteLitter, loading, addPuppy, updatePuppy } = useContext(LitterContext);
+  const { litters, updateLitter, deleteLitter, loading } = useContext(LitterContext);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -32,8 +30,6 @@ const LitterUpdate = () => {
         availableDate: currentLitter.availableDate?.split('T')[0] || '',
         profilePicture: currentLitter.profilePicture || ''
       });
-      setPuppies(currentLitter.puppies || []);
-      // Set initial preview if litter has an image
       if (currentLitter.profilePicture) {
         setPreviewUrl(`/api/images/uploads/litter-images/${currentLitter.profilePicture}`);
       }
@@ -54,66 +50,47 @@ const LitterUpdate = () => {
     }
   };
 
-  const handleAddPuppy = () => {
-    setPuppies([...puppies, { 
-      name: '', 
-      color: '', 
-      gender: '', 
-      status: 'Available' // Note the capital A to match other status options
-    }]);
-  };
-
-  const handleRemovePuppy = (index) => {
-    setPuppies(puppies.filter((_, i) => i !== index));
-  };
-
-  const handlePuppyChange = (index, field, value) => {
-    const updatedPuppies = [...puppies];
-    updatedPuppies[index][field] = value;
-    setPuppies(updatedPuppies);
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     try {
-      // First update the litter basic info
-      const litterData = {
-        ...litter,
-        puppies: undefined  // Remove puppies from basic update
+      const formDataToSend = new FormData();
+      
+      // Prepare the litter data
+      const updateData = {
+        name: litter.name?.trim(),
+        mother: litter.mother?.trim(),
+        father: litter.father?.trim(),
+        birthDate: litter.birthDate,
+        availableDate: litter.availableDate
       };
 
-      const formDataToSend = new FormData();
-      formDataToSend.append('data', JSON.stringify(litterData));
-      
-      if (fileInputRef.current.files[0]) {
+      console.log('Submitting update:', updateData);
+      formDataToSend.append('data', JSON.stringify(updateData));
+
+      // Add the image if a new one was selected
+      if (fileInputRef.current?.files[0]) {
         formDataToSend.append('profilePicture', fileInputRef.current.files[0]);
+        console.log('Including new image in update');
       }
 
-      // Update basic litter info
-      await updateLitter(id, formDataToSend);
-
-      // Handle puppies separately
-      const validPuppies = puppies.filter(puppy => 
-        puppy.name.trim() !== '' && 
-        puppy.color.trim() !== '' && 
-        puppy.gender.trim() !== ''
-      );
-
-      // Update existing puppies
-      for (const puppy of puppies) {
-        if (puppy._id) {  // Update existing puppies
-          await updatePuppy(id, puppy._id, puppy);
-        } else {  // Add new puppies
-          await addPuppy(id, puppy);
-        }
-      }
+      const updatedLitter = await updateLitter(id, formDataToSend);
+      console.log('Update successful:', updatedLitter);
 
       setSuccessMessage('Litter updated successfully!');
       setShowSuccessModal(true);
-      setTimeout(() => navigate('/breeder-dashboard'), 2000);
+      
+      // Longer delay for debugging
+      setTimeout(() => {
+        console.log('Navigating to dashboard...');
+        navigate('/breeder-dashboard');
+      }, 5000);
     } catch (err) {
-      setErrorModal({ show: true, message: err.message });
+      console.error('Update failed:', err);
+      setErrorModal({ 
+        show: true, 
+        message: err.message || 'Failed to update litter. Please try again.' 
+      });
     }
   };
 
@@ -143,7 +120,7 @@ const LitterUpdate = () => {
   }
 
   return (
-    <div className="mx-0 sm:mx-4">
+    <div className="mx-0 sm:mx-4 px-4 sm:px-0 py-8">
       <form onSubmit={handleSubmit} className="bg-slate-900/80 backdrop-blur-sm rounded-xl p-4 sm:p-8 border border-slate-800/50 shadow-xl">
         <h2 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-8">
           Update Litter
@@ -243,13 +220,6 @@ const LitterUpdate = () => {
             </p>
           </div>
         </div>
-
-        <Puppys
-          puppies={puppies}
-          onPuppyChange={handlePuppyChange}
-          onAddPuppy={handleAddPuppy}
-          onRemovePuppy={handleRemovePuppy}
-        />
 
         <div className="flex gap-4 mt-8">
           <button

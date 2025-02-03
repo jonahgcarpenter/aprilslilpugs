@@ -117,17 +117,22 @@ export const LitterProvider = ({ children }) => {
         setLoading(true);
         setError(null);
         try {
-            // Parse the JSON data from FormData
             const jsonData = JSON.parse(formData.get('data'));
-            
-            // Validate dates
-            if (jsonData.birthDate) validateDate(jsonData.birthDate);
-            if (jsonData.availableDate) validateDate(jsonData.availableDate);
+            console.log('Updating litter with data:', jsonData);
 
-            // Validate image if present
-            const image = formData.get('profilePicture');
-            if (image instanceof File) {
-                validateImage(image);
+            // Create new FormData with all fields
+            const formattedFormData = new FormData();
+            
+            // Add all fields individually (this is what multer expects)
+            Object.keys(jsonData).forEach(key => {
+                formattedFormData.append(key, jsonData[key]);
+            });
+
+            // Add the image file if it exists
+            const imageFile = formData.get('profilePicture');
+            if (imageFile instanceof File) {
+                validateImage(imageFile);
+                formattedFormData.append('profilePicture', imageFile);
             }
 
             const response = await fetch(`/api/litters/${litterId}`, {
@@ -135,24 +140,31 @@ export const LitterProvider = ({ children }) => {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 },
-                body: formData
+                body: formattedFormData // Send as multipart/form-data
             });
-            
-            const data = await response.json();
+
             if (!response.ok) {
-                console.error('Server error:', data);
-                throw new Error(data.error || 'Failed to update litter');
+                const errorData = await response.json();
+                console.error('Server error:', errorData);
+                throw new Error(errorData.message || 'Failed to update litter');
             }
-            
+
+            const updatedLitter = await response.json();
+            console.log('Server response:', updatedLitter);
+
             setLitters(prevLitters =>
                 prevLitters.map(litter =>
-                    litter._id === litterId ? data : litter
+                    litter._id === litterId ? {
+                        ...updatedLitter,
+                        birthDate: updatedLitter.birthDate?.split('T')[0],
+                        availableDate: updatedLitter.availableDate?.split('T')[0]
+                    } : litter
                 )
             );
-            return data;
+
+            return updatedLitter;
         } catch (err) {
-            console.error('Update error details:', err);
-            setError(err.message || 'Failed to update litter');
+            console.error('Update error:', err);
             throw err;
         } finally {
             setLoading(false);

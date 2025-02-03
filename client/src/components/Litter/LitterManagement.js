@@ -10,7 +10,19 @@ const LitterManagement = () => {
   const navigate = useNavigate();
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString();
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: '2-digit',
+      timeZone: 'UTC'
+    });
+  };
+
+  const isFutureDate = (dateString) => {
+    const date = new Date(dateString);
+    const today = new Date();
+    return date > today;
   };
 
   if (loading) return <LoadingAnimation />;
@@ -50,7 +62,10 @@ const LitterManagement = () => {
                 <div>
                   <h3 className="text-xl font-semibold text-white">{litter.name}</h3>
                   <p className="text-slate-400">Parents: {litter.mother} & {litter.father}</p>
-                  <p className="text-slate-400">Birth: {formatDate(litter.birthDate)}</p>
+                  <p className="text-slate-400">
+                    {isFutureDate(litter.birthDate) ? 'Expected by: ' : 'Born on: '}
+                    {formatDate(litter.birthDate)}
+                  </p>
                   <p className="text-slate-400">Available: {formatDate(litter.availableDate)}</p>
                 </div>
                 <button
