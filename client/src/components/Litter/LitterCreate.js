@@ -4,12 +4,14 @@ import { LitterContext } from '../../context/LitterContext';
 import LoadingAnimation from '../LoadingAnimation';
 import SuccessModal from '../Modals/SuccessModal';
 import ErrorModal from '../Modals/ErrorModal';
+import Puppies from '../Puppy/Puppies';
 
 const LitterCreate = () => {
   const fileInputRef = useRef();
   const [previewUrl, setPreviewUrl] = useState(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [errorModal, setErrorModal] = useState({ show: false, message: '' });
+  const [createdLitterId, setCreatedLitterId] = useState(null);
   
   const { createLitter, loading } = useContext(LitterContext);
   const navigate = useNavigate();
@@ -59,11 +61,10 @@ const LitterCreate = () => {
     }
 
     try {
-      await createLitter(formDataToSend);
+      const newLitter = await createLitter(formDataToSend);
+      setCreatedLitterId(newLitter._id);
       setShowSuccessModal(true);
-      setTimeout(() => {
-        navigate('/breeder-dashboard');
-      }, 1500);
+      // Don't navigate immediately so user can add puppies
     } catch (err) {
       setErrorModal({ show: true, message: err.message });
     }
@@ -187,6 +188,11 @@ const LitterCreate = () => {
           Create Litter
         </button>
       </form>
+
+      {/* Add Puppies component after form is submitted and litter is created */}
+      {createdLitterId && (
+        <Puppies litterId={createdLitterId} />
+      )}
 
       <SuccessModal
         isOpen={showSuccessModal}

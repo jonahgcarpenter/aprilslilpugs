@@ -5,6 +5,7 @@ import LoadingAnimation from '../LoadingAnimation';
 import DeleteModal from '../Modals/DeleteModal';
 import SuccessModal from '../Modals/SuccessModal';
 import ErrorModal from '../Modals/ErrorModal';
+import Puppies from '../Puppy/Puppies';
 
 const LitterUpdate = () => {
   const { id } = useParams();
@@ -23,12 +24,9 @@ const LitterUpdate = () => {
     const currentLitter = litters.find(l => l._id === id);
     if (currentLitter) {
       setLitter({
-        name: currentLitter.name || '',
-        mother: currentLitter.mother || '',
-        father: currentLitter.father || '',
+        ...currentLitter,
         birthDate: currentLitter.birthDate?.split('T')[0] || '',
         availableDate: currentLitter.availableDate?.split('T')[0] || '',
-        profilePicture: currentLitter.profilePicture || ''
       });
       if (currentLitter.profilePicture) {
         setPreviewUrl(`/api/images/uploads/litter-images/${currentLitter.profilePicture}`);
@@ -237,6 +235,15 @@ const LitterUpdate = () => {
           </button>
         </div>
       </form>
+
+      {/* Add Puppies component */}
+      {litter && (
+        <Puppies 
+          litterId={id} 
+          existingPuppies={litter.puppies || []}
+          readOnly={false}
+        />
+      )}
 
       <DeleteModal
         isOpen={showDeleteModal}
