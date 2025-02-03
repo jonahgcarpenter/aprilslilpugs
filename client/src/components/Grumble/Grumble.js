@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import { GrumbleContext } from '../../context/GrumbleContext';
 import LoadingAnimation from '../LoadingAnimation';
 
@@ -26,15 +26,7 @@ const calculateAge = (birthDateString) => {
 }
 
 const Grumble = () => {
-    const { grumbles, loading, error, getFullImageUrl } = useContext(GrumbleContext);
-    const [imageLoadError, setImageLoadError] = useState({});
-
-    const handleImageError = (pugId) => {
-        setImageLoadError(prev => ({
-            ...prev,
-            [pugId]: true
-        }));
-    };
+    const { grumbles, loading, error } = useContext(GrumbleContext);
 
     if (loading) {
         return (
@@ -74,12 +66,8 @@ const Grumble = () => {
                         >
                             <div className="aspect-square w-full overflow-hidden">
                                 <img
-                                    src={imageLoadError[pug._id] 
-                                        ? '/fallback-pug-image.png' 
-                                        : getFullImageUrl(pug.profilePicture)
-                                    }
+                                    src={`/api/images/uploads/grumble-images/${pug.profilePicture}`}
                                     alt={pug.name}
-                                    onError={() => handleImageError(pug._id)}
                                     className="w-full h-full object-cover"
                                 />
                             </div>

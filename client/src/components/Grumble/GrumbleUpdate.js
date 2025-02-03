@@ -10,7 +10,7 @@ const formatDate = (date) => {
 };
 
 const GrumbleUpdate = () => {
-    const { grumbles, loading, error, addGrumble, updateGrumble, deleteGrumble, getFullImageUrl } = useContext(GrumbleContext);
+    const { grumbles, loading, error, addGrumble, updateGrumble, deleteGrumble } = useContext(GrumbleContext);
     const [selectedGrumble, setSelectedGrumble] = useState(null);
     const [formData, setFormData] = useState({
         name: '',
@@ -40,7 +40,8 @@ const GrumbleUpdate = () => {
                 profilePicture: null
             });
             setPreviewUrls({
-                profilePicture: selectedGrumble.profilePicture ? getFullImageUrl(selectedGrumble.profilePicture) : null
+                profilePicture: selectedGrumble.profilePicture ? 
+                    `/api/images/uploads/grumble-images/${selectedGrumble.profilePicture}` : null
             });
         }
     }, [selectedGrumble]);

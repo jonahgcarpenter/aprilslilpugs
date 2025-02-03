@@ -7,22 +7,15 @@ export const GrumbleProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const getFullImageUrl = (relativePath) => {
-        if (!relativePath || typeof relativePath !== 'string') return '';
-        // Ensure path starts with a slash
-        const normalizedPath = relativePath.startsWith('/') ? relativePath : `/${relativePath}`;
-        return `/api/images${normalizedPath}`;
-    };
-
     const validateImage = (file) => {
-        const maxSize = 5 * 1024 * 1024; // 5MB
+        const maxSize = 2 * 1024 * 1024; // 2MB
         if (file.size > maxSize) {
-            throw new Error('Image must be less than 5MB');
+            throw new Error('Image must be less than 2MB');
         }
         
-        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        const allowedTypes = ['image/jpeg', 'image/png'];
         if (!allowedTypes.includes(file.type)) {
-            throw new Error('Image must be in JPG, PNG, or WebP format');
+            throw new Error('Image must be in JPG or PNG format');
         }
     };
 
@@ -42,13 +35,13 @@ export const GrumbleProvider = ({ children }) => {
         setError(null);
         try {
             const response = await fetch('/api/grumble');
-            if (!response.ok) {
-                throw new Error('Failed to fetch grumbles');
-            }
             const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to fetch grumbles');
+            }
             setGrumbles(data);
         } catch (err) {
-            setError('Failed to fetch grumbles. Please try again later.');
+            setError(err.message || 'Failed to fetch grumbles');
             console.error('Error fetching grumbles:', err);
         } finally {
             setLoading(false);
@@ -182,8 +175,7 @@ export const GrumbleProvider = ({ children }) => {
             fetchGrumbles,
             addGrumble,
             deleteGrumble,
-            updateGrumble,
-            getFullImageUrl
+            updateGrumble
         }}>
             {children}
         </GrumbleContext.Provider>
