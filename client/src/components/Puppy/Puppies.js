@@ -1,4 +1,4 @@
-import { useState, useContext, useRef } from 'react';
+import { useState, useContext, useRef, useEffect } from 'react';
 import { LitterContext } from '../../context/LitterContext';
 import LoadingAnimation from '../LoadingAnimation';
 import DeleteModal from '../Modals/DeleteModal';
@@ -9,6 +9,7 @@ const Puppies = ({ litterId, existingPuppies = [], readOnly = false }) => {
   const [selectedPuppy, setSelectedPuppy] = useState(null);
   const fileInputRef = useRef();
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
   
   const { addPuppy, updatePuppy, deletePuppy, loading } = useContext(LitterContext);
 
@@ -16,10 +17,13 @@ const Puppies = ({ litterId, existingPuppies = [], readOnly = false }) => {
     name: '',
     color: '',
     gender: '',
-    price: '',
-    description: '',
     status: 'Available', // Default status as defined in schema
   });
+
+  // Add useEffect to sync puppies state with existingPuppies prop
+  useEffect(() => {
+    setPuppies(existingPuppies);
+  }, [existingPuppies]);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -39,36 +43,59 @@ const Puppies = ({ litterId, existingPuppies = [], readOnly = false }) => {
     e.preventDefault();
     try {
       const puppyImage = fileInputRef.current?.files[0];
-      const result = await addPuppy(litterId, newPuppy, puppyImage);
-      setPuppies([...puppies, result]);
-      setNewPuppy({
-        name: '',
-        color: '',
-        gender: '',
-        price: '',
-        description: '',
-        status: 'Available'
-      });
-      clearImage();
+      let updatedLitter;
+
+      if (isEditing && selectedPuppy) {
+        // Update existing puppy
+        updatedLitter = await updatePuppy(litterId, selectedPuppy._id, newPuppy, puppyImage);
+      } else {
+        // Add new puppy
+        updatedLitter = await addPuppy(litterId, newPuppy, puppyImage);
+      }
+
+      setPuppies(updatedLitter.puppies);
+      resetForm();
     } catch (err) {
-      console.error('Error adding puppy:', err);
+      console.error('Error handling puppy:', err);
     }
   };
 
-  const handlePuppyUpdate = async (puppyId, updatedData, puppyImage) => {
-    try {
-      const result = await updatePuppy(litterId, puppyId, updatedData, puppyImage);
-      setPuppies(puppies.map(p => p._id === puppyId ? result : p));
-    } catch (err) {
-      console.error('Error updating puppy:', err);
+  const resetForm = () => {
+    setNewPuppy({
+      name: '',
+      color: '',
+      gender: '',
+      status: 'Available'
+    });
+    setIsEditing(false);
+    setSelectedPuppy(null);
+    clearImage();
+  };
+
+  const handleEdit = (puppy) => {
+    setIsEditing(true);
+    setSelectedPuppy(puppy);
+    setNewPuppy({
+      name: puppy.name,
+      color: puppy.color,
+      gender: puppy.gender,
+      status: puppy.status
+    });
+    
+    // Always set the preview URL for the existing puppy image
+    if (puppy.profilePicture) {
+      setPreviewUrl(`/api/images/uploads/puppy-images/${puppy.profilePicture}`);
+    } else {
+      clearImage();
     }
   };
 
   const handlePuppyDelete = async () => {
     if (!selectedPuppy) return;
     try {
-      await deletePuppy(litterId, selectedPuppy._id);
-      setPuppies(puppies.filter(p => p._id !== selectedPuppy._id));
+      const updatedLitter = await deletePuppy(litterId, selectedPuppy._id);
+      // Update puppies with the new litter's puppies array
+      setPuppies(updatedLitter.puppies);
       setShowDeleteModal(false);
       setSelectedPuppy(null);
     } catch (err) {
@@ -84,7 +111,7 @@ const Puppies = ({ litterId, existingPuppies = [], readOnly = false }) => {
     <div className="mt-8">
       <form onSubmit={handlePuppySubmit} className="bg-slate-900/80 backdrop-blur-sm rounded-xl p-4 sm:p-8 border border-slate-800/50 shadow-xl">
         <h2 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-8">
-          Add New Puppy
+          {isEditing ? 'Edit Puppy' : 'Add New Puppy'}
         </h2>
 
         {!readOnly && (
@@ -138,31 +165,6 @@ const Puppies = ({ litterId, existingPuppies = [], readOnly = false }) => {
               </select>
             </div>
 
-            {/* Price field added to match schema */}
-            <div className="form-group">
-              <label className="block text-sm font-medium text-gray-300 mb-2">Price ($)</label>
-              <input
-                type="number"
-                value={newPuppy.price}
-                onChange={(e) => setNewPuppy({...newPuppy, price: e.target.value})}
-                className="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700 focus:ring-2 focus:ring-blue-500"
-                min="0"
-                step="0.01"
-                required
-              />
-            </div>
-
-            {/* Optional description field */}
-            <div className="form-group sm:col-span-2">
-              <label className="block text-sm font-medium text-gray-300 mb-2">Description</label>
-              <textarea
-                value={newPuppy.description}
-                onChange={(e) => setNewPuppy({...newPuppy, description: e.target.value})}
-                className="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700 focus:ring-2 focus:ring-blue-500 min-h-[100px]"
-                placeholder="Optional: Add any special notes about the puppy"
-              />
-            </div>
-
             {/* Profile picture upload */}
             <div className="form-group sm:col-span-2">
               <label className="block text-sm font-medium text-gray-300 mb-2">Puppy Image</label>
@@ -199,12 +201,23 @@ const Puppies = ({ litterId, existingPuppies = [], readOnly = false }) => {
         )}
 
         {!readOnly && (
-          <button
-            type="submit"
-            className="w-full bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition-all duration-200"
-          >
-            Add Puppy
-          </button>
+          <div className="flex gap-4">
+            <button
+              type="submit"
+              className="flex-1 bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition-all duration-200"
+            >
+              {isEditing ? 'Update Puppy' : 'Add Puppy'}
+            </button>
+            {isEditing && (
+              <button
+                type="button"
+                onClick={resetForm}
+                className="px-8 py-3 rounded-lg font-semibold text-slate-300 bg-gradient-to-r from-slate-700 to-slate-600 hover:from-slate-600 hover:to-slate-500 transition-all duration-200"
+              >
+                Cancel
+              </button>
+            )}
+          </div>
         )}
       </form>
 
@@ -231,7 +244,6 @@ const Puppies = ({ litterId, existingPuppies = [], readOnly = false }) => {
                   <div className="space-y-2 text-gray-300">
                     <p><span className="text-gray-400">Color:</span> {puppy.color}</p>
                     <p><span className="text-gray-400">Gender:</span> {puppy.gender}</p>
-                    <p><span className="text-gray-400">Price:</span> ${puppy.price}</p>
                     <p>
                       <span className="text-gray-400">Status:</span> 
                       <span className={`ml-2 px-2 py-1 rounded-full text-sm ${
@@ -243,11 +255,14 @@ const Puppies = ({ litterId, existingPuppies = [], readOnly = false }) => {
                       </span>
                     </p>
                   </div>
-                  {puppy.description && (
-                    <p className="mt-3 text-sm text-gray-400">{puppy.description}</p>
-                  )}
                   {!readOnly && (
-                    <div className="mt-4">
+                    <div className="mt-4 space-y-2">
+                      <button
+                        onClick={() => handleEdit(puppy)}
+                        className="w-full bg-blue-500/10 border border-blue-500/20 text-blue-400 px-4 py-2 rounded-lg hover:bg-blue-500/20 transition-colors"
+                      >
+                        Edit
+                      </button>
                       <button
                         onClick={() => {
                           setSelectedPuppy(puppy);
