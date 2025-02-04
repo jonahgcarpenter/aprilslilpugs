@@ -154,21 +154,19 @@ const LitterCreate = () => {
           <div className="form-group sm:col-span-2">
             <label className="block text-sm font-medium text-gray-300 mb-2">Litter Image</label>
             {previewUrl && (
-              <div className="mb-4 relative w-full">
-                <div className="relative pb-[75%] sm:pb-[56.25%]"> {/* 4:3 on mobile, 16:9 on desktop */}
-                  <img
-                    src={previewUrl}
-                    alt="Litter Preview"
-                    className="absolute inset-0 w-full h-full object-cover rounded-lg border border-slate-700"
-                  />
-                  <button
-                    type="button"
-                    onClick={clearImage}
-                    className="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
-                  >
-                    ×
-                  </button>
-                </div>
+              <div className="mb-4 relative w-32 h-32">
+                <img
+                  src={previewUrl}
+                  alt="Litter Preview"
+                  className="w-full h-full object-cover rounded-lg border border-slate-700"
+                />
+                <button
+                  type="button"
+                  onClick={clearImage}
+                  className="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
+                >
+                  ×
+                </button>
               </div>
             )}
             <input

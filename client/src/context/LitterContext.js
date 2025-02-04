@@ -118,7 +118,6 @@ export const LitterProvider = ({ children }) => {
         setError(null);
         try {
             const jsonData = JSON.parse(formData.get('data'));
-            console.log('Updating litter with data:', jsonData);
 
             // Create new FormData with all fields
             const formattedFormData = new FormData();
@@ -145,12 +144,10 @@ export const LitterProvider = ({ children }) => {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                console.error('Server error:', errorData);
                 throw new Error(errorData.message || 'Failed to update litter');
             }
 
             const updatedLitter = await response.json();
-            console.log('Server response:', updatedLitter);
 
             setLitters(prevLitters =>
                 prevLitters.map(litter =>
@@ -164,7 +161,6 @@ export const LitterProvider = ({ children }) => {
 
             return updatedLitter;
         } catch (err) {
-            console.error('Update error:', err);
             throw err;
         } finally {
             setLoading(false);

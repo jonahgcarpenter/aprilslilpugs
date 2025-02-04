@@ -54,7 +54,6 @@ const LitterUpdate = () => {
     try {
       const formDataToSend = new FormData();
       
-      // Prepare the litter data
       const updateData = {
         name: litter.name?.trim(),
         mother: litter.mother?.trim(),
@@ -63,28 +62,20 @@ const LitterUpdate = () => {
         availableDate: litter.availableDate
       };
 
-      console.log('Submitting update:', updateData);
       formDataToSend.append('data', JSON.stringify(updateData));
 
-      // Add the image if a new one was selected
       if (fileInputRef.current?.files[0]) {
         formDataToSend.append('profilePicture', fileInputRef.current.files[0]);
-        console.log('Including new image in update');
       }
 
-      const updatedLitter = await updateLitter(id, formDataToSend);
-      console.log('Update successful:', updatedLitter);
-
+      await updateLitter(id, formDataToSend);
       setSuccessMessage('Litter updated successfully!');
       setShowSuccessModal(true);
       
-      // Longer delay for debugging
       setTimeout(() => {
-        console.log('Navigating to dashboard...');
         navigate('/breeder-dashboard');
-      }, 5000);
+      }, 1500);
     } catch (err) {
-      console.error('Update failed:', err);
       setErrorModal({ 
         show: true, 
         message: err.message || 'Failed to update litter. Please try again.' 
@@ -188,21 +179,19 @@ const LitterUpdate = () => {
           <div className="form-group sm:col-span-2">
             <label className="block text-sm font-medium text-gray-300 mb-2">Litter Image</label>
             {previewUrl && (
-              <div className="mb-4 relative w-full">
-                <div className="relative pb-[75%] sm:pb-[56.25%]">
-                  <img
-                    src={previewUrl}
-                    alt="Litter Preview"
-                    className="absolute inset-0 w-full h-full object-cover rounded-lg border border-slate-700"
-                  />
-                  <button
-                    type="button"
-                    onClick={clearImage}
-                    className="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
-                  >
-                    ×
-                  </button>
-                </div>
+              <div className="mb-4 relative w-32 h-32">
+                <img
+                  src={previewUrl}
+                  alt="Litter Preview"
+                  className="w-full h-full object-cover rounded-lg border border-slate-700"
+                />
+                <button
+                  type="button"
+                  onClick={clearImage}
+                  className="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
+                >
+                  ×
+                </button>
               </div>
             )}
             <input
@@ -236,12 +225,11 @@ const LitterUpdate = () => {
         </div>
       </form>
 
-      {/* Add Puppies component */}
+      {/* Remove readOnly prop and simplify Puppies component usage */}
       {litter && (
         <Puppies 
           litterId={id} 
           existingPuppies={litter.puppies || []}
-          readOnly={false}
         />
       )}
 

@@ -1,10 +1,9 @@
-import { useState, useContext, useRef, useEffect } from 'react';
+import { useState, useContext, useRef } from 'react';
 import { LitterContext } from '../../context/LitterContext';
 import LoadingAnimation from '../LoadingAnimation';
 import DeleteModal from '../Modals/DeleteModal';
 
 const Puppies = ({ litterId, existingPuppies = [], readOnly = false }) => {
-  const [puppies, setPuppies] = useState(existingPuppies);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedPuppy, setSelectedPuppy] = useState(null);
   const fileInputRef = useRef();
@@ -17,13 +16,8 @@ const Puppies = ({ litterId, existingPuppies = [], readOnly = false }) => {
     name: '',
     color: '',
     gender: '',
-    status: 'Available', // Default status as defined in schema
+    status: 'Available',
   });
-
-  // Add useEffect to sync puppies state with existingPuppies prop
-  useEffect(() => {
-    setPuppies(existingPuppies);
-  }, [existingPuppies]);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -43,17 +37,13 @@ const Puppies = ({ litterId, existingPuppies = [], readOnly = false }) => {
     e.preventDefault();
     try {
       const puppyImage = fileInputRef.current?.files[0];
-      let updatedLitter;
 
       if (isEditing && selectedPuppy) {
-        // Update existing puppy
-        updatedLitter = await updatePuppy(litterId, selectedPuppy._id, newPuppy, puppyImage);
+        await updatePuppy(litterId, selectedPuppy._id, newPuppy, puppyImage);
       } else {
-        // Add new puppy
-        updatedLitter = await addPuppy(litterId, newPuppy, puppyImage);
+        await addPuppy(litterId, newPuppy, puppyImage);
       }
 
-      setPuppies(updatedLitter.puppies);
       resetForm();
     } catch (err) {
       console.error('Error handling puppy:', err);
@@ -93,9 +83,7 @@ const Puppies = ({ litterId, existingPuppies = [], readOnly = false }) => {
   const handlePuppyDelete = async () => {
     if (!selectedPuppy) return;
     try {
-      const updatedLitter = await deletePuppy(litterId, selectedPuppy._id);
-      // Update puppies with the new litter's puppies array
-      setPuppies(updatedLitter.puppies);
+      await deletePuppy(litterId, selectedPuppy._id);
       setShowDeleteModal(false);
       setSelectedPuppy(null);
     } catch (err) {
@@ -169,21 +157,19 @@ const Puppies = ({ litterId, existingPuppies = [], readOnly = false }) => {
             <div className="form-group sm:col-span-2">
               <label className="block text-sm font-medium text-gray-300 mb-2">Puppy Image</label>
               {previewUrl && (
-                <div className="mb-4 relative w-full">
-                  <div className="relative pb-[75%] sm:pb-[56.25%]">
-                    <img
-                      src={previewUrl}
-                      alt="Preview"
-                      className="absolute inset-0 w-full h-full object-cover rounded-lg border border-slate-700"
-                    />
-                    <button
-                      type="button"
-                      onClick={clearImage}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
-                    >
-                      ×
-                    </button>
-                  </div>
+                <div className="mb-4 relative w-32 h-32">
+                  <img
+                    src={previewUrl}
+                    alt="Preview"
+                    className="w-full h-full object-cover rounded-lg border border-slate-700"
+                  />
+                  <button
+                    type="button"
+                    onClick={clearImage}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
+                  >
+                    ×
+                  </button>
                 </div>
               )}
               <input
@@ -221,14 +207,14 @@ const Puppies = ({ litterId, existingPuppies = [], readOnly = false }) => {
         )}
       </form>
 
-      {puppies.length > 0 && (
+      {existingPuppies.length > 0 && (
         <div className="mt-8 bg-slate-900/80 backdrop-blur-sm rounded-xl p-4 sm:p-8 border border-slate-800/50 shadow-xl">
           <h2 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-8">
             Current Puppies
           </h2>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {puppies.map(puppy => (
+            {existingPuppies.map(puppy => (
               <div key={puppy._id} className="bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700/30 transition-all hover:scale-[1.02] hover:shadow-xl">
                 {puppy.profilePicture && (
                   <div className="relative pb-[75%]">
@@ -258,7 +244,10 @@ const Puppies = ({ litterId, existingPuppies = [], readOnly = false }) => {
                   {!readOnly && (
                     <div className="mt-4 space-y-2">
                       <button
-                        onClick={() => handleEdit(puppy)}
+                        onClick={() => {
+                          handleEdit(puppy);
+                          window.scrollBy({ top: -550, behavior: 'smooth' });
+                        }}
                         className="w-full bg-blue-500/10 border border-blue-500/20 text-blue-400 px-4 py-2 rounded-lg hover:bg-blue-500/20 transition-colors"
                       >
                         Edit

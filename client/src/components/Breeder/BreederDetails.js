@@ -6,10 +6,17 @@ import { FaHeart, FaMapMarkerAlt, FaEnvelope, FaPhoneAlt, FaFacebook } from 'rea
 const BreederDetails = () => {
   const { breeder, loading, error } = useBreeder();
   const [imageLoadError, setImageLoadError] = useState(false);
+  const [galleryErrors, setGalleryErrors] = useState({});
 
-  // Add error handling for images
   const handleImageError = () => {
     setImageLoadError(true);
+  };
+
+  const handleGalleryImageError = (index) => {
+    setGalleryErrors(prev => ({
+      ...prev,
+      [index]: true
+    }));
   };
 
   if (loading) {
@@ -30,17 +37,21 @@ const BreederDetails = () => {
         <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">
           <div className="relative mb-8">
             <div className="flex flex-col md:flex-row gap-8 items-center">
-              {breeder.profilePicture && !imageLoadError && (
-                <div className="relative w-48 h-48 md:w-64 md:h-64">
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl transform rotate-6 opacity-20"></div>
+              <div className="relative w-48 h-48 md:w-64 md:h-64">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl transform rotate-6 opacity-20"></div>
+                {breeder.profilePicture && !imageLoadError ? (
                   <img 
                     src={`/api/images/uploads/breeder-profiles/${breeder.profilePicture}`}
                     alt={`${breeder.firstName} ${breeder.lastName}`}
                     onError={handleImageError}
                     className="relative w-full h-full object-cover rounded-xl border-2 border-white/10 shadow-xl transform transition-transform duration-300 hover:scale-[1.02]"
                   />
-                </div>
-              )}
+                ) : (
+                  <div className="relative w-full h-full rounded-xl border-2 border-white/10 shadow-xl bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
+                    <span className="text-4xl text-white/20">{breeder.firstName?.[0]}{breeder.lastName?.[0]}</span>
+                  </div>
+                )}
+              </div>
               <div className="flex-1 text-center md:text-left">
                 <h1 className="text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-4">
                   {breeder.firstName} {breeder.lastName}
@@ -113,11 +124,18 @@ const BreederDetails = () => {
                   image && (
                     <div key={index} className="relative group">
                       <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl transform rotate-3 opacity-20 group-hover:opacity-30 transition-opacity duration-300"></div>
-                      <img
-                        src={`/api/images/uploads/breeder-profiles/${image}`}
-                        alt={`Breeder gallery ${index + 1}`}
-                        className="relative w-full h-72 sm:h-64 object-cover rounded-xl border-2 border-white/10 shadow-xl transform transition-all duration-300 hover:scale-[1.02]"
-                      />
+                      {!galleryErrors[index] ? (
+                        <img
+                          src={`/api/images/uploads/breeder-profiles/${image}`}
+                          alt={`Breeder gallery ${index + 1}`}
+                          onError={() => handleGalleryImageError(index)}
+                          className="relative w-full h-72 sm:h-64 object-cover rounded-xl border-2 border-white/10 shadow-xl transform transition-all duration-300 hover:scale-[1.02]"
+                        />
+                      ) : (
+                        <div className="relative w-full h-72 sm:h-64 rounded-xl border-2 border-white/10 shadow-xl bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
+                          <span className="text-4xl text-white/20">Photo {index + 1}</span>
+                        </div>
+                      )}
                     </div>
                   )
                 ))}
