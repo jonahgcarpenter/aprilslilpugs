@@ -4,14 +4,13 @@ import { LitterContext } from '../../context/LitterContext';
 import LoadingAnimation from '../LoadingAnimation';
 import SuccessModal from '../Modals/SuccessModal';
 import ErrorModal from '../Modals/ErrorModal';
-import Puppies from '../Puppy/Puppies';
 
 const LitterCreate = () => {
   const fileInputRef = useRef();
   const [previewUrl, setPreviewUrl] = useState(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [errorModal, setErrorModal] = useState({ show: false, message: '' });
-  const [createdLitterId, setCreatedLitterId] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const { createLitter, loading } = useContext(LitterContext);
   const navigate = useNavigate();
@@ -47,14 +46,15 @@ const LitterCreate = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
     const formDataToSend = new FormData();
     
-    // Add form fields
     Object.keys(formData).forEach(key => {
       formDataToSend.append(key, formData[key]);
     });
     
-    // Handle file
     const file = fileInputRef.current.files[0];
     if (file) {
       formDataToSend.append('profilePicture', file);
@@ -62,11 +62,15 @@ const LitterCreate = () => {
 
     try {
       const newLitter = await createLitter(formDataToSend);
-      setCreatedLitterId(newLitter._id);
       setShowSuccessModal(true);
-      // Don't navigate immediately so user can add puppies
+      
+      // Navigate after modal is shown
+      setTimeout(() => {
+        navigate(`/breeder/litter/update/${newLitter._id}`);
+      }, 1500);
     } catch (err) {
       setErrorModal({ show: true, message: err.message });
+      setIsSubmitting(false);
     }
   };
 
@@ -183,27 +187,33 @@ const LitterCreate = () => {
 
         <button 
           type="submit"
-          className="w-full bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition-all duration-200 disabled:opacity-50"
+          disabled={isSubmitting}
+          className="w-full bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition-all duration-200 disabled:opacity-50 relative"
         >
-          Create Litter
+          {isSubmitting ? (
+            <span className="flex items-center justify-center">
+              <LoadingAnimation containerClassName="scale-75" />
+              <span className="ml-2">Creating...</span>
+            </span>
+          ) : (
+            'Create Litter'
+          )}
         </button>
       </form>
 
-      {/* Add Puppies component after form is submitted and litter is created */}
-      {createdLitterId && (
-        <Puppies litterId={createdLitterId} />
-      )}
-
       <SuccessModal
         isOpen={showSuccessModal}
-        onClose={() => setShowSuccessModal(false)}
+        onClose={() => {}}  // Prevent manual closing during redirect
         message="Litter created successfully!"
         delay={1500}
       />
 
       <ErrorModal
         isOpen={errorModal.show}
-        onClose={() => setErrorModal({ show: false, message: '' })}
+        onClose={() => {
+          setErrorModal({ show: false, message: '' });
+          setIsSubmitting(false);
+        }}
         message={errorModal.message}
       />
     </div>
