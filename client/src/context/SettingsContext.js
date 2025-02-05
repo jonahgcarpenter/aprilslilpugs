@@ -74,26 +74,28 @@ export const SettingsProvider = ({ children }) => {
 
   const toggleWaitlist = async () => {
     try {
+      setSettings((prev) => ({ ...prev, isLoading: true }));
       const response = await fetch("/api/settings/toggle-waitlist", {
         method: "POST",
         headers: getAuthHeaders(),
       });
 
+      const data = await response.json();
       if (!response.ok) {
-        const data = await response.json();
         throw new Error(data.message || "Failed to toggle waitlist");
       }
 
-      const data = await response.json();
       setSettings((prev) => ({
         ...prev,
         waitlistEnabled: data.waitlistEnabled,
+        isLoading: false,
         error: null,
       }));
     } catch (error) {
       console.error("Error toggling waitlist:", error);
       setSettings((prev) => ({
         ...prev,
+        isLoading: false,
         error: error.message,
       }));
     }
