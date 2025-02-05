@@ -10,13 +10,9 @@ import {
 } from "react-icons/fa";
 
 const BreederDetails = () => {
-  const { breeder, loading, error } = useBreeder();
+  const { breeder, loading, error, preloadedImages } = useBreeder();
   const [imageLoadError, setImageLoadError] = useState(false);
   const [galleryErrors, setGalleryErrors] = useState({});
-
-  const handleImageError = () => {
-    setImageLoadError(true);
-  };
 
   const handleGalleryImageError = (index) => {
     setGalleryErrors((prev) => ({
@@ -45,11 +41,11 @@ const BreederDetails = () => {
             <div className="flex flex-col md:flex-row gap-8 items-center">
               <div className="relative w-48 h-48 md:w-64 md:h-64">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl transform rotate-6 opacity-20"></div>
-                {breeder.profilePicture && !imageLoadError ? (
+                {preloadedImages.profilePicture && !imageLoadError ? (
                   <img
-                    src={`/api/images/uploads/breeder-profiles/${breeder.profilePicture}`}
+                    src={preloadedImages.profilePicture}
                     alt={`${breeder.firstName} ${breeder.lastName}`}
-                    onError={handleImageError}
+                    onError={() => setImageLoadError(true)}
                     className="relative w-full h-full object-cover rounded-xl border-2 border-white/10 shadow-xl transform transition-transform duration-300 hover:scale-[1.02]"
                   />
                 ) : (
@@ -135,34 +131,31 @@ const BreederDetails = () => {
             </div>
           )}
 
-          {breeder.images && breeder.images.length > 0 && (
+          {preloadedImages.gallery.length > 0 && (
             <div className="mt-8">
               <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-6">
                 My Gallery
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                {breeder.images.map(
-                  (image, index) =>
-                    image && (
-                      <div key={index} className="relative group">
-                        <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl transform rotate-3 opacity-20 group-hover:opacity-30 transition-opacity duration-300"></div>
-                        {!galleryErrors[index] ? (
-                          <img
-                            src={`/api/images/uploads/breeder-profiles/${image}`}
-                            alt={`Breeder gallery ${index + 1}`}
-                            onError={() => handleGalleryImageError(index)}
-                            className="relative w-full h-72 sm:h-64 object-cover rounded-xl border-2 border-white/10 shadow-xl transform transition-all duration-300 hover:scale-[1.02]"
-                          />
-                        ) : (
-                          <div className="relative w-full h-72 sm:h-64 rounded-xl border-2 border-white/10 shadow-xl bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
-                            <span className="text-4xl text-white/20">
-                              Photo {index + 1}
-                            </span>
-                          </div>
-                        )}
+                {preloadedImages.gallery.map((imageUrl, index) => (
+                  <div key={index} className="relative group">
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl transform rotate-3 opacity-20 group-hover:opacity-30 transition-opacity duration-300"></div>
+                    {!galleryErrors[index] ? (
+                      <img
+                        src={imageUrl}
+                        alt={`Breeder gallery ${index + 1}`}
+                        onError={() => handleGalleryImageError(index)}
+                        className="relative w-full h-72 sm:h-64 object-cover rounded-xl border-2 border-white/10 shadow-xl transform transition-all duration-300 hover:scale-[1.02]"
+                      />
+                    ) : (
+                      <div className="relative w-full h-72 sm:h-64 rounded-xl border-2 border-white/10 shadow-xl bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
+                        <span className="text-4xl text-white/20">
+                          Photo {index + 1}
+                        </span>
                       </div>
-                    ),
-                )}
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
           )}

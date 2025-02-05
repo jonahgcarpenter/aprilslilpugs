@@ -5,7 +5,7 @@ import SuccessModal from "../Modals/SuccessModal";
 import ErrorModal from "../Modals/ErrorModal";
 
 const BreederUpdateForm = () => {
-  const { breeder, updateBreederProfile } = useBreeder();
+  const { breeder, updateBreederProfile, preloadedImages } = useBreeder();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -32,12 +32,6 @@ const BreederUpdateForm = () => {
   const fileInputRef = useRef(null);
   const galleryFileInputRefs = [useRef(null), useRef(null)];
 
-  const getBackendImageUrl = (imageName) => {
-    return imageName
-      ? `/api/images/uploads/breeder-profiles/${imageName}`
-      : null;
-  };
-
   useEffect(() => {
     if (breeder) {
       setFormData({
@@ -49,20 +43,21 @@ const BreederUpdateForm = () => {
         story: breeder.story || "",
       });
 
-      if (breeder.profilePicture) {
-        setPreviewUrl(
-          `/api/images/uploads/breeder-profiles/${breeder.profilePicture}`,
-        );
+      if (preloadedImages?.profilePicture && !newlyUploadedImages.profile) {
+        setPreviewUrl(preloadedImages.profilePicture);
       }
-      if (breeder.images) {
-        setGalleryPreviews(
-          breeder.images.map((img) =>
-            img ? `/api/images/uploads/breeder-profiles/${img}` : null,
+
+      if (preloadedImages?.gallery?.length > 0) {
+        setGalleryPreviews((prev) =>
+          prev.map((prevUrl, index) =>
+            newlyUploadedImages.gallery[index]
+              ? prevUrl
+              : preloadedImages.gallery[index] || null,
           ),
         );
       }
     }
-  }, [breeder]);
+  }, [breeder, preloadedImages, newlyUploadedImages]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -124,9 +119,8 @@ const BreederUpdateForm = () => {
     }));
     if (fileInputRef.current) fileInputRef.current.value = "";
 
-    // Revert to backend image if it exists
-    if (breeder?.profilePicture) {
-      setPreviewUrl(getBackendImageUrl(breeder.profilePicture));
+    if (preloadedImages?.profilePicture) {
+      setPreviewUrl(preloadedImages.profilePicture);
     } else {
       setPreviewUrl(null);
     }
@@ -149,11 +143,10 @@ const BreederUpdateForm = () => {
       galleryFileInputRefs[index].current.value = "";
     }
 
-    // Revert to backend image if it exists
-    if (breeder?.images?.[index]) {
+    if (preloadedImages?.gallery?.[index]) {
       setGalleryPreviews((prev) => {
         const newPreviews = [...prev];
-        newPreviews[index] = getBackendImageUrl(breeder.images[index]);
+        newPreviews[index] = preloadedImages.gallery[index];
         return newPreviews;
       });
     } else {
