@@ -17,14 +17,10 @@ const LitterUpdate = () => {
   const fileInputRef = useRef();
   const [successMessage, setSuccessMessage] = useState("");
 
-  const { litters, updateLitter, deleteLitter, loading } =
+  const { litters, updateLitter, deleteLitter, loading, preloadedImages } =
     useContext(LitterContext);
   const navigate = useNavigate();
   const [newlyUploadedImage, setNewlyUploadedImage] = useState(false);
-
-  const getBackendImageUrl = (imageName) => {
-    return imageName ? `/api/images/uploads/litter-images/${imageName}` : null;
-  };
 
   useEffect(() => {
     const currentLitter = litters.find((l) => l._id === id);
@@ -34,13 +30,13 @@ const LitterUpdate = () => {
         birthDate: currentLitter.birthDate?.split("T")[0] || "",
         availableDate: currentLitter.availableDate?.split("T")[0] || "",
       });
-      if (currentLitter.profilePicture) {
-        setPreviewUrl(
-          `/api/images/uploads/litter-images/${currentLitter.profilePicture}`,
-        );
+      if (currentLitter.profilePicture && preloadedImages?.litters) {
+        setPreviewUrl(preloadedImages.litters[currentLitter.profilePicture]);
+      } else {
+        setPreviewUrl(null);
       }
     }
-  }, [id, litters]);
+  }, [id, litters, preloadedImages]);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -54,11 +50,10 @@ const LitterUpdate = () => {
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
-
     setNewlyUploadedImage(false);
 
-    if (litter?.profilePicture) {
-      setPreviewUrl(getBackendImageUrl(litter.profilePicture));
+    if (litter?.profilePicture && preloadedImages?.litters) {
+      setPreviewUrl(preloadedImages.litters[litter.profilePicture]);
     } else {
       setPreviewUrl(null);
     }

@@ -3,26 +3,10 @@ import { LitterContext } from "../../context/LitterContext";
 import LoadingAnimation from "../LoadingAnimation";
 
 const OldLitters = () => {
-  const { litters, loading, error } = useContext(LitterContext);
+  const { litters, loading, error, preloadedImages } =
+    useContext(LitterContext);
   const [selectedLitter, setSelectedLitter] = useState(null);
   const [pastLitters, setPastLitters] = useState([]);
-
-  const preloadImages = async (images) => {
-    const loadImage = (src) => {
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.src = `/api/images${src}`;
-        img.onload = resolve;
-        img.onerror = reject;
-      });
-    };
-
-    try {
-      await Promise.all(images.map((src) => loadImage(src)));
-    } catch (error) {
-      console.error("Error preloading images:", error);
-    }
-  };
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -43,12 +27,6 @@ const OldLitters = () => {
           litter.puppies.every((puppy) => puppy.status === "Sold"),
       );
       setPastLitters(filtered);
-
-      const litterImages = filtered.map((litter) => litter.profilePicture);
-      const puppyImages = filtered.flatMap((litter) =>
-        litter.puppies.map((puppy) => puppy.profilePicture),
-      );
-      preloadImages([...litterImages, ...puppyImages]);
     }
   }, [litters]);
 
@@ -87,11 +65,13 @@ const OldLitters = () => {
                 >
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div className="aspect-[4/3] sm:aspect-[16/9] lg:aspect-square w-full overflow-hidden">
-                      <img
-                        src={`/api/images/uploads/litter-images/${litter.profilePicture}`}
-                        alt={litter.name}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                      />
+                      {preloadedImages.litters[litter.profilePicture] && (
+                        <img
+                          src={preloadedImages.litters[litter.profilePicture]}
+                          alt={litter.name}
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                        />
+                      )}
                     </div>
                     <div className="p-8 flex flex-col justify-center">
                       <h2 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-6">
@@ -219,11 +199,13 @@ const OldLitters = () => {
                     className="bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700/50"
                   >
                     <div className="aspect-square w-full overflow-hidden">
-                      <img
-                        src={`/api/images/uploads/puppy-images/${puppy.profilePicture}`}
-                        alt={puppy.name}
-                        className="w-full h-full object-cover"
-                      />
+                      {preloadedImages.puppies[puppy.profilePicture] && (
+                        <img
+                          src={preloadedImages.puppies[puppy.profilePicture]}
+                          alt={puppy.name}
+                          className="w-full h-full object-cover"
+                        />
+                      )}
                     </div>
                     <div className="p-6 space-y-4">
                       <h4 className="text-2xl font-semibold text-slate-100">

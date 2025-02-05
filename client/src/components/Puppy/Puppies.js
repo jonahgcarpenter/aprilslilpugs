@@ -10,7 +10,7 @@ const Puppies = ({ litterId, existingPuppies = [], readOnly = false }) => {
   const [previewUrl, setPreviewUrl] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
 
-  const { addPuppy, updatePuppy, deletePuppy, loading } =
+  const { addPuppy, updatePuppy, deletePuppy, loading, preloadedImages } =
     useContext(LitterContext);
 
   const [newPuppy, setNewPuppy] = useState({
@@ -21,10 +21,6 @@ const Puppies = ({ litterId, existingPuppies = [], readOnly = false }) => {
   });
 
   const [newlyUploadedImage, setNewlyUploadedImage] = useState(false);
-
-  const getBackendImageUrl = (imageName) => {
-    return imageName ? `/api/images/uploads/puppy-images/${imageName}` : null;
-  };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -41,8 +37,12 @@ const Puppies = ({ litterId, existingPuppies = [], readOnly = false }) => {
 
     setNewlyUploadedImage(false);
 
-    if (isEditing && selectedPuppy?.profilePicture) {
-      setPreviewUrl(getBackendImageUrl(selectedPuppy.profilePicture));
+    if (
+      isEditing &&
+      selectedPuppy?.profilePicture &&
+      preloadedImages?.puppies[selectedPuppy.profilePicture]
+    ) {
+      setPreviewUrl(preloadedImages.puppies[selectedPuppy.profilePicture]);
     } else {
       setPreviewUrl(null);
     }
@@ -94,8 +94,11 @@ const Puppies = ({ litterId, existingPuppies = [], readOnly = false }) => {
       status: puppy.status,
     });
 
-    if (puppy.profilePicture) {
-      setPreviewUrl(getBackendImageUrl(puppy.profilePicture));
+    if (
+      puppy.profilePicture &&
+      preloadedImages?.puppies[puppy.profilePicture]
+    ) {
+      setPreviewUrl(preloadedImages.puppies[puppy.profilePicture]);
       setNewlyUploadedImage(false);
     } else {
       clearImage();
@@ -261,15 +264,16 @@ const Puppies = ({ litterId, existingPuppies = [], readOnly = false }) => {
                 key={puppy._id}
                 className="bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700/30 transition-all hover:scale-[1.02] hover:shadow-xl"
               >
-                {puppy.profilePicture && (
-                  <div className="relative pb-[75%]">
-                    <img
-                      src={`/api/images/uploads/puppy-images/${puppy.profilePicture}`}
-                      alt={puppy.name}
-                      className="absolute inset-0 w-full h-full object-cover"
-                    />
-                  </div>
-                )}
+                {puppy.profilePicture &&
+                  preloadedImages?.puppies[puppy.profilePicture] && (
+                    <div className="relative pb-[75%]">
+                      <img
+                        src={preloadedImages.puppies[puppy.profilePicture]}
+                        alt={puppy.name}
+                        className="absolute inset-0 w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
                 <div className="p-4">
                   <h4 className="text-xl font-semibold text-white mb-2">
                     {puppy.name}

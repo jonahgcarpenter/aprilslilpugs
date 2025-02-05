@@ -6,6 +6,64 @@ export const LitterProvider = ({ children }) => {
   const [litters, setLitters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [preloadedImages, setPreloadedImages] = useState({
+    litters: {},
+    puppies: {},
+  });
+
+  const preloadImage = async (src) => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.src = src;
+      img.onload = () => resolve(img.src);
+      img.onerror = reject;
+    });
+  };
+
+  const preloadLitterImages = async (littersData) => {
+    try {
+      const newPreloadedImages = { litters: {}, puppies: {} };
+
+      for (const litter of littersData) {
+        if (litter.profilePicture) {
+          try {
+            const litterSrc = `/api/images/uploads/litter-images/${litter.profilePicture}`;
+            newPreloadedImages.litters[litter.profilePicture] =
+              await preloadImage(litterSrc);
+          } catch (err) {
+            console.error(
+              `Failed to preload litter image for ${litter.name}:`,
+              err,
+            );
+          }
+        }
+
+        if (litter.puppies && litter.puppies.length > 0) {
+          for (const puppy of litter.puppies) {
+            if (puppy.profilePicture) {
+              try {
+                const puppySrc = `/api/images/uploads/puppy-images/${puppy.profilePicture}`;
+                newPreloadedImages.puppies[puppy.profilePicture] =
+                  await preloadImage(puppySrc);
+              } catch (err) {
+                console.error(
+                  `Failed to preload puppy image for ${puppy.name}:`,
+                  err,
+                );
+              }
+            }
+          }
+        }
+      }
+
+      setPreloadedImages((prev) => ({
+        litters: { ...prev.litters, ...newPreloadedImages.litters },
+        puppies: { ...prev.puppies, ...newPreloadedImages.puppies },
+      }));
+    } catch (err) {
+      console.error("Error in preloadLitterImages:", err);
+    }
+  };
 
   const validateImage = (file) => {
     const maxSize = 5 * 1024 * 1024; // 5MB
@@ -40,6 +98,7 @@ export const LitterProvider = ({ children }) => {
         throw new Error(data.error || "Failed to fetch litters");
       }
       setLitters(data);
+      await preloadLitterImages(data);
     } catch (err) {
       setError(err.message || "Failed to fetch litters");
       console.error("Error fetching litters:", err);
@@ -348,6 +407,7 @@ export const LitterProvider = ({ children }) => {
         litters,
         loading,
         error,
+        preloadedImages,
         fetchLitters,
         getLitter,
         createLitter,
@@ -365,4 +425,3 @@ export const LitterProvider = ({ children }) => {
 };
 
 export default LitterProvider;
-

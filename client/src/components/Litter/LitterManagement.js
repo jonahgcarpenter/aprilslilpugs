@@ -5,7 +5,8 @@ import LoadingAnimation from "../LoadingAnimation";
 import ErrorModal from "../Modals/ErrorModal";
 
 const LitterManagement = () => {
-  const { litters, loading, error } = useContext(LitterContext);
+  const { litters, loading, error, preloadedImages } =
+    useContext(LitterContext);
   const [errorModal, setErrorModal] = useState({ show: false, message: "" });
   const navigate = useNavigate();
 
@@ -87,15 +88,15 @@ const LitterManagement = () => {
                   Edit
                 </button>
               </div>
-
-              {litter.profilePicture && (
-                <img
-                  src={`/api/images/uploads/litter-images/${litter.profilePicture}`}
-                  alt={`Litter ${litter.litterName}`}
-                  className="w-full h-48 object-cover rounded-lg border border-slate-700/50 mb-4"
-                />
+              {preloadedImages?.litters[litter.profilePicture] && (
+                <div className="mb-4">
+                  <img
+                    src={preloadedImages.litters[litter.profilePicture]}
+                    alt={`${litter.name}`}
+                    className="w-full h-48 object-cover rounded-lg border border-slate-700/50"
+                  />
+                </div>
               )}
-
               <div>
                 <h4 className="font-semibold text-slate-300 mb-3">
                   Puppies ({litter.puppies?.length || 0})
