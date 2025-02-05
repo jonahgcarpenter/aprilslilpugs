@@ -10,8 +10,14 @@ const Puppies = ({ litterId, existingPuppies = [], readOnly = false }) => {
   const [previewUrl, setPreviewUrl] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
 
-  const { addPuppy, updatePuppy, deletePuppy, loading, preloadedImages } =
-    useContext(LitterContext);
+  const {
+    addPuppy,
+    updatePuppy,
+    deletePuppy,
+    loading,
+    preloadedImages,
+    setPreloadedImages,
+  } = useContext(LitterContext);
 
   const [newPuppy, setNewPuppy] = useState({
     name: "",
@@ -52,11 +58,32 @@ const Puppies = ({ litterId, existingPuppies = [], readOnly = false }) => {
     e.preventDefault();
     try {
       const puppyImage = fileInputRef.current?.files[0];
+      let response;
 
       if (isEditing && selectedPuppy) {
-        await updatePuppy(litterId, selectedPuppy._id, newPuppy, puppyImage);
+        response = await updatePuppy(
+          litterId,
+          selectedPuppy._id,
+          newPuppy,
+          puppyImage,
+        );
       } else {
-        await addPuppy(litterId, newPuppy, puppyImage);
+        response = await addPuppy(litterId, newPuppy, puppyImage);
+      }
+
+      if (puppyImage) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          setPreloadedImages((prev) => ({
+            ...prev,
+            puppies: {
+              ...prev.puppies,
+              [response.puppies[response.puppies.length - 1].profilePicture]:
+                reader.result,
+            },
+          }));
+        };
+        reader.readAsDataURL(puppyImage);
       }
 
       setNewlyUploadedImage(false);

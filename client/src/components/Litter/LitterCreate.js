@@ -12,7 +12,8 @@ const LitterCreate = () => {
   const [errorModal, setErrorModal] = useState({ show: false, message: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { createLitter, loading } = useContext(LitterContext);
+  const { createLitter, loading, setPreloadedImages } =
+    useContext(LitterContext);
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -62,6 +63,21 @@ const LitterCreate = () => {
 
     try {
       const newLitter = await createLitter(formDataToSend);
+
+      if (file && newLitter.profilePicture) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          setPreloadedImages((prev) => ({
+            ...prev,
+            litters: {
+              ...prev.litters,
+              [newLitter.profilePicture]: reader.result,
+            },
+          }));
+        };
+        reader.readAsDataURL(file);
+      }
+
       setShowSuccessModal(true);
 
       setTimeout(() => {

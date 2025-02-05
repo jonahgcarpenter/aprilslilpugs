@@ -408,6 +408,7 @@ export const LitterProvider = ({ children }) => {
         loading,
         error,
         preloadedImages,
+        setPreloadedImages,
         fetchLitters,
         getLitter,
         createLitter,

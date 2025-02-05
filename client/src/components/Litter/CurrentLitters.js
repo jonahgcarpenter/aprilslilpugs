@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { LitterContext } from "../../context/LitterContext";
 import LoadingAnimation from "../LoadingAnimation";
+import { Link } from "react-router-dom";
 
 const CurrentLitters = () => {
   const { litters, loading, error, preloadedImages } =
@@ -110,8 +111,8 @@ const CurrentLitters = () => {
                             <path d="M9 8H6v4h3v12h5V12h3.642L18 8h-4V6.333C14 5.378 14.192 5 15.115 5H18V0h-3.808C10.596 0 9 1.583 9 4.615V8z" />
                           </svg>
                         </a>
-                        <a
-                          href="/past-litters"
+                        <Link
+                          to="/past-litters"
                           className="inline-flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-slate-700/30 to-slate-600/30 hover:from-slate-700/40 hover:to-slate-600/40 text-slate-300 rounded-xl border border-slate-600/30 transition-all duration-300 hover:scale-105"
                         >
                           <span>View Past Litters</span>
@@ -128,7 +129,7 @@ const CurrentLitters = () => {
                               d="M9 5l7 7-7 7"
                             />
                           </svg>
-                        </a>
+                        </Link>
                       </div>
                     </div>
                   </div>
