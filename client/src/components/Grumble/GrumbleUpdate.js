@@ -10,8 +10,15 @@ const formatDate = (date) => {
 };
 
 const GrumbleUpdate = () => {
-  const { grumbles, loading, error, addGrumble, updateGrumble, deleteGrumble } =
-    useContext(GrumbleContext);
+  const {
+    grumbles,
+    loading,
+    error,
+    preloadedImages,
+    addGrumble,
+    updateGrumble,
+    deleteGrumble,
+  } = useContext(GrumbleContext);
   const [selectedGrumble, setSelectedGrumble] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -321,7 +328,11 @@ const GrumbleUpdate = () => {
               {previewUrls.profilePicture && (
                 <div className="mb-4 relative w-32 h-32">
                   <img
-                    src={previewUrls.profilePicture}
+                    src={
+                      newlyUploadedImage
+                        ? previewUrls.profilePicture
+                        : preloadedImages[selectedGrumble?.profilePicture]
+                    }
                     alt="Preview"
                     className="w-full h-full object-cover rounded-lg border border-slate-700"
                   />

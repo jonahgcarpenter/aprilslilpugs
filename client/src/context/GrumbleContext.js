@@ -6,6 +6,7 @@ export const GrumbleProvider = ({ children }) => {
   const [grumbles, setGrumbles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [preloadedImages, setPreloadedImages] = useState({});
 
   const validateImage = (file) => {
     const maxSize = 5 * 1024 * 1024; // 5MB
@@ -30,6 +31,37 @@ export const GrumbleProvider = ({ children }) => {
     return true;
   };
 
+  const preloadImage = async (imageUrl) => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.src = imageUrl;
+      img.onload = () => resolve(img);
+      img.onerror = () =>
+        reject(new Error(`Failed to load image: ${imageUrl}`));
+    });
+  };
+
+  const preloadGrumbleImages = async (grumblesData) => {
+    const newPreloadedImages = { ...preloadedImages };
+
+    for (const grumble of grumblesData) {
+      if (
+        grumble.profilePicture &&
+        !newPreloadedImages[grumble.profilePicture]
+      ) {
+        try {
+          const imageUrl = `/api/images/uploads/grumble-images/${grumble.profilePicture}`;
+          const img = await preloadImage(imageUrl);
+          newPreloadedImages[grumble.profilePicture] = img.src;
+        } catch (err) {
+          console.error(`Failed to preload image for ${grumble.name}:`, err);
+        }
+      }
+    }
+
+    setPreloadedImages(newPreloadedImages);
+  };
+
   const fetchGrumbles = async () => {
     setLoading(true);
     setError(null);
@@ -40,6 +72,7 @@ export const GrumbleProvider = ({ children }) => {
         throw new Error(data.error || "Failed to fetch grumbles");
       }
       setGrumbles(data);
+      await preloadGrumbleImages(data);
     } catch (err) {
       setError(err.message || "Failed to fetch grumbles");
       console.error("Error fetching grumbles:", err);
@@ -76,6 +109,20 @@ export const GrumbleProvider = ({ children }) => {
       }
 
       const newGrumble = await response.json();
+      // Preload the new image
+      if (newGrumble.profilePicture) {
+        const imageUrl = `/api/images/uploads/grumble-images/${newGrumble.profilePicture}`;
+        try {
+          const img = await preloadImage(imageUrl);
+          setPreloadedImages((prev) => ({
+            ...prev,
+            [newGrumble.profilePicture]: img.src,
+          }));
+        } catch (err) {
+          console.error("Failed to preload new image:", err);
+        }
+      }
+
       setGrumbles((prevGrumbles) => [...prevGrumbles, newGrumble]);
       return newGrumble;
     } catch (err) {
@@ -106,6 +153,15 @@ export const GrumbleProvider = ({ children }) => {
       setGrumbles((prevGrumbles) =>
         prevGrumbles.filter((grumble) => grumble._id !== grumbleId),
       );
+
+      const grumbleToDelete = grumbles.find((g) => g._id === grumbleId);
+      if (grumbleToDelete?.profilePicture) {
+        setPreloadedImages((prev) => {
+          const newImages = { ...prev };
+          delete newImages[grumbleToDelete.profilePicture];
+          return newImages;
+        });
+      }
     } catch (err) {
       setError("Failed to delete grumble. Please try again later.");
       console.error("Error deleting grumble:", err);
@@ -137,19 +193,33 @@ export const GrumbleProvider = ({ children }) => {
         body: formData,
       });
 
-      const data = await response.json();
+      const updatedGrumble = await response.json();
 
       if (!response.ok) {
-        console.error("Server error:", data);
-        throw new Error(data.error || "Failed to update grumble");
+        console.error("Server error:", updatedGrumble);
+        throw new Error(updatedGrumble.error || "Failed to update grumble");
+      }
+
+      if (updatedGrumble.profilePicture) {
+        const imageUrl = `/api/images/uploads/grumble-images/${updatedGrumble.profilePicture}`;
+        try {
+          const img = await preloadImage(imageUrl);
+          setPreloadedImages((prev) => ({
+            ...prev,
+            [updatedGrumble.profilePicture]: img.src,
+          }));
+        } catch (err) {
+          console.error("Failed to preload updated image:", err);
+        }
       }
 
       setGrumbles((prevGrumbles) =>
         prevGrumbles.map((grumble) =>
-          grumble._id === grumbleId ? data : grumble,
+          grumble._id === grumbleId ? updatedGrumble : grumble,
         ),
       );
-      return data;
+
+      return updatedGrumble;
     } catch (err) {
       console.error("Update error details:", err);
       setError(err.message || "Failed to update grumble");
@@ -169,6 +239,7 @@ export const GrumbleProvider = ({ children }) => {
         grumbles,
         loading,
         error,
+        preloadedImages,
         fetchGrumbles,
         addGrumble,
         deleteGrumble,

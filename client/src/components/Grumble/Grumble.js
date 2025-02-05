@@ -29,7 +29,8 @@ const calculateAge = (birthDateString) => {
 };
 
 const Grumble = () => {
-  const { grumbles, loading, error } = useContext(GrumbleContext);
+  const { grumbles, loading, error, preloadedImages } =
+    useContext(GrumbleContext);
 
   if (loading) {
     return (
@@ -70,11 +71,13 @@ const Grumble = () => {
                 className="bg-slate-800/50 rounded-xl overflow-hidden hover:transform hover:scale-[1.02] transition-all duration-300 border border-slate-700/50"
               >
                 <div className="aspect-square w-full overflow-hidden">
-                  <img
-                    src={`/api/images/uploads/grumble-images/${pug.profilePicture}`}
-                    alt={pug.name}
-                    className="w-full h-full object-cover"
-                  />
+                  {preloadedImages[pug.profilePicture] && (
+                    <img
+                      src={preloadedImages[pug.profilePicture]}
+                      alt={pug.name}
+                      className="w-full h-full object-cover"
+                    />
+                  )}
                 </div>
                 <div className="p-6 space-y-4">
                   <div className="space-y-2">
