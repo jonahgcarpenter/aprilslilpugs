@@ -23,16 +23,19 @@ const BreederUpdateForm = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorModal, setErrorModal] = useState({ show: false, message: "" });
+  const [galleryErrors, setGalleryErrors] = useState({});
+  const [newlyUploadedImages, setNewlyUploadedImages] = useState({
+    profile: false,
+    gallery: {},
+  });
 
   const fileInputRef = useRef(null);
   const galleryFileInputRefs = [useRef(null), useRef(null)];
-  const [galleryErrors, setGalleryErrors] = useState({});
 
-  const handleGalleryImageError = (index) => {
-    setGalleryErrors((prev) => ({
-      ...prev,
-      [index]: true,
-    }));
+  const getBackendImageUrl = (imageName) => {
+    return imageName
+      ? `/api/images/uploads/breeder-profiles/${imageName}`
+      : null;
   };
 
   useEffect(() => {
@@ -46,7 +49,6 @@ const BreederUpdateForm = () => {
         story: breeder.story || "",
       });
 
-      // Update preview URLs to include full path
       if (breeder.profilePicture) {
         setPreviewUrl(
           `/api/images/uploads/breeder-profiles/${breeder.profilePicture}`,
@@ -72,7 +74,18 @@ const BreederUpdateForm = () => {
     if (file) {
       setProfilePicture(file);
       setPreviewUrl(URL.createObjectURL(file));
+      setNewlyUploadedImages((prev) => ({
+        ...prev,
+        profile: true,
+      }));
     }
+  };
+
+  const handleGalleryImageError = (index) => {
+    setGalleryErrors((prev) => ({
+      ...prev,
+      [index]: true,
+    }));
   };
 
   const handleGalleryImageChange = (index, e) => {
@@ -88,13 +101,74 @@ const BreederUpdateForm = () => {
         newPreviews[index] = URL.createObjectURL(file);
         return newPreviews;
       });
-      // Reset error state for this index when new image is selected
       setGalleryErrors((prev) => {
         const newErrors = { ...prev };
         delete newErrors[index];
         return newErrors;
       });
+      setNewlyUploadedImages((prev) => ({
+        ...prev,
+        gallery: {
+          ...prev.gallery,
+          [index]: true,
+        },
+      }));
     }
+  };
+
+  const handleProfileImageRemoval = () => {
+    setProfilePicture(null);
+    setNewlyUploadedImages((prev) => ({
+      ...prev,
+      profile: false,
+    }));
+    if (fileInputRef.current) fileInputRef.current.value = "";
+
+    // Revert to backend image if it exists
+    if (breeder?.profilePicture) {
+      setPreviewUrl(getBackendImageUrl(breeder.profilePicture));
+    } else {
+      setPreviewUrl(null);
+    }
+  };
+
+  const handleGalleryImageRemoval = (index) => {
+    setGalleryImages((prev) => {
+      const newImages = [...prev];
+      newImages[index] = null;
+      return newImages;
+    });
+    setNewlyUploadedImages((prev) => ({
+      ...prev,
+      gallery: {
+        ...prev.gallery,
+        [index]: false,
+      },
+    }));
+    if (galleryFileInputRefs[index].current) {
+      galleryFileInputRefs[index].current.value = "";
+    }
+
+    // Revert to backend image if it exists
+    if (breeder?.images?.[index]) {
+      setGalleryPreviews((prev) => {
+        const newPreviews = [...prev];
+        newPreviews[index] = getBackendImageUrl(breeder.images[index]);
+        return newPreviews;
+      });
+    } else {
+      setGalleryPreviews((prev) => {
+        const newPreviews = [...prev];
+        newPreviews[index] = null;
+        return newPreviews;
+      });
+    }
+
+    setGalleryErrors((prev) => {
+      const newErrors = { ...prev };
+      delete newErrors[index];
+      return newErrors;
+    });
   };
 
   const preventDefaultValidation = (e) => {
@@ -137,9 +211,9 @@ const BreederUpdateForm = () => {
       setShowSuccessModal(true);
       setSuccessMessage("Profile updated successfully!");
 
-      // Clear file inputs
       setGalleryImages([null, null]);
       setProfilePicture(null);
+      setNewlyUploadedImages({ profile: false, gallery: {} });
       if (fileInputRef.current) fileInputRef.current.value = "";
       galleryFileInputRefs.forEach((ref) => {
         if (ref.current) ref.current.value = "";
@@ -264,17 +338,15 @@ const BreederUpdateForm = () => {
                   alt="Preview"
                   className="w-full h-full object-cover rounded-lg border border-slate-700"
                 />
-                <button
-                  type="button"
-                  onClick={() => {
-                    setPreviewUrl(null);
-                    setProfilePicture(null);
-                    if (fileInputRef.current) fileInputRef.current.value = "";
-                  }}
-                  className="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-600"
-                >
-                  ×
-                </button>
+                {newlyUploadedImages.profile && (
+                  <button
+                    type="button"
+                    onClick={handleProfileImageRemoval}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-600"
+                  >
+                    x
+                  </button>
+                )}
               </div>
             )}
             <input
@@ -293,9 +365,6 @@ const BreederUpdateForm = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {[0, 1].map((index) => (
                 <div key={index} className="space-y-4">
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Gallery Image {index + 1}
-                  </label>
                   {galleryPreviews[index] && (
                     <div className="mb-4 relative w-full h-48">
                       {!galleryErrors[index] ? (
@@ -312,27 +381,15 @@ const BreederUpdateForm = () => {
                           </span>
                         </div>
                       )}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setGalleryPreviews((prev) => {
-                            const newPreviews = [...prev];
-                            newPreviews[index] = null;
-                            return newPreviews;
-                          });
-                          setGalleryErrors((prev) => {
-                            const newErrors = { ...prev };
-                            delete newErrors[index];
-                            return newErrors;
-                          });
-                          if (galleryFileInputRefs[index].current) {
-                            galleryFileInputRefs[index].current.value = "";
-                          }
-                        }}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-600"
-                      >
-                        x
-                      </button>
+                      {newlyUploadedImages.gallery[index] && (
+                        <button
+                          type="button"
+                          onClick={() => handleGalleryImageRemoval(index)}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-600"
+                        >
+                          x
+                        </button>
+                      )}
                     </div>
                   )}
                   <input
@@ -351,7 +408,7 @@ const BreederUpdateForm = () => {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition-all duration-200 disabled:opacity-50"
+          className="w-full bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSubmitting ? (
             <LoadingAnimation containerClassName="h-6" />
