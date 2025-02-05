@@ -1,35 +1,43 @@
-import { useState, useEffect, useContext, useRef } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { LitterContext } from '../../context/LitterContext';
-import LoadingAnimation from '../LoadingAnimation';
-import DeleteModal from '../Modals/DeleteModal';
-import SuccessModal from '../Modals/SuccessModal';
-import ErrorModal from '../Modals/ErrorModal';
-import Puppies from '../Puppy/Puppies';
+import { useState, useEffect, useContext, useRef } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { LitterContext } from "../../context/LitterContext";
+import LoadingAnimation from "../LoadingAnimation";
+import DeleteModal from "../Modals/DeleteModal";
+import SuccessModal from "../Modals/SuccessModal";
+import ErrorModal from "../Modals/ErrorModal";
+import Puppies from "../Puppy/Puppies";
 
 const LitterUpdate = () => {
   const { id } = useParams();
   const [litter, setLitter] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [errorModal, setErrorModal] = useState({ show: false, message: '' });
+  const [errorModal, setErrorModal] = useState({ show: false, message: "" });
   const [previewUrl, setPreviewUrl] = useState(null);
   const fileInputRef = useRef();
-  const [successMessage, setSuccessMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState("");
 
-  const { litters, updateLitter, deleteLitter, loading } = useContext(LitterContext);
+  const { litters, updateLitter, deleteLitter, loading } =
+    useContext(LitterContext);
   const navigate = useNavigate();
+  const [newlyUploadedImage, setNewlyUploadedImage] = useState(false);
+
+  const getBackendImageUrl = (imageName) => {
+    return imageName ? `/api/images/uploads/litter-images/${imageName}` : null;
+  };
 
   useEffect(() => {
-    const currentLitter = litters.find(l => l._id === id);
+    const currentLitter = litters.find((l) => l._id === id);
     if (currentLitter) {
       setLitter({
         ...currentLitter,
-        birthDate: currentLitter.birthDate?.split('T')[0] || '',
-        availableDate: currentLitter.availableDate?.split('T')[0] || '',
+        birthDate: currentLitter.birthDate?.split("T")[0] || "",
+        availableDate: currentLitter.availableDate?.split("T")[0] || "",
       });
       if (currentLitter.profilePicture) {
-        setPreviewUrl(`/api/images/uploads/litter-images/${currentLitter.profilePicture}`);
+        setPreviewUrl(
+          `/api/images/uploads/litter-images/${currentLitter.profilePicture}`,
+        );
       }
     }
   }, [id, litters]);
@@ -38,47 +46,58 @@ const LitterUpdate = () => {
     const file = e.target.files[0];
     if (file) {
       setPreviewUrl(URL.createObjectURL(file));
+      setNewlyUploadedImage(true);
     }
   };
 
   const clearImage = () => {
-    setPreviewUrl(null);
+    // Reset the file input
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
+    }
+
+    setNewlyUploadedImage(false);
+
+    // Revert to backend image if it exists
+    if (litter?.profilePicture) {
+      setPreviewUrl(getBackendImageUrl(litter.profilePicture));
+    } else {
+      setPreviewUrl(null);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
       const formDataToSend = new FormData();
-      
+
       const updateData = {
         name: litter.name?.trim(),
         mother: litter.mother?.trim(),
         father: litter.father?.trim(),
         birthDate: litter.birthDate,
-        availableDate: litter.availableDate
+        availableDate: litter.availableDate,
       };
 
-      formDataToSend.append('data', JSON.stringify(updateData));
+      formDataToSend.append("data", JSON.stringify(updateData));
 
       if (fileInputRef.current?.files[0]) {
-        formDataToSend.append('profilePicture', fileInputRef.current.files[0]);
+        formDataToSend.append("profilePicture", fileInputRef.current.files[0]);
       }
 
       await updateLitter(id, formDataToSend);
-      setSuccessMessage('Litter updated successfully!');
+      setSuccessMessage("Litter updated successfully!");
       setShowSuccessModal(true);
-      
+      setNewlyUploadedImage(false); // Reset the newly uploaded state
+
       setTimeout(() => {
-        navigate('/breeder-dashboard');
+        navigate("/breeder-dashboard");
       }, 1500);
     } catch (err) {
-      setErrorModal({ 
-        show: true, 
-        message: err.message || 'Failed to update litter. Please try again.' 
+      setErrorModal({
+        show: true,
+        message: err.message || "Failed to update litter. Please try again.",
       });
     }
   };
@@ -87,15 +106,15 @@ const LitterUpdate = () => {
     try {
       await deleteLitter(id);
       setShowDeleteModal(false); // Close the modal first
-      setSuccessMessage('Litter deleted successfully!');
+      setSuccessMessage("Litter deleted successfully!");
       setShowSuccessModal(true);
       setTimeout(() => {
-        navigate('/breeder-dashboard');
+        navigate("/breeder-dashboard");
       }, 1500);
     } catch (err) {
-      setErrorModal({ 
-        show: true, 
-        message: err.message || 'Failed to delete litter' 
+      setErrorModal({
+        show: true,
+        message: err.message || "Failed to delete litter",
       });
     }
   };
@@ -110,14 +129,19 @@ const LitterUpdate = () => {
 
   return (
     <div className="mx-0 sm:mx-4 px-4 sm:px-0 py-8">
-      <form onSubmit={handleSubmit} className="bg-slate-900/80 backdrop-blur-sm rounded-xl p-4 sm:p-8 border border-slate-800/50 shadow-xl">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-slate-900/80 backdrop-blur-sm rounded-xl p-4 sm:p-8 border border-slate-800/50 shadow-xl"
+      >
         <h2 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-8">
           Update Litter
         </h2>
-      
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6">
           <div className="form-group">
-            <label className="block text-sm font-medium text-gray-300 mb-2">Litter Name</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Litter Name
+            </label>
             <input
               type="text"
               name="name"
@@ -129,7 +153,9 @@ const LitterUpdate = () => {
           </div>
 
           <div className="form-group">
-            <label className="block text-sm font-medium text-gray-300 mb-2">Mother</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Mother
+            </label>
             <input
               type="text"
               name="mother"
@@ -141,7 +167,9 @@ const LitterUpdate = () => {
           </div>
 
           <div className="form-group">
-            <label className="block text-sm font-medium text-gray-300 mb-2">Father</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Father
+            </label>
             <input
               type="text"
               name="father"
@@ -153,31 +181,41 @@ const LitterUpdate = () => {
           </div>
 
           <div className="form-group">
-            <label className="block text-sm font-medium text-gray-300 mb-2">Birth Date</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Birth Date
+            </label>
             <input
               type="date"
               name="birthDate"
               value={litter?.birthDate}
-              onChange={(e) => setLitter({ ...litter, birthDate: e.target.value })}
+              onChange={(e) =>
+                setLitter({ ...litter, birthDate: e.target.value })
+              }
               required
               className="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700 focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           <div className="form-group">
-            <label className="block text-sm font-medium text-gray-300 mb-2">Available Date</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Available Date
+            </label>
             <input
               type="date"
               name="availableDate"
               value={litter?.availableDate}
-              onChange={(e) => setLitter({ ...litter, availableDate: e.target.value })}
+              onChange={(e) =>
+                setLitter({ ...litter, availableDate: e.target.value })
+              }
               required
               className="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700 focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           <div className="form-group sm:col-span-2">
-            <label className="block text-sm font-medium text-gray-300 mb-2">Litter Image</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Litter Image
+            </label>
             {previewUrl && (
               <div className="mb-4 relative w-32 h-32">
                 <img
@@ -185,13 +223,15 @@ const LitterUpdate = () => {
                   alt="Litter Preview"
                   className="w-full h-full object-cover rounded-lg border border-slate-700"
                 />
-                <button
-                  type="button"
-                  onClick={clearImage}
-                  className="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
-                >
-                  ×
-                </button>
+                {newlyUploadedImage && (
+                  <button
+                    type="button"
+                    onClick={clearImage}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
+                  >
+                    x
+                  </button>
+                )}
               </div>
             )}
             <input
@@ -202,9 +242,6 @@ const LitterUpdate = () => {
               accept="image/jpeg,image/png"
               className="w-full text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:bg-blue-500 file:text-white hover:file:bg-blue-600 transition-colors"
             />
-            <p className="mt-1 text-sm text-slate-400">
-              Leave empty to keep current image
-            </p>
           </div>
         </div>
 
@@ -227,10 +264,7 @@ const LitterUpdate = () => {
 
       {/* Remove readOnly prop and simplify Puppies component usage */}
       {litter && (
-        <Puppies 
-          litterId={id} 
-          existingPuppies={litter.puppies || []}
-        />
+        <Puppies litterId={id} existingPuppies={litter.puppies || []} />
       )}
 
       <DeleteModal
@@ -253,7 +287,7 @@ const LitterUpdate = () => {
 
       <ErrorModal
         isOpen={errorModal.show}
-        onClose={() => setErrorModal({ show: false, message: '' })}
+        onClose={() => setErrorModal({ show: false, message: "" })}
         message={errorModal.message}
       />
     </div>
@@ -261,3 +295,4 @@ const LitterUpdate = () => {
 };
 
 export default LitterUpdate;
+
