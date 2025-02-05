@@ -63,8 +63,8 @@ const CurrentLitters = () => {
           ) : availableLitters.length === 0 ? (
             <div className="space-y-8">
               <div className="bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700/50">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  <div className="aspect-[4/3] sm:aspect-[16/9] lg:aspect-square w-full overflow-hidden bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
+                <div className="grid grid-cols-1 lg:grid-cols-2">
+                  <div className="aspect-square w-full overflow-hidden bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
                     <div className="text-center p-8">
                       <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6 rounded-full bg-blue-500/10 flex items-center justify-center">
                         <svg
@@ -140,11 +140,11 @@ const CurrentLitters = () => {
             <div className="space-y-8">
               {availableLitters.map((litter) => (
                 <div
-                  key={litter.id}
+                  key={litter._id}
                   className="bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700/50"
                 >
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div className="aspect-[4/3] sm:aspect-[16/9] lg:aspect-square w-full overflow-hidden">
+                  <div className="grid grid-cols-1 lg:grid-cols-2">
+                    <div className="aspect-square w-full overflow-hidden">
                       {preloadedImages.litters[litter.profilePicture] && (
                         <img
                           src={preloadedImages.litters[litter.profilePicture]}

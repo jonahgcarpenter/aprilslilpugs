@@ -63,8 +63,8 @@ const OldLitters = () => {
                   key={litter._id}
                   className="bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700/50"
                 >
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div className="aspect-[4/3] sm:aspect-[16/9] lg:aspect-square w-full overflow-hidden">
+                  <div className="grid grid-cols-1 lg:grid-cols-2">
+                    <div className="aspect-square w-full overflow-hidden">
                       {preloadedImages.litters[litter.profilePicture] && (
                         <img
                           src={preloadedImages.litters[litter.profilePicture]}
