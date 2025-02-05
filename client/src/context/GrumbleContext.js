@@ -52,13 +52,11 @@ export const GrumbleProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      // Validate date if present in FormData
       const birthDate = formData.get("birthDate");
       if (birthDate) {
         validateDate(birthDate);
       }
 
-      // Validate image if present
       const image = formData.get("profilePicture");
       if (image instanceof File) {
         validateImage(image);
@@ -121,13 +119,11 @@ export const GrumbleProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      // Validate date if present in FormData
       const birthDate = formData.get("birthDate");
       if (birthDate) {
         validateDate(birthDate);
       }
 
-      // Validate image if present
       const image = formData.get("profilePicture");
       if (image instanceof File) {
         validateImage(image);

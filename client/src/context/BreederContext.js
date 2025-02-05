@@ -1,16 +1,20 @@
-import { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useEffect,
+} from "react";
 
 export const BreederContext = createContext();
 
 export const useBreeder = () => {
   const context = useContext(BreederContext);
   if (!context) {
-    throw new Error('useBreeder must be used within a BreederProvider');
+    throw new Error("useBreeder must be used within a BreederProvider");
   }
   return context;
 };
-
-const BREEDER_ID = "679fd1587f2c7fe4601d3f2e";
 
 export const BreederProvider = ({ children }) => {
   const [breeder, setBreeder] = useState(null);
@@ -21,14 +25,13 @@ export const BreederProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/breeder/profile');
+      const response = await fetch("/api/breeder/profile");
       const json = await response.json();
 
       if (!response.ok) {
         throw new Error(json.error);
       }
 
-      // The backend already sends the relative paths, so no transformation needed here
       setBreeder(json);
     } catch (error) {
       setError(error.message);
@@ -37,7 +40,6 @@ export const BreederProvider = ({ children }) => {
     }
   }, []);
 
-  // Initial fetch on mount
   useEffect(() => {
     fetchBreederProfile();
   }, [fetchBreederProfile]);
@@ -46,12 +48,12 @@ export const BreederProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/breeder/profile', {
-        method: 'PATCH',
+      const response = await fetch("/api/breeder/profile", {
+        method: "PATCH",
         body: formData,
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
       });
       const json = await response.json();
 
@@ -59,10 +61,9 @@ export const BreederProvider = ({ children }) => {
         throw new Error(json.error);
       }
 
-      // Ensure _id is set in the updated data
       setBreeder({
         ...json,
-        _id: "679fd1587f2c7fe4601d3f2e"
+        _id: "679fd1587f2c7fe4601d3f2e",
       });
       return { success: true, data: json };
     } catch (error) {
@@ -74,13 +75,15 @@ export const BreederProvider = ({ children }) => {
   };
 
   return (
-    <BreederContext.Provider value={{
-      breeder,
-      loading,
-      error,
-      fetchBreederProfile,
-      updateBreederProfile
-    }}>
+    <BreederContext.Provider
+      value={{
+        breeder,
+        loading,
+        error,
+        fetchBreederProfile,
+        updateBreederProfile,
+      }}
+    >
       {children}
     </BreederContext.Provider>
   );

@@ -1,15 +1,15 @@
-import React, { useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+import React, { useEffect } from "react";
+import { Navigate } from "react-router-dom";
 
 // CONTEXT
-import { useSettings } from '../context/SettingsContext';
-import { useDownDetector } from '../context/DownDetector';
+import { useSettings } from "../context/SettingsContext";
+import { useDownDetector } from "../context/DownDetector";
 
 // COMPONENTS
-import UnderConstruction from '../components/UnderConstruction';
-import Stream from '../components/LiveStream/Stream';
-import StreamDown from '../components/LiveStream/StreamDown';
-import LoadingAnimation from '../components/LoadingAnimation';
+import UnderConstruction from "../components/UnderConstruction";
+import Stream from "../components/LiveStream/Stream";
+import StreamDown from "../components/LiveStream/StreamDown";
+import LoadingAnimation from "../components/LoadingAnimation";
 
 const Live = () => {
   const { liveEnabled } = useSettings();
@@ -40,7 +40,7 @@ const Live = () => {
         )}
       </div>
     </div>
-  )
+  );
 };
 
 export default Live;

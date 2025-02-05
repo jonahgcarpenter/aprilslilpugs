@@ -1,6 +1,6 @@
 // COMPONENTS
-import UnderConstruction from '../components/UnderConstruction';
-import Grumble from '../components/Grumble/Grumble';
+import UnderConstruction from "../components/UnderConstruction";
+import Grumble from "../components/Grumble/Grumble";
 
 const OurAdults = () => {
   return (
@@ -12,7 +12,7 @@ const OurAdults = () => {
         <Grumble />
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default OurAdults;

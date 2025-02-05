@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
-import videojs from 'video.js';
-import 'video.js/dist/video-js.css';
-import { FaInfoCircle, FaTimes } from 'react-icons/fa';
+import React, { useEffect, useRef, useState } from "react";
+import videojs from "video.js";
+import "video.js/dist/video-js.css";
+import { FaInfoCircle, FaTimes } from "react-icons/fa";
 
 const HLS_STREAM_URL = process.env.REACT_APP_HLS_STREAM_URL;
 
@@ -21,13 +21,15 @@ const Stream = () => {
       const player = videojs(videoRef.current, {
         controls: true,
         fluid: true,
-        preload: 'auto',
+        preload: "auto",
         width: 720,
         autoplay: true,
-        sources: [{
-          src: HLS_STREAM_URL,
-          type: 'application/x-mpegURL'
-        }]
+        sources: [
+          {
+            src: HLS_STREAM_URL,
+            type: "application/x-mpegURL",
+          },
+        ],
       });
 
       playerRef.current = player;
@@ -47,7 +49,10 @@ const Stream = () => {
         <h1 className="text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-4">
           Live Puppy Cam
         </h1>
-        <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/10 mb-4 cursor-pointer" onClick={() => setShowInfo(!showInfo)}>
+        <div
+          className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/10 mb-4 cursor-pointer"
+          onClick={() => setShowInfo(!showInfo)}
+        >
           <FaInfoCircle className="text-blue-400" />
           <span className="text-white/90">Stream Info</span>
         </div>
@@ -55,10 +60,15 @@ const Stream = () => {
           <div className="bg-white/10 p-4 rounded-lg border border-white/20 transition-all duration-300 w-full">
             <div className="flex justify-between items-center mb-2">
               <h2 className="text-xl font-bold text-white">Stream Info</h2>
-              <FaTimes className="text-white cursor-pointer" onClick={() => setShowInfo(false)} />
+              <FaTimes
+                className="text-white cursor-pointer"
+                onClick={() => setShowInfo(false)}
+              />
             </div>
             <p className="text-white/80">
-              The puppy cam is live! We stream when we have puppies to show, and we do not include audio due to the location of the camera. Enjoy the puppies!
+              The puppy cam is live! We stream when we have puppies to show, and
+              we do not include audio due to the location of the camera. Enjoy
+              the puppies!
             </p>
           </div>
         )}

@@ -1,7 +1,7 @@
 // COMPONENTS
-import UnderConstruction from '../components/UnderConstruction';
-import CurrentLitters from '../components/Litter/CurrentLitters';
-import Waitlist from '../components/Waitlist/Waitlist';
+import UnderConstruction from "../components/UnderConstruction";
+import CurrentLitters from "../components/Litter/CurrentLitters";
+import Waitlist from "../components/Waitlist/Waitlist";
 
 const Nursery = () => {
   return (
@@ -14,7 +14,7 @@ const Nursery = () => {
         <CurrentLitters />
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default Nursery;

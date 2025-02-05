@@ -73,16 +73,13 @@ const GrumbleUpdate = () => {
   };
 
   const removeImage = () => {
-    // Reset the form data and uploaded image state
     setFormData((prev) => ({ ...prev, profilePicture: null }));
     setNewlyUploadedImage(false);
 
-    // Clear the file input value
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
 
-    // Revert to backend image if it exists
     if (selectedGrumble?.profilePicture) {
       setPreviewUrls((prev) => ({
         ...prev,
@@ -97,7 +94,6 @@ const GrumbleUpdate = () => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      // Validate date format
       if (!formData.birthDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
         throw new Error("Invalid date format. Please use YYYY-MM-DD format.");
       }
@@ -117,7 +113,7 @@ const GrumbleUpdate = () => {
         setSuccessMessage("New grumble member added successfully!");
       }
       setShowSuccessModal(true);
-      setNewlyUploadedImage(false); // Reset the newly uploaded state
+      setNewlyUploadedImage(false);
     } catch (error) {
       setErrorModal({
         show: true,
@@ -159,9 +155,8 @@ const GrumbleUpdate = () => {
     });
     setNewlyUploadedImage(false);
 
-    // Scroll to form with offset
     if (formRef.current) {
-      const yOffset = -250; // Adjust this value to scroll higher or lower
+      const yOffset = -250;
       const element = formRef.current;
       const y =
         element.getBoundingClientRect().top + window.pageYOffset + yOffset;

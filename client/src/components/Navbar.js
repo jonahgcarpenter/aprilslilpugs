@@ -1,12 +1,12 @@
-import { Link } from 'react-router-dom'
+import { Link } from "react-router-dom";
 
 // CONTEXT
-import { useAuth } from '../context/AuthContext'
-import { useSettings } from '../context/SettingsContext'
+import { useAuth } from "../context/AuthContext";
+import { useSettings } from "../context/SettingsContext";
 
 // COMPONENTS
-import LoginButton from './Auth/LoginButton'
-import LogoutButton from './Auth/LogoutButton'
+import LoginButton from "./Auth/LoginButton";
+import LogoutButton from "./Auth/LogoutButton";
 
 const Navbar = () => {
   const { user } = useAuth();
@@ -26,14 +26,14 @@ const Navbar = () => {
               </button>
             </Link>
             <Link to="/ouradults">
-                <button className="bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-4 sm:px-6 py-2 text-sm rounded-full font-semibold shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200">
-                    Our Adults
-                </button>
+              <button className="bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-4 sm:px-6 py-2 text-sm rounded-full font-semibold shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+                Our Adults
+              </button>
             </Link>
             <Link to="/nursery">
-                <button className="bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-4 sm:px-6 py-2 text-sm rounded-full font-semibold shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200">
-                    Nursery
-                </button>
+              <button className="bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-4 sm:px-6 py-2 text-sm rounded-full font-semibold shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+                Nursery
+              </button>
             </Link>
             {liveEnabled && (
               <Link to="/live">
@@ -44,14 +44,14 @@ const Navbar = () => {
               </Link>
             )}
             <Link to="/past-litters">
-                <button className="bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-4 sm:px-6 py-2 text-sm rounded-full font-semibold shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200">
-                    Past Litters
-                </button>
+              <button className="bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-4 sm:px-6 py-2 text-sm rounded-full font-semibold shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+                Past Litters
+              </button>
             </Link>
             <Link to="/gallery">
-                <button className="bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-4 sm:px-6 py-2 text-sm rounded-full font-semibold shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200">
-                    Gallery
-                </button>
+              <button className="bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white px-4 sm:px-6 py-2 text-sm rounded-full font-semibold shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+                Gallery
+              </button>
             </Link>
             {user && (
               <Link to="/breeder-dashboard">
@@ -65,7 +65,7 @@ const Navbar = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Navbar
+export default Navbar;

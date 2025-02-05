@@ -64,7 +64,6 @@ const LitterCreate = () => {
       const newLitter = await createLitter(formDataToSend);
       setShowSuccessModal(true);
 
-      // Navigate after modal is shown
       setTimeout(() => {
         navigate(`/breeder/litter/update/${newLitter._id}`);
       }, 1500);
@@ -213,7 +212,7 @@ const LitterCreate = () => {
 
       <SuccessModal
         isOpen={showSuccessModal}
-        onClose={() => {}} // Prevent manual closing during redirect
+        onClose={() => {}}
         message="Litter created successfully!"
         delay={1500}
       />

@@ -1,5 +1,5 @@
 // COMPONENTS
-import UnderConstruction from '../components/UnderConstruction';
+import UnderConstruction from "../components/UnderConstruction";
 
 const Gallery = () => {
   return (
@@ -11,7 +11,7 @@ const Gallery = () => {
         <h1> Gallery </h1>
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default Gallery;

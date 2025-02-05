@@ -1,6 +1,6 @@
 // COMPONENTS
-import BreederDetails from '../components/Breeder/BreederDetails';
-import UnderConstruction from '../components/UnderConstruction';
+import BreederDetails from "../components/Breeder/BreederDetails";
+import UnderConstruction from "../components/UnderConstruction";
 
 const Home = () => {
   return (
@@ -12,7 +12,7 @@ const Home = () => {
         <BreederDetails />
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default Home;

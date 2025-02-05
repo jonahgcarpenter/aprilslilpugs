@@ -51,14 +51,12 @@ const LitterUpdate = () => {
   };
 
   const clearImage = () => {
-    // Reset the file input
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
 
     setNewlyUploadedImage(false);
 
-    // Revert to backend image if it exists
     if (litter?.profilePicture) {
       setPreviewUrl(getBackendImageUrl(litter.profilePicture));
     } else {
@@ -89,8 +87,7 @@ const LitterUpdate = () => {
       await updateLitter(id, formDataToSend);
       setSuccessMessage("Litter updated successfully!");
       setShowSuccessModal(true);
-      setNewlyUploadedImage(false); // Reset the newly uploaded state
-
+      setNewlyUploadedImage(false);
       setTimeout(() => {
         navigate("/breeder-dashboard");
       }, 1500);
@@ -105,7 +102,7 @@ const LitterUpdate = () => {
   const handleDelete = async () => {
     try {
       await deleteLitter(id);
-      setShowDeleteModal(false); // Close the modal first
+      setShowDeleteModal(false);
       setSuccessMessage("Litter deleted successfully!");
       setShowSuccessModal(true);
       setTimeout(() => {
@@ -262,7 +259,6 @@ const LitterUpdate = () => {
         </div>
       </form>
 
-      {/* Remove readOnly prop and simplify Puppies component usage */}
       {litter && (
         <Puppies litterId={id} existingPuppies={litter.puppies || []} />
       )}

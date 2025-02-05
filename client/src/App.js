@@ -1,28 +1,28 @@
-import {BrowserRouter, Routes, Route} from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 // CONTEXT
-import { AuthProvider } from './context/AuthContext';
-import { BreederProvider } from './context/BreederContext';
-import { LitterProvider } from './context/LitterContext';
-import { GrumbleProvider } from './context/GrumbleContext';
-import { WaitlistProvider } from './context/WaitlistContext';
-import { SettingsProvider } from './context/SettingsContext';
-import { DownDetectorProvider } from './context/DownDetector';
+import { AuthProvider } from "./context/AuthContext";
+import { BreederProvider } from "./context/BreederContext";
+import { LitterProvider } from "./context/LitterContext";
+import { GrumbleProvider } from "./context/GrumbleContext";
+import { WaitlistProvider } from "./context/WaitlistContext";
+import { SettingsProvider } from "./context/SettingsContext";
+import { DownDetectorProvider } from "./context/DownDetector";
 
 // PAGES
-import Home from './pages/Home';
-import BreederDashboard from './pages/BreederDashboard';
-import Live from './pages/Live';
-import OurAdults from './pages/OurAdults';
-import Nursery from './pages/Nursery';
-import PastLitters from './pages/PastLitters';
-import Gallery from './pages/Gallery';
+import Home from "./pages/Home";
+import BreederDashboard from "./pages/BreederDashboard";
+import Live from "./pages/Live";
+import OurAdults from "./pages/OurAdults";
+import Nursery from "./pages/Nursery";
+import PastLitters from "./pages/PastLitters";
+import Gallery from "./pages/Gallery";
 
 // COMPONENTS
-import ProtectedRoute from './components/Auth/ProtectedRoute';
-import Navbar from './components/Navbar';
-import LitterCreate from './components/Litter/LitterCreate';
-import LitterUpdate from './components/Litter/LitterUpdate';
+import ProtectedRoute from "./components/Auth/ProtectedRoute";
+import Navbar from "./components/Navbar";
+import LitterCreate from "./components/Litter/LitterCreate";
+import LitterUpdate from "./components/Litter/LitterUpdate";
 
 function App() {
   return (
@@ -34,7 +34,7 @@ function App() {
               <WaitlistProvider>
                 <DownDetectorProvider>
                   <div className="App min-h-screen">
-                    <div 
+                    <div
                       className="fixed inset-0 bg-cover bg-center bg-no-repeat -z-10"
                       style={{ backgroundImage: "url('/background.png')" }}
                     />
@@ -46,23 +46,35 @@ function App() {
                           <Route path="/ouradults" element={<OurAdults />} />
                           <Route path="/nursery" element={<Nursery />} />
                           <Route path="/live" element={<Live />} />
-                          <Route path="/past-litters" element={<PastLitters />} />
+                          <Route
+                            path="/past-litters"
+                            element={<PastLitters />}
+                          />
                           <Route path="/gallery" element={<Gallery />} />
-                          <Route path="/breeder-dashboard" element={
-                            <ProtectedRoute>
-                              <BreederDashboard />
-                            </ProtectedRoute>
-                          } />
-                          <Route path="/breeder/litter/create" element={
-                            <ProtectedRoute>
-                              <LitterCreate />
-                            </ProtectedRoute>
-                          } />
-                          <Route path="/breeder/litter/update/:id" element={
-                            <ProtectedRoute>
-                              <LitterUpdate />
-                            </ProtectedRoute>
-                          } />
+                          <Route
+                            path="/breeder-dashboard"
+                            element={
+                              <ProtectedRoute>
+                                <BreederDashboard />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/breeder/litter/create"
+                            element={
+                              <ProtectedRoute>
+                                <LitterCreate />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/breeder/litter/update/:id"
+                            element={
+                              <ProtectedRoute>
+                                <LitterUpdate />
+                              </ProtectedRoute>
+                            }
+                          />
                         </Routes>
                       </div>
                     </BrowserRouter>
@@ -78,3 +90,4 @@ function App() {
 }
 
 export default App;
+
