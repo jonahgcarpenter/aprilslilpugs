@@ -1,28 +1,33 @@
-const Breeder = require('../models/breederModel');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
-const fs = require('fs').promises;
-const path = require('path');
+const Breeder = require("../models/breederModel");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
+const fs = require("fs").promises;
+const path = require("path");
 
 const createToken = (_id) => {
-  return jwt.sign({ _id }, process.env.JWT_SECRET, { expiresIn: '3d' });
+  return jwt.sign({ _id }, process.env.JWT_SECRET, { expiresIn: "3d" });
 };
 
 const deleteFile = async (filename) => {
   try {
     if (!filename) return;
-    
-    const absolutePath = path.join('public', 'uploads', 'breeder-profiles', filename);
-    console.log('Attempting to delete:', absolutePath);
-    
+
+    const absolutePath = path.join(
+      "public",
+      "uploads",
+      "breeder-profiles",
+      filename,
+    );
+    console.log("Attempting to delete:", absolutePath);
+
     await fs.access(absolutePath);
     await fs.unlink(absolutePath);
-    console.log('Successfully deleted file:', absolutePath);
+    console.log("Successfully deleted file:", absolutePath);
   } catch (error) {
-    if (error.code === 'ENOENT') {
-      console.log('File not found at path:', error.path);
+    if (error.code === "ENOENT") {
+      console.log("File not found at path:", error.path);
     } else {
-      console.error('Error deleting file:', error);
+      console.error("Error deleting file:", error);
     }
   }
 };
@@ -34,32 +39,32 @@ const loginBreeder = async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(400).json({ error: 'Email and password are required' });
+    return res.status(400).json({ error: "Email and password are required" });
   }
 
   try {
     // First find by email
     const breeder = await Breeder.findOne({ email });
     if (!breeder) {
-      throw Error('Incorrect email');
+      throw Error("Incorrect email");
     }
-    
+
     // Then verify it's our specific breeder
     if (breeder._id.toString() !== BREEDER_ID) {
-      throw Error('Unauthorized breeder');
+      throw Error("Unauthorized breeder");
     }
 
     const match = await bcrypt.compare(password, breeder.password);
     if (!match) {
-      throw Error('Incorrect password');
+      throw Error("Incorrect password");
     }
 
     const token = createToken(BREEDER_ID);
-    res.status(200).json({ 
-      email, 
+    res.status(200).json({
+      email,
       token,
       firstName: breeder.firstName,
-      lastName: breeder.lastName 
+      lastName: breeder.lastName,
     });
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -69,9 +74,9 @@ const loginBreeder = async (req, res) => {
 // get breeder profile
 const getBreederProfile = async (req, res) => {
   try {
-    const breeder = await Breeder.findById(BREEDER_ID).select('-password');
+    const breeder = await Breeder.findById(BREEDER_ID).select("-password");
     if (!breeder) {
-      return res.status(404).json({ error: 'No breeder profile found' });
+      return res.status(404).json({ error: "No breeder profile found" });
     }
     res.status(200).json(breeder);
   } catch (error) {
@@ -84,7 +89,7 @@ const updateBreederProfile = async (req, res) => {
   try {
     const breeder = await Breeder.findById(BREEDER_ID);
     if (!breeder) {
-      return res.status(404).json({ error: 'Breeder not found' });
+      return res.status(404).json({ error: "Breeder not found" });
     }
 
     const updates = req.body;
@@ -114,24 +119,25 @@ const updateBreederProfile = async (req, res) => {
 
     // Update other fields
     Object.keys(updates).forEach((key) => {
-      if (key !== 'images') { // Don't overwrite images array directly
+      if (key !== "images") {
+        // Don't overwrite images array directly
         breeder[key] = updates[key];
       }
     });
 
     await breeder.save();
-    
+
     const breederResponse = breeder.toObject();
     delete breederResponse.password;
-    
+
     // Transform response to include full paths
     if (breederResponse.profilePicture) {
       breederResponse.profilePicture = `/uploads/breeder-profiles/${breederResponse.profilePicture}`;
     }
-    breederResponse.images = breederResponse.images.map(filename => 
-      filename ? `/uploads/breeder-profiles/${filename}` : null
+    breederResponse.images = breederResponse.images.map((filename) =>
+      filename ? `/uploads/breeder-profiles/${filename}` : null,
     );
-    
+
     res.status(200).json(breederResponse);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -142,12 +148,12 @@ const updateBreederProfile = async (req, res) => {
 const logoutBreeder = async (req, res) => {
   // Since JWT is stateless, we just return success
   // The client should remove the token
-  res.status(200).json({ message: 'Logged out successfully' });
+  res.status(200).json({ message: "Logged out successfully" });
 };
 
 module.exports = {
   loginBreeder,
   getBreederProfile,
   updateBreederProfile,
-  logoutBreeder
+  logoutBreeder,
 };

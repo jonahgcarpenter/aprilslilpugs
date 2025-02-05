@@ -1,12 +1,11 @@
-const Waitlist = require('../models/waitlistModel');
-const mongoose = require('mongoose');
+const Waitlist = require("../models/waitlistModel");
+const mongoose = require("mongoose");
 
 // Get all waitlist entries
 const getAllEntries = async (req, res) => {
   try {
-    const entries = await Waitlist.find({})
-      .sort({ position: 1 });
-    
+    const entries = await Waitlist.find({}).sort({ position: 1 });
+
     res.status(200).json(entries);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -20,17 +19,17 @@ const createEntry = async (req, res) => {
       firstName: req.body.firstName,
       lastName: req.body.lastName,
       phoneNumber: req.body.phoneNumber,
-      notes: req.body.notes || '',
-      status: req.body.status || 'waiting'
+      notes: req.body.notes || "",
+      status: req.body.status || "waiting",
     });
 
     await entry.save();
     res.status(201).json(entry);
   } catch (error) {
-    console.error('Error creating waitlist entry:', error);
-    res.status(500).json({ 
-      error: 'Failed to create waitlist entry',
-      details: error.message 
+    console.error("Error creating waitlist entry:", error);
+    res.status(500).json({
+      error: "Failed to create waitlist entry",
+      details: error.message,
     });
   }
 };
@@ -41,12 +40,12 @@ const getEntry = async (req, res) => {
     const { id } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({error: 'Invalid ID format'});
+      return res.status(400).json({ error: "Invalid ID format" });
     }
 
     const entry = await Waitlist.findById(id);
     if (!entry) {
-      return res.status(404).json({error: 'Waitlist entry not found'});
+      return res.status(404).json({ error: "Waitlist entry not found" });
     }
 
     res.status(200).json(entry);
@@ -61,13 +60,13 @@ const updateEntry = async (req, res) => {
     const entry = await Waitlist.findOneAndUpdate(
       { _id: req.params.id },
       req.body,
-      { new: true }
+      { new: true },
     );
-    
+
     if (!entry) {
-      return res.status(404).json({error: 'Waitlist entry not found'});
+      return res.status(404).json({ error: "Waitlist entry not found" });
     }
-    
+
     res.status(200).json(entry);
   } catch (error) {
     res.status(500).json({ error: error.message, code: error.code });
@@ -83,18 +82,18 @@ const deleteEntry = async (req, res) => {
     const entry = await Waitlist.findById(req.params.id);
     if (!entry) {
       await session.abortTransaction();
-      return res.status(404).json({ error: 'Entry not found' });
+      return res.status(404).json({ error: "Entry not found" });
     }
 
     const deletedPosition = entry.position;
-    
+
     // Delete the entry
     await entry.deleteOne();
 
     // Update positions for all entries after the deleted one
     await Waitlist.updateMany(
       { position: { $gt: deletedPosition } },
-      { $inc: { position: -1 } }
+      { $inc: { position: -1 } },
     );
 
     await session.commitTransaction();
@@ -112,5 +111,5 @@ module.exports = {
   createEntry,
   getEntry,
   updateEntry,
-  deleteEntry
+  deleteEntry,
 };

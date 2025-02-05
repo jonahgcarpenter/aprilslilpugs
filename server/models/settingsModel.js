@@ -1,14 +1,17 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const settingsSchema = new mongoose.Schema({
-  waitlistEnabled: {
-    type: Boolean,
-    default: true
+const settingsSchema = new mongoose.Schema(
+  {
+    waitlistEnabled: {
+      type: Boolean,
+      default: true,
+    },
+    liveEnabled: {
+      type: Boolean,
+      default: false,
+    },
   },
-  liveEnabled: {
-    type: Boolean,
-    default: false
-  }
-}, { timestamps: true });
+  { timestamps: true },
+);
 
-module.exports = mongoose.model('Settings', settingsSchema);
+module.exports = mongoose.model("Settings", settingsSchema);
