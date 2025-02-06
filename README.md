@@ -21,4 +21,5 @@ A website for my moms buisness, in which I have tailored to her request.
 ## BUGS
 
 - eslint errors
+- navbar doesn't always scroll to top
 - white space on mobile
