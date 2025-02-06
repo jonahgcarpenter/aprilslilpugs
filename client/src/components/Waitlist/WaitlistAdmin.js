@@ -1,13 +1,14 @@
 import React, { useState, useContext, memo } from "react";
 import { WaitlistContext } from "../../context/WaitlistContext";
+import { useSettings } from "../../context/SettingsContext";
 import DeleteModal from "../Modals/DeleteModal";
 import SuccessModal from "../Modals/SuccessModal";
 import ErrorModal from "../Modals/ErrorModal";
 import LoadingAnimation from "../LoadingAnimation";
 
 const WaitlistAdmin = memo(() => {
-  const { updateEntry, deleteEntry, entries, isEnabled } =
-    useContext(WaitlistContext);
+  const { updateEntry, deleteEntry, entries } = useContext(WaitlistContext);
+  const { waitlistEnabled } = useSettings();
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -48,7 +49,7 @@ const WaitlistAdmin = memo(() => {
     }
   };
 
-  if (!isEnabled) return null;
+  if (!waitlistEnabled) return null;
 
   return (
     <div className="mx-2 sm:mx-4">

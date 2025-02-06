@@ -1,11 +1,13 @@
 import React, { useState, useContext, useRef, useEffect } from "react";
 import { WaitlistContext } from "../../context/WaitlistContext";
+import { useSettings } from "../../context/SettingsContext";
 import LoadingAnimation from "../LoadingAnimation";
 import SuccessModal from "../Modals/SuccessModal";
 import ErrorModal from "../Modals/ErrorModal";
 
 const Waitlist = () => {
-  const { createEntry, entries, isEnabled } = useContext(WaitlistContext);
+  const { createEntry, entries } = useContext(WaitlistContext);
+  const { waitlistEnabled, isLoading: settingsLoading } = useSettings();
   const notesRef = useRef(null);
   const [formData, setFormData] = useState({
     firstName: "",
@@ -126,10 +128,10 @@ const Waitlist = () => {
   return (
     <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">
       <h2 className="text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 text-center tracking-wider px-4 mb-8">
-        {isEnabled ? "Join Our Waitlist" : "Waitlist Currently Closed"}
+        {waitlistEnabled ? "Join Our Waitlist" : "Waitlist Currently Closed"}
       </h2>
 
-      {isEnabled && (
+      {waitlistEnabled && (
         <div className="max-w-2xl mx-auto mb-8">
           <button
             onClick={() => setShowInfo(!showInfo)}
@@ -179,7 +181,7 @@ const Waitlist = () => {
         </div>
       )}
 
-      {isEnabled ? (
+      {waitlistEnabled ? (
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
