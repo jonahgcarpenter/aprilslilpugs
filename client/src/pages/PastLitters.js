@@ -1,6 +1,7 @@
 // COMPONENTS
 import OldLitters from "../components/Litter/OldLitters";
 import UnderConstruction from "../components/UnderConstruction";
+import MoreImages from "../components/Gallery/MoreImages";
 
 const PastLitters = () => {
   return (
@@ -10,6 +11,7 @@ const PastLitters = () => {
           <UnderConstruction />
         </div>
         <OldLitters />
+        <MoreImages />
       </div>
     </div>
   );

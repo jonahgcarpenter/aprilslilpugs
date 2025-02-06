@@ -2,6 +2,7 @@
 import UnderConstruction from "../components/UnderConstruction";
 import CurrentLitters from "../components/Litter/CurrentLitters";
 import Waitlist from "../components/Waitlist/Waitlist";
+import MoreImages from "../components/Gallery/MoreImages";
 
 const Nursery = () => {
   return (
@@ -12,6 +13,7 @@ const Nursery = () => {
         </div>
         <Waitlist />
         <CurrentLitters />
+        <MoreImages />
       </div>
     </div>
   );

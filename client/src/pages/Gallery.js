@@ -1,5 +1,6 @@
 // COMPONENTS
 import UnderConstruction from "../components/UnderConstruction";
+import AllImages from "../components/Gallery/AllImages";
 
 const Gallery = () => {
   return (
@@ -8,7 +9,7 @@ const Gallery = () => {
         <div className="max-w-4xl mx-auto transform hover:scale-[1.01] transition-all duration-300">
           <UnderConstruction />
         </div>
-        <h1> Gallery </h1>
+        <AllImages />
       </div>
     </div>
   );
