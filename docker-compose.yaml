@@ -4,12 +4,12 @@ services:
       context: ./server
       dockerfile: Dockerfile
     ports:
-      - "4000:4000"
+      - "${PORT:-4000}:${PORT:-4000}"
     volumes:
       - ./server/public/uploads:/app/public/uploads
     environment:
       - NODE_ENV=production
-      - PORT=4000
+      - PORT=${PORT:-4000}
       - MONGODB_URI=${MONGODB_URI}
       - JWT_SECRET=${JWT_SECRET}
       - REACT_APP_HLS_STREAM_URL=${REACT_APP_HLS_STREAM_URL}
