@@ -66,8 +66,10 @@ const WaitlistAdmin = memo(() => {
   if (settingsLoading || entriesLoading) {
     return (
       <div className="mx-2 sm:mx-4">
-        <div className="bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl flex justify-center">
-          <LoadingAnimation />
+        <div className="bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">
+          <div className="min-h-[200px] flex items-center justify-center">
+            <LoadingAnimation />
+          </div>
         </div>
       </div>
     );
@@ -78,8 +80,10 @@ const WaitlistAdmin = memo(() => {
       <div className="mx-2 sm:mx-4">
         <div className="bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">
           <div className="text-red-400 text-center">
-            <p>Error loading waitlist settings</p>
-            <p className="text-sm">{settingsError}</p>
+            <p className="text-lg font-medium mb-2">
+              Error loading waitlist settings
+            </p>
+            <p className="text-sm opacity-90">{settingsError}</p>
           </div>
         </div>
       </div>
@@ -91,7 +95,10 @@ const WaitlistAdmin = memo(() => {
       <div className="mx-2 sm:mx-4">
         <div className="bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">
           <div className="text-red-400 text-center">
-            <p>Error: Unable to determine waitlist status</p>
+            <p className="text-lg font-medium mb-2">Error</p>
+            <p className="text-sm opacity-90">
+              Unable to determine waitlist status
+            </p>
           </div>
         </div>
       </div>
@@ -246,7 +253,7 @@ const WaitlistAdmin = memo(() => {
       <SuccessModal
         isOpen={showSuccessModal}
         onClose={() => setShowSuccessModal(false)}
-        message="Operation completed successfully!"
+        message={successMessage}
       />
 
       <ErrorModal

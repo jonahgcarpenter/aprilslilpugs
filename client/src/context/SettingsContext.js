@@ -12,8 +12,8 @@ export const useSettings = () => {
 
 export const SettingsProvider = ({ children }) => {
   const [settings, setSettings] = useState({
-    waitlistEnabled: null,
-    liveEnabled: null,
+    waitlistEnabled: null, // Initialize as null
+    liveEnabled: null, // Initialize as null
     isLoading: true,
     error: null,
   });
@@ -34,20 +34,10 @@ export const SettingsProvider = ({ children }) => {
 
     const fetchSettings = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          if (isMounted) {
-            setSettings((prev) => ({
-              ...prev,
-              isLoading: false,
-              error: "Authentication token not found",
-            }));
-          }
-          return;
-        }
-
         const response = await fetch(`/api/settings?t=${Date.now()}`, {
-          headers: getAuthHeaders(),
+          headers: {
+            "Content-Type": "application/json",
+          },
           cache: "no-store",
         });
 
@@ -145,11 +135,20 @@ export const SettingsProvider = ({ children }) => {
   };
 
   if (settings.isLoading) {
-    return null;
-  }
-
-  if (settings.waitlistEnabled === null || settings.liveEnabled === null) {
-    return null;
+    return (
+      <SettingsContext.Provider
+        value={{
+          waitlistEnabled: null,
+          liveEnabled: null,
+          isLoading: true,
+          error: null,
+          toggleWaitlist,
+          toggleLive,
+        }}
+      >
+        {children}
+      </SettingsContext.Provider>
+    );
   }
 
   return (

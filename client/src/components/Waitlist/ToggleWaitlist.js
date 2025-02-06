@@ -4,10 +4,12 @@ import LoadingAnimation from "../LoadingAnimation";
 const ToggleWaitlist = () => {
   const { waitlistEnabled, toggleWaitlist, isLoading } = useSettings();
 
+  const isDisabled = isLoading || waitlistEnabled === null;
+
   return (
     <button
       onClick={toggleWaitlist}
-      disabled={isLoading}
+      disabled={isDisabled}
       className={`
         w-full sm:w-auto 
         bg-gradient-to-r from-blue-600 to-blue-400 
@@ -24,11 +26,13 @@ const ToggleWaitlist = () => {
         hover:scale-105 
         transition-transform 
         duration-200
-        ${isLoading ? "opacity-50 cursor-not-allowed hover:scale-100" : ""}
+        ${isDisabled ? "opacity-50 cursor-not-allowed hover:scale-100" : ""}
       `}
     >
       {isLoading ? (
         <LoadingAnimation containerClassName="h-6" />
+      ) : waitlistEnabled === null ? (
+        "Loading..."
       ) : waitlistEnabled ? (
         "Disable Waitlist"
       ) : (
