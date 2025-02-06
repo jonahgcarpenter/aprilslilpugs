@@ -21,5 +21,4 @@ A website for my moms buisness, in which I have tailored to her request.
 ## BUGS
 
 - eslint errors
-- waitlist not properly fetching state on startup
 - white space on mobile
