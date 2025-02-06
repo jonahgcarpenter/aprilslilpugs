@@ -7,7 +7,11 @@ import ErrorModal from "../Modals/ErrorModal";
 
 const Waitlist = () => {
   const { createEntry, entries } = useContext(WaitlistContext);
-  const { waitlistEnabled, isLoading: settingsLoading } = useSettings();
+  const {
+    waitlistEnabled,
+    isLoading: settingsLoading,
+    error: settingsError,
+  } = useSettings();
   const notesRef = useRef(null);
   const [formData, setFormData] = useState({
     firstName: "",
@@ -62,6 +66,15 @@ const Waitlist = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!waitlistEnabled) {
+      setErrorModal({
+        show: true,
+        message: "The waitlist is currently closed. Please try again later.",
+      });
+      return;
+    }
+
     if (!formData.firstName || !formData.lastName || !formData.phoneNumber) {
       setErrorModal({ show: true, message: "Please fill in all fields" });
       return;
@@ -77,14 +90,21 @@ const Waitlist = () => {
 
     try {
       setIsSubmitting(true);
+
+      const currentPosition = (entries?.length || 0) + 1;
+
       const result = await createEntry({
         firstName: formData.firstName,
         lastName: formData.lastName,
         phoneNumber: formData.phoneNumber,
         notes: formData.notes,
         status: "waiting",
-        position: (entries?.length || 0) + 1,
+        position: currentPosition,
       });
+
+      if (!result) {
+        throw new Error("Failed to create waitlist entry");
+      }
 
       setSuccessMessage(
         `Congratulations! You've been added to the waitlist at position #${result.position}`,
@@ -100,7 +120,8 @@ const Waitlist = () => {
     } catch (error) {
       setErrorModal({
         show: true,
-        message: "Error submitting to waitlist. Please try again.",
+        message:
+          error.message || "Error submitting to waitlist. Please try again.",
       });
     } finally {
       setIsSubmitting(false);
@@ -124,6 +145,25 @@ const Waitlist = () => {
   useEffect(() => {
     autoResize();
   }, []);
+
+  if (settingsLoading) {
+    return (
+      <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl flex justify-center">
+        <LoadingAnimation />
+      </div>
+    );
+  }
+
+  if (settingsError || waitlistEnabled === null) {
+    return (
+      <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">
+        <div className="text-red-400 text-center">
+          <p>Error loading waitlist status</p>
+          <p className="text-sm">{settingsError}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">

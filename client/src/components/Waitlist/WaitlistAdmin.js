@@ -7,13 +7,25 @@ import ErrorModal from "../Modals/ErrorModal";
 import LoadingAnimation from "../LoadingAnimation";
 
 const WaitlistAdmin = memo(() => {
-  const { updateEntry, deleteEntry, entries } = useContext(WaitlistContext);
-  const { waitlistEnabled } = useSettings();
+  const {
+    updateEntry,
+    deleteEntry,
+    entries,
+    isLoading: entriesLoading,
+  } = useContext(WaitlistContext);
+  const {
+    waitlistEnabled,
+    isLoading: settingsLoading,
+    error: settingsError,
+  } = useSettings();
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [entryToDelete, setEntryToDelete] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(
+    "Operation completed successfully!",
+  );
 
   const handleStatusChange = async (id, newStatus) => {
     try {
@@ -23,6 +35,7 @@ const WaitlistAdmin = memo(() => {
         throw new Error("Failed to update status");
       }
       setError(null);
+      setSuccessMessage("Status updated successfully!");
       setShowSuccessModal(true);
     } catch (err) {
       setError(err.message || "Failed to update status");
@@ -41,6 +54,7 @@ const WaitlistAdmin = memo(() => {
       setShowDeleteModal(false);
       setEntryToDelete(null);
       setError(null);
+      setSuccessMessage("Entry deleted successfully!");
       setShowSuccessModal(true);
     } catch (err) {
       setError(err.message || "Failed to delete entry");
@@ -49,15 +63,64 @@ const WaitlistAdmin = memo(() => {
     }
   };
 
-  if (!waitlistEnabled) return null;
+  if (settingsLoading || entriesLoading) {
+    return (
+      <div className="mx-2 sm:mx-4">
+        <div className="bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl flex justify-center">
+          <LoadingAnimation />
+        </div>
+      </div>
+    );
+  }
+
+  if (settingsError) {
+    return (
+      <div className="mx-2 sm:mx-4">
+        <div className="bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">
+          <div className="text-red-400 text-center">
+            <p>Error loading waitlist settings</p>
+            <p className="text-sm">{settingsError}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (waitlistEnabled === null) {
+    return (
+      <div className="mx-2 sm:mx-4">
+        <div className="bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">
+          <div className="text-red-400 text-center">
+            <p>Error: Unable to determine waitlist status</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!waitlistEnabled) {
+    return (
+      <div className="mx-2 sm:mx-4">
+        <div className="bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">
+          <div className="text-slate-400 text-center">
+            <p>Waitlist is currently disabled</p>
+            <p className="text-sm">Enable the waitlist to manage entries</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-2 sm:mx-4">
-      <div className="bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">
-        <div className="mb-6">
+      <div className="relative bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">
+        <div className="mb-6 flex justify-between items-center">
           <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600">
             Waitlist Management
           </h2>
+          <span className="text-sm text-slate-400">
+            {Array.isArray(entries) ? `${entries.length} entries` : "0 entries"}
+          </span>
         </div>
 
         {error && (
@@ -91,66 +154,71 @@ const WaitlistAdmin = memo(() => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800">
-              {entries.map((entry) => (
-                <tr
-                  key={entry._id}
-                  className="hover:bg-slate-800/30 transition-colors"
-                >
-                  <td className="p-2 sm:px-6 sm:py-4 whitespace-nowrap">
-                    <span
-                      className={`inline-flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-full ${
-                        entry.position === 1
-                          ? "bg-green-500/10 text-green-400"
-                          : "bg-blue-500/10 text-blue-400"
-                      } text-sm sm:text-base font-semibold`}
-                    >
-                      {entry.position}
-                    </span>
-                  </td>
-                  <td className="p-2 sm:px-6 sm:py-4 whitespace-nowrap text-slate-300 text-sm sm:text-base">
-                    {entry.firstName} {entry.lastName}
-                  </td>
-                  <td className="hidden sm:table-cell p-2 sm:px-6 sm:py-4 whitespace-nowrap text-slate-300">
-                    {entry.phoneNumber}
-                  </td>
-                  <td className="p-2 sm:px-6 sm:py-4 whitespace-nowrap">
-                    <select
-                      value={entry.status}
-                      onChange={(e) =>
-                        handleStatusChange(entry._id, e.target.value)
-                      }
-                      className="bg-slate-800 text-slate-300 text-sm rounded-lg px-2 py-1 sm:px-3 sm:py-2 border border-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 outline-none"
-                    >
-                      <option value="waiting">Waiting</option>
-                      <option value="contacted">Contacted</option>
-                      <option value="completed">Completed</option>
-                    </select>
-                  </td>
-                  <td className="hidden sm:table-cell p-2 sm:px-6 sm:py-4">
-                    <div className="text-slate-300 max-w-[200px] sm:max-w-xs text-sm truncate">
-                      {entry.notes || "No preferences specified"}
-                    </div>
-                  </td>
-                  <td className="p-2 sm:px-6 sm:py-4 whitespace-nowrap">
-                    <button
-                      onClick={() => {
-                        setEntryToDelete(entry._id);
-                        setShowDeleteModal(true);
-                      }}
-                      className="text-red-400 hover:text-red-300 transition-colors px-2 py-1 sm:px-4 sm:py-2 text-sm rounded-lg hover:bg-red-500/10"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {entries.length === 0 && (
+              {Array.isArray(entries) && entries.length > 0 ? (
+                entries.map((entry) => (
+                  <tr
+                    key={entry._id}
+                    className="hover:bg-slate-800/30 transition-colors"
+                  >
+                    <td className="p-2 sm:px-6 sm:py-4 whitespace-nowrap">
+                      <span
+                        className={`inline-flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-full ${
+                          entry.position === 1
+                            ? "bg-green-500/10 text-green-400"
+                            : "bg-blue-500/10 text-blue-400"
+                        } text-sm sm:text-base font-semibold`}
+                      >
+                        {entry.position}
+                      </span>
+                    </td>
+                    <td className="p-2 sm:px-6 sm:py-4 whitespace-nowrap text-slate-300 text-sm sm:text-base">
+                      {entry.firstName} {entry.lastName}
+                    </td>
+                    <td className="hidden sm:table-cell p-2 sm:px-6 sm:py-4 whitespace-nowrap text-slate-300">
+                      {entry.phoneNumber}
+                    </td>
+                    <td className="p-2 sm:px-6 sm:py-4 whitespace-nowrap">
+                      <select
+                        value={entry.status}
+                        onChange={(e) =>
+                          handleStatusChange(entry._id, e.target.value)
+                        }
+                        disabled={loading}
+                        className="bg-slate-800 text-slate-300 text-sm rounded-lg px-2 py-1 sm:px-3 sm:py-2 border border-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <option value="waiting">Waiting</option>
+                        <option value="contacted">Contacted</option>
+                        <option value="completed">Completed</option>
+                      </select>
+                    </td>
+                    <td className="hidden sm:table-cell p-2 sm:px-6 sm:py-4">
+                      <div className="text-slate-300 max-w-[200px] sm:max-w-xs text-sm truncate">
+                        {entry.notes || "No preferences specified"}
+                      </div>
+                    </td>
+                    <td className="p-2 sm:px-6 sm:py-4 whitespace-nowrap">
+                      <button
+                        onClick={() => {
+                          setEntryToDelete(entry._id);
+                          setShowDeleteModal(true);
+                        }}
+                        disabled={loading}
+                        className="text-red-400 hover:text-red-300 transition-colors px-2 py-1 sm:px-4 sm:py-2 text-sm rounded-lg hover:bg-red-500/10 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
                 <tr>
                   <td
                     colSpan="6"
                     className="px-6 py-8 text-center text-slate-400"
                   >
-                    No entries in the waitlist
+                    {Array.isArray(entries)
+                      ? "No entries in the waitlist"
+                      : "Error loading waitlist entries"}
                   </td>
                 </tr>
               )}
@@ -167,13 +235,17 @@ const WaitlistAdmin = memo(() => {
 
       <DeleteModal
         isOpen={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setEntryToDelete(null);
+        }}
         onDelete={() => handleDelete(entryToDelete)}
         itemName="this waitlist entry"
       />
 
       <SuccessModal
         isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
         message="Operation completed successfully!"
       />
 

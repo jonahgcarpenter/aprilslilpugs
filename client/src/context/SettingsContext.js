@@ -12,8 +12,8 @@ export const useSettings = () => {
 
 export const SettingsProvider = ({ children }) => {
   const [settings, setSettings] = useState({
-    waitlistEnabled: true,
-    liveEnabled: false,
+    waitlistEnabled: null,
+    liveEnabled: null,
     isLoading: true,
     error: null,
   });
@@ -30,46 +30,58 @@ export const SettingsProvider = ({ children }) => {
   };
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchSettings = async () => {
       try {
-        setSettings((prev) => ({ ...prev, isLoading: true }));
         const token = localStorage.getItem("token");
         if (!token) {
-          setSettings((prev) => ({
-            ...prev,
-            isLoading: false,
-            error: "Authentication token not found",
-          }));
+          if (isMounted) {
+            setSettings((prev) => ({
+              ...prev,
+              isLoading: false,
+              error: "Authentication token not found",
+            }));
+          }
           return;
         }
 
-        const response = await fetch("/api/settings", {
+        const response = await fetch(`/api/settings?t=${Date.now()}`, {
           headers: getAuthHeaders(),
+          cache: "no-store",
         });
 
+        const data = await response.json();
+
         if (!response.ok) {
-          const data = await response.json();
           throw new Error(data.message || "Failed to fetch settings");
         }
 
-        const data = await response.json();
-        setSettings({
-          waitlistEnabled: data.waitlistEnabled,
-          liveEnabled: data.liveEnabled,
-          isLoading: false,
-          error: null,
-        });
+        if (isMounted) {
+          setSettings({
+            waitlistEnabled: data.waitlistEnabled,
+            liveEnabled: data.liveEnabled,
+            isLoading: false,
+            error: null,
+          });
+        }
       } catch (error) {
         console.error("Error fetching settings:", error);
-        setSettings((prev) => ({
-          ...prev,
-          isLoading: false,
-          error: error.message,
-        }));
+        if (isMounted) {
+          setSettings((prev) => ({
+            ...prev,
+            isLoading: false,
+            error: error.message,
+          }));
+        }
       }
     };
 
     fetchSettings();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const toggleWaitlist = async () => {
@@ -78,6 +90,7 @@ export const SettingsProvider = ({ children }) => {
       const response = await fetch("/api/settings/toggle-waitlist", {
         method: "POST",
         headers: getAuthHeaders(),
+        cache: "no-store",
       });
 
       const data = await response.json();
@@ -103,30 +116,41 @@ export const SettingsProvider = ({ children }) => {
 
   const toggleLive = async () => {
     try {
+      setSettings((prev) => ({ ...prev, isLoading: true }));
       const response = await fetch("/api/settings/toggle-live", {
         method: "POST",
         headers: getAuthHeaders(),
+        cache: "no-store",
       });
 
+      const data = await response.json();
       if (!response.ok) {
-        const data = await response.json();
         throw new Error(data.message || "Failed to toggle live status");
       }
 
-      const data = await response.json();
       setSettings((prev) => ({
         ...prev,
         liveEnabled: data.liveEnabled,
+        isLoading: false,
         error: null,
       }));
     } catch (error) {
       console.error("Error toggling live status:", error);
       setSettings((prev) => ({
         ...prev,
+        isLoading: false,
         error: error.message,
       }));
     }
   };
+
+  if (settings.isLoading) {
+    return null;
+  }
+
+  if (settings.waitlistEnabled === null || settings.liveEnabled === null) {
+    return null;
+  }
 
   return (
     <SettingsContext.Provider
