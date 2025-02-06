@@ -4,22 +4,23 @@ A website for my moms buisness, in which I have tailored to her request.
 
 ## Technologies
 
-### LOCAL RTSP/HLS STREAM SERVER
+### LOCAL RTSP STREAM SERVER
+
+- using a separate docker container, I self-host a RTSP stream server for the live puppy cam
+- [rtmps-hls-server](https://github.com/JamiePhonic/rtmps-hls-server)
 
 ### MERN Stack
 
 - MongoDB
 - Express
 - React
-- Node.js
+- Node
 
 ## TODO
 
+- refactor frontend with react query
+- create separate branch for server/ to make it easy for unraid
+- implement actual images functionality
+- move RTSP stream into this codebase?
 - notifications for stream down
-- replace gallery placeholders
-
-## BUGS
-
-- eslint errors
-- navbar doesn't always scroll to top
-- white space on mobile
+- fix white space on mobile
