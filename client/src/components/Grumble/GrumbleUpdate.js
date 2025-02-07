@@ -3,7 +3,7 @@ import { GrumbleContext } from "../../context/GrumbleContext";
 import DeleteModal from "../Modals/DeleteModal";
 import SuccessModal from "../Modals/SuccessModal";
 import ErrorModal from "../Modals/ErrorModal";
-import LoadingAnimation from "../LoadingAnimation";
+import LoadingAnimation from "../Misc/LoadingAnimation";
 
 const formatDate = (date) => {
   return new Date(date).toISOString().split("T")[0];

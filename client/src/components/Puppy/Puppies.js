@@ -1,6 +1,6 @@
 import { useState, useContext, useRef } from "react";
 import { LitterContext } from "../../context/LitterContext";
-import LoadingAnimation from "../LoadingAnimation";
+import LoadingAnimation from "../Misc/LoadingAnimation";
 import DeleteModal from "../Modals/DeleteModal";
 
 const Puppies = ({ litterId, existingPuppies = [], readOnly = false }) => {
@@ -371,4 +371,3 @@ const Puppies = ({ litterId, existingPuppies = [], readOnly = false }) => {
 };
 
 export default Puppies;
-

@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { LitterContext } from "../../context/LitterContext";
-import LoadingAnimation from "../LoadingAnimation";
+import LoadingAnimation from "../Misc/LoadingAnimation";
 
 const OldLitters = () => {
   const { litters, loading, error, preloadedImages } =

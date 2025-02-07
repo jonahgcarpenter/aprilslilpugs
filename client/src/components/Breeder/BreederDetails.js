@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useBreeder } from "../../context/BreederContext";
-import LoadingAnimation from "../LoadingAnimation";
+import LoadingAnimation from "../Misc/LoadingAnimation";
 import {
   FaHeart,
   FaMapMarkerAlt,

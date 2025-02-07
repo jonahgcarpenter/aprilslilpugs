@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LitterContext } from "../../context/LitterContext";
-import LoadingAnimation from "../LoadingAnimation";
+import LoadingAnimation from "../Misc/LoadingAnimation";
 import ErrorModal from "../Modals/ErrorModal";
 
 const LitterManagement = () => {
@@ -136,4 +136,3 @@ const LitterManagement = () => {
 };
 
 export default LitterManagement;
-

@@ -11,7 +11,7 @@ import { DownDetectorProvider } from "./context/DownDetector";
 
 // PAGES
 import Home from "./pages/Home";
-import BreederDashboard from "./pages/BreederDashboard";
+import Admin from "./pages/Admin";
 import Live from "./pages/Live";
 import OurAdults from "./pages/OurAdults";
 import Nursery from "./pages/Nursery";
@@ -20,7 +20,7 @@ import Gallery from "./pages/Gallery";
 
 // COMPONENTS
 import ProtectedRoute from "./components/Auth/ProtectedRoute";
-import Navbar from "./components/Navbar";
+import Navbar from "./components/Misc/Navbar";
 import LitterCreate from "./components/Litter/LitterCreate";
 import LitterUpdate from "./components/Litter/LitterUpdate";
 
@@ -52,10 +52,10 @@ function App() {
                           />
                           <Route path="/gallery" element={<Gallery />} />
                           <Route
-                            path="/breeder-dashboard"
+                            path="/admin"
                             element={
                               <ProtectedRoute>
-                                <BreederDashboard />
+                                <Admin />
                               </ProtectedRoute>
                             }
                           />
@@ -90,4 +90,3 @@ function App() {
 }
 
 export default App;
-

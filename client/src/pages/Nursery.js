@@ -1,5 +1,5 @@
 // COMPONENTS
-import UnderConstruction from "../components/UnderConstruction";
+import UnderConstruction from "../components/Misc/UnderConstruction";
 import CurrentLitters from "../components/Litter/CurrentLitters";
 import Waitlist from "../components/Waitlist/Waitlist";
 import MoreImages from "../components/Gallery/MoreImages";

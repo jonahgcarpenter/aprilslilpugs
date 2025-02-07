@@ -1,5 +1,5 @@
 import { useSettings } from "../../context/SettingsContext";
-import LoadingAnimation from "../LoadingAnimation";
+import LoadingAnimation from "../Misc/LoadingAnimation";
 
 const ToggleStream = () => {
   const { liveEnabled, toggleLive, isLoading } = useSettings();

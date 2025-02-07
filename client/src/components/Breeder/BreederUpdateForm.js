@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useBreeder } from "../../context/BreederContext";
-import LoadingAnimation from "../LoadingAnimation";
+import LoadingAnimation from "../Misc/LoadingAnimation";
 import SuccessModal from "../Modals/SuccessModal";
 import ErrorModal from "../Modals/ErrorModal";
 
@@ -423,4 +423,3 @@ const BreederUpdateForm = () => {
 };
 
 export default BreederUpdateForm;
-

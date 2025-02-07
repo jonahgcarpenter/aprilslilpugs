@@ -6,10 +6,10 @@ import { useSettings } from "../context/SettingsContext";
 import { useDownDetector } from "../context/DownDetector";
 
 // COMPONENTS
-import UnderConstruction from "../components/UnderConstruction";
+import UnderConstruction from "../components/Misc/UnderConstruction";
 import Stream from "../components/LiveStream/Stream";
 import StreamDown from "../components/LiveStream/StreamDown";
-import LoadingAnimation from "../components/LoadingAnimation";
+import LoadingAnimation from "../components/Misc/LoadingAnimation";
 
 const Live = () => {
   const { liveEnabled } = useSettings();

@@ -4,7 +4,7 @@ import { useSettings } from "../../context/SettingsContext";
 import DeleteModal from "../Modals/DeleteModal";
 import SuccessModal from "../Modals/SuccessModal";
 import ErrorModal from "../Modals/ErrorModal";
-import LoadingAnimation from "../LoadingAnimation";
+import LoadingAnimation from "../Misc/LoadingAnimation";
 
 const WaitlistAdmin = memo(() => {
   const {

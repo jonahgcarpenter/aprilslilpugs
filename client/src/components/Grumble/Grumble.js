@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import { GrumbleContext } from "../../context/GrumbleContext";
-import LoadingAnimation from "../LoadingAnimation";
+import LoadingAnimation from "../Misc/LoadingAnimation";
 
 const calculateAge = (birthDateString) => {
   const [birthYear, birthMonth, birthDay] = birthDateString

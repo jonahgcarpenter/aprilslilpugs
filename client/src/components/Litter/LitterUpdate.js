@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { LitterContext } from "../../context/LitterContext";
-import LoadingAnimation from "../LoadingAnimation";
+import LoadingAnimation from "../Misc/LoadingAnimation";
 import DeleteModal from "../Modals/DeleteModal";
 import SuccessModal from "../Modals/SuccessModal";
 import ErrorModal from "../Modals/ErrorModal";
@@ -286,4 +286,3 @@ const LitterUpdate = () => {
 };
 
 export default LitterUpdate;
-

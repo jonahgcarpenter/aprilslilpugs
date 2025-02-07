@@ -6,7 +6,7 @@ import ToggleStream from "../components/LiveStream/ToggleStream";
 import ToggleWaitlist from "../components/Waitlist/ToggleWaitlist";
 import LitterManagement from "../components/Litter/LitterManagement";
 
-const BreederDashboard = () => {
+const Admin = () => {
   return (
     <div className="min-h-screen pt-8 pb-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-12">
@@ -23,4 +23,4 @@ const BreederDashboard = () => {
   );
 };
 
-export default BreederDashboard;
+export default Admin;
