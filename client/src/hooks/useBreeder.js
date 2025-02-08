@@ -20,7 +20,7 @@ export const fetchBreeder = async () => {
       ? breeder.images.map((filename) =>
           filename ? `${IMAGE_BASE_URL}${filename}` : null,
         )
-      : [],
+      : [null, null],
   };
 };
 
