@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { useBreeder } from "../../context/BreederContext";
+import { useBreeder } from "../../hooks/useBreeder";
 import LoadingAnimation from "../Misc/LoadingAnimation";
 import {
   FaHeart,
@@ -10,18 +9,9 @@ import {
 } from "react-icons/fa";
 
 const BreederDetails = () => {
-  const { breeder, loading, error, preloadedImages } = useBreeder();
-  const [imageLoadError, setImageLoadError] = useState(false);
-  const [galleryErrors, setGalleryErrors] = useState({});
+  const { breeder, isLoading, error } = useBreeder();
 
-  const handleGalleryImageError = (index) => {
-    setGalleryErrors((prev) => ({
-      ...prev,
-      [index]: true,
-    }));
-  };
-
-  if (loading) {
+  if (isLoading) {
     return <LoadingAnimation />;
   }
 
@@ -41,11 +31,10 @@ const BreederDetails = () => {
             <div className="flex flex-col md:flex-row gap-8 items-center">
               <div className="relative w-48 h-48 md:w-64 md:h-64">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl transform rotate-6 opacity-20"></div>
-                {preloadedImages.profilePicture && !imageLoadError ? (
+                {breeder.profilePicture ? (
                   <img
-                    src={preloadedImages.profilePicture}
+                    src={breeder.profilePicture}
                     alt={`${breeder.firstName} ${breeder.lastName}`}
-                    onError={() => setImageLoadError(true)}
                     className="relative w-full h-full object-cover rounded-xl border-2 border-white/10 shadow-xl transform transition-transform duration-300 hover:scale-[1.02]"
                   />
                 ) : (
@@ -131,29 +120,20 @@ const BreederDetails = () => {
             </div>
           )}
 
-          {preloadedImages.gallery.length > 0 && (
+          {breeder.images.length > 0 && (
             <div className="mt-8">
               <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-6">
                 My Gallery
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                {preloadedImages.gallery.map((imageUrl, index) => (
+                {breeder.images.map((imageUrl, index) => (
                   <div key={index} className="relative group">
                     <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl transform rotate-3 opacity-20 group-hover:opacity-30 transition-opacity duration-300"></div>
-                    {!galleryErrors[index] ? (
-                      <img
-                        src={imageUrl}
-                        alt={`Breeder gallery ${index + 1}`}
-                        onError={() => handleGalleryImageError(index)}
-                        className="relative w-full h-72 sm:h-64 object-cover rounded-xl border-2 border-white/10 shadow-xl transform transition-all duration-300 hover:scale-[1.02]"
-                      />
-                    ) : (
-                      <div className="relative w-full h-72 sm:h-64 rounded-xl border-2 border-white/10 shadow-xl bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
-                        <span className="text-4xl text-white/20">
-                          Photo {index + 1}
-                        </span>
-                      </div>
-                    )}
+                    <img
+                      src={imageUrl}
+                      alt={`Breeder gallery ${index + 1}`}
+                      className="relative w-full h-72 sm:h-64 object-cover rounded-xl border-2 border-white/10 shadow-xl transform transition-all duration-300 hover:scale-[1.02]"
+                    />
                   </div>
                 ))}
               </div>
