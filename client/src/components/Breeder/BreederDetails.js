@@ -12,7 +12,11 @@ const BreederDetails = () => {
   const { breeder, isLoading, error } = useBreeder();
 
   if (isLoading) {
-    return <LoadingAnimation />;
+    return (
+      <div className="mx-2 sm:mx-4 bg-slate-900 rounded-xl shadow-xl p-4 sm:p-8">
+        <LoadingAnimation />;
+      </div>
+    );
   }
 
   if (error) {
