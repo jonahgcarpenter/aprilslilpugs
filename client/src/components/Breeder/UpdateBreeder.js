@@ -7,20 +7,21 @@ import ErrorModal from "../Modals/ErrorModal";
 const UpdateBreeder = () => {
   const { breeder, updateBreeder, isLoading } = useBreeder();
 
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    phoneNumber: "",
-    email: "",
-    location: "",
-    story: "",
-  });
+  const [formData, setFormData] = useState(() => ({
+    firstName: breeder?.firstName || "",
+    lastName: breeder?.lastName || "",
+    phoneNumber: breeder?.phoneNumber || "",
+    email: breeder?.email || "",
+    location: breeder?.location || "",
+    story: breeder?.story || "",
+  }));
 
   const [profilePicture, setProfilePicture] = useState(null);
   const [galleryImages, setGalleryImages] = useState([null, null]);
-  const [previewUrl, setPreviewUrl] = useState(null);
-  const [galleryPreviews, setGalleryPreviews] = useState([null, null]);
-  const [error, setError] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(breeder?.profilePicture || null);
+  const [galleryPreviews, setGalleryPreviews] = useState(
+    breeder?.galleryImages || [null, null],
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
@@ -113,7 +114,6 @@ const UpdateBreeder = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setError(null);
 
     try {
       const formDataToSend = new FormData();
