@@ -19,6 +19,4 @@ A website for my moms buisness, in which I have tailored to her request.
 ## TODO
 
 - create separate branch for server/ to make it easy for unraid
-- implement actual images functionality
-- move RTSP stream into this codebase?
 
