@@ -2,9 +2,6 @@ import React, { useState } from "react";
 import LoadingAnimation from "../Misc/LoadingAnimation";
 import { createPortal } from "react-dom";
 
-// TODO:
-// Add back born in future function to update Born on: to Expected By: dynamically
-
 const Litters = ({ litters = [], isLoading, littersError }) => {
   const [selectedLitter, setSelectedLitter] = useState(null);
 
@@ -16,6 +13,12 @@ const Litters = ({ litters = [], isLoading, littersError }) => {
       year: "2-digit",
       timeZone: "UTC",
     });
+  };
+
+  const isFutureDate = (dateString) => {
+    const date = new Date(dateString);
+    const today = new Date();
+    return date > today;
   };
 
   const handleLitterClick = (litter) => {
@@ -66,7 +69,12 @@ const Litters = ({ litters = [], isLoading, littersError }) => {
                           d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                         />
                       </svg>
-                      <span>Born on: {formatDate(litter.birthDate)}</span>
+                      <span>
+                        {isFutureDate(litter.birthDate)
+                          ? "Expected By:"
+                          : "Born on:"}{" "}
+                        {formatDate(litter.birthDate)}{" "}
+                      </span>
                     </p>
                     <p className="flex items-center gap-2">
                       <svg
