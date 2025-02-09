@@ -12,21 +12,6 @@ const Nursery = () => {
   const { litters, isLoading, littersError } = useLitter();
   const [currentLitters, setCurrentLitters] = useState([]);
 
-  // useEffect(() => {
-  //   if (Array.isArray(litters) && litters.length > 0) {
-  //     const filtered = litters.filter(
-  //       (litter) =>
-  //         litter.puppies &&
-  //         litter.puppies.length > 0 &&
-  //         litter.puppies.some(
-  //           (puppy) =>
-  //             puppy.status === "Available" || puppy.status === "Reserved",
-  //         ),
-  //     );
-  //     setCurrentLitters(filtered);
-  //   }
-  // }, [litters]);
-
   useEffect(() => {
     if (Array.isArray(litters) && litters.length > 0) {
       const filtered = litters.filter((litter) => {
