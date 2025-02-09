@@ -1,5 +1,5 @@
 // COMPONENTS
-import BreederDetails from "../components/Breeder/BreederDetails";
+import Breeder from "../components/Breeder/Breeder";
 import UnderConstruction from "../components/Misc/UnderConstruction";
 
 const Home = () => {
@@ -9,7 +9,7 @@ const Home = () => {
         <div className="max-w-4xl mx-auto transform hover:scale-[1.01] transition-all duration-300">
           <UnderConstruction />
         </div>
-        <BreederDetails />
+        <Breeder />
       </div>
     </div>
   );

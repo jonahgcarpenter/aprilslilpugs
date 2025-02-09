@@ -8,7 +8,7 @@ import {
   FaFacebook,
 } from "react-icons/fa";
 
-const BreederDetails = () => {
+const Breeder = () => {
   const { breeder, isLoading, error } = useBreeder();
 
   if (isLoading) {
@@ -149,4 +149,4 @@ const BreederDetails = () => {
   );
 };
 
-export default BreederDetails;
+export default Breeder;
