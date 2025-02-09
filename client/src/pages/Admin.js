@@ -2,6 +2,7 @@
 import ToggleStream from "../components/LiveStream/ToggleStream";
 import ToggleWaitlist from "../components/Waitlist/ToggleWaitlist";
 import UpdateBreeder from "../components/Breeder/UpdateBreeder";
+import UpdateGrumble from "../components/Grumble/UpdateGrumble";
 
 const Admin = () => {
   return (
@@ -12,6 +13,7 @@ const Admin = () => {
           <ToggleWaitlist />
         </div>
         <UpdateBreeder />
+        <UpdateGrumble />
       </div>
     </div>
   );
