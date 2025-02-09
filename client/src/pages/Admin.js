@@ -1,6 +1,7 @@
 // COMPONENTS
 import ToggleStream from "../components/LiveStream/ToggleStream";
 import ToggleWaitlist from "../components/Waitlist/ToggleWaitlist";
+import UpdateBreeder from "../components/Breeder/UpdateBreeder";
 
 const Admin = () => {
   return (
@@ -10,7 +11,7 @@ const Admin = () => {
           <ToggleStream />
           <ToggleWaitlist />
         </div>
-        {/* OTHER ADMIN COMPONENTS */}
+        <UpdateBreeder />
       </div>
     </div>
   );
