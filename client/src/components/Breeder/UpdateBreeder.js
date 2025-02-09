@@ -159,67 +159,73 @@ const UpdateBreeder = () => {
         <div className="flex gap-4">
           <div className="flex-1">
             <label className="block text-sm font-medium text-gray-300 mb-2">
-              First Name:
+              First Name: <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
+              required
               className="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700 focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <div className="flex-1">
             <label className="block text-sm font-medium text-gray-300 mb-2">
-              Last Name:
+              Last Name: <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
+              required
               className="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700 focus:ring-2 focus:ring-blue-500"
             />
           </div>
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-2">
-            Location:
+            Location: <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
+            required
             className="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700 focus:ring-2 focus:ring-blue-500"
           />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-2">
-            Email:
+            Email: <span className="text-red-500">*</span>
           </label>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            required
             className="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700 focus:ring-2 focus:ring-blue-500"
           />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-2">
-            Phone Number:
+            Phone Number: <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
             value={phoneNumber}
             onChange={(e) => setPhoneNumber(e.target.value)}
+            required
             className="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700 focus:ring-2 focus:ring-blue-500"
           />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-2">
-            Story:
+            Story: <span className="text-red-500">*</span>
           </label>
           <textarea
             value={story}
             onChange={(e) => setStory(e.target.value)}
+            required
             rows="4"
             className="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-700 focus:ring-2 focus:ring-blue-500 resize-none"
           ></textarea>
