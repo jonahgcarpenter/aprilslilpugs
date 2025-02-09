@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useSettings } from "../hooks/useSettings";
 
+// TODO:
+// email notifications when stream down
+// look into moving the stream server into this codebase
+
 // COMPONENTS
 import UnderConstruction from "../components/Misc/UnderConstruction";
 import StreamUp from "../components/LiveStream/StreamUp";

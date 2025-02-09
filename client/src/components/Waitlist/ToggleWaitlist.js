@@ -13,8 +13,7 @@ const ToggleWaitlist = () => {
       disabled={isDisabled}
       className={`
         w-full sm:w-auto
-        bg-gradient-to-r from-blue-600 to-blue-400
-        hover:from-blue-700 hover:to-blue-500
+        ${waitlistEnabled ? "bg-gradient-to-r from-red-600 to-red-400 hover:from-red-700 hover:to-red-500" : "bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500"}
         text-white
         px-4 sm:px-6
         py-2.5

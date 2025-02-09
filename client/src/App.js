@@ -16,6 +16,9 @@ import Navbar from "./components/Misc/Navbar";
 
 const queryClient = new QueryClient();
 
+// BUG:
+// background image not covering entire page for mobile leaving white space
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>

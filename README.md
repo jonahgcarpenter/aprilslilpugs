@@ -18,9 +18,7 @@ A website for my moms buisness, in which I have tailored to her request.
 
 ## TODO
 
-- refactor frontend with react query
 - create separate branch for server/ to make it easy for unraid
 - implement actual images functionality
 - move RTSP stream into this codebase?
-- notifications for stream down
-- fix white space on mobile
+

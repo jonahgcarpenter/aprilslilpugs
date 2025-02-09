@@ -22,7 +22,7 @@ const Breeder = () => {
   if (error) {
     return (
       <div className="mx-2 sm:mx-4 bg-slate-900 rounded-xl shadow-xl p-4 sm:p-8">
-        <p className="text-red-500 text-center">{error}</p>
+        <p className="text-red-500 text-center">{error.message}</p>
       </div>
     );
   }
