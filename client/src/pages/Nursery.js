@@ -1,8 +1,9 @@
 // COMPONENTS
 import UnderConstruction from "../components/Misc/UnderConstruction";
 import CurrentLitters from "../components/Litter/CurrentLitters";
-import Waitlist from "../components/Waitlist/Waitlist";
+// import Waitlist from "../components/Waitlist/Waitlist";
 import MoreImages from "../components/Gallery/MoreImages";
+import NoLitters from "../components/Litter/NoLitters";
 
 const Nursery = () => {
   return (
@@ -11,7 +12,8 @@ const Nursery = () => {
         <div className="max-w-4xl mx-auto transform hover:scale-[1.01] transition-all duration-300">
           <UnderConstruction />
         </div>
-        <Waitlist />
+        <NoLitters />
+        {/* <Waitlist /> */}
         <CurrentLitters />
         <MoreImages />
       </div>
