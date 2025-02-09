@@ -150,7 +150,7 @@ const UpdateBreeder = () => {
   }
 
   return (
-    <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">
+    <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-xl">
       <h2 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-8">
         Update Profile
       </h2>
@@ -226,7 +226,7 @@ const UpdateBreeder = () => {
         </div>
 
         {/* Profile Picture Section */}
-        <div className="sm:col-span-1">
+        <div className="sm:col-span-2">
           <label className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-4">
             Profile Picture:
           </label>
@@ -283,7 +283,7 @@ const UpdateBreeder = () => {
                     )}
                   </div>
                 ) : (
-                  <div className="relative w-full h-48 rounded-lg border-2 border-white/10 shadow-xl bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
+                  <div className="relative w-full h-48 rounded-lg border-2 border-slate-700 shadow-xl bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
                     <span className="text-4xl text-white/20">
                       Photo {index + 1}
                     </span>
