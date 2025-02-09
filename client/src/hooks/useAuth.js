@@ -27,7 +27,10 @@ export const adminLogin = async (email, password) => {
 export const adminLogout = async () => {
   try {
     const token = getToken();
-    if (!token) return { success: false, message: "No token found" };
+    if (!token) {
+      localStorage.removeItem("token"); // Always remove the token
+      return { success: false, message: "No token found" };
+    }
 
     await axios.post(
       "/api/breeder/logout",
@@ -39,6 +42,7 @@ export const adminLogout = async () => {
     return { success: true };
   } catch (error) {
     console.error("Logout failed:", error.response?.data || error.message);
+    localStorage.removeItem("token"); // Always remove token even on failure
     return {
       success: false,
       message: error.response?.data?.message || error.message,
@@ -50,7 +54,7 @@ export const adminLogout = async () => {
 export const useAuth = () => {
   return useQuery({
     queryKey: ["auth"],
-    queryFN: () => getToken(),
+    queryFn: () => getToken(),
     staleTime: Infinity,
     cacheTime: Infinity,
   });

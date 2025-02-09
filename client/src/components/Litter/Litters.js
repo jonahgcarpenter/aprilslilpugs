@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import LoadingAnimation from "../Misc/LoadingAnimation";
 
+// BUG:
+// Puppies model needs to open outside of the component
+
 const Litters = ({ litters = [], isLoading, littersError }) => {
   const [selectedLitter, setSelectedLitter] = useState(null);
 
