@@ -1,11 +1,12 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
-/* import { useSettings } from "../../context/SettingsContext"; */
+import { useSettings } from "../../hooks/useSettings";
 import { isAuthenticated } from "../../utils/Auth";
 import { adminLogin, adminLogout } from "../../hooks/useAuth";
 
 const Navbar = () => {
-  /* const { liveEnabled } = useSettings(); */
+  const { settings } = useSettings();
+  const liveEnabled = settings?.liveEnabled;
   const location = useLocation();
   const [auth, setAuth] = useState(isAuthenticated());
   const [errorMessage, setErrorMessage] = useState("");
@@ -93,14 +94,17 @@ const Navbar = () => {
                 <NavLink to="/">Home</NavLink>
                 <NavLink to="/ouradults">Our Adults</NavLink>
                 <NavLink to="/nursery">Nursery</NavLink>
-                {/* {liveEnabled && ( */}
-                {/*   <NavLink to="/live"> */}
-                {/*     <div className="flex items-center gap-2"> */}
-                {/*       <span>Live Puppy Cam</span> */}
-                {/*       <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" /> */}
-                {/*     </div> */}
-                {/*   </NavLink> */}
-                {/* )} */}
+
+                {/* Conditionally render the Live link */}
+                {liveEnabled && (
+                  <NavLink to="/live">
+                    <div className="flex items-center gap-2">
+                      <span>Live Puppy Cam</span>
+                      <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                    </div>
+                  </NavLink>
+                )}
+
                 <NavLink to="/past-litters">Past Litters</NavLink>
                 <NavLink to="/gallery">Gallery</NavLink>
 
@@ -125,14 +129,17 @@ const Navbar = () => {
             <NavLink to="/">Home</NavLink>
             <NavLink to="/ouradults">Our Adults</NavLink>
             <NavLink to="/nursery">Nursery</NavLink>
-            {/* {liveEnabled && ( */}
-            {/*   <NavLink to="/live"> */}
-            {/*     <div className="flex items-center gap-2"> */}
-            {/*       <span>Live Puppy Cam</span> */}
-            {/*       <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" /> */}
-            {/*     </div> */}
-            {/*   </NavLink> */}
-            {/* )} */}
+
+            {/* Conditionally render the Live link */}
+            {liveEnabled && (
+              <NavLink to="/live">
+                <div className="flex items-center gap-2">
+                  <span>Live Puppy Cam</span>
+                  <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                </div>
+              </NavLink>
+            )}
+
             <NavLink to="/past-litters">Past Litters</NavLink>
             <NavLink to="/gallery">Gallery</NavLink>
 

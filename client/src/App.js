@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 // PAGES
 import Home from "./pages/Home";
 import Admin from "./pages/Admin";
-/* import Live from "./pages/Live"; */
+import Live from "./pages/Live";
 import OurAdults from "./pages/OurAdults";
 import Nursery from "./pages/Nursery";
 import PastLitters from "./pages/PastLitters";
@@ -33,7 +33,7 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/ouradults" element={<OurAdults />} />
               <Route path="/nursery" element={<Nursery />} />
-              {/* <Route path="/live" element={<Live />} /> */}
+              <Route path="/live" element={<Live />} />
               <Route path="/past-litters" element={<PastLitters />} />
               <Route path="/gallery" element={<Gallery />} />
               <Route
