@@ -6,6 +6,7 @@ import UnderConstruction from "../components/Misc/UnderConstruction";
 import Litters from "../components/Litter/Litters";
 import MoreImages from "../components/Gallery/MoreImages";
 import NoLitters from "../components/Litter/NoLitters";
+import Waitlist from "../components/Waitlist/Waitlist";
 
 const Nursery = () => {
   const { litters, isLoading, littersError } = useLitter();
@@ -34,7 +35,7 @@ const Nursery = () => {
         <div className="max-w-4xl mx-auto transform hover:scale-[1.01] transition-all duration-300">
           <UnderConstruction />
         </div>
-        {/* <Waitlist /> */}
+        <Waitlist />
         <div className="transition-all duration-500 ease-in-out">
           <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-12">
