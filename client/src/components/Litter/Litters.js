@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import LoadingAnimation from "../Misc/LoadingAnimation";
 import { createPortal } from "react-dom";
 
+// TODO:
+// Add back born in future function to update Born on: to Expected By: dynamically
+
 const Litters = ({ litters = [], isLoading, littersError }) => {
   const [selectedLitter, setSelectedLitter] = useState(null);
 

@@ -22,7 +22,7 @@ const queryClient = new QueryClient();
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="App min-h-screen">
+      <div className="App relative min-h-screen">
         <div
           className="fixed inset-0 bg-cover bg-center bg-no-repeat -z-10"
           style={{ backgroundImage: "url('/background.png')" }}
