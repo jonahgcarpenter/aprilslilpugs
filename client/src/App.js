@@ -13,8 +13,6 @@ import Gallery from "./pages/Gallery";
 // COMPONENTS
 import ProtectedRoute from "./components/Auth/ProtectedRoute";
 import Navbar from "./components/Misc/Navbar";
-// import LitterCreate from "./components/Litter/LitterCreate";
-// import LitterUpdate from "./components/Litter/LitterUpdate";
 
 const queryClient = new QueryClient();
 
@@ -44,22 +42,6 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-              {/* <Route */}
-              {/*   path="/breeder/litter/create" */}
-              {/*   element={ */}
-              {/*     <ProtectedRoute> */}
-              {/*       <LitterCreate /> */}
-              {/*     </ProtectedRoute> */}
-              {/*   } */}
-              {/* /> */}
-              {/* <Route */}
-              {/*   path="/breeder/litter/update/:id" */}
-              {/*   element={ */}
-              {/*     <ProtectedRoute> */}
-              {/*       <LitterUpdate /> */}
-              {/*     </ProtectedRoute> */}
-              {/*   } */}
-              {/* /> */}
             </Routes>
           </div>
         </BrowserRouter>

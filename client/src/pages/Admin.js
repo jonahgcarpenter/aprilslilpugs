@@ -1,10 +1,6 @@
 // COMPONENTS
-import UpdateBreeder from "../components/Breeder/UpdateBreeder";
-// import GrumbleUpdate from "../components/Grumble/GrumbleUpdate";
-// import WaitlistAdmin from "../components/Waitlist/WaitlistAdmin";
 import ToggleStream from "../components/LiveStream/ToggleStream";
 import ToggleWaitlist from "../components/Waitlist/ToggleWaitlist";
-// import LitterManagement from "../components/Litter/LitterManagement";
 
 const Admin = () => {
   return (
@@ -14,10 +10,7 @@ const Admin = () => {
           <ToggleStream />
           <ToggleWaitlist />
         </div>
-        {/* <WaitlistAdmin /> */}
-        <UpdateBreeder />
-        {/* <GrumbleUpdate /> */}
-        {/* <LitterManagement /> */}
+        {/* OTHER ADMIN COMPONENTS */}
       </div>
     </div>
   );

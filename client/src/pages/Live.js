@@ -3,7 +3,7 @@ import { useSettings } from "../hooks/useSettings";
 
 // COMPONENTS
 import UnderConstruction from "../components/Misc/UnderConstruction";
-import Stream from "../components/LiveStream/Stream";
+import StreamUp from "../components/LiveStream/StreamUp";
 import StreamDown from "../components/LiveStream/StreamDown";
 import LoadingAnimation from "../components/Misc/LoadingAnimation";
 import { FaInfoCircle, FaTimes } from "react-icons/fa";
@@ -21,7 +21,7 @@ const Live = () => {
         const response = await fetch(HLS_STREAM_URL, { method: "HEAD" });
         setIsStreamDown(response.status === 404);
       } catch (error) {
-        setIsStreamDown(true); // Handle network errors as "stream down"
+        setIsStreamDown(true);
       }
     };
 
@@ -45,7 +45,6 @@ const Live = () => {
                 Live Puppy Cam
               </h1>
 
-              {/* Info Button */}
               <div
                 className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/10 mb-4 cursor-pointer"
                 onClick={() => setShowInfo(!showInfo)}
@@ -54,7 +53,6 @@ const Live = () => {
                 <span className="text-white/90">Stream Info</span>
               </div>
 
-              {/* Info Panel */}
               {showInfo && (
                 <div className="bg-white/10 p-4 rounded-lg border border-white/20 transition-all duration-300 w-full">
                   <div className="flex justify-between items-center mb-2">
@@ -75,11 +73,10 @@ const Live = () => {
               )}
             </div>
 
-            {/* Stream or StreamDown Component */}
             {isStreamDown ? (
               <StreamDown />
             ) : (
-              <Stream streamUrl={HLS_STREAM_URL} />
+              <StreamUp streamUrl={HLS_STREAM_URL} />
             )}
           </div>
         )}

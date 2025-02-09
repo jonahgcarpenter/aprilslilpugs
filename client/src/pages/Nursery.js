@@ -4,7 +4,6 @@ import { useLitter } from "../hooks/useLitter";
 // COMPONENTS
 import UnderConstruction from "../components/Misc/UnderConstruction";
 import Litters from "../components/Litter/Litters";
-// import Waitlist from "../components/Waitlist/Waitlist";
 import MoreImages from "../components/Gallery/MoreImages";
 import NoLitters from "../components/Litter/NoLitters";
 
@@ -15,15 +14,14 @@ const Nursery = () => {
   useEffect(() => {
     if (Array.isArray(litters) && litters.length > 0) {
       const filtered = litters.filter((litter) => {
-        // Check if there are puppies with "Available" or "Reserved" status, or if there are no puppies
         return (
           !litter.puppies ||
-          litter.puppies.length === 0 || // No puppies at all
+          litter.puppies.length === 0 ||
           (litter.puppies.length > 0 &&
             litter.puppies.some(
               (puppy) =>
                 puppy.status === "Available" || puppy.status === "Reserved",
-            )) // Puppies are "Available" or "Reserved"
+            ))
         );
       });
       setCurrentLitters(filtered);

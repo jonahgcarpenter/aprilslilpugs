@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import videojs from "video.js";
 import "video.js/dist/video-js.css";
 
-const Stream = ({ streamUrl }) => {
+const StreamUp = ({ streamUrl }) => {
   const videoRef = useRef(null);
   const playerRef = useRef(null);
   const [isMounted, setIsMounted] = useState(false);
@@ -17,7 +17,6 @@ const Stream = ({ streamUrl }) => {
         return;
       }
 
-      // Ensure Video.js is not re-initialized on re-renders
       if (!playerRef.current) {
         const player = videojs(videoRef.current, {
           controls: true,
@@ -58,4 +57,4 @@ const Stream = ({ streamUrl }) => {
   );
 };
 
-export default Stream;
+export default StreamUp;
