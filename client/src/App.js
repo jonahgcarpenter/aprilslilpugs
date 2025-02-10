@@ -13,10 +13,9 @@ import Gallery from "./pages/Gallery";
 // COMPONENTS
 import ProtectedRoute from "./components/Auth/ProtectedRoute";
 import Navbar from "./components/Misc/Navbar";
+import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
-//TODO:
-// NOT FOUND PAGE
 
 // BUG:
 // background image not covering entire page for mobile leaving white space
@@ -47,6 +46,7 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </div>
         </BrowserRouter>
