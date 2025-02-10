@@ -2,9 +2,6 @@
 import UnderConstruction from "../components/Misc/UnderConstruction";
 import AllImages from "../components/Gallery/AllImages";
 
-// TODO:
-// add real images
-
 const Gallery = () => {
   return (
     <div className="min-h-screen pt-8 pb-16">
