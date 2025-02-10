@@ -54,7 +54,11 @@ const Nursery = () => {
             </div>
           </div>
         </div>
-        <MoreImages />
+        <MoreImages
+          litters={currentLitters}
+          isLoading={isLoading}
+          littersError={littersError}
+        />
       </div>
     </div>
   );

@@ -1,4 +1,3 @@
-// Import required dependencies
 const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
@@ -47,4 +46,5 @@ module.exports = {
   littersUpload: createUploader("litter-images"), // For litter images
   puppyUpload: createUploader("puppy-images"), // For individual puppy images
   grumbleUpload: createUploader("grumble-images"), // For grumble (group) images
+  galleryUpload: createUploader("gallery"), // For general gallery images
 };

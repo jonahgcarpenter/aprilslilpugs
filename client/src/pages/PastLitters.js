@@ -42,7 +42,11 @@ const PastLitters = () => {
             </div>
           </div>
         </div>
-        <MoreImages />
+        <MoreImages
+          litters={pastLitters}
+          isLoading={isLoading}
+          littersError={littersError}
+        />
       </div>
     </div>
   );

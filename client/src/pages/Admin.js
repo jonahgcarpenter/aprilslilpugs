@@ -5,6 +5,8 @@ import UpdateBreeder from "../components/Breeder/UpdateBreeder";
 import UpdateGrumble from "../components/Grumble/UpdateGrumble";
 import UpdateWaitlist from "../components/Waitlist/UpdateWaitlist";
 import UpdateLitters from "../components/Litter/UpdateLitters";
+import AddImages from "../components/Gallery/AddImages";
+import UpdateImages from "../components/Gallery/UpdateImages";
 
 const Admin = () => {
   return (
@@ -18,6 +20,8 @@ const Admin = () => {
         <UpdateBreeder />
         <UpdateGrumble />
         <UpdateLitters />
+        <AddImages />
+        <UpdateImages />
       </div>
     </div>
   );
