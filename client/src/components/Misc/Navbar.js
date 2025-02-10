@@ -4,6 +4,9 @@ import { useSettings } from "../../hooks/useSettings";
 import { isAuthenticated } from "../../utils/Auth";
 import { adminLogin, adminLogout } from "../../hooks/useAuth";
 
+// BUG:
+// Page only scrolls after data loads
+
 const Navbar = () => {
   const { settings } = useSettings();
   const liveEnabled = settings?.liveEnabled;

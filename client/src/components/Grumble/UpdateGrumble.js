@@ -2,6 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { useGrumble } from "../../hooks/useGrumble";
 import LoadingAnimation from "../Misc/LoadingAnimation";
 
+// TODO:
+// USE DELETE MODAL
+
 const UpdateGrumble = () => {
   const {
     grumbles,

@@ -2,12 +2,15 @@ import React from "react";
 import { useWaitlist } from "../../hooks/useWaitlist";
 import LoadingAnimation from "../Misc/LoadingAnimation";
 
+// TODO:
+// DELETE MODAL
+
+// BUG:
+// Sometimes we get 401 error
+
 const UpdateWaitlist = () => {
   const { entries, isLoading, error, updateWaitlist, deleteWaitlist } =
     useWaitlist();
-
-  // TODO:
-  // remove console logs, and implemnent modals
 
   const handleStatusChange = async (id, newStatus) => {
     try {
