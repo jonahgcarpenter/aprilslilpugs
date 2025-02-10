@@ -15,6 +15,8 @@ import ProtectedRoute from "./components/Auth/ProtectedRoute";
 import Navbar from "./components/Misc/Navbar";
 
 const queryClient = new QueryClient();
+//TODO:
+// NOT FOUND PAGE
 
 // BUG:
 // background image not covering entire page for mobile leaving white space
