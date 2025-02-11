@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import useGallery from "../../hooks/useGallery";
 import LoadingAnimation from "../Misc/LoadingAnimation";
+import { createPortal } from "react-dom";
 
 const AllImages = () => {
   const { useGalleryItems } = useGallery();
@@ -103,43 +104,27 @@ const AllImages = () => {
       </div>
 
       {/* Modal for selected image */}
-      {selectedImage && (
-        <div
-          className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
-          onClick={() => setSelectedImage(null)}
-        >
-          <div className="relative max-w-7xl w-full max-h-[90vh] flex flex-col items-center">
-            <button
-              onClick={() => setSelectedImage(null)}
-              className="absolute top-4 right-4 text-white hover:text-blue-400 transition-colors"
-            >
-              <svg
-                className="w-8 h-8"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-            <img
-              src={selectedImage.filename}
-              alt={selectedImage.description || "Gallery image"}
-              className="max-h-[80vh] w-auto object-contain"
-            />
-            {selectedImage.description && (
-              <div className="mt-4 text-white text-center">
-                <p>{selectedImage.description}</p>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      {selectedImage &&
+        createPortal(
+          <div
+            className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+            onClick={() => setSelectedImage(null)}
+          >
+            <div className="relative flex flex-col items-center">
+              <img
+                src={selectedImage.filename}
+                alt={selectedImage.description || "Gallery image"}
+                className="max-h-[90vh] max-w-[90vw] object-contain"
+              />
+              {selectedImage.description && (
+                <div className="mt-4 text-white text-center">
+                  <p>{selectedImage.description}</p>
+                </div>
+              )}
+            </div>
+          </div>,
+          document.body,
+        )}
     </>
   );
 };

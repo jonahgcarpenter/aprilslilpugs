@@ -17,13 +17,11 @@ const UpdateGrumble = () => {
   const [selectedGrumbleId, setSelectedGrumbleId] = useState("");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-  // TEXT FIELDS
   const [name, setName] = useState("");
   const [gender, setGender] = useState("");
   const [description, setDescription] = useState("");
   const [birthDate, setBirthDate] = useState("");
 
-  // IMAGE FIELDS
   const [newProfilePicture, setNewProfilePicture] = useState(null);
   const [profilePicturePreview, setProfilePicturePreview] = useState(null);
   const profilePictureInputRef = useRef(null);

@@ -1,8 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import useGallery from "../../hooks/useGallery";
 import LoadingAnimation from "../Misc/LoadingAnimation";
-
-// BUG: the puppy and litter ids are passed to this component as props, we should only render the images for those ids so we can properly check the array length for the filtered ids
+import { createPortal } from "react-dom";
 
 const MoreImages = ({ litters, isLoading, littersError }) => {
   const { useGalleryItems } = useGallery();
@@ -11,6 +10,13 @@ const MoreImages = ({ litters, isLoading, littersError }) => {
     entityType: "litter",
     litterIds: litters?.map((litter) => litter._id) || [],
   });
+
+  const filteredGalleryItems =
+    galleryItems?.filter((item) =>
+      litters.some((litter) => litter._id === item.litterId),
+    ) || [];
+
+  const [selectedImage, setSelectedImage] = useState(null);
 
   if (isLoading || isGalleryLoading) {
     return (
@@ -40,7 +46,7 @@ const MoreImages = ({ litters, isLoading, littersError }) => {
     );
   }
 
-  if (!galleryItems?.length || !litters?.length) {
+  if (!litters?.length || !filteredGalleryItems.length) {
     return (
       <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-12">
@@ -73,24 +79,21 @@ const MoreImages = ({ litters, isLoading, littersError }) => {
   }
 
   return (
-    <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-12">
-        <h1 className="text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 text-center tracking-wider px-4">
-          More Images
-        </h1>
-
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {galleryItems
-            .filter((item) =>
-              litters.some((litter) => litter._id === item.litterId),
-            )
-            .map((item) => (
+    <>
+      <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-12">
+          <h1 className="text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 text-center tracking-wider px-4">
+            More Images
+          </h1>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {filteredGalleryItems.map((item) => (
               <div
                 key={item._id}
-                className="relative group aspect-square overflow-hidden rounded-lg"
+                className="relative group aspect-square overflow-hidden rounded-lg cursor-pointer"
+                onClick={() => setSelectedImage(item)}
               >
                 <img
-                  src={item.filename} // Using the formatted filename from the hook
+                  src={item.filename}
                   alt={item.description || "Gallery image"}
                   className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-110"
                 />
@@ -101,9 +104,33 @@ const MoreImages = ({ litters, isLoading, littersError }) => {
                 )}
               </div>
             ))}
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* Modal for selected image */}
+      {selectedImage &&
+        createPortal(
+          <div
+            className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+            onClick={() => setSelectedImage(null)}
+          >
+            <div className="relative flex flex-col items-center">
+              <img
+                src={selectedImage.filename}
+                alt={selectedImage.description || "Gallery image"}
+                className="max-h-[90vh] max-w-[90vw] object-contain"
+              />
+              {selectedImage.description && (
+                <div className="mt-4 text-white text-center">
+                  <p>{selectedImage.description}</p>
+                </div>
+              )}
+            </div>
+          </div>,
+          document.body,
+        )}
+    </>
   );
 };
 
