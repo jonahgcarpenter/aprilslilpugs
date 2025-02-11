@@ -1,5 +1,5 @@
 // COMPONENTS
-import UnderConstruction from "../components/UnderConstruction";
+import UnderConstruction from "../components/Misc/UnderConstruction";
 import Grumble from "../components/Grumble/Grumble";
 
 const OurAdults = () => {

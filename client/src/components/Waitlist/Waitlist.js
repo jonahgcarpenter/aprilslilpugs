@@ -1,17 +1,13 @@
-import React, { useState, useContext, useRef, useEffect } from "react";
-import { WaitlistContext } from "../../context/WaitlistContext";
-import { useSettings } from "../../context/SettingsContext";
-import LoadingAnimation from "../LoadingAnimation";
-import SuccessModal from "../Modals/SuccessModal";
-import ErrorModal from "../Modals/ErrorModal";
+import React, { useState, useRef, useEffect } from "react";
+import { useWaitlist } from "../../hooks/useWaitlist";
+import { useSettings } from "../../hooks/useSettings";
+import LoadingAnimation from "../Misc/LoadingAnimation";
 
 const Waitlist = () => {
-  const { createEntry, entries } = useContext(WaitlistContext);
-  const {
-    waitlistEnabled,
-    isLoading: settingsLoading,
-    error: settingsError,
-  } = useSettings();
+  const { createEntry, entries } = useWaitlist();
+  const { settings } = useSettings();
+  const waitlistEnabled = settings?.waitlistEnabled;
+
   const notesRef = useRef(null);
   const [formData, setFormData] = useState({
     firstName: "",
@@ -20,11 +16,11 @@ const Waitlist = () => {
     notes: "",
     submissionDate: "",
   });
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
-  const [errorModal, setErrorModal] = useState({ show: false, message: "" });
+
   const [showInfo, setShowInfo] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const formatPhoneNumber = (value) => {
     const phoneNumber = value.replace(/\D/g, "");
@@ -66,25 +62,22 @@ const Waitlist = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMessage("");
 
     if (!waitlistEnabled) {
-      setErrorModal({
-        show: true,
-        message: "The waitlist is currently closed. Please try again later.",
-      });
+      setErrorMessage(
+        "The waitlist is currently closed. Please try again later.",
+      );
       return;
     }
 
     if (!formData.firstName || !formData.lastName || !formData.phoneNumber) {
-      setErrorModal({ show: true, message: "Please fill in all fields" });
+      setErrorMessage("Please fill in all fields");
       return;
     }
 
     if (!validatePhoneNumber(formData.phoneNumber)) {
-      setErrorModal({
-        show: true,
-        message: "Please enter a valid phone number",
-      });
+      setErrorMessage("Please enter a valid phone number");
       return;
     }
 
@@ -109,7 +102,6 @@ const Waitlist = () => {
       setSuccessMessage(
         `Congratulations! You've been added to the waitlist at position #${result.position}`,
       );
-      setShowSuccessModal(true);
       setFormData({
         firstName: "",
         lastName: "",
@@ -118,11 +110,9 @@ const Waitlist = () => {
         submissionDate: "",
       });
     } catch (error) {
-      setErrorModal({
-        show: true,
-        message:
-          error.message || "Error submitting to waitlist. Please try again.",
-      });
+      setErrorMessage(
+        error.message || "Error submitting to waitlist. Please try again.",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -145,31 +135,6 @@ const Waitlist = () => {
   useEffect(() => {
     autoResize();
   }, []);
-
-  if (settingsLoading) {
-    return (
-      <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">
-        <div className="min-h-[200px] flex items-center justify-center">
-          <LoadingAnimation />
-        </div>
-      </div>
-    );
-  }
-
-  if (settingsError || waitlistEnabled === null) {
-    return (
-      <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">
-        <div className="text-red-400 text-center">
-          <p className="text-lg font-medium mb-2">
-            Error loading waitlist status
-          </p>
-          <p className="text-sm opacity-90">
-            {settingsError || "Unable to determine waitlist status"}
-          </p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">
@@ -209,18 +174,18 @@ const Waitlist = () => {
             <div className="p-4 space-y-4 text-slate-300 bg-slate-800/25 rounded-b-lg border-t border-slate-700/50">
               <p className="text-center ">
                 Our waitlist system helps you secure your spot for upcoming
-                puppy litters
+                puppy litters.
               </p>
               <ol className="flex flex-col items-center space-y-2">
-                <li>Fill out the form with your contact information</li>
+                <li>Fill out the form with your contact information.</li>
                 <li>
-                  We'll contact you by phone when new puppies become available
+                  We'll contact you by phone when new puppies become available.
                 </li>
               </ol>
               <p className="text-center font-bold">
                 The number you are given only reflects the order you may be
                 contacted in. It does not reflect the order in which you might
-                receive a puppy due to color/gender preferences
+                receive a puppy due to color/gender preferences.
               </p>
             </div>
           </div>
@@ -328,17 +293,13 @@ const Waitlist = () => {
         </div>
       )}
 
-      <SuccessModal
-        isOpen={showSuccessModal}
-        message={successMessage}
-        title="Welcome to the Waitlist!"
-      />
+      {successMessage && (
+        <div className="text-center text-green-500 mt-4">{successMessage}</div>
+      )}
 
-      <ErrorModal
-        isOpen={errorModal.show}
-        onClose={() => setErrorModal({ show: false, message: "" })}
-        message={errorModal.message}
-      />
+      {errorMessage && (
+        <div className="text-center text-red-500 mt-4">{errorMessage}</div>
+      )}
     </div>
   );
 };
