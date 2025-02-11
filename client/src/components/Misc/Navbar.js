@@ -4,8 +4,6 @@ import { useSettings } from "../../hooks/useSettings";
 import { isAuthenticated } from "../../utils/Auth";
 import { adminLogin, adminLogout } from "../../hooks/useAuth";
 
-// BUG: Page only scrolls after data loads
-
 const Navbar = () => {
   const { settings } = useSettings();
   const liveEnabled = settings?.liveEnabled;
@@ -33,7 +31,9 @@ const Navbar = () => {
     return (
       <Link
         to={to}
-        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        onClick={() =>
+          setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 200)
+        }
       >
         <button
           className={`bg-gradient-to-r ${
@@ -69,7 +69,12 @@ const Navbar = () => {
         <div className="flex flex-col items-center">
           <Link
             to="/"
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            onClick={() =>
+              setTimeout(
+                () => window.scrollTo({ top: 0, behavior: "smooth" }),
+                200,
+              )
+            }
           >
             <h1 className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 text-3xl sm:text-4xl font-extrabold text-center tracking-wider px-4">
               April's Lil Pugs

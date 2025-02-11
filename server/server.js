@@ -10,8 +10,6 @@ const waitlistRoutes = require("./routes/waitlist");
 const settingsRoutes = require("./routes/settings");
 const galleryRoutes = require("./routes/gallery");
 
-//TODO: remove logging for deleting files or change to relative paths
-
 // Create an express app
 const app = express();
 
