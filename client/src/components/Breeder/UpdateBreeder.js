@@ -5,7 +5,6 @@ import LoadingAnimation from "../Misc/LoadingAnimation";
 const UpdateBreeder = () => {
   const { breeder, isLoading, error, updateBreeder } = useBreeder();
 
-  // Text fields
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [location, setLocation] = useState("");
@@ -13,19 +12,16 @@ const UpdateBreeder = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [story, setStory] = useState("");
 
-  // Profile picture state
   const [newProfilePicture, setNewProfilePicture] = useState(null);
   const [profilePicturePreview, setProfilePicturePreview] = useState(null);
 
   const profilePictureInputRef = useRef(null);
 
-  // Gallery images state
   const [newGalleryImages, setNewGalleryImages] = useState([]);
   const [galleryPreviews, setGalleryPreviews] = useState([]);
 
   const galleryPictureInputRef = useRef([]);
 
-  // When breeder data loads, populate local state
   useEffect(() => {
     if (breeder) {
       setFirstName(breeder.firstName || "");
@@ -35,7 +31,6 @@ const UpdateBreeder = () => {
       setPhoneNumber(breeder.phoneNumber || "");
       setStory(breeder.story || "");
 
-      // Set previews from existing data
       setProfilePicturePreview(breeder.profilePicture || null);
 
       const images = breeder.images || [];
@@ -44,7 +39,6 @@ const UpdateBreeder = () => {
     }
   }, [breeder]);
 
-  // Handle new profile picture selection
   const handleProfilePictureChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -54,7 +48,6 @@ const UpdateBreeder = () => {
     }
   };
 
-  // Clear the new profile picture selection and revert to original
   const handleClearProfilePicture = () => {
     setNewProfilePicture(null);
     setProfilePicturePreview(breeder ? breeder.profilePicture : null);
@@ -63,18 +56,15 @@ const UpdateBreeder = () => {
     }
   };
 
-  // Handle new gallery images selection (multiple files allowed)
   const handleGalleryImageChange = (index, e) => {
     const file = e.target.files[0];
     if (file) {
       const previewUrl = URL.createObjectURL(file);
-      // Update the preview for the specific gallery image
       setGalleryPreviews((prev) => {
         const newPreviews = [...prev];
         newPreviews[index] = previewUrl;
         return newPreviews;
       });
-      // Update the file for the specific gallery image
       setNewGalleryImages((prev) => {
         const newImages = [...prev];
         newImages[index] = file;
@@ -83,7 +73,6 @@ const UpdateBreeder = () => {
     }
   };
 
-  // Clear the new gallery images selection and revert to original
   const handleClearGalleryImage = (index) => {
     setNewGalleryImages((prev) => {
       const newImages = [...prev];
@@ -106,7 +95,6 @@ const UpdateBreeder = () => {
     }
   };
 
-  // When submitting, build a FormData object to include text and file data
   const handleSubmit = (e) => {
     e.preventDefault();
     const formData = new FormData();
@@ -122,14 +110,12 @@ const UpdateBreeder = () => {
       formData.append("profilePicture", newProfilePicture);
     }
 
-    // Append gallery images (only those that have been updated)
     newGalleryImages.forEach((file, index) => {
       if (file) {
         formData.append(`galleryImage${index}`, file);
       }
     });
 
-    // Call your update function from the hook
     updateBreeder(formData);
   };
 

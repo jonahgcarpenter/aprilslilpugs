@@ -4,8 +4,7 @@ import { useSettings } from "../../hooks/useSettings";
 import { isAuthenticated } from "../../utils/Auth";
 import { adminLogin, adminLogout } from "../../hooks/useAuth";
 
-// BUG:
-// Page only scrolls after data loads
+// BUG: Page only scrolls after data loads
 
 const Navbar = () => {
   const { settings } = useSettings();
@@ -18,7 +17,7 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    setErrorMessage(""); // Clear previous errors
+    setErrorMessage("");
 
     const result = await adminLogout();
     if (result.success) {

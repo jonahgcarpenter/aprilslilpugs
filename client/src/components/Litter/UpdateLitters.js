@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useLitter } from "../../hooks/useLitter";
 import LoadingAnimation from "../Misc/LoadingAnimation";
-
-// TODO:
-// USE DELETE MODAL
+import DeleteModal from "../Modals/DeleteModal";
+import { createPortal } from "react-dom";
 
 const UpdateLitter = () => {
   const [selectedLitterId, setSelectedLitterId] = useState("");
@@ -26,6 +25,9 @@ const UpdateLitter = () => {
   const [puppyProfilePicturePreview, setPuppyProfilePicturePreview] =
     useState(null);
   const puppyProfilePictureInputRef = useRef(null);
+
+  const [isLitterDeleteModalOpen, setIsLitterDeleteModalOpen] = useState(false);
+  const [isPuppyDeleteModalOpen, setIsPuppyDeleteModalOpen] = useState(false);
 
   const {
     litters,
@@ -155,15 +157,18 @@ const UpdateLitter = () => {
     }
   };
 
-  const handleLitterDelete = () => {
-    if (
-      window.confirm(
-        "Are you sure you want to delete this litter? It will also delete all puppys within the litter! This action cannot be undone.",
-      )
-    ) {
-      deleteLitterMutation.mutate(selectedLitterId);
-      setSelectedLitterId("");
-    }
+  const handleLitterDeleteClick = () => {
+    setIsLitterDeleteModalOpen(true);
+  };
+
+  const handleLitterDeleteConfirm = () => {
+    deleteLitterMutation.mutate(selectedLitterId);
+    setSelectedLitterId("");
+    setIsLitterDeleteModalOpen(false);
+  };
+
+  const handleLitterDeleteCancel = () => {
+    setIsLitterDeleteModalOpen(false);
   };
 
   const handlePuppySubmit = (e) => {
@@ -190,18 +195,21 @@ const UpdateLitter = () => {
     }
   };
 
-  const handlePuppyDelete = () => {
-    if (
-      window.confirm(
-        "Are you sure you want to delete this puppy? This action cannot be undone.",
-      )
-    ) {
-      deletePuppyMutation.mutate({
-        litterId: selectedLitterId,
-        puppyId: selectedPuppyId,
-      });
-      setSelectedPuppyId("");
-    }
+  const handlePuppyDeleteClick = () => {
+    setIsPuppyDeleteModalOpen(true);
+  };
+
+  const handlePuppyDeleteConfirm = () => {
+    deletePuppyMutation.mutate({
+      litterId: selectedLitterId,
+      puppyId: selectedPuppyId,
+    });
+    setSelectedPuppyId("");
+    setIsPuppyDeleteModalOpen(false);
+  };
+
+  const handlePuppyDeleteCancel = () => {
+    setIsPuppyDeleteModalOpen(false);
   };
 
   if (isLoading) {
@@ -360,7 +368,7 @@ const UpdateLitter = () => {
           {selectedLitterId && (
             <button
               type="button"
-              onClick={handleLitterDelete}
+              onClick={handleLitterDeleteClick}
               className="flex-1 bg-red-500 hover:bg-red-600 text-white py-3 rounded-lg transition-all"
             >
               Delete Litter
@@ -507,7 +515,7 @@ const UpdateLitter = () => {
               {selectedPuppyId && (
                 <button
                   type="button"
-                  onClick={handlePuppyDelete}
+                  onClick={handlePuppyDeleteClick}
                   className="flex-1 bg-red-500 hover:bg-red-600 text-white py-3 rounded-lg transition-all"
                 >
                   Delete Puppy
@@ -522,6 +530,30 @@ const UpdateLitter = () => {
             </div>
           </form>
         </div>
+      )}
+      {/* Add DeleteModal components using createPortal */}
+      {createPortal(
+        <DeleteModal
+          isOpen={isLitterDeleteModalOpen}
+          onClose={handleLitterDeleteCancel}
+          onDelete={handleLitterDeleteConfirm}
+          title="Delete Litter"
+          message="It will also delete all puppies within the litter! This action cannot be undone."
+          itemName="this litter"
+        />,
+        document.body,
+      )}
+
+      {createPortal(
+        <DeleteModal
+          isOpen={isPuppyDeleteModalOpen}
+          onClose={handlePuppyDeleteCancel}
+          onDelete={handlePuppyDeleteConfirm}
+          title="Delete Puppy"
+          message="This action cannot be undone."
+          itemName="this puppy"
+        />,
+        document.body,
       )}
     </div>
   );

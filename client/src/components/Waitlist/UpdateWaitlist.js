@@ -1,31 +1,46 @@
-import React from "react";
+import React, { useState } from "react";
 import { useWaitlist } from "../../hooks/useWaitlist";
 import LoadingAnimation from "../Misc/LoadingAnimation";
+import DeleteModal from "../Modals/DeleteModal";
+import { createPortal } from "react-dom";
 
-// TODO:
-// DELETE MODAL
-
-// BUG:
-// Sometimes we get 401 error
+// BUG:  Sometimes we get 401 error immediately after login
 
 const UpdateWaitlist = () => {
   const { entries, isLoading, error, updateWaitlist, deleteWaitlist } =
     useWaitlist();
 
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [entryToDelete, setEntryToDelete] = useState(null);
+
   const handleStatusChange = async (id, newStatus) => {
     try {
       await updateWaitlist({ id, data: { status: newStatus } });
     } catch (err) {
-      console.error(`Failed to update status for entry ${id}`, err);
+      alert(`Failed to update status for entry ${id}: ${err?.message || err}`);
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDeleteClick = (entry) => {
+    setEntryToDelete(entry);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!entryToDelete) return;
+
     try {
-      await deleteWaitlist({ id });
+      await deleteWaitlist({ id: entryToDelete._id });
+      setIsDeleteModalOpen(false);
+      setEntryToDelete(null);
     } catch (err) {
-      console.error(`Failed to delete entry ${id}`, err);
+      alert(`Failed to delete entry ${entryToDelete._id}: ${err.message}`);
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setIsDeleteModalOpen(false);
+    setEntryToDelete(null);
   };
 
   if (isLoading) {
@@ -124,7 +139,7 @@ const UpdateWaitlist = () => {
                     <td className="p-2 sm:px-6 sm:py-4 whitespace-nowrap">
                       <button
                         onClick={() => {
-                          handleDelete(entry._id);
+                          handleDeleteClick(entry);
                         }}
                         className="text-red-400 hover:text-red-300 transition-colors px-2 py-1 sm:px-4 sm:py-2 text-sm rounded-lg hover:bg-red-500/10 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
                       >
@@ -149,6 +164,22 @@ const UpdateWaitlist = () => {
           </table>
         </div>
       </div>
+      {/* Delete Modal Portal */}
+      {createPortal(
+        <DeleteModal
+          isOpen={isDeleteModalOpen}
+          onClose={handleDeleteCancel}
+          onDelete={handleDeleteConfirm}
+          title="Delete Waitlist Entry"
+          message="This action cannot be undone."
+          itemName={
+            entryToDelete
+              ? `${entryToDelete.firstName} ${entryToDelete.lastName}'s entry`
+              : "this entry"
+          }
+        />,
+        document.body,
+      )}
     </div>
   );
 };

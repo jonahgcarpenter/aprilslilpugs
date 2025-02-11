@@ -8,6 +8,8 @@ import UpdateLitters from "../components/Litter/UpdateLitters";
 import AddImages from "../components/Gallery/AddImages";
 import UpdateImages from "../components/Gallery/UpdateImages";
 
+// TODO: update images should insta update whenever we add a new image
+
 const Admin = () => {
   return (
     <div className="min-h-screen pt-8 pb-16">

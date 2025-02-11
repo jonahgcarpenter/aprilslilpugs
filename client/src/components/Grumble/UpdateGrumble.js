@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useGrumble } from "../../hooks/useGrumble";
 import LoadingAnimation from "../Misc/LoadingAnimation";
-
-// TODO:
-// USE DELETE MODAL
+import DeleteModal from "../Modals/DeleteModal";
+import { createPortal } from "react-dom";
 
 const UpdateGrumble = () => {
   const {
@@ -16,6 +15,7 @@ const UpdateGrumble = () => {
   } = useGrumble();
 
   const [selectedGrumbleId, setSelectedGrumbleId] = useState("");
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   // TEXT FIELDS
   const [name, setName] = useState("");
@@ -91,15 +91,18 @@ const UpdateGrumble = () => {
     }
   };
 
-  const handleDelete = () => {
-    if (
-      window.confirm(
-        "Are you sure you want to delete this dog? This action cannot be undone.",
-      )
-    ) {
-      deleteGrumble(selectedGrumbleId);
-      setSelectedGrumbleId("");
-    }
+  const handleDeleteClick = () => {
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    deleteGrumble(selectedGrumbleId);
+    setSelectedGrumbleId("");
+    setIsDeleteModalOpen(false);
+  };
+
+  const handleDeleteCancel = () => {
+    setIsDeleteModalOpen(false);
   };
 
   if (isLoading) {
@@ -236,7 +239,7 @@ const UpdateGrumble = () => {
           {selectedGrumbleId && (
             <button
               type="button"
-              onClick={handleDelete}
+              onClick={handleDeleteClick}
               className="flex-1 bg-red-500 hover:bg-red-600 text-white py-3 rounded-lg transition-all"
             >
               Delete Dog
@@ -250,6 +253,17 @@ const UpdateGrumble = () => {
           </button>
         </div>
       </form>
+      {createPortal(
+        <DeleteModal
+          isOpen={isDeleteModalOpen}
+          onClose={handleDeleteCancel}
+          onDelete={handleDeleteConfirm}
+          title="Delete Dog"
+          message="This action cannot be undone."
+          itemName="this dog"
+        />,
+        document.body,
+      )}
     </div>
   );
 };

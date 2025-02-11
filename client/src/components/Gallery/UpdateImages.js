@@ -3,10 +3,8 @@ import useGallery from "../../hooks/useGallery";
 import { useGrumble } from "../../hooks/useGrumble";
 import { useLitter } from "../../hooks/useLitter";
 import LoadingAnimation from "../Misc/LoadingAnimation";
-
-// TODO:
-// use DELETE MODAL
-// should update as soon as new image is uploaded
+import DeleteModal from "../Modals/DeleteModal";
+import { createPortal } from "react-dom";
 
 const UpdateImages = () => {
   const { useGalleryItems, updateGalleryItem, deleteGalleryItem } =
@@ -15,8 +13,9 @@ const UpdateImages = () => {
   const { litters } = useLitter();
   const [editingId, setEditingId] = useState(null);
   const [editingDescription, setEditingDescription] = useState("");
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
 
-  // Fetch all gallery items
   const { data: galleryItems, isLoading, error } = useGalleryItems();
 
   const getEntityInfo = (item) => {
@@ -62,18 +61,24 @@ const UpdateImages = () => {
     }
   };
 
-  const handleDelete = async (itemId) => {
-    if (
-      window.confirm(
-        "Are you sure you want to delete this image? This action cannot be undone.",
-      )
-    ) {
-      try {
-        await deleteGalleryItem.mutateAsync(itemId);
-      } catch (error) {
-        alert("Error deleting image: " + error.message);
-      }
+  const handleDeleteClick = (itemId) => {
+    setItemToDelete(itemId);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      await deleteGalleryItem.mutateAsync(itemToDelete);
+      setIsDeleteModalOpen(false);
+      setItemToDelete(null);
+    } catch (error) {
+      alert("Error deleting image: " + error.message);
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setIsDeleteModalOpen(false);
+    setItemToDelete(null);
   };
 
   if (isLoading) {
@@ -97,7 +102,6 @@ const UpdateImages = () => {
       <h2 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-8">
         Update Images
       </h2>
-
       {!galleryItems?.length ? (
         <div className="text-center text-gray-400">
           <p>No images found in the gallery.</p>
@@ -167,7 +171,7 @@ const UpdateImages = () => {
                         Edit
                       </button>
                       <button
-                        onClick={() => handleDelete(item._id)}
+                        onClick={() => handleDeleteClick(item._id)}
                         disabled={deleteGalleryItem.isPending}
                         className="flex-1 bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded text-sm"
                       >
@@ -180,6 +184,17 @@ const UpdateImages = () => {
             </div>
           ))}
         </div>
+      )}
+      {createPortal(
+        <DeleteModal
+          isOpen={isDeleteModalOpen}
+          onClose={handleDeleteCancel}
+          onDelete={handleDeleteConfirm}
+          title="Delete Image"
+          message="This action cannot be undone."
+          itemName="this image"
+        />,
+        document.body,
       )}
     </div>
   );

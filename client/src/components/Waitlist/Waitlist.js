@@ -62,7 +62,7 @@ const Waitlist = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrorMessage(""); // Clear previous error messages
+    setErrorMessage("");
 
     if (!waitlistEnabled) {
       setErrorMessage(

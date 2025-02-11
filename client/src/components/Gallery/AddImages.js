@@ -5,12 +5,10 @@ import useGallery from "../../hooks/useGallery";
 import LoadingAnimation from "../Misc/LoadingAnimation";
 
 const AddImages = () => {
-  // Get hooks data
   const { grumbles } = useGrumble();
   const { litters } = useLitter();
   const { uploadGalleryItems } = useGallery();
 
-  // Form state
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [descriptions, setDescriptions] = useState([]);
   const [previews, setPreviews] = useState([]);
@@ -52,6 +50,10 @@ const AddImages = () => {
     setSelectedFiles(newFiles);
     setDescriptions(newDescriptions);
     setPreviews(newPreviews);
+
+    if (newFiles.length === 0 && fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -76,8 +78,6 @@ const AddImages = () => {
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
-
-      alert("Images uploaded successfully!");
     } catch (error) {
       alert("Error uploading images: " + error.message);
     }
