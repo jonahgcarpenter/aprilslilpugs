@@ -79,17 +79,14 @@ const useGallery = () => {
         items: data.items ? data.items.map(formatGalleryItem) : [],
       };
     },
-    onSuccess: (_, variables) => {
-      const { entityType, grumbleId, litterId, puppyId } = variables;
-      queryClient.invalidateQueries({
-        queryKey: [
-          "gallery",
-          {
-            entityType,
-            entityId: grumbleId || litterId,
-            ...(puppyId && { puppyId }),
-          },
-        ],
+    onSuccess: async () => {
+      // First invalidate all gallery queries
+      await queryClient.invalidateQueries({ queryKey: ["gallery"] });
+      // Then force an immediate refetch of all active gallery queries
+      await queryClient.refetchQueries({
+        queryKey: ["gallery"],
+        type: "active",
+        exact: false,
       });
     },
   });
@@ -102,8 +99,13 @@ const useGallery = () => {
       });
       return formatGalleryItem(data);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["gallery"] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["gallery"] });
+      await queryClient.refetchQueries({
+        queryKey: ["gallery"],
+        type: "active",
+        exact: false,
+      });
     },
   });
 
@@ -122,8 +124,13 @@ const useGallery = () => {
       });
       return formatGalleryItem(data);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["gallery"] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["gallery"] });
+      await queryClient.refetchQueries({
+        queryKey: ["gallery"],
+        type: "active",
+        exact: false,
+      });
     },
   });
 
