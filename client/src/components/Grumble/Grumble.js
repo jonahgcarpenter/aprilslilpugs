@@ -57,7 +57,7 @@ const Grumble = () => {
                 return (
                   <div
                     key={pug._id}
-                    className="bg-slate-800/50 rounded-xl overflow-hidden hover:transform hover:scale-[1.02] transition-all duration-300 border border-slate-700/50"
+                    className="bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700/50"
                   >
                     <div className="aspect-square w-full overflow-hidden">
                       {pug.profilePicture && (

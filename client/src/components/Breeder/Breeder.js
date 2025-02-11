@@ -39,7 +39,7 @@ const Breeder = () => {
                   <img
                     src={breeder.profilePicture}
                     alt={`${breeder.firstName} ${breeder.lastName}`}
-                    className="relative w-full h-full object-cover rounded-xl border-2 border-white/10 shadow-xl transform transition-transform duration-300 hover:scale-[1.02]"
+                    className="relative w-full h-full object-cover rounded-xl border-2 border-white/10 shadow-xl"
                   />
                 ) : (
                   <div className="relative w-full h-full rounded-xl border-2 border-white/10 shadow-xl bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
@@ -112,7 +112,7 @@ const Breeder = () => {
           </div>
 
           {breeder.story && (
-            <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 hover:border-white/20 transition-all duration-300">
+            <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
               <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-6">
                 My Journey with Pugs
               </h2>
@@ -132,11 +132,11 @@ const Breeder = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 {breeder.images.map((imageUrl, index) => (
                   <div key={index} className="relative group">
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl transform rotate-3 opacity-20 group-hover:opacity-30 transition-opacity duration-300"></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl transform rotate-3 opacity-20"></div>
                     <img
                       src={imageUrl}
                       alt={`Breeder gallery ${index + 1}`}
-                      className="relative w-full h-72 sm:h-64 object-cover rounded-xl border-2 border-white/10 shadow-xl transform transition-all duration-300 hover:scale-[1.02]"
+                      className="relative w-full h-72 sm:h-64 object-cover rounded-xl border-2 border-white/10 shadow-xl"
                     />
                   </div>
                 ))}

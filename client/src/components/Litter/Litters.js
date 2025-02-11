@@ -47,7 +47,7 @@ const Litters = ({ litters = [], isLoading, littersError }) => {
                   <img
                     src={litter.profilePicture}
                     alt={litter.name}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                    className="w-full h-full object-cover"
                   />
                 </div>
                 <div className="p-8 flex flex-col justify-center">
