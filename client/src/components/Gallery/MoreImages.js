@@ -2,12 +2,14 @@ import React from "react";
 import useGallery from "../../hooks/useGallery";
 import LoadingAnimation from "../Misc/LoadingAnimation";
 
+// BUG: the puppy and litter ids are passed to this component as props, we should only render the images for those ids so we can properly check the array length for the filtered ids
+
 const MoreImages = ({ litters, isLoading, littersError }) => {
   const { useGalleryItems } = useGallery();
 
   const { data: galleryItems, isLoading: isGalleryLoading } = useGalleryItems({
     entityType: "litter",
-    litterIds: litters?.map((litter) => litter._id) || [], // Only get images for current litters
+    litterIds: litters?.map((litter) => litter._id) || [],
   });
 
   if (isLoading || isGalleryLoading) {
