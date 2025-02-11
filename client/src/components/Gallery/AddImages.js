@@ -4,6 +4,8 @@ import { useLitter } from "../../hooks/useLitter";
 import useGallery from "../../hooks/useGallery";
 import LoadingAnimation from "../Misc/LoadingAnimation";
 
+// TODO: need to add a way to check each file size and reject if too large before uploading making it more user friendly
+
 const AddImages = () => {
   const { grumbles } = useGrumble();
   const { litters } = useLitter();

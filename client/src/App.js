@@ -17,9 +17,6 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-// BUG:
-// double check we are properly using axios/react-query request caching to reduce server requests
-
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
