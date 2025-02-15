@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useSettings } from "../hooks/useSettings";
-import { useNotify } from "../hooks/useNotify";
 
 // COMPONENTS
 import UnderConstruction from "../components/Misc/UnderConstruction";
@@ -9,35 +8,9 @@ import StreamDown from "../components/LiveStream/StreamDown";
 import LoadingAnimation from "../components/Misc/LoadingAnimation";
 import { FaInfoCircle, FaTimes } from "react-icons/fa";
 
-const HLS_STREAM_URL = process.env.REACT_APP_HLS_STREAM_URL;
-
 const Live = () => {
-  const { settings, isLoading, toggleStreamDown } = useSettings();
-  const { sendNotification } = useNotify();
+  const { settings, isLoading } = useSettings();
   const [showInfo, setShowInfo] = useState(false);
-
-  useEffect(() => {
-    const checkStreamStatus = async () => {
-      try {
-        const response = await fetch(HLS_STREAM_URL, { method: "HEAD" });
-        const isStreamUnavailable = response.status === 404;
-
-        if (isStreamUnavailable !== settings?.streamDown) {
-          if (isStreamUnavailable && !settings?.streamDown) {
-            sendNotification();
-          }
-          toggleStreamDown();
-        }
-      } catch (error) {
-        if (!settings?.streamDown) {
-          sendNotification();
-          toggleStreamDown();
-        }
-      }
-    };
-
-    checkStreamStatus();
-  }, [settings?.streamDown, toggleStreamDown, sendNotification]);
 
   return (
     <div className="min-h-screen pt-8 pb-16">
@@ -84,11 +57,7 @@ const Live = () => {
               )}
             </div>
 
-            {settings?.streamDown ? (
-              <StreamDown />
-            ) : (
-              <StreamUp streamUrl={HLS_STREAM_URL} />
-            )}
+            {settings?.streamDown ? <StreamDown /> : <StreamUp />}
           </div>
         )}
       </div>

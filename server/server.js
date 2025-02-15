@@ -9,7 +9,6 @@ const grumbleRoutes = require("./routes/grumble");
 const waitlistRoutes = require("./routes/waitlist");
 const settingsRoutes = require("./routes/settings");
 const galleryRoutes = require("./routes/gallery");
-const notifyRoutes = require("./routes/notify");
 
 // Create an express app
 const app = express();
@@ -32,7 +31,6 @@ app.use("/api/grumble", grumbleRoutes);
 app.use("/api/waitlist", waitlistRoutes);
 app.use("/api/settings", settingsRoutes);
 app.use("/api/gallery", galleryRoutes);
-app.use("/api/notify", notifyRoutes);
 
 // Serve static files from the React build directory
 app.use(express.static(path.join(__dirname, "build")));

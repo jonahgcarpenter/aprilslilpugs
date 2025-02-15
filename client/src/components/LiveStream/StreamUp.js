@@ -1,34 +1,48 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import videojs from "video.js";
 import "video.js/dist/video-js.css";
+import { useSettings } from "../../hooks/useSettings";
 
-const StreamUp = ({ streamUrl }) => {
+const HLS_STREAM_URL = process.env.REACT_APP_HLS_STREAM_URL;
+
+const StreamUp = () => {
   const videoRef = useRef(null);
   const playerRef = useRef(null);
-  const [isMounted, setIsMounted] = useState(false);
+  const isHandlingError = useRef(false);
+  const { toggleStreamDown } = useSettings();
 
   useEffect(() => {
-    setIsMounted(true);
-  }, []);
+    if (videoRef.current && !playerRef.current) {
+      setTimeout(() => {
+        if (videoRef.current) {
+          const player = videojs(videoRef.current, {
+            controls: true,
+            fluid: true,
+            preload: "auto",
+            width: 720,
+            autoplay: true,
+            sources: [{ src: HLS_STREAM_URL, type: "application/x-mpegURL" }],
+          });
 
-  useEffect(() => {
-    if (isMounted && videoRef.current) {
-      if (!streamUrl) {
-        return;
-      }
+          // Add error handler for video.js player
+          player.on("error", async () => {
+            if (isHandlingError.current) return; // Prevent duplicate requests
+            isHandlingError.current = true;
 
-      if (!playerRef.current) {
-        const player = videojs(videoRef.current, {
-          controls: true,
-          fluid: true,
-          preload: "auto",
-          width: 720,
-          autoplay: true,
-          sources: [{ src: streamUrl, type: "application/x-mpegURL" }],
-        });
+            try {
+              const response = await fetch(HLS_STREAM_URL, { method: "HEAD" });
+              if (response.status === 404) {
+                toggleStreamDown();
+              }
+            } catch (error) {
+              console.error("Error checking stream status:", error);
+              toggleStreamDown();
+            }
+          });
 
-        playerRef.current = player;
-      }
+          playerRef.current = player;
+        }
+      }, 100);
     }
 
     return () => {
@@ -36,13 +50,12 @@ const StreamUp = ({ streamUrl }) => {
         playerRef.current.dispose();
         playerRef.current = null;
       }
+      isHandlingError.current = false;
     };
-  }, [isMounted, streamUrl]);
+  }, [toggleStreamDown]);
 
   return (
     <div className="relative min-h-[300px]">
-      {" "}
-      {/* Ensures space for the player */}
       <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl transform rotate-1 opacity-20"></div>
       <div className="relative bg-white/5 backdrop-blur-sm rounded-xl overflow-hidden border border-white/10">
         <div data-vjs-player className="aspect-video">

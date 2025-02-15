@@ -1,4 +1,5 @@
 const Settings = require("../models/settingsModel");
+const { sendNotification } = require("../util/notify");
 
 const getSettings = async (req, res) => {
   try {
@@ -42,8 +43,18 @@ const streamDown = async (req, res) => {
   try {
     let settings =
       (await Settings.findOne({})) || (await new Settings().save());
+    const previousState = settings.streamDown;
     settings.streamDown = !settings.streamDown;
     await settings.save();
+
+    if (!previousState && settings.streamDown) {
+      const notificationResult = await sendNotification();
+
+      if (!notificationResult.success) {
+        console.error("Failed to send stream down notification");
+      }
+    }
+
     res.status(200).json({ streamDown: settings.streamDown });
   } catch (error) {
     res.status(500).json({ error: error.message });
