@@ -1,4 +1,26 @@
+import React, { useEffect } from "react";
+import { useSettings } from "../../hooks/useSettings";
+
+const HLS_STREAM_URL = process.env.REACT_APP_HLS_STREAM_URL;
+
 const StreamDown = () => {
+  const { toggleStreamDown } = useSettings();
+
+  useEffect(() => {
+    const checkStreamInterval = setInterval(async () => {
+      try {
+        const response = await fetch(HLS_STREAM_URL, { method: "HEAD" });
+        if (response.status === 200) {
+          toggleStreamDown();
+        }
+      } catch (error) {
+        console.error("Error checking stream status:", error);
+      }
+    }, 30000);
+
+    return () => clearInterval(checkStreamInterval);
+  }, [toggleStreamDown]);
+
   return (
     <div className="relative">
       <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl transform rotate-1 opacity-20"></div>

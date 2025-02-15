@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import videojs from "video.js";
 import "video.js/dist/video-js.css";
 import { useSettings } from "../../hooks/useSettings";
@@ -10,11 +10,17 @@ const StreamUp = () => {
   const playerRef = useRef(null);
   const isHandlingError = useRef(false);
   const { toggleStreamDown } = useSettings();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (videoRef.current && !playerRef.current) {
-      setTimeout(() => {
-        if (videoRef.current) {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
+
+  useEffect(() => {
+    if (mounted && videoRef.current && !playerRef.current) {
+      requestAnimationFrame(() => {
+        if (!playerRef.current) {
           const player = videojs(videoRef.current, {
             controls: true,
             fluid: true,
@@ -24,35 +30,42 @@ const StreamUp = () => {
             sources: [{ src: HLS_STREAM_URL, type: "application/x-mpegURL" }],
           });
 
-          // Add error handler for video.js player
-          player.on("error", async () => {
-            if (isHandlingError.current) return; // Prevent duplicate requests
-            isHandlingError.current = true;
+          const origWarn = videojs.log.warn;
+          videojs.log.warn = function (msg) {
+            if (
+              msg?.includes("Problem encountered with playlist") &&
+              !isHandlingError.current
+            ) {
+              isHandlingError.current = true;
+              toggleStreamDown();
+            }
+            origWarn.apply(this, arguments);
+          };
 
-            try {
-              const response = await fetch(HLS_STREAM_URL, { method: "HEAD" });
-              if (response.status === 404) {
-                toggleStreamDown();
-              }
-            } catch (error) {
-              console.error("Error checking stream status:", error);
+          player.on("error", () => {
+            if (!isHandlingError.current) {
+              isHandlingError.current = true;
               toggleStreamDown();
             }
           });
 
           playerRef.current = player;
         }
-      }, 100);
+      });
     }
 
     return () => {
       if (playerRef.current) {
+        // Restore original warning function
+        if (videojs.log.warn.__original) {
+          videojs.log.warn = videojs.log.warn.__original;
+        }
         playerRef.current.dispose();
         playerRef.current = null;
       }
       isHandlingError.current = false;
     };
-  }, [toggleStreamDown]);
+  }, [mounted, toggleStreamDown]);
 
   return (
     <div className="relative min-h-[300px]">
