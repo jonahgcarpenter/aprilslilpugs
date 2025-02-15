@@ -10,6 +10,10 @@ const settingsSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    streamDown: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true },
 );

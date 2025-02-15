@@ -39,6 +39,13 @@ export const toggleLive = async () => {
   return response.data;
 };
 
+// TOGGLE STREAM DOWN
+// POST /api/settings/stream-down
+export const toggleStreamDown = async () => {
+  const response = await axios.post("/api/settings/stream-down");
+  return response.data;
+};
+
 // HOOK FOR SETTINGS
 export const useSettings = () => {
   const queryClient = useQueryClient();
@@ -69,6 +76,14 @@ export const useSettings = () => {
     },
   });
 
+  // Toggle stream down mutation
+  const toggleStreamDownMutation = useMutation({
+    mutationFn: toggleStreamDown,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["settings"]);
+    },
+  });
+
   return {
     settings,
     error,
@@ -76,6 +91,7 @@ export const useSettings = () => {
     toggleWaitlist: toggleWaitlistMutation.mutate,
     toggleWaitlistLoading: toggleWaitlistMutation.isLoading,
     toggleLive: toggleLiveMutation.mutate,
+    toggleStreamDown: toggleStreamDownMutation.mutate,
     toggleLiveLoading: toggleLiveMutation.isLoading,
   };
 };

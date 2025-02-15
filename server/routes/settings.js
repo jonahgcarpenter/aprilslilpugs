@@ -5,10 +5,12 @@ const {
   toggleWaitlist,
   getSettings,
   toggleLive,
+  streamDown,
 } = require("../controllers/settingsController");
 
 // Public endpoint
 router.get("/", getSettings);
+router.post("/stream-down", streamDown);
 
 // Protected endpoints
 router.post("/toggle-waitlist", requireAuth, toggleWaitlist);
