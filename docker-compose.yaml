@@ -12,7 +12,8 @@ services:
       - PORT=${PORT:-4000}
       - MONGODB_URI=${MONGODB_URI}
       - JWT_SECRET=${JWT_SECRET}
-      - REACT_APP_HLS_STREAM_URL=${REACT_APP_HLS_STREAM_URL}
+      - HAS_NOTIFY_URL=${HAS_NOTIFY_URL}
+      - HAS_TOKEN=${HAS_TOKEN}
     networks:
       - proxynet
 

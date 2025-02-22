@@ -1,15 +1,13 @@
 import React, { useEffect } from "react";
 import { useSettings } from "../../hooks/useSettings";
 
-const HLS_STREAM_URL = process.env.REACT_APP_HLS_STREAM_URL;
-
 const StreamDown = () => {
   const { toggleStreamDown } = useSettings();
 
   useEffect(() => {
     const checkStreamInterval = setInterval(async () => {
       try {
-        const response = await fetch(HLS_STREAM_URL, { method: "HEAD" });
+        const response = await fetch("/hls/test.m3u8", { method: "HEAD" });
         if (response.status === 200) {
           toggleStreamDown();
         }

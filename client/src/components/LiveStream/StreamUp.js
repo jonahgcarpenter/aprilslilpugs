@@ -3,8 +3,6 @@ import videojs from "video.js";
 import "video.js/dist/video-js.css";
 import { useSettings } from "../../hooks/useSettings";
 
-const HLS_STREAM_URL = process.env.REACT_APP_HLS_STREAM_URL;
-
 const StreamUp = () => {
   const videoRef = useRef(null);
   const playerRef = useRef(null);
@@ -27,7 +25,7 @@ const StreamUp = () => {
             preload: "auto",
             width: 720,
             autoplay: true,
-            sources: [{ src: HLS_STREAM_URL, type: "application/x-mpegURL" }],
+            sources: [{ src: "/hls/test.m3u8", type: "application/x-mpegURL" }],
           });
 
           const origWarn = videojs.log.warn;
@@ -56,7 +54,6 @@ const StreamUp = () => {
 
     return () => {
       if (playerRef.current) {
-        // Restore original warning function
         if (videojs.log.warn.__original) {
           videojs.log.warn = videojs.log.warn.__original;
         }
