@@ -1,12 +1,17 @@
-# April's Lil Pugs [DockerHub](https://hub.docker.com/r/jonahgcarpenter/aprilslilpugs)
+# April's Lil Pugs
 
-A website for my moms buisness, in which I have tailored to her request.
+[View on DockerHub](https://hub.docker.com/r/jonahgcarpenter/aprilslilpugs)
+
+A custom website built for my mom’s business, tailored to her specific needs.
 
 ## Technologies
 
-### [LOCAL RTSP STREAM SERVER](https://github.com/JamiePhonic/rtmps-hls-server)
+### Local RTSP Stream Server
 
-- using a separate docker container, I self-host a RTSP stream server for the live puppy cam
+[GitHub Repository](https://github.com/JamiePhonic/rtmps-hls-server)
+
+- Self-hosted RTSP stream server running in a separate Docker container
+- Provides a live stream for the puppy cam
 
 ### MERN Stack
 
