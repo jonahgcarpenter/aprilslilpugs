@@ -25,7 +25,12 @@ const StreamUp = () => {
             preload: "auto",
             width: 720,
             autoplay: true,
-            sources: [{ src: "/hls/test.m3u8", type: "application/x-mpegURL" }],
+            sources: [
+              {
+                src: "/hls/test.m3u8",
+                type: "application/x-mpegURL",
+              },
+            ],
           });
 
           const origWarn = videojs.log.warn;

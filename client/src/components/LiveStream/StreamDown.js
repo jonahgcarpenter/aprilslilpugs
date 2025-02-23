@@ -33,7 +33,8 @@ const StreamDown = () => {
           <div className="bg-black/50 px-6 py-3 rounded-lg relative z-10">
             <p className="text-xl text-white">
               Stream is currently offline, we are aware of this issue and are
-              working to resolve it!
+              working to resolve it! Once it is back online the stream will
+              automaticlly reappear.
             </p>
           </div>
         </div>
