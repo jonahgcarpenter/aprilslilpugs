@@ -1,7 +1,6 @@
 # FRONTEND
 node_modules/
 build/
-setupProxy.js
 
 # BACKEND
 .env
