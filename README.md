@@ -14,8 +14,4 @@ A website for my moms buisness, in which I have tailored to her request.
 - Express
 - React
 - Node
-
-## TODO
-
-- create separate branch for server/ to make it easy for unraid
-
+- Docker
