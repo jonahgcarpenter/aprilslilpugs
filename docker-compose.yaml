@@ -14,9 +14,3 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - HAS_NOTIFY_URL=${HAS_NOTIFY_URL}
       - HAS_TOKEN=${HAS_TOKEN}
-    networks:
-      - proxynet
-
-networks:
-  proxynet:
-    external: true
