@@ -258,7 +258,7 @@ const UpdateBreeder = () => {
             {galleryPreviews.map((preview, index) => (
               <div key={index} className="space-y-4">
                 {preview ? (
-                  <div className="mb-4 relative w-full h-48">
+                  <div className="mb-4 relative w-full h-64 sm:h-80 md:h-96">
                     <img
                       src={preview}
                       alt={`Gallery ${index + 1}`}

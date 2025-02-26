@@ -136,7 +136,7 @@ const Breeder = () => {
                     <img
                       src={imageUrl}
                       alt={`Breeder gallery ${index + 1}`}
-                      className="relative w-full h-72 sm:h-64 object-cover rounded-xl border-2 border-white/10 shadow-xl"
+                      className="relative w-full h-64 sm:h-80 md:h-96 object-cover rounded-xl border-2 border-white/10 shadow-xl"
                     />
                   </div>
                 ))}

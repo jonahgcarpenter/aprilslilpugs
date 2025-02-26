@@ -70,7 +70,7 @@ const StreamUp = () => {
   }, [mounted, toggleStreamDown]);
 
   return (
-    <div className="relative min-h-[300px]">
+    <div className="relative">
       <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl transform rotate-1 opacity-20"></div>
       <div className="relative bg-white/5 backdrop-blur-sm rounded-xl overflow-hidden border border-white/10">
         <div data-vjs-player className="aspect-video">
