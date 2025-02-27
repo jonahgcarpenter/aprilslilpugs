@@ -76,8 +76,13 @@ const Navbar = () => {
               )
             }
           >
-            <h1 className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 text-3xl sm:text-4xl font-extrabold text-center tracking-wider px-4">
+            <h1 className="flex items-center justify-center text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 text-3xl sm:text-4xl font-extrabold text-center tracking-wider px-4">
               April's Lil Pugs
+              <img
+                src="/favicon.ico"
+                alt="Logo"
+                className="w-9 h-9 ml-8 transform rotate-[-10deg]"
+              />
             </h1>
           </Link>
 
