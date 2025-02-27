@@ -1,5 +1,6 @@
 const Waitlist = require("../models/waitlistModel");
 const mongoose = require("mongoose");
+const { sendNewEntryNotification } = require("../util/email");
 
 // Get all waitlist entries
 const getAllEntries = async (req, res) => {
@@ -24,6 +25,13 @@ const createEntry = async (req, res) => {
     });
 
     await entry.save();
+
+    try {
+      await sendNewEntryNotification(entry);
+    } catch (emailError) {
+      console.error("Failed to send email notification:", emailError);
+    }
+
     res.status(201).json(entry);
   } catch (error) {
     console.error("Error creating waitlist entry:", error);
@@ -87,10 +95,8 @@ const deleteEntry = async (req, res) => {
 
     const deletedPosition = entry.position;
 
-    // Delete the entry
     await entry.deleteOne();
 
-    // Update positions for all entries after the deleted one
     await Waitlist.updateMany(
       { position: { $gt: deletedPosition } },
       { $inc: { position: -1 } },
