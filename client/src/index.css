@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin 'tailwind-scrollbar';
 
 body {
   background-image: url("./assets/background.png");
