@@ -3,7 +3,9 @@ import BreederInfo from "../components/Breeder/BreederInfo";
 const Home = () => {
   return (
     <div className="min-h-screen pt-8 pb-16">
-      <BreederInfo />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-12">
+        <BreederInfo />
+      </div>
     </div>
   );
 };
