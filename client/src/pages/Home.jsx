@@ -1,7 +1,9 @@
+import BreederInfo from "../components/Breeder/BreederInfo";
+
 const Home = () => {
   return (
-    <div>
-      <h1 className="text-red-500 font-bold">Home</h1>
+    <div className="min-h-screen pt-8 pb-16">
+      <BreederInfo />
     </div>
   );
 };
