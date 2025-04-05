@@ -1,4 +1,12 @@
+import {
+  FaMars,
+  FaVenus,
+  FaBirthdayCake,
+  FaCalendarCheck,
+} from "react-icons/fa";
+
 const Litters = ({ litters, onLitterClick, title }) => {
+  // Function to format YYYY-MM-DD date string to "Month Day, Year" format
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
@@ -9,6 +17,7 @@ const Litters = ({ litters, onLitterClick, title }) => {
     });
   };
 
+  // Function that used for determining if it should say "Expected By" or "Born on"
   const isFutureDate = (dateString) => {
     const date = new Date(dateString);
     const today = new Date();
@@ -42,19 +51,7 @@ const Litters = ({ litters, onLitterClick, title }) => {
                     </h2>
                     <div className="space-y-4 text-lg text-slate-300">
                       <p className="flex items-center gap-2">
-                        <svg
-                          className="w-5 h-5 text-blue-400"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                          />
-                        </svg>
+                        <FaBirthdayCake className="w-5 h-5 text-green-400" />
                         <span>
                           {isFutureDate(litter.birthDate)
                             ? "Expected By:"
@@ -63,53 +60,17 @@ const Litters = ({ litters, onLitterClick, title }) => {
                         </span>
                       </p>
                       <p className="flex items-center gap-2">
-                        <svg
-                          className="w-5 h-5 text-blue-400"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
+                        <FaCalendarCheck className="w-5 h-5 text-blue-400" />
                         <span>
                           Available on: {formatDate(litter.availableDate)}
                         </span>
                       </p>
                       <p className="flex items-center gap-2">
-                        <svg
-                          className="w-5 h-5 text-blue-400"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                          />
-                        </svg>
+                        <FaVenus className="w-5 h-5 text-pink-400" />
                         <span>Mother: {litter.mother}</span>
                       </p>
                       <p className="flex items-center gap-2">
-                        <svg
-                          className="w-5 h-5 text-blue-400"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                          />
-                        </svg>
+                        <FaMars className="w-5 h-5 text-blue-400" />
                         <span>Father: {litter.father}</span>
                       </p>
                     </div>

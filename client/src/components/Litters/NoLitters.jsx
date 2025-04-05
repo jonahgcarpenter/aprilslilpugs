@@ -5,10 +5,18 @@ const NoLitters = () => {
   return (
     <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-12">
+        <h1 className="text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 text-center tracking-wider px-4">
+          Current Litters
+        </h1>
         <div className="space-y-8">
           <div className="bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700/50">
             <div className="grid grid-cols-1 lg:grid-cols-2">
-              <div className="aspect-square w-full overflow-hidden bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
+              <div className="aspect-square w-full overflow-hidden flex items-center justify-center relative">
+                <img
+                  src="/logo.PNG"
+                  alt="Logo"
+                  className="absolute inset-0 w-full h-full object-cover blur-sm opacity-15"
+                />
                 <div className="text-center p-8">
                   <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6 rounded-full bg-blue-500/10 flex items-center justify-center">
                     <svg
@@ -36,8 +44,8 @@ const NoLitters = () => {
                 </h2>
                 <div className="space-y-6 text-lg text-slate-300">
                   <p>
-                    We currently do not have any available puppies. Stay
-                    connected for updates on upcoming litters!
+                    We currently do not have any available puppies. Follow us on
+                    facebook for updates on upcoming litters!
                   </p>
                   <div className="flex flex-col sm:flex-row gap-4">
                     <a
