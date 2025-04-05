@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import {
   FaMars,
   FaVenus,
@@ -5,7 +6,9 @@ import {
   FaCalendarCheck,
 } from "react-icons/fa";
 
-const Litters = ({ litters, onLitterClick, title }) => {
+const Litters = ({ litters, title }) => {
+  const navigate = useNavigate();
+
   // Function to format YYYY-MM-DD date string to "Month Day, Year" format
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -75,10 +78,10 @@ const Litters = ({ litters, onLitterClick, title }) => {
                       </p>
                     </div>
                     <button
-                      onClick={() => onLitterClick(litter)}
+                      onClick={() => navigate(`/nursery/${litter.id}`)}
                       className="mt-8 w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-blue-600/20 to-blue-500/20 hover:from-blue-600/30 hover:to-blue-500/30 text-blue-400 rounded-xl border border-blue-500/20 transition-all duration-300 hover:scale-105"
                     >
-                      View Puppies
+                      View Litter
                     </button>
                   </div>
                 </div>

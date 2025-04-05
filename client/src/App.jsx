@@ -7,6 +7,7 @@ import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import OurAdults from "./pages/OurAdults";
 import Nursery from "./pages/Nursery";
+import ViewLitter from "./pages/ViewLitter";
 import LivePuppyCam from "./pages/LivePuppyCam";
 import PastLitters from "./pages/PastLitters";
 import Gallery from "./pages/Gallery";
@@ -20,6 +21,7 @@ function App() {
         <Route path="/live" element={<LivePuppyCam />} />
         <Route path="/our-adults" element={<OurAdults />} />
         <Route path="/nursery" element={<Nursery />} />
+        <Route path="/nursery/:litterId" element={<ViewLitter />} />
         <Route path="/past-litters" element={<PastLitters />} />
         <Route path="/gallery" element={<Gallery />} />
       </Routes>
