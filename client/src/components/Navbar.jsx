@@ -6,8 +6,6 @@ const Navbar = () => {
 
   const navLinks = [
     { to: "/", label: "Home" },
-    { to: "/our-adults", label: "Our Adults" },
-    { to: "/nursery", label: "Nursery" },
     {
       to: "/live",
       label: (
@@ -17,6 +15,8 @@ const Navbar = () => {
         </div>
       ),
     },
+    { to: "/our-adults", label: "Our Adults" },
+    { to: "/nursery", label: "Nursery" },
     { to: "/past-litters", label: "Past Litters" },
     { to: "/gallery", label: "Gallery" },
   ];

@@ -24,7 +24,7 @@ const calculateAge = (birthDateString) => {
   return age;
 };
 
-const GrumbleInfo = ({ grumbles }) => {
+const GrumbleInfo = ({ grumble }) => {
   return (
     <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-12">
@@ -33,7 +33,7 @@ const GrumbleInfo = ({ grumbles }) => {
         </h1>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {grumbles
+          {grumble
             .sort(
               (a, b) => calculateAge(b.birthDate) - calculateAge(a.birthDate),
             )
