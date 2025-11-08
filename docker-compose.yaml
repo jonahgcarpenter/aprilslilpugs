@@ -1,8 +1,7 @@
 services:
-  alp:
-    build:
-      context: ./
-      dockerfile: Dockerfile
+  alp_web:
+    container_name: alp_web
+    image: ghcr.io/jonahgcarpenter/aprilslilpugs/aprilslilpugs:latest
     ports:
       - "${PORT:-4000}:${PORT:-4000}"
     volumes:
