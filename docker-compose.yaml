@@ -1,7 +1,7 @@
 services:
   alp:
     build:
-      context: ./server
+      context: ./
       dockerfile: Dockerfile
     ports:
       - "${PORT:-4000}:${PORT:-4000}"
