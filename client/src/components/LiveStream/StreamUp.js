@@ -1,83 +1,68 @@
-import React, { useEffect, useRef, useState } from "react";
-import videojs from "video.js";
-import "video.js/dist/video-js.css";
+import React, { useEffect, useRef } from "react";
+import Hls from "hls.js"; // Import hls.js
 import { useSettings } from "../../hooks/useSettings";
 
 const StreamUp = () => {
   const videoRef = useRef(null);
-  const playerRef = useRef(null);
+  const hlsRef = useRef(null);
   const isHandlingError = useRef(false);
   const { toggleStreamDown } = useSettings();
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
-    return () => setMounted(false);
-  }, []);
+    const video = videoRef.current;
+    if (!video) return;
 
-  useEffect(() => {
-    if (mounted && videoRef.current && !playerRef.current) {
-      requestAnimationFrame(() => {
-        if (!playerRef.current) {
-          const player = videojs(videoRef.current, {
-            controls: true,
-            fluid: true,
-            preload: "auto",
-            width: 720,
-            autoplay: true,
-            sources: [
-              {
-                src: "/hls/test.m3u8",
-                type: "application/x-mpegURL",
-              },
-            ],
-          });
+    if (Hls.isSupported()) {
+      const hls = new Hls();
+      hlsRef.current = hls;
 
-          const origWarn = videojs.log.warn;
-          videojs.log.warn = function (msg) {
-            if (
-              msg?.includes("Problem encountered with playlist") &&
-              !isHandlingError.current
-            ) {
-              isHandlingError.current = true;
-              toggleStreamDown();
-            }
-            origWarn.apply(this, arguments);
-          };
+      hls.loadSource("/hls/test.m3u8");
+      hls.attachMedia(video);
 
-          player.on("error", () => {
-            if (!isHandlingError.current) {
-              isHandlingError.current = true;
-              toggleStreamDown();
-            }
-          });
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        video.play().catch(() => {
+          console.log("Autoplay was prevented.");
+        });
+      });
 
-          playerRef.current = player;
+      hls.on(Hls.Events.ERROR, (event, data) => {
+        if (data.fatal && !isHandlingError.current) {
+          console.error("HLS.js fatal error:", data);
+          isHandlingError.current = true; // Prevent multiple triggers
+          toggleStreamDown(); // Switch to the "StreamDown" component
         }
+      });
+    } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+      // Fallback for native HLS support (like Safari)
+      video.src = "/hls/test.m3u8";
+      video.addEventListener("loadedmetadata", () => {
+        video.play().catch(() => {
+          console.log("Autoplay was prevented.");
+        });
       });
     }
 
     return () => {
-      if (playerRef.current) {
-        if (videojs.log.warn.__original) {
-          videojs.log.warn = videojs.log.warn.__original;
-        }
-        playerRef.current.dispose();
-        playerRef.current = null;
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
       }
       isHandlingError.current = false;
     };
-  }, [mounted, toggleStreamDown]);
+  }, [toggleStreamDown]);
 
   return (
     <div className="relative">
       <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl transform rotate-1 opacity-20"></div>
       <div className="relative bg-white/5 backdrop-blur-sm rounded-xl overflow-hidden border border-white/10">
-        <div data-vjs-player className="aspect-video">
+        <div className="aspect-video">
           <video
             ref={videoRef}
-            className="video-js vjs-default-skin vjs-big-play-centered"
+            controls
+            autoPlay
+            muted
             playsInline
+            style={{ width: "100%", height: "100%" }}
           />
         </div>
       </div>
