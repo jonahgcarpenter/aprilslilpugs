@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import Hls from "hls.js"; // Import hls.js
+import Hls from "hls.js";
 import { useSettings } from "../../hooks/useSettings";
 
 const StreamUp = () => {
@@ -13,7 +13,12 @@ const StreamUp = () => {
     if (!video) return;
 
     if (Hls.isSupported()) {
-      const hls = new Hls();
+      const hls = new Hls({
+        manifestLoadingTimeOut: 10000,
+        manifestLoadingMaxRetry: 3,
+        levelLoadingTimeOut: 10000,
+        levelLoadingMaxRetry: 3,
+      });
       hlsRef.current = hls;
 
       hls.loadSource("/hls/test.m3u8");
@@ -26,19 +31,41 @@ const StreamUp = () => {
       });
 
       hls.on(Hls.Events.ERROR, (event, data) => {
-        if (data.fatal && !isHandlingError.current) {
-          console.error("HLS.js fatal error:", data);
-          isHandlingError.current = true; // Prevent multiple triggers
-          toggleStreamDown(); // Switch to the "StreamDown" component
+        if (data.fatal) {
+          switch (data.type) {
+            case Hls.ErrorTypes.NETWORK_ERROR:
+              console.warn(
+                "Fatal network error encountered, trying to recover...",
+              );
+              hls.startLoad();
+              break;
+            case Hls.ErrorTypes.MEDIA_ERROR:
+              console.warn(
+                "Fatal media error encountered, trying to recover...",
+              );
+              hls.recoverMediaError();
+              break;
+            default:
+              if (!isHandlingError.current) {
+                console.error("Unrecoverable HLS.js fatal error:", data);
+                isHandlingError.current = true;
+                hls.destroy();
+                toggleStreamDown();
+              }
+              break;
+          }
         }
       });
     } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-      // Fallback for native HLS support (like Safari)
       video.src = "/hls/test.m3u8";
       video.addEventListener("loadedmetadata", () => {
         video.play().catch(() => {
           console.log("Autoplay was prevented.");
         });
+      });
+
+      video.addEventListener("error", (e) => {
+        console.error("Native Video Error", e);
       });
     }
 

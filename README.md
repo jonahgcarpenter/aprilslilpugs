@@ -1,7 +1,5 @@
 # April's Lil Pugs
 
-[View on DockerHub](https://hub.docker.com/r/jonahgcarpenter/aprilslilpugs)
-
 A custom website built for my mom’s business, tailored to her specific needs.
 
 ## Technologies
@@ -20,3 +18,7 @@ A custom website built for my mom’s business, tailored to her specific needs.
 - React
 - Node
 - Docker
+
+## TODO:
+
+- Completely rewrite using a newer stack and postgres db

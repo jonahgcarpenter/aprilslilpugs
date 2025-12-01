@@ -11,10 +11,8 @@ const StreamDown = () => {
         if (response.status === 200) {
           toggleStreamDown();
         }
-      } catch (error) {
-        console.error("Error checking stream status:", error);
-      }
-    }, 30000);
+      } catch (error) {}
+    }, 5000);
 
     return () => clearInterval(checkStreamInterval);
   }, [toggleStreamDown]);
@@ -34,7 +32,7 @@ const StreamDown = () => {
             <p className="text-xl text-white">
               Stream is currently offline, we are aware of this issue and are
               working to resolve it! Once it is back online the stream will
-              automaticlly reappear.
+              automatically reappear.
             </p>
           </div>
         </div>
