@@ -22,3 +22,5 @@ A custom website built for my mom’s business, tailored to her specific needs.
 ## TODO:
 
 - Completely rewrite using a newer stack and postgres db
+- Traffic analytics
+- Post on the website mirror facebook?
