@@ -1,6 +1,6 @@
 import useSWR, { mutate } from "swr";
 import axios from "axios";
-// import { getToken } from "../utils/Auth";
+// import { getToken } from "../utils/auth";
 
 const BREEDER_API_URL = "/api/breeder/profile";
 const IMAGE_BASE_URL = "/api/images/uploads/breeder-profiles/";

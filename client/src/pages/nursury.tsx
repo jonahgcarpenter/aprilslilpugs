@@ -1,9 +1,19 @@
 import Litters from "../components/litters/litters";
+import Waitlist from "../components/waitlist/waitlist";
 import { useLitter } from "../hooks/uselitter";
+import { useWaitlist } from "../hooks/usewaitlist";
+import { useSettings } from "../hooks/usesettings";
 import type { Litter } from "../hooks/uselitter";
 
 const Nursery = () => {
-  const { litters, isLoading, error } = useLitter();
+  const {
+    litters,
+    isLoading: isLittersLoading,
+    error: littersError,
+  } = useLitter();
+
+  const { createEntry, entries } = useWaitlist();
+  const { settings, isLoading: isSettingsLoading } = useSettings();
 
   const currentLitters =
     litters?.filter((litter: Litter) => {
@@ -21,10 +31,16 @@ const Nursery = () => {
   return (
     <div className="min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-12">
+        <Waitlist
+          createEntry={createEntry}
+          entries={entries}
+          settings={settings}
+          isLoadingSettings={isSettingsLoading}
+        />
         <Litters
           litters={currentLitters}
-          isLoading={isLoading}
-          littersError={error}
+          isLoading={isLittersLoading}
+          littersError={littersError}
         />
       </div>
     </div>

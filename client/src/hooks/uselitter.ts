@@ -1,6 +1,6 @@
 import useSWR, { mutate } from "swr";
 import axios from "axios";
-// import { getToken } from "../utils/Auth";
+import { getToken } from "../utils/auth";
 
 const API_BASE_URL = "/api/litters";
 const LITTER_IMAGE_BASE_URL = "/api/images/uploads/litter-images/";
