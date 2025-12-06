@@ -1,1 +1,13 @@
 @import "tailwindcss";
+
+body {
+  background-image: url("/background.png");
+
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed; /* Creates the parallax effect */
+  background-repeat: no-repeat;
+
+  /* Fallback color (loads instantly while image downloads) */
+  background-color: #f0f9ff;
+}

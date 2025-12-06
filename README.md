@@ -11,16 +11,8 @@ A custom website built for my mom’s business, tailored to her specific needs.
 - Self-hosted RTSP stream server running in a separate Docker container
 - Provides a live stream for the puppy cam
 
-### MERN Stack
-
-- MongoDB
-- Express
-- React
-- Node
-- Docker
-
 ## TODO:
 
-- Completely rewrite using a newer stack and postgres db
+- Stale-While-Revalidate instead of useEffect
 - Traffic analytics
 - Post on the website mirror facebook?
