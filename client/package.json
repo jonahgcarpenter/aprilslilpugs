@@ -1,48 +1,32 @@
 {
   "name": "client",
-  "version": "0.1.0",
   "private": true,
-  "proxy": "http://localhost:4000",
-  "dependencies": {
-    "@tanstack/react-query": "^5.66.0",
-    "axios": "^1.7.9",
-    "cra-template": "1.2.0",
-    "framer-motion": "^11.15.0",
-    "hls.js": "^1.6.14",
-    "jwt-decode": "^4.0.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "react-icons": "^5.4.0",
-    "react-router-dom": "^7.1.1",
-    "react-scripts": "5.0.1",
-    "tailwindcss": "^3.4.17",
-    "video.js": "^8.21.0"
-  },
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "start": "react-scripts start",
-    "build": "BUILD_PATH='../server/build' react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+  "dependencies": {
+    "@tailwindcss/vite": "^4.1.17",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "tailwindcss": "^4.1.17"
   },
   "devDependencies": {
-    "tailwind-scrollbar": "^3.1.0"
+    "@eslint/js": "^9.39.1",
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.5",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react-swc": "^4.2.2",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "globals": "^16.5.0",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.46.4",
+    "vite": "^7.2.4"
   }
 }
