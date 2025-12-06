@@ -1,5 +1,7 @@
+import AboutMe from "../components/breeder/about-me";
+
 const Home = () => {
-  return <h1>Home</h1>;
+  return <AboutMe />;
 };
 
 export default Home;

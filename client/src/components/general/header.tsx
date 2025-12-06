@@ -10,7 +10,7 @@ export default function Header() {
   }, [location.pathname]);
 
   return (
-    <header className="bg-slate-900/95 backdrop-blur-sm border-b border-slate-800/50 sticky top-0 z-50">
+    <header className="bg-slate-900/95 backdrop-blur-sm border-b border-slate-800/50 sticky top-0 z-50 mb-4">
       <div className="container mx-auto px-4 max-w-7xl py-6">
         <div className="flex flex-col items-center">
           <a href="/" className="group">
