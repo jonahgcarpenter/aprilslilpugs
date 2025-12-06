@@ -6,21 +6,45 @@ import {
   FaFacebook,
 } from "react-icons/fa";
 
-// --- Hardcoded Test Data ---
-const breeder = {
-  firstName: "April",
-  lastName: "Carpenter",
-  profilePicture: "/logo.jpg",
-  location: "Tupelo, MS",
-  email: "contact@aprilslilpugs.com",
-  phoneNumber: "(662) 555-0199",
-  story: `My name is April Carpenter. I fell in love with pugs when I was 5. At 7 I finally talked my parents into getting a pug. Sugar was my faithful companion until just before my 21st birthday.
+export interface Breeder {
+  firstName: string;
+  lastName: string;
+  profilePicture?: string | null;
+  location: string;
+  email: string;
+  phoneNumber: string;
+  story: string;
+  images: (string | null)[];
+}
 
-  I got married soon after that and my husband swore, we were never getting a pug. 20 years later I gave up and brought my baby Winston home. It didn't take long before we were both in love. Our love for pugs and the breed in general nudged us to start breeding quality companion pugs.`,
-  images: ["/background.png", "/logo.jpg"],
-};
+interface AboutMeProps {
+  breeder: Breeder | null;
+  isLoading: boolean;
+  error: any;
+}
 
-const AboutMe = () => {
+const AboutMe = ({ breeder, isLoading, error }: AboutMeProps) => {
+  if (isLoading) {
+    return (
+      <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-12 border border-slate-800/50 shadow-xl flex justify-center">
+        {/* TODO: LoadingAnimation component */}
+        <span className="text-blue-400 font-semibold animate-pulse">
+          Loading...
+        </span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center text-red-400 p-8 bg-slate-900/80 rounded-xl">
+        Failed to load breeder profile.
+      </div>
+    );
+  }
+
+  if (!breeder) return null;
+
   return (
     <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">
       <div className="relative mb-8">
@@ -61,7 +85,7 @@ const AboutMe = () => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {breeder.location && (
           <a
-            href={`https://maps.google.com/?q=${encodeURIComponent(breeder.location)}`}
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(breeder.location)}`}
             target="_blank"
             rel="noopener noreferrer"
             className="group bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10 hover:border-white/20 transition-all duration-300 flex flex-col items-center justify-center gap-2"
@@ -122,16 +146,19 @@ const AboutMe = () => {
             My Gallery
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-            {breeder.images.map((imageUrl, index) => (
-              <div key={index} className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl transform rotate-3 opacity-20"></div>
-                <img
-                  src={imageUrl}
-                  alt={`Breeder gallery ${index + 1}`}
-                  className="relative w-full h-64 sm:h-80 md:h-96 object-cover rounded-xl border-2 border-white/10 shadow-xl"
-                />
-              </div>
-            ))}
+            {breeder.images.map((imageUrl, index) => {
+              if (!imageUrl) return null;
+              return (
+                <div key={index} className="relative group">
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl transform rotate-3 opacity-20"></div>
+                  <img
+                    src={imageUrl}
+                    alt={`Breeder gallery ${index + 1}`}
+                    className="relative w-full h-64 sm:h-80 md:h-96 object-cover rounded-xl border-2 border-white/10 shadow-xl"
+                  />
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
