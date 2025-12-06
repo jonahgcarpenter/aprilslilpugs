@@ -5,17 +5,7 @@ import {
   FaPhoneAlt,
   FaFacebook,
 } from "react-icons/fa";
-
-export interface Breeder {
-  firstName: string;
-  lastName: string;
-  profilePicture?: string | null;
-  location: string;
-  email: string;
-  phoneNumber: string;
-  story: string;
-  images: (string | null)[];
-}
+import type { Breeder } from "../../hooks/usebreeder";
 
 interface AboutMeProps {
   breeder: Breeder | null;

@@ -5,6 +5,17 @@ import axios from "axios";
 const BREEDER_API_URL = "/api/breeder/profile";
 const IMAGE_BASE_URL = "/api/images/uploads/breeder-profiles/";
 
+export interface Breeder {
+  firstName: string;
+  lastName: string;
+  profilePicture?: string | null;
+  location: string;
+  email: string;
+  phoneNumber: string;
+  story: string;
+  images: (string | null)[];
+}
+
 const fetchBreeder = async (url: string) => {
   const response = await axios.get(url);
   const breeder = response.data;
