@@ -17,7 +17,6 @@ const AboutMe = ({ breeder, isLoading, error }: AboutMeProps) => {
   if (isLoading) {
     return (
       <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-12 border border-slate-800/50 shadow-xl flex justify-center">
-        {/* TODO: LoadingAnimation component */}
         <span className="text-blue-400 font-semibold animate-pulse">
           Loading...
         </span>
@@ -75,7 +74,7 @@ const AboutMe = ({ breeder, isLoading, error }: AboutMeProps) => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {breeder.location && (
           <a
-            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(breeder.location)}`}
+            href={`https://maps.google.com/?q=${encodeURIComponent(breeder.location)}`}
             target="_blank"
             rel="noopener noreferrer"
             className="group bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10 hover:border-white/20 transition-all duration-300 flex flex-col items-center justify-center gap-2"
@@ -95,9 +94,9 @@ const AboutMe = ({ breeder, isLoading, error }: AboutMeProps) => {
             <span className="text-white/80 text-sm text-center">Email Me</span>
           </a>
         )}
-        {breeder.phoneNumber && (
+        {breeder.phone && (
           <a
-            href={`tel:${breeder.phoneNumber}`}
+            href={`tel:${breeder.phone}`}
             className="group bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10 hover:border-white/20 transition-all duration-300 flex flex-col items-center justify-center gap-2"
           >
             <FaPhoneAlt className="text-2xl text-blue-400 group-hover:scale-110 transition-transform duration-300" />
@@ -115,15 +114,15 @@ const AboutMe = ({ breeder, isLoading, error }: AboutMeProps) => {
         </a>
       </div>
 
-      {/* Story Section */}
-      {breeder.story && (
+      {/* Description Section */}
+      {breeder.description && (
         <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
           <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-6">
             My Journey with Pugs
           </h2>
           <div className="prose prose-invert max-w-none">
             <p className="text-white/90 whitespace-pre-line leading-relaxed text-base">
-              {breeder.story}
+              {breeder.description}
             </p>
           </div>
         </div>

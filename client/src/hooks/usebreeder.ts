@@ -1,61 +1,84 @@
-import useSWR, { mutate } from "swr";
+import useSWR from "swr";
 import axios from "axios";
-// import { getToken } from "../utils/auth";
+import { mockBreeder } from "../data/breeder";
+import { mockImages } from "../data/images";
 
-const BREEDER_API_URL = "/api/breeder/profile";
-const IMAGE_BASE_URL = "/api/images/uploads/breeder-profiles/";
-
-export interface Breeder {
-  firstName: string;
-  lastName: string;
-  profilePicture?: string | null;
-  location: string;
+interface RawBreederResponse {
+  id: string;
+  firstname: string;
+  lastname: string;
   email: string;
-  phoneNumber: string;
-  story: string;
-  images: (string | null)[];
+  phone: string;
+  location: string;
+  description: string;
+  profile_picture_id: string;
+  image_ids?: string;
 }
 
-const fetchBreeder = async (url: string) => {
-  const response = await axios.get(url);
-  const breeder = response.data;
+export interface Breeder {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  location: string;
+  description: string;
+  profilePicture: string;
+  images: string[];
+}
 
-  return {
-    ...breeder,
-    profilePicture: breeder.profilePicture
-      ? `${IMAGE_BASE_URL}${breeder.profilePicture}`
-      : null,
-    images: breeder.images
-      ? breeder.images.map((filename: string) =>
-          filename ? `${IMAGE_BASE_URL}${filename}` : null,
-        )
-      : [null, null],
-  };
+const FALLBACK_PROFILE =
+  "https://placehold.co/400x400/2563eb/white?text=Breeder";
+const FALLBACK_GALLERY =
+  "https://placehold.co/600x400/1e293b/white?text=Pug+Image";
+
+const fetchBreederData = async (): Promise<RawBreederResponse> => {
+  await new Promise((resolve) => setTimeout(resolve, 300));
+
+  return mockBreeder;
 };
 
 export const useBreeder = () => {
-  const { data, error, isLoading, mutate } = useSWR(
-    BREEDER_API_URL,
-    fetchBreeder,
-  );
+  const {
+    data: rawData,
+    error,
+    isLoading,
+  } = useSWR<RawBreederResponse>("/api/breeder", fetchBreederData);
 
-  // const updateBreeder = async (updates: FormData) => {
-  //   const token = getToken();
-  //   if (!token) throw new Error("Unauthorized: No authentication token found");
-  //
-  //   const response = await axios.patch(BREEDER_API_URL, updates, {
-  //     headers: { Authorization: `Bearer ${token}` },
-  //   });
-  //
-  //   mutate();
-  //
-  //   return response.data;
-  // };
+  let breeder: Breeder | null = null;
+
+  if (rawData) {
+    const profileImgObj = mockImages.find(
+      (img) => img.id === rawData.profile_picture_id,
+    );
+    const profileUrl = profileImgObj
+      ? `/assets/images/${profileImgObj.filename}`
+      : FALLBACK_PROFILE;
+
+    let galleryUrls: string[] = [];
+    if (rawData.image_ids) {
+      galleryUrls = rawData.image_ids.split(",").map((id) => {
+        const imgObj = mockImages.find((img) => img.id === id.trim());
+        return imgObj ? `/assets/images/${imgObj.filename}` : FALLBACK_GALLERY;
+      });
+    }
+
+    breeder = {
+      id: rawData.id,
+      firstName: rawData.firstname,
+      lastName: rawData.lastname,
+      email: rawData.email,
+      phone: rawData.phone,
+      location: rawData.location,
+      description: rawData.description,
+      profilePicture: profileUrl,
+      images: galleryUrls,
+    };
+  }
 
   return {
-    breeder: data,
+    breeder,
     isLoading,
     error,
-    // updateBreeder,
   };
 };

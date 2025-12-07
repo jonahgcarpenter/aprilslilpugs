@@ -1,12 +1,14 @@
-import type { Pug } from "../../hooks/usegrumble";
+import type { Pug } from "../../hooks/usepugs";
 
 interface GrumbleProps {
-  grumbles?: Pug[];
+  grumbles: Pug[];
   isLoading: boolean;
   error: any;
 }
 
 const calculateAge = (birthDateString: string) => {
+  if (!birthDateString) return 0;
+
   const [birthYear, birthMonth, birthDay] = birthDateString
     .split("-")
     .map(Number);
@@ -42,7 +44,7 @@ const Grumble = ({ grumbles, isLoading, error }: GrumbleProps) => {
   if (error) {
     return (
       <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-8 text-center border border-slate-800/50 text-red-400">
-        {error.message || "An error occurred while fetching the data"}
+        Failed to load the Grumble. Please try again later.
       </div>
     );
   }
@@ -54,15 +56,15 @@ const Grumble = ({ grumbles, isLoading, error }: GrumbleProps) => {
           Meet my Grumble
         </h1>
 
-        {grumbles && (
+        {grumbles && grumbles.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {grumbles
+            {[...grumbles]
               .sort(
                 (a, b) => calculateAge(b.birthDate) - calculateAge(a.birthDate),
               )
               .map((pug) => (
                 <div
-                  key={pug._id}
+                  key={pug.id} // Updated from _id to id
                   className="bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700/50 shadow-lg hover:shadow-blue-500/10 transition-all duration-300"
                 >
                   <div className="aspect-square w-full overflow-hidden">
@@ -92,12 +94,16 @@ const Grumble = ({ grumbles, isLoading, error }: GrumbleProps) => {
                         </p>
                       </div>
                     </div>
-                    <p className="text-slate-300 leading-relaxed">
+                    <p className="text-slate-300 leading-relaxed line-clamp-4">
                       {pug.description}
                     </p>
                   </div>
                 </div>
               ))}
+          </div>
+        ) : (
+          <div className="text-center text-slate-400 py-12">
+            No pugs found in the grumble yet!
           </div>
         )}
       </div>
