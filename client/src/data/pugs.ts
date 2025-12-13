@@ -10,33 +10,33 @@ export interface Pug {
 
 export const mockPugs: Pug[] = [
   {
-    id: "pug-001-otis",
-    name: "Otis",
+    id: "pug-1",
+    name: "Pug 1",
     gender: "M",
     description:
-      "Our main stud and the king of the house. Otis has a classic fawn coat and a temperament that is both calm and playful. He loves cheese and belly scratches.",
-    profile_picture_id: "img-otis-main",
-    image_ids: "img-otis-main",
+      "Generic description for Pug 1. He is the main stud with a classic fawn coat and a temperament that is both calm and playful.",
+    profile_picture_id: "img-pug-1",
+    image_ids: "img-pug-1",
     birth_date: "2019-05-15",
   },
   {
-    id: "pug-002-luna",
-    name: "Luna",
+    id: "pug-2",
+    name: "Pug 2",
     gender: "F",
     description:
-      "Luna is the sweetest mother we've ever had. She is attentive, gentle, and passes her lovely black mask traits to her puppies.",
-    profile_picture_id: "img-luna-main",
-    image_ids: "img-luna-main",
+      "Generic description for Pug 2. She is an attentive and gentle mother who passes lovely traits to her puppies.",
+    profile_picture_id: "img-pug-2",
+    image_ids: "img-pug-2",
     birth_date: "2020-11-20",
   },
   {
-    id: "pug-003-daisy",
-    name: "Daisy",
+    id: "pug-3",
+    name: "Pug 3",
     gender: "F",
     description:
-      "Daisy is full of energy and spunk. She's smaller than Luna but makes up for it with a big personality.",
-    profile_picture_id: "img-daisy-main",
-    image_ids: "img-daisy-main",
+      "Generic description for Pug 3. She is full of energy, spunk, and has a very big personality.",
+    profile_picture_id: "img-pug-3",
+    image_ids: "img-pug-3",
     birth_date: "2021-03-10",
   },
 ];

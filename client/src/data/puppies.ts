@@ -12,36 +12,36 @@ export interface Puppy {
 
 export const mockPuppies: Puppy[] = [
   {
-    id: "pup-001-thor",
-    litter_id: "litter-002-superheroes",
-    name: "Thor",
+    id: "pup-1",
+    litter_id: "litter-2",
+    name: "Puppy 1",
     color: "Fawn",
     gender: "M",
     status: "A",
-    profile_picture: "img-pup-thor",
+    profile_picture: "img-pup-1",
     description:
-      "The biggest of the bunch. Very brave and loves to explore new toys.",
+      "Generic description for Puppy 1. He is the biggest of the bunch, very brave, and loves to explore new toys.",
   },
   {
-    id: "pup-002-hulk",
-    litter_id: "litter-002-superheroes",
-    name: "Hulk",
+    id: "pup-2",
+    litter_id: "litter-2",
+    name: "Puppy 2",
     color: "Fawn",
     gender: "M",
     status: "A",
-    profile_picture: "img-pup-hulk",
+    profile_picture: "img-pup-2",
     description:
-      "Don't let the name fool you, he's a gentle giant who loves cuddles.",
+      "Generic description for Puppy 2. A gentle giant who loves cuddles and playing with his siblings.",
   },
   {
-    id: "pup-003-widow",
-    litter_id: "litter-002-superheroes",
-    name: "Black Widow",
+    id: "pup-3",
+    litter_id: "litter-2",
+    name: "Puppy 3",
     color: "Black",
     gender: "F",
     status: "R",
-    profile_picture: "img-pup-widow",
+    profile_picture: "img-pup-3",
     description:
-      "Sleek, fast, and incredibly smart. She's already learning to sit!",
+      "Generic description for Puppy 3. She is sleek, fast, and incredibly smart.",
   },
 ];

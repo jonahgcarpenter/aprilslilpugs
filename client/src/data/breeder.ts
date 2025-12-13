@@ -12,7 +12,7 @@ export interface Breeder {
 }
 
 export const mockBreeder: Breeder = {
-  id: "user-admin-april",
+  id: "breeder-april",
   firstname: "April",
   lastname: "Carpenter",
   email: "contact@aprilslilpugs.com",
@@ -21,6 +21,6 @@ export const mockBreeder: Breeder = {
   location: "Tupelo,MS",
   description:
     "Welcome to April's Lil Pugs! Located in Tupelo, MS, we have been passionately raising happy, healthy pugs for over 15 years. All our dogs are AKC registered and raised right in our living room.",
-  profile_picture_id: "img-breeder-april",
-  image_ids: "img-gallery-april-1,img-gallery-april-2",
+  profile_picture_id: "img-breeder",
+  image_ids: "img-gallery-1,img-gallery-2",
 };
