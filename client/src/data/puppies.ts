@@ -18,7 +18,7 @@ export const mockPuppies: Puppy[] = [
     color: "Fawn",
     gender: "M",
     status: "A",
-    profile_picture: "img-pup-thor", // References the ID in images.ts
+    profile_picture: "img-pup-thor",
     description:
       "The biggest of the bunch. Very brave and loves to explore new toys.",
   },
@@ -39,7 +39,7 @@ export const mockPuppies: Puppy[] = [
     name: "Black Widow",
     color: "Black",
     gender: "F",
-    status: "R", // Reserved
+    status: "R",
     profile_picture: "img-pup-widow",
     description:
       "Sleek, fast, and incredibly smart. She's already learning to sit!",
