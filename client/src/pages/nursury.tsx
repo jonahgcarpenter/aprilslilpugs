@@ -1,10 +1,32 @@
+import { useState } from "react";
+import CurrentLitters from "../components/litters/current-litters";
+import PuppiesModal from "../components/puppies/modal";
+import { useLitters } from "../hooks/uselitters";
+
 const Nursery = () => {
+  const { currentLitters, isLoading, error } = useLitters();
+
+  const [selectedLitterId, setSelectedLitterId] = useState<string | null>(null);
+
+  const selectedLitter = currentLitters
+    ? currentLitters.find((l) => l.id === selectedLitterId) || null
+    : null;
+
   return (
-    <div className="min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-12">
-        <p> Litters </p>
-      </div>
-    </div>
+    <>
+      <CurrentLitters
+        litters={currentLitters}
+        isLoading={isLoading}
+        error={error}
+        onLitterClick={setSelectedLitterId}
+      />
+
+      <PuppiesModal
+        isOpen={!!selectedLitterId}
+        litter={selectedLitter}
+        onClose={() => setSelectedLitterId(null)}
+      />
+    </>
   );
 };
 
