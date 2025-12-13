@@ -13,6 +13,5 @@ A custom website built for my mom’s business, tailored to her specific needs.
 
 ## TODO:
 
-- Stale-While-Revalidate instead of useEffect
 - Traffic analytics
 - Post on the website mirror facebook?
