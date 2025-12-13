@@ -20,10 +20,10 @@ interface RawLitter {
 export interface Litter {
   id: string;
   name: string;
+  motherId?: string;
   motherName: string;
-  motherPicture: string; // Added
+  fatherId?: string;
   fatherName: string;
-  fatherPicture: string; // Added
   birthDate: string;
   availableDate: string;
   profilePicture: string;
@@ -32,7 +32,6 @@ export interface Litter {
   statusLabel: string;
 }
 
-const FALLBACK_IMAGE = "https://placehold.co/400x400/2563eb/white?text=Pug";
 const FALLBACK_LITTER_IMAGE =
   "https://placehold.co/400x400/2563eb/white?text=Litter";
 
@@ -46,15 +45,6 @@ const STATUS_MAP: Record<string, string> = {
 const fetchLitters = async (): Promise<RawLitter[]> => {
   await new Promise((resolve) => setTimeout(resolve, 500));
   return mockLitters;
-};
-
-const getPugImage = (pugId: string | undefined) => {
-  if (!pugId) return FALLBACK_IMAGE;
-  const pug = mockPugs.find((p) => p.id === pugId);
-  if (!pug) return FALLBACK_IMAGE;
-
-  const img = mockImages.find((i) => i.id === pug.profile_picture_id);
-  return img ? `/assets/images/${img.filename}` : FALLBACK_IMAGE;
 };
 
 export const useLitters = () => {
@@ -87,23 +77,21 @@ export const useLitters = () => {
         raw.mother_name ||
         mockPugs.find((p) => p.id === raw.mother_id)?.name ||
         "Unknown Mother";
-      const motherPicture = getPugImage(raw.mother_id);
 
       const fatherName =
         raw.father_name ||
         mockPugs.find((p) => p.id === raw.father_id)?.name ||
         "Unknown Father";
-      const fatherPicture = getPugImage(raw.father_id);
 
       const statusLabel = STATUS_MAP[raw.status] || "Unknown";
 
       return {
         id: raw.id,
         name: raw.name,
+        motherId: raw.mother_id,
         motherName,
-        motherPicture,
+        fatherId: raw.father_id,
         fatherName,
-        fatherPicture,
         birthDate: raw.birth_date,
         availableDate: raw.available_date,
         profilePicture: profileUrl,

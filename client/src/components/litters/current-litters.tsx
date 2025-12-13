@@ -1,10 +1,10 @@
 import type { Litter } from "../../hooks/uselitters";
+import { useNavigate } from "react-router-dom";
 
 interface LitterProps {
   litters: Litter[];
   isLoading: boolean;
   error: any;
-  onLitterClick?: (litterId: string) => void;
 }
 
 const formatDate = (dateString: string) => {
@@ -23,12 +23,9 @@ const isFutureDate = (dateString: string) => {
   return date > today;
 };
 
-const CurrentLitters = ({
-  litters,
-  isLoading,
-  error,
-  onLitterClick,
-}: LitterProps) => {
+const CurrentLitters = ({ litters, isLoading, error }: LitterProps) => {
+  const navigate = useNavigate();
+
   if (isLoading) {
     return (
       <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-12 border border-slate-800/50 shadow-xl flex justify-center">
@@ -156,10 +153,10 @@ const CurrentLitters = ({
                   </div>
 
                   <button
-                    onClick={() => onLitterClick?.(litter.id)}
+                    onClick={() => navigate(`/litter/${litter.id}`)}
                     className="mt-8 w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-blue-600/20 to-blue-500/20 hover:from-blue-600/30 hover:to-blue-500/30 text-blue-400 rounded-xl border border-blue-500/20 transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
                   >
-                    View Puppies
+                    More Info
                   </button>
                 </div>
               </div>

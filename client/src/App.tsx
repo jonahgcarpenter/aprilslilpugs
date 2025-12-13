@@ -9,6 +9,7 @@ import Live from "./pages/live";
 import PastLitters from "./pages/past-litters";
 import Gallery from "./pages/gallery";
 import Admin from "./pages/admin";
+import Litter from "./pages/litter";
 
 function App() {
   return (
@@ -20,6 +21,8 @@ function App() {
         <Route path="/live" element={<Live />} />
         <Route path="/pastlitters" element={<PastLitters />} />
         <Route path="/gallery" element={<Gallery />} />
+
+        <Route path="/litter/:id" element={<Litter />} />
 
         {/* NOTE: This route is not displayed on navbar */}
         {/* TODO: Protect route with auth */}
