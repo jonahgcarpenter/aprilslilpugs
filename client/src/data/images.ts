@@ -47,7 +47,17 @@ export const mockImages: Image[] = [
   },
   {
     id: "img-breeder-april",
-    filename: "april_profile.jpg",
+    filename: "april_profile.png",
+    description: "April with two puppies",
+  },
+  {
+    id: "img-gallery-april-1",
+    filename: "april_gallery-1.jpeg",
+    description: "April with two puppies",
+  },
+  {
+    id: "img-gallery-april-2",
+    filename: "april_gallery-2.jpeg",
     description: "April with two puppies",
   },
 ];

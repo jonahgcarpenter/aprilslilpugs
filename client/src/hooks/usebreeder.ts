@@ -1,5 +1,4 @@
 import useSWR from "swr";
-import axios from "axios";
 import { mockBreeder } from "../data/breeder";
 import { mockImages } from "../data/images";
 
@@ -27,10 +26,9 @@ export interface Breeder {
   images: string[];
 }
 
-const FALLBACK_PROFILE =
-  "https://placehold.co/400x400/2563eb/white?text=Breeder";
+const FALLBACK_PROFILE = "https://placehold.co/400x400/2563eb/white?text=April";
 const FALLBACK_GALLERY =
-  "https://placehold.co/600x400/1e293b/white?text=Pug+Image";
+  "https://placehold.co/600x400/1e293b/white?text=April-Image";
 
 const fetchBreederData = async (): Promise<RawBreederResponse> => {
   await new Promise((resolve) => setTimeout(resolve, 300));

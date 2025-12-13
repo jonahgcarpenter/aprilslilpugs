@@ -22,5 +22,5 @@ export const mockBreeder: Breeder = {
   description:
     "Welcome to April's Lil Pugs! Located in Tupelo, MS, we have been passionately raising happy, healthy pugs for over 15 years. All our dogs are AKC registered and raised right in our living room.",
   profile_picture_id: "img-breeder-april",
-  image_ids: "img-otis-main,img-luna-main",
+  image_ids: "img-gallery-april-1,img-gallery-april-2",
 };

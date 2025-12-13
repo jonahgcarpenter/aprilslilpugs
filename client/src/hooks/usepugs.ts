@@ -1,5 +1,4 @@
 import useSWR from "swr";
-import axios from "axios";
 import { mockPugs } from "../data/pugs";
 import { mockImages } from "../data/images";
 
