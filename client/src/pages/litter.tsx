@@ -1,15 +1,24 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useLitters } from "../hooks/uselitters";
 import { usePug } from "../hooks/usepugs";
-import { mockPuppies, type Puppy } from "../data/puppies";
+import { mockPuppies } from "../data/puppies";
 import { mockImages } from "../data/images";
 import PuppyParents from "../components/puppies/puppy-parents";
-import PuppyGallery from "../components/puppies/puppy-gallery";
+import LitterGallery from "../components/litters/litter-gallery";
 import PuppyHero from "../components/puppies/puppy-hero";
 import PuppyList from "../components/puppies/puppy-list";
 
 const FALLBACK_PUPPY_IMAGE =
   "https://placehold.co/400x400/2563eb/white?text=Puppy";
+
+const resolveImageIds = (ids: string[] = []) => {
+  return ids
+    .map((id) => {
+      const img = mockImages.find((i) => i.id === id);
+      return img ? `/assets/images/${img.filename}` : null;
+    })
+    .filter((url): url is string => url !== null);
+};
 
 const Litter = () => {
   const { id } = useParams<{ id: string }>();
@@ -54,17 +63,34 @@ const Litter = () => {
   const mother = pugs.find((p) => p.id === litter.motherId);
   const father = pugs.find((p) => p.id === litter.fatherId);
 
-  const puppies: Puppy[] = mockPuppies
+  const puppies = mockPuppies
     .filter((p) => p.litter_id === litter.id)
     .map((p) => {
       const img = mockImages.find((i) => i.id === p.profile_picture);
+      const profileUrl = img
+        ? `/assets/images/${img.filename}`
+        : FALLBACK_PUPPY_IMAGE;
+
+      const galleryUrls = resolveImageIds(p.image_ids);
+
       return {
         ...p,
-        profile_picture: img
-          ? `/assets/images/${img.filename}`
-          : FALLBACK_PUPPY_IMAGE,
+        profile_picture: profileUrl,
+        images: galleryUrls,
       };
     });
+
+  const filteredLitterImages = litter.images.filter(
+    (url) => url !== litter.profilePicture,
+  );
+
+  const filteredPuppyImages = puppies.flatMap((p) =>
+    p.images.filter((url) => url !== p.profile_picture),
+  );
+
+  const combinedGallery = Array.from(
+    new Set([...filteredLitterImages, ...filteredPuppyImages]),
+  );
 
   return (
     <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl border border-slate-800/50 shadow-xl overflow-hidden mb-12">
@@ -80,7 +106,7 @@ const Litter = () => {
 
         <PuppyList puppies={puppies} />
 
-        <PuppyGallery images={litter.images} litterName={litter.name} />
+        <LitterGallery images={combinedGallery} litterName={litter.name} />
       </div>
     </div>
   );
