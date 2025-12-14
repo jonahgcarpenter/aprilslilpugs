@@ -1,5 +1,7 @@
+import Stream from "../components/live/stream";
+
 const Live = () => {
-  return <h1>Live</h1>;
+  return <Stream />;
 };
 
 export default Live;
