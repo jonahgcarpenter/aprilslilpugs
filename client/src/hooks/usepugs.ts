@@ -5,7 +5,7 @@ import { mockImages } from "../data/images";
 interface RawPug {
   id: string;
   name: string;
-  gender: "M" | "F";
+  gender: "Male" | "Female";
   description?: string;
   profile_picture_id: string;
   image_ids?: string;
@@ -58,7 +58,7 @@ export const usePug = () => {
       return {
         id: raw.id,
         name: raw.name,
-        gender: raw.gender === "M" ? "Male" : "Female",
+        gender: raw.gender,
         description: raw.description || "",
         birthDate: raw.birth_date,
         profilePicture: profileUrl,
