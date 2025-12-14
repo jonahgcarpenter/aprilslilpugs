@@ -1,24 +1,17 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useLitters } from "../hooks/uselitters";
 import { usePug } from "../hooks/usepugs";
-import { mockPuppies } from "../data/puppies";
+import { mockPuppies, type Puppy } from "../data/puppies";
 import { mockImages } from "../data/images";
 import PuppyParents from "../components/puppies/puppy-parents";
-import LitterGallery from "../components/litters/litter-gallery";
+import LitterGallery, {
+  type GalleryItem,
+} from "../components/litters/litter-gallery";
 import PuppyHero from "../components/puppies/puppy-hero";
 import PuppyList from "../components/puppies/puppy-list";
 
 const FALLBACK_PUPPY_IMAGE =
   "https://placehold.co/400x400/2563eb/white?text=Puppy";
-
-const resolveImageIds = (ids: string[] = []) => {
-  return ids
-    .map((id) => {
-      const img = mockImages.find((i) => i.id === id);
-      return img ? `/assets/images/${img.filename}` : null;
-    })
-    .filter((url): url is string => url !== null);
-};
 
 const Litter = () => {
   const { id } = useParams<{ id: string }>();
@@ -63,34 +56,53 @@ const Litter = () => {
   const mother = pugs.find((p) => p.id === litter.motherId);
   const father = pugs.find((p) => p.id === litter.fatherId);
 
-  const puppies = mockPuppies
+  const puppies: Puppy[] = mockPuppies
     .filter((p) => p.litter_id === litter.id)
     .map((p) => {
       const img = mockImages.find((i) => i.id === p.profile_picture);
-      const profileUrl = img
-        ? `/assets/images/${img.filename}`
-        : FALLBACK_PUPPY_IMAGE;
-
-      const galleryUrls = resolveImageIds(p.image_ids);
-
       return {
         ...p,
-        profile_picture: profileUrl,
-        images: galleryUrls,
+        profile_picture: img
+          ? `/assets/images/${img.filename}`
+          : FALLBACK_PUPPY_IMAGE,
       };
     });
 
-  const filteredLitterImages = litter.images.filter(
-    (url) => url !== litter.profilePicture,
-  );
+  const galleryMap = new Map<string, GalleryItem>();
 
-  const filteredPuppyImages = puppies.flatMap((p) =>
-    p.images.filter((url) => url !== p.profile_picture),
-  );
+  litter.images.forEach((url) => {
+    if (url === litter.profilePicture) return;
 
-  const combinedGallery = Array.from(
-    new Set([...filteredLitterImages, ...filteredPuppyImages]),
-  );
+    const matchedImg = mockImages.find((img) => url.includes(img.filename));
+
+    galleryMap.set(url, {
+      url,
+      description: matchedImg ? (matchedImg as any).description : undefined,
+      puppyName: undefined,
+    });
+  });
+
+  mockPuppies
+    .filter((p) => p.litter_id === litter.id)
+    .forEach((p) => {
+      if (p.image_ids) {
+        p.image_ids.forEach((imgId) => {
+          if (imgId === p.profile_picture) return;
+
+          const img = mockImages.find((i) => i.id === imgId);
+          if (img) {
+            const url = `/assets/images/${img.filename}`;
+            galleryMap.set(url, {
+              url,
+              description: (img as any).description,
+              puppyName: p.name,
+            });
+          }
+        });
+      }
+    });
+
+  const combinedGallery = Array.from(galleryMap.values());
 
   return (
     <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl border border-slate-800/50 shadow-xl overflow-hidden mb-12">

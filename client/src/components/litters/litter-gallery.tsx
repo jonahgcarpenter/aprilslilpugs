@@ -1,5 +1,11 @@
+export interface GalleryItem {
+  url: string;
+  description?: string;
+  puppyName?: string;
+}
+
 interface PuppyGalleryProps {
-  images: string[];
+  images: GalleryItem[];
   litterName: string;
 }
 
@@ -17,22 +23,33 @@ export const LitterGallery = ({ images, litterName }: PuppyGalleryProps) => {
 
       {images.length > 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-          {images.map((imgUrl, index) => (
+          {images.map((item, index) => (
             <div
               key={index}
-              className="group relative aspect-square overflow-hidden rounded-xl bg-slate-800/50 border border-slate-700/50 hover:border-slate-600 transition-colors shadow-sm"
+              className="group relative aspect-square overflow-hidden rounded-xl bg-slate-800/50 border border-slate-700/50 hover:border-blue-500/30 transition-all duration-300 shadow-sm cursor-pointer"
             >
               <img
-                src={imgUrl}
-                alt={`${litterName} puppy ${index + 1}`}
+                src={item.url}
+                alt={item.description || `${litterName} gallery ${index + 1}`}
                 className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                 loading="lazy"
               />
 
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-slate-900 to-transparent p-3 pt-8 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                <span className="text-xs font-semibold text-white">
-                  Photo {index + 1}
-                </span>
+              {/* Overlay */}
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900 via-slate-900/90 to-transparent p-4 flex flex-col justify-end min-h-[40%]">
+                {/* Puppy Name Badge */}
+                {item.puppyName && (
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xs font-bold text-blue-300 uppercase tracking-wide truncate">
+                      {item.puppyName}
+                    </span>
+                  </div>
+                )}
+
+                {/* Description */}
+                <p className="text-xs font-medium text-slate-200 line-clamp-2 leading-relaxed">
+                  {item.description || "Litter Moment"}
+                </p>
               </div>
             </div>
           ))}
