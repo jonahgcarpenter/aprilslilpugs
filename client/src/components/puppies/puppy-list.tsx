@@ -6,28 +6,61 @@ interface PuppyListProps {
 
 const getStatusColor = (status: Puppy["status"]) => {
   switch (status) {
-    case "A":
+    case "Available":
       return "bg-green-500/20 text-green-300 border-green-500/30";
-    case "R":
+    case "Reserved":
       return "bg-yellow-500/20 text-yellow-300 border-yellow-500/30";
-    case "S":
+    case "Sold":
       return "bg-red-500/20 text-red-300 border-red-500/30";
     default:
       return "bg-slate-500/20 text-slate-300 border-slate-500/30";
   }
 };
 
-const getStatusLabel = (status: Puppy["status"]) => {
-  switch (status) {
-    case "A":
-      return "Available";
-    case "R":
-      return "Reserved";
-    case "S":
-      return "Sold";
-    default:
-      return "Unknown";
+const getGenderBadge = (gender: "Male" | "Female") => {
+  if (gender === "Male") {
+    return (
+      <span
+        title="Male"
+        className="text-blue-400 bg-blue-400/10 p-2 rounded-lg border border-blue-400/20"
+      >
+        <svg
+          className="w-5 h-5"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M16 3h5v5" />
+          <path d="m21 3-6.75 6.75" />
+          <circle cx="10" cy="14" r="5" />
+        </svg>
+      </span>
+    );
   }
+
+  return (
+    <span
+      title="Female"
+      className="text-pink-400 bg-pink-400/10 p-2 rounded-lg border border-pink-400/20"
+    >
+      <svg
+        className="w-5 h-5"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M12 15v7" />
+        <path d="M9 19h6" />
+        <circle cx="12" cy="9" r="6" />
+      </svg>
+    </span>
+  );
 };
 
 const PuppyList = ({ puppies }: PuppyListProps) => {
@@ -66,7 +99,7 @@ const PuppyList = ({ puppies }: PuppyListProps) => {
                     puppy.status,
                   )}`}
                 >
-                  {getStatusLabel(puppy.status)}
+                  {puppy.status}
                 </span>
               </div>
             </div>
@@ -81,45 +114,8 @@ const PuppyList = ({ puppies }: PuppyListProps) => {
                     {puppy.color}
                   </p>
                 </div>
-                {puppy.gender === "M" ? (
-                  <span
-                    title="Male"
-                    className="text-blue-400 bg-blue-400/10 p-2 rounded-lg border border-blue-400/20"
-                  >
-                    <svg
-                      className="w-5 h-5"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M16 3h5v5" />
-                      <path d="m21 3-6.75 6.75" />
-                      <circle cx="10" cy="14" r="5" />
-                    </svg>
-                  </span>
-                ) : (
-                  <span
-                    title="Female"
-                    className="text-pink-400 bg-pink-400/10 p-2 rounded-lg border border-pink-400/20"
-                  >
-                    <svg
-                      className="w-5 h-5"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M12 15v7" />
-                      <path d="M9 19h6" />
-                      <circle cx="12" cy="9" r="6" />
-                    </svg>
-                  </span>
-                )}
+
+                {getGenderBadge(puppy.gender)}
               </div>
 
               {puppy.description && (
