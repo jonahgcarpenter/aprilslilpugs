@@ -42,7 +42,7 @@ export const PuppyParents = ({
 
       <div className="space-y-4">
         {/* Mother Card */}
-        <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 flex items-center gap-4 hover:border-slate-600 transition-colors shadow-sm">
+        <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 flex items-center gap-4 transition-colors shadow-sm">
           <img
             src={motherImage}
             alt={motherName}
@@ -57,7 +57,7 @@ export const PuppyParents = ({
         </div>
 
         {/* Father Card */}
-        <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 flex items-center gap-4 hover:border-slate-600 transition-colors shadow-sm">
+        <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 flex items-center gap-4 transition-colors shadow-sm">
           <img
             src={fatherImage}
             alt={fatherName}
