@@ -24,6 +24,19 @@ const isFutureDate = (dateString: string) => {
   return date > today;
 };
 
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case "Planned":
+      return "bg-yellow-500/20 text-yellow-300 border-yellow500/30";
+    case "Available":
+      return "bg-green-500/20 text-green-300 border-green-500/30";
+    case "Sold":
+      return "bg-red-500/20 text-red-300 border-red-500/30";
+    default:
+      return "bg-slate-500/20 text-slate-300 border-slate-500/30";
+  }
+};
+
 const DisplayLitters = ({ title, litters, isLoading, error }: LitterProps) => {
   const navigate = useNavigate();
 
@@ -74,7 +87,11 @@ const DisplayLitters = ({ title, litters, isLoading, error }: LitterProps) => {
                     <h2 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600">
                       {litter.name}
                     </h2>
-                    <span className="px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide bg-blue-900/30 text-blue-300 border border-blue-500/20">
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide border ${getStatusColor(
+                        litter.status,
+                      )}`}
+                    >
                       {litter.status}
                     </span>
                   </div>

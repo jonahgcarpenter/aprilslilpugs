@@ -15,6 +15,19 @@ const formatDate = (dateString: string) => {
   });
 };
 
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case "Planned":
+      return "bg-yellow-500/20 text-yellow-300 border-yellow500/30";
+    case "Available":
+      return "bg-green-500/20 text-green-300 border-green-500/30";
+    case "Sold":
+      return "bg-red-500/20 text-red-300 border-red-500/30";
+    default:
+      return "bg-slate-500/20 text-slate-300 border-slate-500/30";
+  }
+};
+
 export const PuppyHero = ({ litter }: PuppyHeroProps) => {
   const navigate = useNavigate();
 
@@ -51,7 +64,11 @@ export const PuppyHero = ({ litter }: PuppyHeroProps) => {
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide bg-blue-600 text-white shadow-lg shadow-blue-900/50">
+              <span
+                className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide border ${getStatusColor(
+                  litter.status,
+                )}`}
+              >
                 {litter.status}
               </span>
             </div>
