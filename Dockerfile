@@ -10,6 +10,7 @@ COPY client/ ./
 
 RUN npm run build
 
+# TODO: Switch to GO
 FROM node:20-alpine
 
 WORKDIR /app

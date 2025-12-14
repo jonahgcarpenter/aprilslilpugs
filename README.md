@@ -17,3 +17,4 @@ A custom website built for my mom’s business, tailored to her specific needs.
 - Post on the website mirror facebook?
 - Upload compression
 - Document storage
+- Learn Go
