@@ -1,5 +1,11 @@
 import type { Litter } from "../../hooks/uselitters";
 import { useNavigate } from "react-router-dom";
+import {
+  FaVenus,
+  FaMars,
+  FaBirthdayCake,
+  FaCalendarCheck,
+} from "react-icons/fa";
 
 interface LitterProps {
   title: string;
@@ -27,7 +33,7 @@ const isFutureDate = (dateString: string) => {
 const getStatusColor = (status: string) => {
   switch (status) {
     case "Planned":
-      return "bg-yellow-500/20 text-yellow-300 border-yellow500/30";
+      return "bg-yellow-500/20 text-yellow-300 border-yellow-500/30";
     case "Available":
       return "bg-green-500/20 text-green-300 border-green-500/30";
     case "Sold":
@@ -98,19 +104,7 @@ const DisplayLitters = ({ title, litters, isLoading, error }: LitterProps) => {
 
                   <div className="space-y-4 text-lg text-slate-300">
                     <p className="flex items-center gap-2">
-                      <svg
-                        className="w-5 h-5 text-blue-400 flex-shrink-0"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                        />
-                      </svg>
+                      <FaBirthdayCake className="w-5 h-5 text-blue-400 flex-shrink-0" />
                       <span>
                         {isFutureDate(litter.birthDate)
                           ? "Expected By: "
@@ -118,54 +112,21 @@ const DisplayLitters = ({ title, litters, isLoading, error }: LitterProps) => {
                         {formatDate(litter.birthDate)}
                       </span>
                     </p>
+
                     <p className="flex items-center gap-2">
-                      <svg
-                        className="w-5 h-5 text-blue-400 flex-shrink-0"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
+                      <FaCalendarCheck className="w-5 h-5 text-blue-400 flex-shrink-0" />
                       <span>
                         Available on: {formatDate(litter.availableDate)}
                       </span>
                     </p>
+
                     <p className="flex items-center gap-2">
-                      <svg
-                        className="w-5 h-5 text-blue-400 flex-shrink-0"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                        />
-                      </svg>
+                      <FaVenus className="w-5 h-5 text-pink-400 flex-shrink-0" />
                       <span>Mother: {litter.motherName}</span>
                     </p>
+
                     <p className="flex items-center gap-2">
-                      <svg
-                        className="w-5 h-5 text-blue-400 flex-shrink-0"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                        />
-                      </svg>
+                      <FaMars className="w-5 h-5 text-blue-400 flex-shrink-0" />
                       <span>Father: {litter.fatherName}</span>
                     </p>
                   </div>
