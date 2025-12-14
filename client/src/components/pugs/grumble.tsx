@@ -64,7 +64,7 @@ const Grumble = ({ grumbles, isLoading, error }: GrumbleProps) => {
               )
               .map((pug) => (
                 <div
-                  key={pug.id} // Updated from _id to id
+                  key={pug.id}
                   className="bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700/50 shadow-lg hover:shadow-blue-500/10 transition-all duration-300"
                 >
                   <div className="aspect-square w-full overflow-hidden">
