@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import type { Litter } from "../../hooks/uselitters";
+import { FaArrowLeft } from "react-icons/fa";
 
 interface PuppyHeroProps {
   litter: Litter;
@@ -18,7 +19,7 @@ const formatDate = (dateString: string) => {
 const getStatusColor = (status: string) => {
   switch (status) {
     case "Planned":
-      return "bg-yellow-500/20 text-yellow-300 border-yellow500/30";
+      return "bg-yellow-500/20 text-yellow-300 border-yellow-500/30";
     case "Available":
       return "bg-green-500/20 text-green-300 border-green-500/30";
     case "Sold":
@@ -45,25 +46,22 @@ export const PuppyHero = ({ litter }: PuppyHeroProps) => {
           onClick={() => navigate(-1)}
           className="mb-4 flex items-center text-sm text-blue-400 hover:text-blue-300 transition-colors gap-2 group cursor-pointer"
         >
-          <svg
-            className="w-4 h-4 transition-transform group-hover:-translate-x-1"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M10 19l-7-7m0 0l7-7m-7 7h18"
-            />
-          </svg>
+          <FaArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
           Back to Nursery
         </button>
 
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
           <div>
-            <div className="flex items-center gap-3 mb-2">
+            <h1 className="text-4xl sm:text-5xl font-extrabold text-white tracking-tight">
+              {litter.name}
+            </h1>
+          </div>
+
+          <div className="flex gap-8 text-sm sm:text-base border-t sm:border-t-0 border-slate-700/50 pt-4 sm:pt-0">
+            <div>
+              <p className="text-slate-400 uppercase text-xs tracking-wider mb-1">
+                Status
+              </p>
               <span
                 className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide border ${getStatusColor(
                   litter.status,
@@ -72,14 +70,9 @@ export const PuppyHero = ({ litter }: PuppyHeroProps) => {
                 {litter.status}
               </span>
             </div>
-            <h1 className="text-4xl sm:text-5xl font-extrabold text-white tracking-tight">
-              {litter.name}
-            </h1>
-          </div>
 
-          <div className="flex gap-8 text-sm sm:text-base border-t sm:border-t-0 border-slate-700/50 pt-4 sm:pt-0">
             <div>
-              <p className="text-slate-400 uppercase text-xs tracking-wider">
+              <p className="text-slate-400 uppercase text-xs tracking-wider mb-1">
                 Born
               </p>
               <p className="font-semibold text-white">
@@ -87,7 +80,7 @@ export const PuppyHero = ({ litter }: PuppyHeroProps) => {
               </p>
             </div>
             <div>
-              <p className="text-slate-400 uppercase text-xs tracking-wider">
+              <p className="text-slate-400 uppercase text-xs tracking-wider mb-1">
                 Go Home
               </p>
               <p className="font-semibold text-white">
