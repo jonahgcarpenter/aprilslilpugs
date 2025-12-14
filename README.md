@@ -15,3 +15,5 @@ A custom website built for my mom’s business, tailored to her specific needs.
 
 - Traffic analytics
 - Post on the website mirror facebook?
+- Upload compression
+- Document storage

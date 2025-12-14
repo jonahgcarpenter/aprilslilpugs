@@ -2,6 +2,7 @@ import type { Litter } from "../../hooks/uselitters";
 import { useNavigate } from "react-router-dom";
 
 interface LitterProps {
+  title: string;
   litters: Litter[];
   isLoading: boolean;
   error: any;
@@ -23,7 +24,7 @@ const isFutureDate = (dateString: string) => {
   return date > today;
 };
 
-const CurrentLitters = ({ litters, isLoading, error }: LitterProps) => {
+const DisplayLitters = ({ title, litters, isLoading, error }: LitterProps) => {
   const navigate = useNavigate();
 
   if (isLoading) {
@@ -39,7 +40,7 @@ const CurrentLitters = ({ litters, isLoading, error }: LitterProps) => {
   if (error) {
     return (
       <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-8 text-center border border-slate-800/50 text-red-400">
-        Failed to load the Grumble. Please try again later.
+        Failed to load litters. Please try again later.
       </div>
     );
   }
@@ -48,7 +49,7 @@ const CurrentLitters = ({ litters, isLoading, error }: LitterProps) => {
     <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-12">
         <h1 className="text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 text-center tracking-wider px-4">
-          Current Litters
+          {title}
         </h1>
 
         <div className="space-y-8">
@@ -168,4 +169,4 @@ const CurrentLitters = ({ litters, isLoading, error }: LitterProps) => {
   );
 };
 
-export default CurrentLitters;
+export default DisplayLitters;

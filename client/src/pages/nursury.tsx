@@ -1,11 +1,12 @@
-import CurrentLitters from "../components/litters/current-litters";
+import DisplayLitters from "../components/litters/display-litters";
 import { useLitters } from "../hooks/uselitters";
 
 const Nursery = () => {
   const { currentLitters, isLoading, error } = useLitters();
 
   return (
-    <CurrentLitters
+    <DisplayLitters
+      title="Current Litters"
       litters={currentLitters}
       isLoading={isLoading}
       error={error}
