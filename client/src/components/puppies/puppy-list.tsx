@@ -20,45 +20,15 @@ const getStatusColor = (status: Puppy["status"]) => {
 const getGenderBadge = (gender: "Male" | "Female") => {
   if (gender === "Male") {
     return (
-      <span
-        title="Male"
-        className="text-blue-400 bg-blue-400/10 p-2 rounded-lg border border-blue-400/20"
-      >
-        <svg
-          className="w-5 h-5"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M16 3h5v5" />
-          <path d="m21 3-6.75 6.75" />
-          <circle cx="10" cy="14" r="5" />
-        </svg>
+      <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase border bg-blue-500/20 text-blue-300 border-blue-500/30">
+        Male
       </span>
     );
   }
 
   return (
-    <span
-      title="Female"
-      className="text-pink-400 bg-pink-400/10 p-2 rounded-lg border border-pink-400/20"
-    >
-      <svg
-        className="w-5 h-5"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M12 15v7" />
-        <path d="M9 19h6" />
-        <circle cx="12" cy="9" r="6" />
-      </svg>
+    <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase border bg-pink-500/20 text-pink-300 border-pink-500/30">
+      Female
     </span>
   );
 };
@@ -93,35 +63,56 @@ const PuppyList = ({ puppies }: PuppyListProps) => {
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 loading="lazy"
               />
-              <div className="absolute top-3 right-3">
-                <span
-                  className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border backdrop-blur-md shadow-sm ${getStatusColor(
-                    puppy.status,
-                  )}`}
-                >
-                  {puppy.status}
-                </span>
-              </div>
             </div>
 
-            <div className="p-5 flex-grow flex flex-col gap-4">
-              <div className="flex justify-between items-start">
+            <div className="p-5 flex-grow flex flex-col">
+              {/* Name */}
+              <h4 className="text-xl font-bold text-slate-100 group-hover:text-blue-400 transition-colors mb-4">
+                {puppy.name}
+              </h4>
+
+              {/* Attributes Grid */}
+              <div className="grid grid-cols-3 gap-2 mb-4">
+                {/* Color */}
                 <div>
-                  <h4 className="text-xl font-bold text-slate-100 group-hover:text-blue-400 transition-colors">
-                    {puppy.name}
-                  </h4>
-                  <p className="text-sm text-slate-400 font-medium mt-1">
+                  <p className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-1">
+                    Color
+                  </p>
+                  <p className="text-sm font-medium text-slate-200 truncate">
                     {puppy.color}
                   </p>
                 </div>
 
-                {getGenderBadge(puppy.gender)}
+                {/* Gender */}
+                <div>
+                  <p className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-1">
+                    Gender
+                  </p>
+                  <div>{getGenderBadge(puppy.gender)}</div>
+                </div>
+
+                {/* Status */}
+                <div>
+                  <p className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-1">
+                    Status
+                  </p>
+                  <span
+                    className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${getStatusColor(
+                      puppy.status,
+                    )}`}
+                  >
+                    {puppy.status}
+                  </span>
+                </div>
               </div>
 
+              {/* Description Divider */}
               {puppy.description && (
-                <p className="text-sm text-slate-300 leading-relaxed line-clamp-3">
-                  {puppy.description}
-                </p>
+                <div className="border-t border-slate-700/50 pt-3 mt-auto">
+                  <p className="text-sm text-slate-300 leading-relaxed line-clamp-2">
+                    {puppy.description}
+                  </p>
+                </div>
               )}
             </div>
           </div>
