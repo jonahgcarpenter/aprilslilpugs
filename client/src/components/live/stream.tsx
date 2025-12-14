@@ -2,10 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import Hls from "hls.js";
 
 const STREAM_URL = "/hls/test.m3u8";
+const LOGO_URL = "/logo.jpg";
 
 const Stream = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -24,7 +24,6 @@ const Stream = () => {
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
         video.play().catch((e) => {
           console.log("Autoplay prevented:", e);
-          setIsPlaying(false);
         });
       });
 
@@ -56,7 +55,6 @@ const Stream = () => {
       video.addEventListener("loadedmetadata", () => {
         video.play().catch((e) => {
           console.log("Autoplay prevented:", e);
-          setIsPlaying(false);
         });
       });
 
@@ -67,18 +65,6 @@ const Stream = () => {
       setError("Your browser does not support HLS playback.");
     }
   }, []);
-
-  const handlePlay = () => {
-    if (videoRef.current) {
-      if (videoRef.current.paused) {
-        videoRef.current.play();
-        setIsPlaying(true);
-      } else {
-        videoRef.current.pause();
-        setIsPlaying(false);
-      }
-    }
-  };
 
   return (
     <div className="relative">
@@ -106,36 +92,28 @@ const Stream = () => {
             <video
               ref={videoRef}
               className="w-full h-full object-cover"
-              controls={false}
+              controls={true}
               muted
               playsInline
-              onClick={handlePlay}
             />
           )}
 
-          {!isPlaying && !error && (
-            <div
-              className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/40 transition-colors cursor-pointer"
-              onClick={handlePlay}
-            >
-              <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/30 hover:scale-110 transition-transform">
-                <svg
-                  className="w-8 h-8 text-white ml-1"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-              </div>
-            </div>
-          )}
-
           {!error && (
-            <div className="absolute top-4 left-4 flex items-center gap-2 px-3 py-1 bg-red-600/90 backdrop-blur-sm rounded-full">
-              <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
-              <span className="text-white text-xs font-bold uppercase tracking-wider">
-                Live
-              </span>
+            <div className="absolute top-4 left-4 z-10 flex flex-col gap-3 pointer-events-none select-none">
+              {/* Live Badge */}
+              <div className="flex items-center gap-2 px-3 py-1 bg-red-600/90 backdrop-blur-sm rounded-full w-fit shadow-lg">
+                <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                <span className="text-white text-xs font-bold uppercase tracking-wider">
+                  Live
+                </span>
+              </div>
+
+              {/* Watermark Logo */}
+              <img
+                src={LOGO_URL}
+                alt="Channel Logo"
+                className="w-15 opacity-80 ml-1"
+              />
             </div>
           )}
         </div>
