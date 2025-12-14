@@ -13,7 +13,7 @@ interface RawLitter {
   birth_date: string;
   available_date: string;
   profile_picture_id: string;
-  image_ids?: string;
+  image_ids?: string[];
   status: "Planned" | "Available" | "Sold";
 }
 
@@ -58,9 +58,9 @@ export const useLitters = () => {
         : FALLBACK_LITTER_IMAGE;
 
       let galleryUrls: string[] = [];
-      if (raw.image_ids) {
-        galleryUrls = raw.image_ids.split(",").map((id) => {
-          const img = mockImages.find((i) => i.id === id.trim());
+      if (raw.image_ids && Array.isArray(raw.image_ids)) {
+        galleryUrls = raw.image_ids.map((id) => {
+          const img = mockImages.find((i) => i.id === id);
           return img ? `/assets/images/${img.filename}` : FALLBACK_LITTER_IMAGE;
         });
       }

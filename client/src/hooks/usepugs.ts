@@ -8,7 +8,7 @@ interface RawPug {
   gender: "Male" | "Female";
   description?: string;
   profile_picture_id: string;
-  image_ids?: string;
+  image_ids?: string[];
   birth_date: string;
 }
 
@@ -26,7 +26,7 @@ const FALLBACK_IMAGE = "https://placehold.co/400x400/2563eb/white?text=Pug";
 
 const fetchPugs = async (): Promise<RawPug[]> => {
   await new Promise((resolve) => setTimeout(resolve, 500));
-  return mockPugs;
+  return mockPugs as RawPug[];
 };
 
 export const usePug = () => {
@@ -48,9 +48,9 @@ export const usePug = () => {
         : FALLBACK_IMAGE;
 
       let galleryUrls: string[] = [];
-      if (raw.image_ids) {
-        galleryUrls = raw.image_ids.split(",").map((id) => {
-          const img = mockImages.find((i) => i.id === id.trim());
+      if (raw.image_ids && Array.isArray(raw.image_ids)) {
+        galleryUrls = raw.image_ids.map((id) => {
+          const img = mockImages.find((i) => i.id === id);
           return img ? `/assets/images/${img.filename}` : FALLBACK_IMAGE;
         });
       }

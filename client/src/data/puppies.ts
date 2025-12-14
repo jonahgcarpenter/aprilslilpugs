@@ -6,7 +6,7 @@ export interface Puppy {
   gender: "Male" | "Female";
   status: "Available" | "Reserved" | "Sold";
   profile_picture: string;
-  image_ids?: string;
+  image_ids?: string[];
   description?: string;
 }
 
@@ -19,6 +19,7 @@ export const mockPuppies: Puppy[] = [
     gender: "Male",
     status: "Available",
     profile_picture: "img-pup-1",
+    image_ids: ["img-pup-1", "img-pup-1-play"],
     description:
       "Generic description for Puppy 1. He is the biggest of the bunch, very brave, and loves to explore new toys.",
   },
@@ -30,6 +31,7 @@ export const mockPuppies: Puppy[] = [
     gender: "Male",
     status: "Available",
     profile_picture: "img-pup-2",
+    image_ids: ["img-pup-2"],
     description:
       "Generic description for Puppy 2. A gentle giant who loves cuddles and playing with his siblings.",
   },
@@ -41,6 +43,7 @@ export const mockPuppies: Puppy[] = [
     gender: "Female",
     status: "Reserved",
     profile_picture: "img-pup-3",
+    image_ids: ["img-pup-3", "img-gallery-3"],
     description:
       "Generic description for Puppy 3. She is sleek, fast, and incredibly smart.",
   },

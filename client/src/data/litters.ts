@@ -8,7 +8,7 @@ export interface Litter {
   birth_date: string;
   available_date: string;
   profile_picture_id: string;
-  image_ids?: string;
+  image_ids?: string[];
   status: "Planned" | "Available" | "Sold";
 }
 
@@ -21,6 +21,7 @@ export const mockLitters: Litter[] = [
     birth_date: "2023-10-01",
     available_date: "2023-12-01",
     profile_picture_id: "img-litter-1",
+    image_ids: ["img-litter-1", "img-gallery-1"],
     status: "Sold",
   },
   {
@@ -31,7 +32,7 @@ export const mockLitters: Litter[] = [
     birth_date: "2024-02-15",
     available_date: "2024-04-15",
     profile_picture_id: "img-litter-2",
-    image_ids: "img-litter-2,img-pup-1,img-pup-2",
+    image_ids: ["img-litter-2", "img-pup-1", "img-pup-2"],
     status: "Available",
   },
   {
@@ -42,6 +43,7 @@ export const mockLitters: Litter[] = [
     birth_date: "2024-05-20",
     available_date: "2024-07-20",
     profile_picture_id: "img-litter-3",
+    image_ids: [],
     status: "Planned",
   },
 ];

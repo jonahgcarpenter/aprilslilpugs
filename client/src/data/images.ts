@@ -70,4 +70,29 @@ export const mockImages: Image[] = [
     filename: "gallery.svg",
     description: "Gallery photo 3",
   },
+  {
+    id: "img-gallery-1",
+    filename: "gallery.svg",
+    description: "Gallery photo 1",
+  },
+  {
+    id: "img-gallery-2",
+    filename: "gallery.svg",
+    description: "Gallery photo 2",
+  },
+  {
+    id: "img-gallery-3",
+    filename: "gallery.svg",
+    description: "Gallery photo 3",
+  },
+  {
+    id: "img-pug-1-side",
+    filename: "pug.svg",
+    description: "Pug 1 side profile",
+  },
+  {
+    id: "img-pup-1-play",
+    filename: "puppy.svg",
+    description: "Puppy 1 playing outside",
+  },
 ];
