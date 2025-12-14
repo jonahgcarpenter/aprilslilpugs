@@ -14,7 +14,7 @@ interface RawLitter {
   available_date: string;
   profile_picture_id: string;
   image_ids?: string;
-  status: "P" | "B" | "A" | "S";
+  status: "Planned" | "Available" | "Sold";
 }
 
 export interface Litter {
@@ -28,19 +28,11 @@ export interface Litter {
   availableDate: string;
   profilePicture: string;
   images: string[];
-  status: "Planned" | "Born" | "Available" | "Sold";
-  statusLabel: string;
+  status: "Planned" | "Available" | "Sold";
 }
 
 const FALLBACK_LITTER_IMAGE =
   "https://placehold.co/400x400/2563eb/white?text=Litter";
-
-const STATUS_MAP: Record<string, string> = {
-  P: "Planned",
-  B: "Born",
-  A: "Available",
-  S: "Sold",
-};
 
 const fetchLitters = async (): Promise<RawLitter[]> => {
   await new Promise((resolve) => setTimeout(resolve, 500));
@@ -83,8 +75,6 @@ export const useLitters = () => {
         mockPugs.find((p) => p.id === raw.father_id)?.name ||
         "Unknown Father";
 
-      const statusLabel = STATUS_MAP[raw.status] || "Unknown";
-
       return {
         id: raw.id,
         name: raw.name,
@@ -96,8 +86,7 @@ export const useLitters = () => {
         availableDate: raw.available_date,
         profilePicture: profileUrl,
         images: galleryUrls,
-        status: statusLabel as Litter["status"],
-        statusLabel,
+        status: raw.status,
       };
     });
   }

@@ -75,7 +75,7 @@ const DisplayLitters = ({ title, litters, isLoading, error }: LitterProps) => {
                       {litter.name}
                     </h2>
                     <span className="px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide bg-blue-900/30 text-blue-300 border border-blue-500/20">
-                      {litter.statusLabel}
+                      {litter.status}
                     </span>
                   </div>
 

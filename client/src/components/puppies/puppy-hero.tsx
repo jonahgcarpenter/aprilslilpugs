@@ -52,7 +52,7 @@ export const PuppyHero = ({ litter }: PuppyHeroProps) => {
           <div>
             <div className="flex items-center gap-3 mb-2">
               <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide bg-blue-600 text-white shadow-lg shadow-blue-900/50">
-                {litter.statusLabel}
+                {litter.status}
               </span>
             </div>
             <h1 className="text-4xl sm:text-5xl font-extrabold text-white tracking-tight">
