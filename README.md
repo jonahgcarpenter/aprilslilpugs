@@ -18,3 +18,4 @@ A custom website built for my mom’s business, tailored to her specific needs.
 - Upload compression
 - Document storage
 - Learn Go
+- Rewrite RTMP server in go
