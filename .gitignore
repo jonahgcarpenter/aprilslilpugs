@@ -1,7 +1,6 @@
 # FRONTEND
 node_modules/
 build/
-client/public/assets/
 
 # BACKEND
 .env
