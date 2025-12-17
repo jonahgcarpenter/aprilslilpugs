@@ -19,3 +19,4 @@ A custom website built for my mom’s business, tailored to her specific needs.
 - Document storage
 - Learn Go
 - Rewrite RTMP server in go
+- SEO
