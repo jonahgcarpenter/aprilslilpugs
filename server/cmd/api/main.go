@@ -20,6 +20,7 @@ func main() {
 
 	os.MkdirAll("public/uploads/user-profiles", 0755)
 	os.MkdirAll("public/uploads/dogs", 0755)
+	os.MkdirAll("public/uploads/litters", 0755)
 
 	api := r.Group("/api")
 	{
@@ -39,6 +40,13 @@ func main() {
 			api.POST("/dogs", middleware.RequireAuth, controllers.CreateDog)
 			api.PATCH("/dogs/:id", middleware.RequireAuth, controllers.UpdateDog)
 			api.DELETE("/dogs/:id", middleware.RequireAuth, controllers.DeleteDog)
+
+			// Litters
+			api.GET("/litters", controllers.GetLitters)
+			api.GET("/litters/:id", controllers.GetLitter)
+			api.POST("/litters", middleware.RequireAuth, controllers.CreateLitter)
+			api.PATCH("/litters/:id", middleware.RequireAuth, controllers.UpdateLitter)
+			api.DELETE("/litters/:id", middleware.RequireAuth, controllers.DeleteLitter)
 	}
 
 	r.Static("/assets", "./public/dist/assets")
