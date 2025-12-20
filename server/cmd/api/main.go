@@ -62,6 +62,12 @@ func main() {
 			api.PATCH("/waitlist/:id", middleware.RequireAuth, controllers.UpdateWaitlist)
 			api.DELETE("/waitlist/:id", middleware.RequireAuth, controllers.DeleteWaitlist)
 
+			//Settings
+			api.GET("/settings", controllers.GetSettings)
+			api.PATCH("/settings/waitlist", middleware.RequireAuth, controllers.UpdateWaitlist)
+			api.PATCH("/settings/stream", middleware.RequireAuth, controllers.UpdateStream)
+			api.PATCH("/settings/stream-down", middleware.RequireAuth, controllers.UpdateStreamDown)
+
 	}
 
 	r.Static("/assets", "./public/dist/assets")
