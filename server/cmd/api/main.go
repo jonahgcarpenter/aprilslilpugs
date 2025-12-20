@@ -66,8 +66,6 @@ func main() {
 			api.GET("/settings", controllers.GetSettings)
 			api.PATCH("/settings/waitlist", middleware.RequireAuth, controllers.UpdateWaitlistStatus)
 			api.PATCH("/settings/stream", middleware.RequireAuth, controllers.UpdateStreamStatus)
-			api.PATCH("/settings/stream-down", middleware.RequireAuth, controllers.UpdateStreamDown)
-
 	}
 
 	r.Static("/assets", "./public/dist/assets")

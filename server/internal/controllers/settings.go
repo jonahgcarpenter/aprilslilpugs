@@ -65,24 +65,3 @@ func UpdateStreamStatus(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Stream setting updated", "stream_enabled": input.StreamEnabled})
 }
-
-func UpdateStreamDown(c *gin.Context) {
-	var input struct {
-		StreamDown bool `json:"stream_down" form:"stream_down"`
-	}
-
-	if err := c.ShouldBind(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	query := `UPDATE settings SET stream_down=$1, updated_at=NOW() WHERE id=1`
-	_, err := database.Pool.Exec(c, query, input.StreamDown)
-
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update stream down setting"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Stream Down setting updated", "stream_down": input.StreamDown})
-}
