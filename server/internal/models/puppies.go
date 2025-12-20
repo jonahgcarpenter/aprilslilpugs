@@ -10,8 +10,10 @@ type Puppy struct {
 	Gender         string    `json:"gender" form:"gender" binding:"required,oneof=Male Female"`
 	Status         string    `json:"status" form:"status" binding:"required,oneof=Available Reserved Sold"`
 	Description    string    `json:"description" form:"description"`
-	ProfilePicture string    `json:"profile_picture"`
-	Images         []string  `json:"image_ids"`
+	ProfilePicture *Image    `json:"profile_picture"` 
+	Images         []Image   `json:"images"`
+	ProfilePictureID *int    `json:"-"`
+	ImageIDs         []int   `json:"-"`
 	CreatedAt      time.Time `json:"createdAt"`
 	UpdatedAt      time.Time `json:"updatedAt"`
 }

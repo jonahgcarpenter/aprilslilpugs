@@ -13,8 +13,8 @@ CREATE TABLE IF NOT EXISTS puppies (
     gender puppy_gender NOT NULL,
     status puppy_status DEFAULT 'Available',
     description TEXT,
-    profile_picture VARCHAR(255),
-    images TEXT[],
+    profile_picture_id INT REFERENCES images(id) ON DELETE SET NULL,
+    images_ids TEXT[],
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );

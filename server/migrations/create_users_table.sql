@@ -7,8 +7,8 @@ CREATE TABLE IF NOT EXISTS users (
     phone_number VARCHAR(50) NOT NULL,
     location VARCHAR(255) NOT NULL,
     story TEXT,
-    profile_picture VARCHAR(255),
-    images TEXT[],
+    profile_picture_id INT REFERENCES images(id) ON DELETE SET NULL,
+    images_ids TEXT[],
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );

@@ -13,8 +13,10 @@ type Litter struct {
 	FatherName     string    `json:"father_name"` 
 	BirthDate      time.Time `json:"birth_date"`
 	AvailableDate  time.Time `json:"available_date"`
-	ProfilePicture string    `json:"profile_picture_id"` 
-	Images         []string  `json:"image_ids"`          
+	ProfilePicture *Image    `json:"profile_picture"` 
+	Images         []Image   `json:"images"`
+	ProfilePictureID *int    `json:"-"`
+	ImageIDs         []int   `json:"-"`        
 	Status         string    `json:"status" form:"status"`
 	CreatedAt      time.Time `json:"createdAt"`
 	UpdatedAt      time.Time `json:"updatedAt"`

@@ -3,15 +3,13 @@ package controllers
 import (
 	"fmt"
 	"net/http"
-	"os"
-	"path/filepath"
 	"strconv"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/internal/models"
-	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/database"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/utils"
+	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/database"
+	"github.com/lib/pq"
 )
 
 func CreateUser(c *gin.Context) {
@@ -49,13 +47,22 @@ func CreateUser(c *gin.Context) {
 func GetUser(c *gin.Context) {
 	id := c.Param("id")
 	var user models.User
+	var imageIDs []int64
+	var pID *int
+	var pURL, pAlt *string
 
-	query := `SELECT id, first_name, last_name, email, phone_number, location, story, profile_picture, images FROM users WHERE id = $1`
+	query := `
+		SELECT 
+			u.id, u.first_name, u.last_name, u.email, u.phone_number, u.location, u.story, u.image_ids,
+			img.id, img.url, img.alt_text
+		FROM users u
+		LEFT JOIN images img ON u.profile_picture_id = img.id
+		WHERE u.id = $1`
 
 	err := database.Pool.QueryRow(c, query, id).Scan(
 		&user.ID, &user.FirstName, &user.LastName, &user.Email,
-		&user.PhoneNumber, &user.Location, &user.Story,
-		&user.ProfilePicture, &user.Images,
+		&user.PhoneNumber, &user.Location, &user.Story, pq.Array(&imageIDs),
+		&pID, &pURL, &pAlt,
 	)
 
 	if err != nil {
@@ -63,13 +70,21 @@ func GetUser(c *gin.Context) {
 		return
 	}
 
-	if user.ProfilePicture != "" {
-		user.ProfilePicture = "/uploads/users/" + user.ProfilePicture
+	if pID != nil {
+		user.ProfilePicture = &models.Image{ID: *pID, URL: *pURL, AltText: *pAlt}
 	}
-	for i, img := range user.Images {
-		if img != "" {
-			user.Images[i] = "/uploads/users/" + img
+
+	if len(imageIDs) > 0 {
+		imgRows, _ := database.Pool.Query(c, "SELECT id, url, alt_text FROM images WHERE id = ANY($1)", pq.Array(imageIDs))
+		defer imgRows.Close()
+		for imgRows.Next() {
+			var img models.Image
+			if err := imgRows.Scan(&img.ID, &img.URL, &img.AltText); err == nil {
+				user.Images = append(user.Images, img)
+			}
 		}
+	} else {
+		user.Images = []models.Image{}
 	}
 
 	c.JSON(http.StatusOK, user)
@@ -84,14 +99,14 @@ func UpdateUser(c *gin.Context) {
 		return
 	}
 	authUser := userVal.(models.User)
-
 	if strconv.Itoa(authUser.ID) != idParam {
 		c.JSON(http.StatusForbidden, gin.H{"error": "You can only update your own profile"})
 		return
 	}
 
-	var currentUser models.User
-	err := database.Pool.QueryRow(c, "SELECT profile_picture, images FROM users WHERE id = $1", idParam).Scan(&currentUser.ProfilePicture, &currentUser.Images)
+	var currentPPID *int
+	var currentImageIDs []int64
+	err := database.Pool.QueryRow(c, "SELECT profile_picture_id, image_ids FROM users WHERE id = $1", idParam).Scan(&currentPPID, pq.Array(&currentImageIDs))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
@@ -103,46 +118,27 @@ func UpdateUser(c *gin.Context) {
 	location := c.PostForm("location")
 	story := c.PostForm("story")
 
-	newProfilePic := currentUser.ProfilePicture
-	file, err := c.FormFile("profilePicture")
-	if err == nil {
-		if currentUser.ProfilePicture != "" {
-			os.Remove(filepath.Join("public/uploads/users", currentUser.ProfilePicture))
-		}
-		filename := fmt.Sprintf("%d-%s", time.Now().Unix(), file.Filename)
-		dst := filepath.Join("public/uploads/users", filename)
-		c.SaveUploadedFile(file, dst)
-		newProfilePic = filename
+	newPPID := currentPPID
+	if uploadID, _ := utils.UploadAndCreateImage(c, "profilePicture", "users"); uploadID != nil {
+		newPPID = uploadID
 	}
 
-	newImages := currentUser.Images
-	if len(newImages) < 2 {
-		newImages = append(newImages, "", "")
-	}
-
-	for i := 0; i < 2; i++ {
-		formKey := fmt.Sprintf("galleryImage%d", i)
-		gFile, err := c.FormFile(formKey)
-		if err == nil {
-			if len(newImages) > i && newImages[i] != "" {
-				os.Remove(filepath.Join("public/uploads/users", newImages[i]))
-			}
-			filename := fmt.Sprintf("%d-gallery-%d-%s", time.Now().Unix(), i, gFile.Filename)
-			dst := filepath.Join("public/uploads/users", filename)
-			c.SaveUploadedFile(gFile, dst)
-			newImages[i] = filename
+	newImageIDs := currentImageIDs
+	for i := 0; i < 5; i++ {
+		if uploadID, _ := utils.UploadAndCreateImage(c, fmt.Sprintf("galleryImage%d", i), "users"); uploadID != nil {
+			newImageIDs = append(newImageIDs, int64(*uploadID))
 		}
 	}
 
 	updateQuery := `
 		UPDATE users 
-		SET first_name=$1, last_name=$2, phone_number=$3, location=$4, story=$5, profile_picture=$6, images=$7, updated_at=NOW()
+		SET first_name=$1, last_name=$2, phone_number=$3, location=$4, story=$5, profile_picture_id=$6, image_ids=$7, updated_at=NOW()
 		WHERE id = $8
 		RETURNING id, email`
 
 	var updatedUser models.User
 	err = database.Pool.QueryRow(c, updateQuery,
-		firstName, lastName, phone, location, story, newProfilePic, newImages, idParam,
+		firstName, lastName, phone, location, story, newPPID, pq.Array(newImageIDs), idParam,
 	).Scan(&updatedUser.ID, &updatedUser.Email)
 
 	if err != nil {
@@ -162,26 +158,12 @@ func DeleteUser(c *gin.Context) {
 		return
 	}
 	authUser := userVal.(models.User)
-
 	if strconv.Itoa(authUser.ID) != idParam {
 		c.JSON(http.StatusForbidden, gin.H{"error": "You can only delete your own profile"})
 		return
 	}
 
-	var currentUser models.User
-	err := database.Pool.QueryRow(c, "SELECT profile_picture, images FROM users WHERE id = $1", idParam).Scan(&currentUser.ProfilePicture, &currentUser.Images)
-	if err == nil {
-		if currentUser.ProfilePicture != "" {
-			os.Remove(filepath.Join("public/uploads/users", currentUser.ProfilePicture))
-		}
-		for _, img := range currentUser.Images {
-			if img != "" {
-				os.Remove(filepath.Join("public/uploads/users", img))
-			}
-		}
-	}
-
-	_, err = database.Pool.Exec(c, "DELETE FROM users WHERE id = $1", idParam)
+	_, err := database.Pool.Exec(c, "DELETE FROM users WHERE id = $1", idParam)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user"})
 		return

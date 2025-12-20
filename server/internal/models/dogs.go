@@ -8,8 +8,10 @@ type Dog struct {
 	Gender         string    `json:"gender" form:"gender" binding:"required,oneof=Male Female"`
 	Description    string    `json:"description" form:"description"`
 	BirthDate      time.Time `json:"birthDate"`
-	ProfilePicture string    `json:"profilePicture"`
-	Images         []string  `json:"images"`
+	ProfilePicture *Image    `json:"profile_picture"` 
+	Images         []Image   `json:"images"`
+	ProfilePictureID *int    `json:"-"`
+	ImageIDs         []int   `json:"-"`
 	CreatedAt      time.Time `json:"createdAt"`
 	UpdatedAt      time.Time `json:"updatedAt"`
 }

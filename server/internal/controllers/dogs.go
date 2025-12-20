@@ -3,17 +3,25 @@ package controllers
 import (
 	"fmt"
 	"net/http"
-	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/internal/models"
+	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/utils"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/database"
+	"github.com/lib/pq"
 )
 
 func GetDogs(c *gin.Context) {
-	rows, err := database.Pool.Query(c, "SELECT id, name, gender, description, birth_date, profile_picture, images FROM dogs ORDER BY created_at DESC")
+	query := `
+		SELECT 
+			d.id, d.name, d.gender, d.description, d.birth_date, d.image_ids,
+			img.id, img.url, img.alt_text 
+		FROM dogs d
+		LEFT JOIN images img ON d.profile_picture_id = img.id
+		ORDER BY d.created_at DESC`
+
+	rows, err := database.Pool.Query(c, query)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch dogs"})
 		return
@@ -23,10 +31,35 @@ func GetDogs(c *gin.Context) {
 	var dogs []models.Dog
 	for rows.Next() {
 		var dog models.Dog
-		if err := rows.Scan(&dog.ID, &dog.Name, &dog.Gender, &dog.Description, &dog.BirthDate, &dog.ProfilePicture, &dog.Images); err != nil {
+		var imageIDs []int64
+		
+		var pID *int
+		var pURL, pAlt *string
+
+		if err := rows.Scan(
+			&dog.ID, &dog.Name, &dog.Gender, &dog.Description, &dog.BirthDate, pq.Array(&imageIDs),
+			&pID, &pURL, &pAlt,
+		); err != nil {
 			continue
 		}
-		formatDogImages(&dog)
+
+		if pID != nil {
+			dog.ProfilePicture = &models.Image{ID: *pID, URL: *pURL, AltText: *pAlt}
+		}
+
+		if len(imageIDs) > 0 {
+			imgRows, _ := database.Pool.Query(c, "SELECT id, url, alt_text FROM images WHERE id = ANY($1)", pq.Array(imageIDs))
+			defer imgRows.Close()
+			for imgRows.Next() {
+				var img models.Image
+				if err := imgRows.Scan(&img.ID, &img.URL, &img.AltText); err == nil {
+					dog.Images = append(dog.Images, img)
+				}
+			}
+		} else {
+			dog.Images = []models.Image{}
+		}
+
 		dogs = append(dogs, dog)
 	}
 
@@ -36,59 +69,78 @@ func GetDogs(c *gin.Context) {
 func GetDog(c *gin.Context) {
 	id := c.Param("id")
 	var dog models.Dog
+	var imageIDs []int64
+	var pID *int
+	var pURL, pAlt *string
 
-	err := database.Pool.QueryRow(c, "SELECT id, name, gender, description, birth_date, profile_picture, images FROM dogs WHERE id=$1", id).Scan(
-		&dog.ID, &dog.Name, &dog.Gender, &dog.Description, &dog.BirthDate, &dog.ProfilePicture, &dog.Images,
+	query := `
+		SELECT 
+			d.id, d.name, d.gender, d.description, d.birth_date, d.image_ids,
+			img.id, img.url, img.alt_text 
+		FROM dogs d
+		LEFT JOIN images img ON d.profile_picture_id = img.id
+		WHERE d.id=$1`
+
+	err := database.Pool.QueryRow(c, query, id).Scan(
+		&dog.ID, &dog.Name, &dog.Gender, &dog.Description, &dog.BirthDate, pq.Array(&imageIDs),
+		&pID, &pURL, &pAlt,
 	)
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Dog not found"})
 		return
 	}
-	formatDogImages(&dog)
+
+	if pID != nil {
+		dog.ProfilePicture = &models.Image{ID: *pID, URL: *pURL, AltText: *pAlt}
+	}
+
+	if len(imageIDs) > 0 {
+		imgRows, _ := database.Pool.Query(c, "SELECT id, url, alt_text FROM images WHERE id = ANY($1)", pq.Array(imageIDs))
+		defer imgRows.Close()
+		for imgRows.Next() {
+			var img models.Image
+			if err := imgRows.Scan(&img.ID, &img.URL, &img.AltText); err == nil {
+				dog.Images = append(dog.Images, img)
+			}
+		}
+	} else {
+		dog.Images = []models.Image{}
+	}
+
 	c.JSON(http.StatusOK, dog)
 }
 
 func CreateDog(c *gin.Context) {
-	name := c.PostForm("name")
-	gender := c.PostForm("gender")
-	desc := c.PostForm("description")
-	dobStr := c.PostForm("birthDate")
-
-	birthDate, err := time.Parse("2006-01-02", dobStr)
+	profilePicID, err := utils.UploadAndCreateImage(c, "profilePicture", "dogs")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid birthDate format. Use YYYY-MM-DD"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to upload profile picture"})
 		return
 	}
 
-	var profilePic string
-	file, err := c.FormFile("profilePicture")
-	if err == nil {
-		filename := fmt.Sprintf("%d-%s", time.Now().Unix(), file.Filename)
-		dst := filepath.Join("public/uploads/dogs", filename)
-		c.SaveUploadedFile(file, dst)
-		profilePic = filename
-	}
-
-	var images []string
+	var galleryIDs []int
 	for i := 0; i < 5; i++ {
 		formKey := fmt.Sprintf("galleryImage%d", i)
-		gFile, err := c.FormFile(formKey)
-		if err == nil {
-			filename := fmt.Sprintf("%d-gallery-%d-%s", time.Now().Unix(), i, gFile.Filename)
-			dst := filepath.Join("public/uploads/dogs", filename)
-			c.SaveUploadedFile(gFile, dst)
-			images = append(images, filename)
+		imgID, _ := utils.UploadAndCreateImage(c, formKey, "dogs")
+		if imgID != nil {
+			galleryIDs = append(galleryIDs, *imgID)
 		}
 	}
-	if images == nil { images = []string{} }
+
+	name := c.PostForm("name")
+	gender := c.PostForm("gender")
+	desc := c.PostForm("description")
+	birthDate, _ := time.Parse("2006-01-02", c.PostForm("birthDate"))
 
 	var dogID int
 	query := `
-		INSERT INTO dogs (name, gender, description, birth_date, profile_picture, images)
+		INSERT INTO dogs (name, gender, description, birth_date, profile_picture_id, image_ids)
 		VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`
 	
-	err = database.Pool.QueryRow(c, query, name, gender, desc, birthDate, profilePic, images).Scan(&dogID)
+	err = database.Pool.QueryRow(c, query, 
+		name, gender, desc, birthDate, profilePicID, pq.Array(galleryIDs),
+	).Scan(&dogID)
+
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -100,8 +152,9 @@ func CreateDog(c *gin.Context) {
 func UpdateDog(c *gin.Context) {
 	id := c.Param("id")
 	
-	var currentDog models.Dog
-	err := database.Pool.QueryRow(c, "SELECT profile_picture, images FROM dogs WHERE id=$1", id).Scan(&currentDog.ProfilePicture, &currentDog.Images)
+	var currentPPID *int
+	var currentImageIDs []int64
+	err := database.Pool.QueryRow(c, "SELECT profile_picture_id, image_ids FROM dogs WHERE id=$1", id).Scan(&currentPPID, pq.Array(&currentImageIDs))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Dog not found"})
 		return
@@ -110,40 +163,27 @@ func UpdateDog(c *gin.Context) {
 	name := c.PostForm("name")
 	gender := c.PostForm("gender")
 	desc := c.PostForm("description")
-	dobStr := c.PostForm("birthDate")
-	
-	birthDate, err := time.Parse("2006-01-02", dobStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid birthDate format"})
-		return
+	birthDate, _ := time.Parse("2006-01-02", c.PostForm("birthDate"))
+
+	newPPID := currentPPID
+	uploadPPID, _ := utils.UploadAndCreateImage(c, "profilePicture", "dogs")
+	if uploadPPID != nil {
+		newPPID = uploadPPID
 	}
 
-	newProfilePic := currentDog.ProfilePicture
-	file, err := c.FormFile("profilePicture")
-	if err == nil {
-		if currentDog.ProfilePicture != "" {
-			os.Remove(filepath.Join("public/uploads/dogs", currentDog.ProfilePicture))
-		}
-		filename := fmt.Sprintf("%d-%s", time.Now().Unix(), file.Filename)
-		c.SaveUploadedFile(file, filepath.Join("public/uploads/dogs", filename))
-		newProfilePic = filename
-	}
-
-	newImages := currentDog.Images
+	newImageIDs := currentImageIDs
 	for i := 0; i < 5; i++ {
 		formKey := fmt.Sprintf("galleryImage%d", i)
-		gFile, err := c.FormFile(formKey)
-		if err == nil {
-			filename := fmt.Sprintf("%d-gallery-%d-%s", time.Now().Unix(), i, gFile.Filename)
-			c.SaveUploadedFile(gFile, filepath.Join("public/uploads/dogs", filename))
-			newImages = append(newImages, filename)
+		imgID, _ := utils.UploadAndCreateImage(c, formKey, "dogs")
+		if imgID != nil {
+			newImageIDs = append(newImageIDs, int64(*imgID))
 		}
 	}
 
 	_, err = database.Pool.Exec(c, `
-		UPDATE dogs SET name=$1, gender=$2, description=$3, birth_date=$4, profile_picture=$5, images=$6, updated_at=NOW()
+		UPDATE dogs SET name=$1, gender=$2, description=$3, birth_date=$4, profile_picture_id=$5, image_ids=$6, updated_at=NOW()
 		WHERE id=$7`, 
-		name, gender, desc, birthDate, newProfilePic, newImages, id)
+		name, gender, desc, birthDate, newPPID, pq.Array(newImageIDs), id)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -155,31 +195,10 @@ func UpdateDog(c *gin.Context) {
 
 func DeleteDog(c *gin.Context) {
 	id := c.Param("id")
-	var currentDog models.Dog
-	err := database.Pool.QueryRow(c, "SELECT profile_picture, images FROM dogs WHERE id=$1", id).Scan(&currentDog.ProfilePicture, &currentDog.Images)
-	
-	if err == nil {
-		os.Remove(filepath.Join("public/uploads/dogs", currentDog.ProfilePicture))
-		for _, img := range currentDog.Images {
-			os.Remove(filepath.Join("public/uploads/dogs", img))
-		}
-	}
-
-	_, err = database.Pool.Exec(c, "DELETE FROM dogs WHERE id=$1", id)
+	_, err := database.Pool.Exec(c, "DELETE FROM dogs WHERE id=$1", id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete dog"})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Dog deleted"})
-}
-
-func formatDogImages(dog *models.Dog) {
-	if dog.ProfilePicture != "" {
-		dog.ProfilePicture = "/uploads/dogs/" + dog.ProfilePicture
-	}
-	for i, img := range dog.Images {
-		if img != "" {
-			dog.Images[i] = "/uploads/dogs/" + img
-		}
-	}
 }
