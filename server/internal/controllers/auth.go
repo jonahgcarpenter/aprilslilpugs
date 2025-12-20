@@ -1,12 +1,13 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/internal/models"
-	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/utils"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/database"
+	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/utils"
 )
 
 func LoginUser(c *gin.Context) {
@@ -45,5 +46,11 @@ func LoginUser(c *gin.Context) {
 }
 
 func LogoutUser(c *gin.Context) {
+	val, exists := c.Get("user")
+	if exists {
+		 user := val.(models.User)
+		 fmt.Println("User logging out:", user.Email)
+	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "Successfully logged out"})
 }

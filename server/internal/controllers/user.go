@@ -5,12 +5,13 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/internal/models"
-	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/utils"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/database"
+	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/utils"
 )
 
 func CreateUser(c *gin.Context) {
@@ -30,14 +31,14 @@ func CreateUser(c *gin.Context) {
 		INSERT INTO users (first_name, last_name, email, password_hash, phone_number, location, story, created_at, updated_at)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
 		RETURNING id, created_at`
-	
-	err = database.Pool.QueryRow(c, query, 
+
+	err = database.Pool.QueryRow(c, query,
 		user.FirstName, user.LastName, user.Email, hashedPassword,
 		user.PhoneNumber, user.Location, user.Story,
 	).Scan(&user.ID, &user.CreatedAt)
 
 	if err != nil {
-		fmt.Println("Database Error:", err) 
+		fmt.Println("Database Error:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -48,12 +49,12 @@ func CreateUser(c *gin.Context) {
 func GetUser(c *gin.Context) {
 	id := c.Param("id")
 	var user models.User
-	
+
 	query := `SELECT id, first_name, last_name, email, phone_number, location, story, profile_picture, images FROM users WHERE id = $1`
-	
+
 	err := database.Pool.QueryRow(c, query, id).Scan(
-		&user.ID, &user.FirstName, &user.LastName, &user.Email, 
-		&user.PhoneNumber, &user.Location, &user.Story, 
+		&user.ID, &user.FirstName, &user.LastName, &user.Email,
+		&user.PhoneNumber, &user.Location, &user.Story,
 		&user.ProfilePicture, &user.Images,
 	)
 
@@ -75,10 +76,22 @@ func GetUser(c *gin.Context) {
 }
 
 func UpdateUser(c *gin.Context) {
-	id := c.Param("id")
+	idParam := c.Param("id")
+
+	userVal, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+	authUser := userVal.(models.User)
+
+	if strconv.Itoa(authUser.ID) != idParam {
+		c.JSON(http.StatusForbidden, gin.H{"error": "You can only update your own profile"})
+		return
+	}
 
 	var currentUser models.User
-	err := database.Pool.QueryRow(c, "SELECT profile_picture, images FROM users WHERE id = $1", id).Scan(&currentUser.ProfilePicture, &currentUser.Images)
+	err := database.Pool.QueryRow(c, "SELECT profile_picture, images FROM users WHERE id = $1", idParam).Scan(&currentUser.ProfilePicture, &currentUser.Images)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
@@ -89,7 +102,7 @@ func UpdateUser(c *gin.Context) {
 	phone := c.PostForm("phoneNumber")
 	location := c.PostForm("location")
 	story := c.PostForm("story")
-	
+
 	newProfilePic := currentUser.ProfilePicture
 	file, err := c.FormFile("profilePicture")
 	if err == nil {
@@ -104,7 +117,7 @@ func UpdateUser(c *gin.Context) {
 
 	newImages := currentUser.Images
 	if len(newImages) < 2 {
-		newImages = append(newImages, "", "") 
+		newImages = append(newImages, "", "")
 	}
 
 	for i := 0; i < 2; i++ {
@@ -126,10 +139,10 @@ func UpdateUser(c *gin.Context) {
 		SET first_name=$1, last_name=$2, phone_number=$3, location=$4, story=$5, profile_picture=$6, images=$7, updated_at=NOW()
 		WHERE id = $8
 		RETURNING id, email`
-	
+
 	var updatedUser models.User
-	err = database.Pool.QueryRow(c, updateQuery, 
-		firstName, lastName, phone, location, story, newProfilePic, newImages, id,
+	err = database.Pool.QueryRow(c, updateQuery,
+		firstName, lastName, phone, location, story, newProfilePic, newImages, idParam,
 	).Scan(&updatedUser.ID, &updatedUser.Email)
 
 	if err != nil {
@@ -141,10 +154,22 @@ func UpdateUser(c *gin.Context) {
 }
 
 func DeleteUser(c *gin.Context) {
-	id := c.Param("id")
+	idParam := c.Param("id")
+
+	userVal, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+	authUser := userVal.(models.User)
+
+	if strconv.Itoa(authUser.ID) != idParam {
+		c.JSON(http.StatusForbidden, gin.H{"error": "You can only delete your own profile"})
+		return
+	}
 
 	var currentUser models.User
-	err := database.Pool.QueryRow(c, "SELECT profile_picture, images FROM users WHERE id = $1", id).Scan(&currentUser.ProfilePicture, &currentUser.Images)
+	err := database.Pool.QueryRow(c, "SELECT profile_picture, images FROM users WHERE id = $1", idParam).Scan(&currentUser.ProfilePicture, &currentUser.Images)
 	if err == nil {
 		if currentUser.ProfilePicture != "" {
 			os.Remove(filepath.Join("public/uploads/breeder-profiles", currentUser.ProfilePicture))
@@ -156,7 +181,7 @@ func DeleteUser(c *gin.Context) {
 		}
 	}
 
-	_, err = database.Pool.Exec(c, "DELETE FROM users WHERE id = $1", id)
+	_, err = database.Pool.Exec(c, "DELETE FROM users WHERE id = $1", idParam)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user"})
 		return

@@ -6,7 +6,7 @@ import (
 	
 	"github.com/jonahgcarpenter/aprilslilpugs/server/internal/config"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/internal/controllers"
-	// "github.com/jonahgcarpenter/aprilslilpugs/server/internal/middleware"
+	"github.com/jonahgcarpenter/aprilslilpugs/server/internal/middleware"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/database"
 )
 
@@ -24,15 +24,13 @@ func main() {
 	{
 			// Auth
 			api.POST("/auth/login", controllers.LoginUser)
-			// TODO: Protect
-			api.POST("/auth/logout", controllers.LogoutUser)
+			api.POST("/auth/logout", middleware.RequireAuth,controllers.LogoutUser)
 
 			// User
-			// TODO: Protect
-			api.POST("/users", controllers.CreateUser)
-			api.GET("/users/:id", controllers.GetUser)
-			api.PATCH("/users/:id", controllers.UpdateUser)
-			api.DELETE("/users/:id", controllers.DeleteUser)
+			api.POST("/users", middleware.RequireAuth, controllers.CreateUser)
+			api.GET("/users/:id", middleware.RequireAuth, controllers.GetUser)
+			api.PATCH("/users/:id", middleware.RequireAuth, controllers.UpdateUser)
+			api.DELETE("/users/:id", middleware.RequireAuth, controllers.DeleteUser)
 	}
 
 	r.Static("/assets", "./public/dist/assets")
