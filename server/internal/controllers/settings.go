@@ -10,10 +10,10 @@ import (
 
 func GetSettings(c *gin.Context) {
 	var s models.Settings
-	query := `SELECT id, waitlist_enabled, stream_enabled, stream_down FROM settings WHERE id = 1`
+	query := `SELECT id, waitlist_enabled, stream_enabled FROM settings WHERE id = 1`
 
 	err := database.Pool.QueryRow(c, query).Scan(
-		&s.ID, &s.WaitlistEnabled, &s.StreamEnabled, &s.StreamDown,
+		&s.ID, &s.WaitlistEnabled, &s.StreamEnabled,
 	)
 
 	if err != nil {
