@@ -18,7 +18,7 @@ func main() {
 
 	r := gin.Default()
 
-	os.MkdirAll("public/uploads/user-profiles", 0755)
+	os.MkdirAll("public/uploads/users", 0755)
 	os.MkdirAll("public/uploads/dogs", 0755)
 	os.MkdirAll("public/uploads/litters", 0755)
 

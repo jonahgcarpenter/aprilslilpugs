@@ -64,11 +64,11 @@ func GetUser(c *gin.Context) {
 	}
 
 	if user.ProfilePicture != "" {
-		user.ProfilePicture = "/uploads/user-profiles/" + user.ProfilePicture
+		user.ProfilePicture = "/uploads/users/" + user.ProfilePicture
 	}
 	for i, img := range user.Images {
 		if img != "" {
-			user.Images[i] = "/uploads/user-profiles/" + img
+			user.Images[i] = "/uploads/users/" + img
 		}
 	}
 
@@ -107,10 +107,10 @@ func UpdateUser(c *gin.Context) {
 	file, err := c.FormFile("profilePicture")
 	if err == nil {
 		if currentUser.ProfilePicture != "" {
-			os.Remove(filepath.Join("public/uploads/user-profiles", currentUser.ProfilePicture))
+			os.Remove(filepath.Join("public/uploads/users", currentUser.ProfilePicture))
 		}
 		filename := fmt.Sprintf("%d-%s", time.Now().Unix(), file.Filename)
-		dst := filepath.Join("public/uploads/user-profiles", filename)
+		dst := filepath.Join("public/uploads/users", filename)
 		c.SaveUploadedFile(file, dst)
 		newProfilePic = filename
 	}
@@ -125,10 +125,10 @@ func UpdateUser(c *gin.Context) {
 		gFile, err := c.FormFile(formKey)
 		if err == nil {
 			if len(newImages) > i && newImages[i] != "" {
-				os.Remove(filepath.Join("public/uploads/user-profiles", newImages[i]))
+				os.Remove(filepath.Join("public/uploads/users", newImages[i]))
 			}
 			filename := fmt.Sprintf("%d-gallery-%d-%s", time.Now().Unix(), i, gFile.Filename)
-			dst := filepath.Join("public/uploads/user-profiles", filename)
+			dst := filepath.Join("public/uploads/users", filename)
 			c.SaveUploadedFile(gFile, dst)
 			newImages[i] = filename
 		}
@@ -172,11 +172,11 @@ func DeleteUser(c *gin.Context) {
 	err := database.Pool.QueryRow(c, "SELECT profile_picture, images FROM users WHERE id = $1", idParam).Scan(&currentUser.ProfilePicture, &currentUser.Images)
 	if err == nil {
 		if currentUser.ProfilePicture != "" {
-			os.Remove(filepath.Join("public/uploads/user-profiles", currentUser.ProfilePicture))
+			os.Remove(filepath.Join("public/uploads/users", currentUser.ProfilePicture))
 		}
 		for _, img := range currentUser.Images {
 			if img != "" {
-				os.Remove(filepath.Join("public/uploads/user-profiles", img))
+				os.Remove(filepath.Join("public/uploads/users", img))
 			}
 		}
 	}
