@@ -3,7 +3,6 @@ package database
 import (
 	"context"
 	"log"
-	"os"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -11,13 +10,12 @@ import (
 
 var Pool *pgxpool.Pool
 
-func Connect() {
-	dbURL := os.Getenv("DATABASE_URL")
-	if dbURL == "" {
-		log.Fatal("DATABASE_URL is not set in .env")
+func Connect(connectionString string) {
+	if connectionString == "" {
+		log.Fatal("Database connection string is empty")
 	}
 
-	config, err := pgxpool.ParseConfig(dbURL)
+	config, err := pgxpool.ParseConfig(connectionString)
 	if err != nil {
 		log.Fatal("Unable to parse DATABASE_URL:", err)
 	}
@@ -34,7 +32,7 @@ func Connect() {
 		log.Fatal("Unable to ping database:", err)
 	}
 
-	log.Println("Connected to PostgreSQL!")
+	log.Println("Connected to Database")
 }
 
 func Close() {

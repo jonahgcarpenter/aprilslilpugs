@@ -1,19 +1,16 @@
 package main
 
 import (
-	"log"
-
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
+	
+	"github.com/jonahgcarpenter/aprilslilpugs/server/internal/config"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/database"
 )
 
 func main() {
-	if err := godotenv.Load(); err != nil {
-		log.Println("No .env file found")
-	}
+	cfg := config.Load()
 
-	database.Connect()
+	database.Connect(cfg.DatabaseURL)
 	defer database.Close()
 
 	r := gin.Default()
@@ -26,5 +23,5 @@ func main() {
 		c.File("./public/dist/index.html")
 	})
 
-	r.Run(":4000")
+	r.Run(":" + cfg.Port)
 }
