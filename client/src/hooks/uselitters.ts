@@ -1,20 +1,23 @@
 import useSWR from "swr";
-import { mockLitters } from "../data/litters";
-import { mockPugs } from "../data/pugs";
-import { mockImages } from "../data/images";
 
-interface RawLitter {
-  id: string;
+interface Image {
+  id: number;
+  url: string;
+  alt_text: string;
+}
+
+interface LitterResponse {
+  id: number;
   name: string;
-  mother_id?: string;
-  mother_name?: string;
-  father_id?: string;
-  father_name?: string;
+  mother_id?: number;
+  mother_name: string;
+  father_id?: number;
+  father_name: string;
   birth_date: string;
   available_date: string;
-  profile_picture_id: string;
-  image_ids?: string[];
-  status: "Planned" | "Available" | "Sold";
+  profile_picture: Image | null;
+  images: Image[];
+  status: string;
 }
 
 export interface Litter {
@@ -28,60 +31,38 @@ export interface Litter {
   availableDate: string;
   profilePicture: string;
   images: string[];
-  status: "Planned" | "Available" | "Sold";
+  status: "Planned" | "Available" | "Sold" | string;
 }
 
 const FALLBACK_LITTER_IMAGE =
   "https://placehold.co/400x400/2563eb/white?text=Litter";
 
-const fetchLitters = async (): Promise<RawLitter[]> => {
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  return mockLitters;
-};
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export const useLitters = () => {
   const {
     data: rawLitters,
     error,
     isLoading,
-  } = useSWR<RawLitter[]>("/api/litters", fetchLitters);
+  } = useSWR<LitterResponse[]>("/api/litters", fetcher);
 
   let litters: Litter[] = [];
 
   if (rawLitters) {
     litters = rawLitters.map((raw) => {
-      const profileImg = mockImages.find(
-        (img) => img.id === raw.profile_picture_id,
-      );
-      const profileUrl = profileImg
-        ? `/assets/images/${profileImg.filename}`
+      const profileUrl = raw.profile_picture
+        ? raw.profile_picture.url
         : FALLBACK_LITTER_IMAGE;
 
-      let galleryUrls: string[] = [];
-      if (raw.image_ids && Array.isArray(raw.image_ids)) {
-        galleryUrls = raw.image_ids.map((id) => {
-          const img = mockImages.find((i) => i.id === id);
-          return img ? `/assets/images/${img.filename}` : FALLBACK_LITTER_IMAGE;
-        });
-      }
-
-      const motherName =
-        raw.mother_name ||
-        mockPugs.find((p) => p.id === raw.mother_id)?.name ||
-        "Unknown Mother";
-
-      const fatherName =
-        raw.father_name ||
-        mockPugs.find((p) => p.id === raw.father_id)?.name ||
-        "Unknown Father";
+      const galleryUrls = raw.images ? raw.images.map((img) => img.url) : [];
 
       return {
-        id: raw.id,
+        id: raw.id.toString(),
         name: raw.name,
-        motherId: raw.mother_id,
-        motherName,
-        fatherId: raw.father_id,
-        fatherName,
+        motherId: raw.mother_id?.toString(),
+        motherName: raw.mother_name || "Unknown Mother",
+        fatherId: raw.father_id?.toString(),
+        fatherName: raw.father_name || "Unknown Father",
         birthDate: raw.birth_date,
         availableDate: raw.available_date,
         profilePicture: profileUrl,
@@ -95,9 +76,9 @@ export const useLitters = () => {
   const pastLitters = litters.filter((l) => l.status === "Sold");
 
   return {
-    litters, // All litters
-    currentLitters, // Planned, Born, Available
-    pastLitters, // Sold
+    litters,
+    currentLitters,
+    pastLitters,
     isLoading,
     error,
   };

@@ -1,17 +1,21 @@
 import useSWR from "swr";
-import { mockBreeder } from "../data/breeder";
-import { mockImages } from "../data/images";
 
-interface RawBreederResponse {
-  id: string;
-  firstname: string;
-  lastname: string;
+interface Image {
+  id: number;
+  url: string;
+  alt_text: string;
+}
+
+interface UserResponse {
+  id: number;
+  firstName: string;
+  lastName: string;
   email: string;
-  phone: string;
+  phoneNumber: string;
   location: string;
-  description: string;
-  profile_picture_id: string;
-  image_ids?: string;
+  story: string;
+  profile_picture: Image | null;
+  images: Image[];
 }
 
 export interface Breeder {
@@ -27,48 +31,35 @@ export interface Breeder {
 }
 
 const FALLBACK_PROFILE = "https://placehold.co/400x400/2563eb/white?text=April";
-const FALLBACK_GALLERY =
-  "https://placehold.co/600x400/1e293b/white?text=April-Image";
 
-const fetchBreederData = async (): Promise<RawBreederResponse> => {
-  await new Promise((resolve) => setTimeout(resolve, 300));
-
-  return mockBreeder;
-};
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export const useBreeder = () => {
   const {
     data: rawData,
     error,
     isLoading,
-  } = useSWR<RawBreederResponse>("/api/breeder", fetchBreederData);
+  } = useSWR<UserResponse>("/api/users/1", fetcher);
 
   let breeder: Breeder | null = null;
 
   if (rawData) {
-    const profileImgObj = mockImages.find(
-      (img) => img.id === rawData.profile_picture_id,
-    );
-    const profileUrl = profileImgObj
-      ? `/assets/images/${profileImgObj.filename}`
+    const profileUrl = rawData.profile_picture
+      ? rawData.profile_picture.url
       : FALLBACK_PROFILE;
 
-    let galleryUrls: string[] = [];
-    if (rawData.image_ids) {
-      galleryUrls = rawData.image_ids.split(",").map((id) => {
-        const imgObj = mockImages.find((img) => img.id === id.trim());
-        return imgObj ? `/assets/images/${imgObj.filename}` : FALLBACK_GALLERY;
-      });
-    }
+    const galleryUrls = rawData.images
+      ? rawData.images.map((img) => img.url)
+      : [];
 
     breeder = {
-      id: rawData.id,
-      firstName: rawData.firstname,
-      lastName: rawData.lastname,
+      id: rawData.id.toString(),
+      firstName: rawData.firstName,
+      lastName: rawData.lastName,
       email: rawData.email,
-      phone: rawData.phone,
+      phone: rawData.phoneNumber,
       location: rawData.location,
-      description: rawData.description,
+      description: rawData.story,
       profilePicture: profileUrl,
       images: galleryUrls,
     };

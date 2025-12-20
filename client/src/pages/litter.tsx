@@ -1,17 +1,13 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useLitters } from "../hooks/uselitters";
-import { usePug } from "../hooks/usepugs";
-import { mockPuppies, type Puppy } from "../data/puppies";
-import { mockImages } from "../data/images";
+import { usePuppies, type Puppy } from "../hooks/usepuppies";
+import { useDogs } from "../hooks/usedogs";
 import PuppyParents from "../components/puppies/puppy-parents";
 import LitterGallery, {
   type GalleryItem,
 } from "../components/litters/litter-gallery";
 import PuppyHero from "../components/puppies/puppy-hero";
 import PuppyList from "../components/puppies/puppy-list";
-
-const FALLBACK_PUPPY_IMAGE =
-  "https://placehold.co/400x400/2563eb/white?text=Puppy";
 
 const Litter = () => {
   const { id } = useParams<{ id: string }>();
@@ -23,11 +19,13 @@ const Litter = () => {
     error: littersError,
   } = useLitters();
 
-  const { pugs, isLoading: pugsLoading } = usePug();
+  const { dogs, isLoading: pugsLoading } = useDogs();
+
+  const { puppies, isLoading: puppiesLoading } = usePuppies(id);
 
   const litter = litters.find((l) => l.id === id);
 
-  if (littersLoading || pugsLoading) {
+  if (littersLoading || pugsLoading || puppiesLoading) {
     return (
       <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-12 border border-slate-800/50 shadow-xl flex justify-center">
         <span className="text-blue-400 font-semibold animate-pulse">
@@ -53,54 +51,32 @@ const Litter = () => {
     );
   }
 
-  const mother = pugs.find((p) => p.id === litter.motherId);
-  const father = pugs.find((p) => p.id === litter.fatherId);
-
-  const puppies: Puppy[] = mockPuppies
-    .filter((p) => p.litter_id === litter.id)
-    .map((p) => {
-      const img = mockImages.find((i) => i.id === p.profile_picture);
-      return {
-        ...p,
-        profile_picture: img
-          ? `/assets/images/${img.filename}`
-          : FALLBACK_PUPPY_IMAGE,
-      };
-    });
+  const mother = dogs.find((d) => d.id === litter.motherId);
+  const father = dogs.find((d) => d.id === litter.fatherId);
 
   const galleryMap = new Map<string, GalleryItem>();
 
   litter.images.forEach((url) => {
     if (url === litter.profilePicture) return;
 
-    const matchedImg = mockImages.find((img) => url.includes(img.filename));
-
     galleryMap.set(url, {
       url,
-      description: matchedImg ? (matchedImg as any).description : undefined,
+      description: undefined,
       puppyName: undefined,
     });
   });
 
-  mockPuppies
-    .filter((p) => p.litter_id === litter.id)
-    .forEach((p) => {
-      if (p.image_ids) {
-        p.image_ids.forEach((imgId) => {
-          if (imgId === p.profile_picture) return;
+  puppies.forEach((d) => {
+    d.images.forEach((url) => {
+      if (url === d.profilePicture) return;
 
-          const img = mockImages.find((i) => i.id === imgId);
-          if (img) {
-            const url = `/assets/images/${img.filename}`;
-            galleryMap.set(url, {
-              url,
-              description: (img as any).description,
-              puppyName: p.name,
-            });
-          }
-        });
-      }
+      galleryMap.set(url, {
+        url,
+        description: undefined,
+        puppyName: d.name,
+      });
     });
+  });
 
   const combinedGallery = Array.from(galleryMap.values());
 

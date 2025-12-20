@@ -1,10 +1,10 @@
 import Grumble from "../components/pugs/grumble";
-import { usePug } from "../hooks/usepugs";
+import { useDogs } from "../hooks/usedogs";
 
 const OurAdults = () => {
-  const { pugs, isLoading, error } = usePug();
+  const { dogs, isLoading, error } = useDogs();
 
-  return <Grumble grumbles={pugs} isLoading={isLoading} error={error} />;
+  return <Grumble grumbles={dogs} isLoading={isLoading} error={error} />;
 };
 
 export default OurAdults;
