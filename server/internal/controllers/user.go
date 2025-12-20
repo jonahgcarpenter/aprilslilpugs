@@ -9,8 +9,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/internal/models"
+	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/utils"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/database"
-	"golang.org/x/crypto/bcrypt"
 )
 
 func CreateUser(c *gin.Context) {
@@ -20,7 +20,7 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	hashedPassword, err := utils.HashPassword(user.Password)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
 		return
@@ -32,7 +32,7 @@ func CreateUser(c *gin.Context) {
 		RETURNING id, created_at`
 	
 	err = database.Pool.QueryRow(c, query, 
-		user.FirstName, user.LastName, user.Email, string(hashedPassword), 
+		user.FirstName, user.LastName, user.Email, hashedPassword,
 		user.PhoneNumber, user.Location, user.Story,
 	).Scan(&user.ID, &user.CreatedAt)
 
