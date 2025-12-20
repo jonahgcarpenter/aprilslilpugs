@@ -18,7 +18,7 @@ func main() {
 
 	r := gin.Default()
 
-	os.MkdirAll("public/uploads/breeder-profiles", 0755)
+	os.MkdirAll("public/uploads/user-profiles", 0755)
 
 	api := r.Group("/api")
 	{
