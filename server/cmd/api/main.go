@@ -19,6 +19,7 @@ func main() {
 	r := gin.Default()
 
 	os.MkdirAll("public/uploads/user-profiles", 0755)
+	os.MkdirAll("public/uploads/dogs", 0755)
 
 	api := r.Group("/api")
 	{
@@ -31,6 +32,13 @@ func main() {
 			api.GET("/users/:id", middleware.RequireAuth, controllers.GetUser)
 			api.PATCH("/users/:id", middleware.RequireAuth, controllers.UpdateUser)
 			api.DELETE("/users/:id", middleware.RequireAuth, controllers.DeleteUser)
+
+			// Dogs
+			api.GET("/dogs", controllers.GetDogs)
+			api.GET("/dogs/:id", controllers.GetDog)
+			api.POST("/dogs", middleware.RequireAuth, controllers.CreateDog)
+			api.PATCH("/dogs/:id", middleware.RequireAuth, controllers.UpdateDog)
+			api.DELETE("/dogs/:id", middleware.RequireAuth, controllers.DeleteDog)
 	}
 
 	r.Static("/assets", "./public/dist/assets")
