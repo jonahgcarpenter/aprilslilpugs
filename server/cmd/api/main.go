@@ -64,8 +64,8 @@ func main() {
 
 			//Settings
 			api.GET("/settings", controllers.GetSettings)
-			api.PATCH("/settings/waitlist", middleware.RequireAuth, controllers.UpdateWaitlist)
-			api.PATCH("/settings/stream", middleware.RequireAuth, controllers.UpdateStream)
+			api.PATCH("/settings/waitlist", middleware.RequireAuth, controllers.UpdateWaitlistStatus)
+			api.PATCH("/settings/stream", middleware.RequireAuth, controllers.UpdateStreamStatus)
 			api.PATCH("/settings/stream-down", middleware.RequireAuth, controllers.UpdateStreamDown)
 
 	}

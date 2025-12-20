@@ -24,7 +24,7 @@ func GetSettings(c *gin.Context) {
 	c.JSON(http.StatusOK, s)
 }
 
-func UpdateWaitlist(c *gin.Context) {
+func UpdateWaitlistStatus(c *gin.Context) {
 	var input struct {
 		WaitlistEnabled bool `json:"waitlist_enabled" form:"waitlist_enabled"`
 	}
@@ -45,7 +45,7 @@ func UpdateWaitlist(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Waitlist setting updated", "waitlist_enabled": input.WaitlistEnabled})
 }
 
-func UpdateStream(c *gin.Context) {
+func UpdateStreamStatus(c *gin.Context) {
 	var input struct {
 		StreamEnabled bool `json:"stream_enabled" form:"stream_enabled"`
 	}
