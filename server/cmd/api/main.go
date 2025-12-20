@@ -56,6 +56,12 @@ func main() {
       api.PATCH("/puppies/:id", middleware.RequireAuth, controllers.UpdatePuppy)
       api.DELETE("/puppies/:id", middleware.RequireAuth, controllers.DeletePuppy)
 
+			//Waitlist
+			api.POST("/waitlist", controllers.CreateWaitlist)
+			api.GET("/waitlist", middleware.RequireAuth, controllers.GetWaitlist)
+			api.PATCH("/waitlist/:id", middleware.RequireAuth, controllers.UpdateWaitlist)
+			api.DELETE("/waitlist/:id", middleware.RequireAuth, controllers.DeleteWaitlist)
+
 	}
 
 	r.Static("/assets", "./public/dist/assets")
