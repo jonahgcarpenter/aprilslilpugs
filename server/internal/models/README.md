@@ -1,1 +1,0 @@
-# Go Structs & Database Definitions
