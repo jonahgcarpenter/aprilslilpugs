@@ -7,9 +7,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/internal/models"
-	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/utils"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/database"
-	"github.com/lib/pq"
+	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/utils"
 )
 
 func CreateUser(c *gin.Context) {
@@ -26,13 +25,12 @@ func CreateUser(c *gin.Context) {
 	}
 
 	query := `
-		INSERT INTO users (first_name, last_name, email, password_hash, phone_number, location, story, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
+		INSERT INTO users (first_name, last_name, email, password_hash, phone_number, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
 		RETURNING id, created_at`
 
 	err = database.Pool.QueryRow(c, query,
-		user.FirstName, user.LastName, user.Email, hashedPassword,
-		user.PhoneNumber, user.Location, user.Story,
+		user.FirstName, user.LastName, user.Email, hashedPassword, user.PhoneNumber,
 	).Scan(&user.ID, &user.CreatedAt)
 
 	if err != nil {
@@ -47,44 +45,22 @@ func CreateUser(c *gin.Context) {
 func GetUser(c *gin.Context) {
 	id := c.Param("id")
 	var user models.User
-	var imageIDs []int64
-	var pID *int
-	var pURL, pAlt *string
 
 	query := `
 		SELECT 
-			u.id, u.first_name, u.last_name, u.email, u.phone_number, u.location, u.story, u.image_ids,
-			img.id, img.url, img.alt_text
-		FROM users u
-		LEFT JOIN images img ON u.profile_picture_id = img.id
-		WHERE u.id = $1`
+			id, first_name, last_name, email, phone_number, created_at, updated_at
+		FROM users
+		WHERE id = $1`
 
 	err := database.Pool.QueryRow(c, query, id).Scan(
 		&user.ID, &user.FirstName, &user.LastName, &user.Email,
-		&user.PhoneNumber, &user.Location, &user.Story, pq.Array(&imageIDs),
-		&pID, &pURL, &pAlt,
+		&user.PhoneNumber, &user.CreatedAt, &user.UpdatedAt,
 	)
 
 	if err != nil {
+		fmt.Println("Database Error:", err)
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
-	}
-
-	if pID != nil {
-		user.ProfilePicture = &models.Image{ID: *pID, URL: *pURL, AltText: *pAlt}
-	}
-
-	if len(imageIDs) > 0 {
-		imgRows, _ := database.Pool.Query(c, "SELECT id, url, alt_text FROM images WHERE id = ANY($1)", pq.Array(imageIDs))
-		defer imgRows.Close()
-		for imgRows.Next() {
-			var img models.Image
-			if err := imgRows.Scan(&img.ID, &img.URL, &img.AltText); err == nil {
-				user.Images = append(user.Images, img)
-			}
-		}
-	} else {
-		user.Images = []models.Image{}
 	}
 
 	c.JSON(http.StatusOK, user)
@@ -104,49 +80,29 @@ func UpdateUser(c *gin.Context) {
 		return
 	}
 
-	var currentPPID *int
-	var currentImageIDs []int64
-	err := database.Pool.QueryRow(c, "SELECT profile_picture_id, image_ids FROM users WHERE id = $1", idParam).Scan(&currentPPID, pq.Array(&currentImageIDs))
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+	var input models.User
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
-	}
-
-	firstName := c.PostForm("firstName")
-	lastName := c.PostForm("lastName")
-	phone := c.PostForm("phoneNumber")
-	location := c.PostForm("location")
-	story := c.PostForm("story")
-
-	newPPID := currentPPID
-	if uploadID, _ := utils.UploadAndCreateImage(c, "profilePicture", "users"); uploadID != nil {
-		newPPID = uploadID
-	}
-
-	newImageIDs := currentImageIDs
-	for i := 0; i < 5; i++ {
-		if uploadID, _ := utils.UploadAndCreateImage(c, fmt.Sprintf("galleryImage%d", i), "users"); uploadID != nil {
-			newImageIDs = append(newImageIDs, int64(*uploadID))
-		}
 	}
 
 	updateQuery := `
 		UPDATE users 
-		SET first_name=$1, last_name=$2, phone_number=$3, location=$4, story=$5, profile_picture_id=$6, image_ids=$7, updated_at=NOW()
-		WHERE id = $8
-		RETURNING id, email`
+		SET first_name=$1, last_name=$2, phone_number=$3, updated_at=NOW()
+		WHERE id = $4
+		RETURNING id, email, first_name, last_name, phone_number, updated_at`
 
 	var updatedUser models.User
-	err = database.Pool.QueryRow(c, updateQuery,
-		firstName, lastName, phone, location, story, newPPID, pq.Array(newImageIDs), idParam,
-	).Scan(&updatedUser.ID, &updatedUser.Email)
+	err := database.Pool.QueryRow(c, updateQuery,
+		input.FirstName, input.LastName, input.PhoneNumber, idParam,
+	).Scan(&updatedUser.ID, &updatedUser.Email, &updatedUser.FirstName, &updatedUser.LastName, &updatedUser.PhoneNumber, &updatedUser.UpdatedAt)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "User updated successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "User updated successfully", "user": updatedUser})
 }
 
 func DeleteUser(c *gin.Context) {

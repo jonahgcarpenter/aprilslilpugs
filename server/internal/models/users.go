@@ -10,12 +10,6 @@ type User struct {
 	Password       string    `json:"password,omitempty"`
 	PasswordHash   string    `json:"-"`
 	PhoneNumber    string    `json:"phoneNumber" binding:"required"`
-	Location       string    `json:"location" binding:"required"`
-	Story          string    `json:"story"`
-	ProfilePicture *Image    `json:"profile_picture"` 
-	Images         []Image   `json:"images"`
-	ProfilePictureID *int    `json:"-"`
-	ImageIDs         []int   `json:"-"`
 	CreatedAt      time.Time `json:"createdAt"`
 	UpdatedAt      time.Time `json:"updatedAt"`
 }

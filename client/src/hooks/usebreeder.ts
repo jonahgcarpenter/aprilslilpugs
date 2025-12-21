@@ -1,4 +1,6 @@
 import useSWR from "swr";
+import axios from "axios";
+import { useMemo } from "react";
 
 interface Image {
   id: number;
@@ -6,7 +8,7 @@ interface Image {
   alt_text: string;
 }
 
-interface UserResponse {
+interface BreederResponse {
   id: number;
   firstName: string;
   lastName: string;
@@ -26,33 +28,49 @@ export interface Breeder {
   phone: string;
   location: string;
   description: string;
-  profilePicture: string;
+  profilePicture: string | null;
   images: string[];
 }
 
-const FALLBACK_PROFILE = "https://placehold.co/400x400/2563eb/white?text=April";
+export interface UpdateBreederInput {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phoneNumber?: string;
+  location?: string;
+  story?: string;
+  profilePictureFile?: File;
+  galleryFiles?: (File | null)[];
+}
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+const API_URL = "/api/breeder";
+
+const fetcher = async (url: string) => {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("Failed to fetch data");
+  return res.json();
+};
 
 export const useBreeder = () => {
   const {
     data: rawData,
     error,
     isLoading,
-  } = useSWR<UserResponse>("/api/users/1", fetcher);
+    mutate,
+  } = useSWR<BreederResponse>(API_URL, fetcher);
 
-  let breeder: Breeder | null = null;
+  const breeder = useMemo<Breeder | null>(() => {
+    if (!rawData) return null;
 
-  if (rawData) {
     const profileUrl = rawData.profile_picture
       ? rawData.profile_picture.url
-      : FALLBACK_PROFILE;
+      : null;
 
     const galleryUrls = rawData.images
       ? rawData.images.map((img) => img.url)
       : [];
 
-    breeder = {
+    return {
       id: rawData.id.toString(),
       firstName: rawData.firstName,
       lastName: rawData.lastName,
@@ -63,11 +81,49 @@ export const useBreeder = () => {
       profilePicture: profileUrl,
       images: galleryUrls,
     };
-  }
+  }, [rawData]);
+
+  const buildFormData = (data: UpdateBreederInput) => {
+    const formData = new FormData();
+
+    if (data.firstName) formData.append("firstName", data.firstName);
+    if (data.lastName) formData.append("lastName", data.lastName);
+    if (data.email) formData.append("email", data.email);
+    if (data.phoneNumber) formData.append("phoneNumber", data.phoneNumber);
+    if (data.location) formData.append("location", data.location);
+    if (data.story) formData.append("story", data.story);
+
+    if (data.profilePictureFile) {
+      formData.append("profilePicture", data.profilePictureFile);
+    }
+
+    if (data.galleryFiles && data.galleryFiles.length > 0) {
+      data.galleryFiles.forEach((file, index) => {
+        if (file && index < 2) {
+          formData.append(`galleryImage${index}`, file);
+        }
+      });
+    }
+
+    return formData;
+  };
+
+  const updateBreeder = async (data: UpdateBreederInput) => {
+    try {
+      const formData = buildFormData(data);
+      await axios.patch(API_URL, formData);
+      await mutate();
+      return true;
+    } catch (e: any) {
+      console.error("Update Breeder Error:", e);
+      throw e;
+    }
+  };
 
   return {
     breeder,
     isLoading,
     error,
+    updateBreeder,
   };
 };

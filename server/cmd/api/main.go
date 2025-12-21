@@ -18,7 +18,7 @@ func main() {
 
 	r := gin.Default()
 
-	os.MkdirAll("public/uploads/users", 0755)
+	os.MkdirAll("public/uploads/breeders", 0755)
 	os.MkdirAll("public/uploads/dogs", 0755)
 	os.MkdirAll("public/uploads/litters", 0755)
 	os.MkdirAll("public/uploads/puppies", 0755)
@@ -30,10 +30,14 @@ func main() {
 			api.POST("/auth/logout", middleware.RequireAuth,controllers.LogoutUser)
 
 			// Users
-			api.GET("/users/:id", controllers.GetUser)
+			api.GET("/users/:id", middleware.RequireAuth, controllers.GetUser)
 			api.POST("/users", middleware.RequireAuth, controllers.CreateUser)
 			api.PATCH("/users/:id", middleware.RequireAuth, controllers.UpdateUser)
 			api.DELETE("/users/:id", middleware.RequireAuth, controllers.DeleteUser)
+
+			// Breeder
+			api.GET("/breeder", controllers.GetBreeder)
+			api.PATCH("/breeder", middleware.RequireAuth, controllers.UpdateBreeder)
 
 			// Dogs
 			api.GET("/dogs", controllers.GetDogs)
@@ -68,6 +72,7 @@ func main() {
 			api.PATCH("/settings/stream", middleware.RequireAuth, controllers.UpdateStreamStatus)
 	}
 
+	r.Static("/uploads", "./public/uploads")
 	r.Static("/assets", "./public/dist/assets")
 	r.StaticFile("/logo.jpg", "./public/dist/logo.jpg")
 	r.StaticFile("/background.png", "./public/dist/background.png")

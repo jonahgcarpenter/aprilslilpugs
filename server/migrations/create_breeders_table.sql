@@ -1,10 +1,13 @@
-CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE IF NOT EXISTS breeders (
     id SERIAL PRIMARY KEY,
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
     phone_number VARCHAR(50) NOT NULL,
+    location VARCHAR(255) NOT NULL,
+    story TEXT,
+    profile_picture_id INT REFERENCES images(id) ON DELETE SET NULL,
+    images_ids TEXT[],
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
