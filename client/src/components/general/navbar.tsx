@@ -12,7 +12,7 @@ export default function Navbar() {
     }`;
 
   const logoutStyles =
-    "px-4 sm:px-6 py-2 text-sm rounded-full font-semibold shadow-md hover:shadow-lg transition-all duration-200 whitespace-nowrap text-white bg-gradient-to-r from-red-600 to-red-400 hover:from-red-700 hover:to-red-500 hover:-translate-y-0.5";
+    "cursor-pointer px-4 sm:px-6 py-2 text-sm rounded-full font-semibold shadow-md hover:shadow-lg transition-all duration-200 whitespace-nowrap text-white bg-gradient-to-r from-red-600 to-red-400 hover:from-red-700 hover:to-red-500 hover:-translate-y-0.5";
 
   const NavLinks = () => (
     <>
