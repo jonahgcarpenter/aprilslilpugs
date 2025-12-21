@@ -90,7 +90,7 @@ func UpdateBreeder(c *gin.Context) {
 		if currentPPID != nil {
 			var oldURL string
 			if err := database.Pool.QueryRow(c, "SELECT url FROM images WHERE id=$1", *currentPPID).Scan(&oldURL); err == nil {
-				_ = os.Remove("." + oldURL)
+				_ = os.Remove("public" + oldURL)
 				_, _ = database.Pool.Exec(c, "DELETE FROM images WHERE id=$1", *currentPPID)
 			}
 		}
@@ -102,42 +102,37 @@ func UpdateBreeder(c *gin.Context) {
 		SET first_name=$1, last_name=$2, email=$3, phone_number=$4, location=$5, story=$6, profile_picture_id=$7, updated_at=NOW()
 		WHERE id = $8`
 
-	_, err = database.Pool.Exec(c, updateQuery,
-		firstName, lastName, email, phone, location, story, newPPID, id,
-	)
-
+	_, err = database.Pool.Exec(c, updateQuery, firstName, lastName, email, phone, location, story, newPPID, id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	var currentGalleryIDs []int
-	gRows, err := database.Pool.Query(c, "SELECT image_id FROM breeder_gallery WHERE breeder_id=$1 ORDER BY display_order ASC", id)
+	currentGalleryMap := make(map[int]int)
+	gRows, err := database.Pool.Query(c, "SELECT image_id, display_order FROM breeder_gallery WHERE breeder_id=$1", id)
 	if err == nil {
 		defer gRows.Close()
 		for gRows.Next() {
-			var imgID int
-			if err := gRows.Scan(&imgID); err == nil {
-				currentGalleryIDs = append(currentGalleryIDs, imgID)
+			var imgID, dispOrder int
+			if err := gRows.Scan(&imgID, &dispOrder); err == nil {
+				currentGalleryMap[dispOrder] = imgID
 			}
 		}
 	}
 
 	for i := 0; i < 4; i++ {
 		formKey := fmt.Sprintf("galleryImage%d", i)
-
 		if uploadID, err := utils.UploadAndCreateImage(c, formKey, "breeders"); err == nil && uploadID != nil {
 			newImageID := *uploadID
 
-			if i < len(currentGalleryIDs) {
-				oldID := currentGalleryIDs[i]
+			if oldID, exists := currentGalleryMap[i]; exists {
 				var oldURL string
 				if err := database.Pool.QueryRow(c, "SELECT url FROM images WHERE id=$1", oldID).Scan(&oldURL); err == nil {
-					_ = os.Remove("." + oldURL)
+					_ = os.Remove("public" + oldURL)
 					_, _ = database.Pool.Exec(c, "DELETE FROM images WHERE id=$1", oldID)
 				}
-			} 
-			
+			}
+
 			_, _ = database.Pool.Exec(c, 
 				"INSERT INTO breeder_gallery (breeder_id, image_id, display_order) VALUES ($1, $2, $3)", 
 				id, newImageID, i)
