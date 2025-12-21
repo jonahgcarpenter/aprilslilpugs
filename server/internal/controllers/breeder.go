@@ -120,7 +120,7 @@ func UpdateBreeder(c *gin.Context) {
 		}
 	}
 
-	for i := 0; i < 4; i++ {
+	for i := 0; i < 2; i++ {
 		formKey := fmt.Sprintf("galleryImage%d", i)
 		if uploadID, err := utils.UploadAndCreateImage(c, formKey, "breeders"); err == nil && uploadID != nil {
 			newImageID := *uploadID
