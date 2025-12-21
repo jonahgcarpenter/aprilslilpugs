@@ -55,12 +55,15 @@ const UpdateBreeder = ({ breeder, onSave }: UpdateBreederProps) => {
         location: breeder.location || "",
         story: breeder.description || "",
       });
-      setProfilePreview(breeder.profilePicture);
+
+      setProfilePreview(
+        breeder.profilePicture ? breeder.profilePicture.url : null,
+      );
 
       if (breeder.images && breeder.images.length > 0) {
-        setGalleryPreview1(breeder.images[0] || null);
+        setGalleryPreview1(breeder.images[0]?.url || null);
         if (breeder.images.length > 1) {
-          setGalleryPreview2(breeder.images[1] || null);
+          setGalleryPreview2(breeder.images[1]?.url || null);
         }
       }
     }

@@ -14,8 +14,14 @@ CREATE TABLE IF NOT EXISTS litters (
     birth_date DATE NOT NULL,
     available_date DATE NOT NULL,
     profile_picture_id INT REFERENCES images(id) ON DELETE SET NULL,
-    images_ids TEXT[],
     status litter_status DEFAULT 'Planned',
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS litter_gallery (
+    litter_id INT REFERENCES litters(id) ON DELETE CASCADE,
+    image_id INT REFERENCES images(id) ON DELETE CASCADE,
+    display_order INT DEFAULT 0,
+    PRIMARY KEY (litter_id, image_id)
 );

@@ -2,10 +2,10 @@ import useSWR from "swr";
 import axios from "axios";
 import { useMemo } from "react";
 
-interface Image {
+export interface Image {
   id: number;
   url: string;
-  alt_text: string;
+  alt_text?: string;
 }
 
 interface BreederResponse {
@@ -28,8 +28,8 @@ export interface Breeder {
   phone: string;
   location: string;
   description: string;
-  profilePicture: string | null;
-  images: string[];
+  profilePicture: Image | null;
+  images: Image[];
 }
 
 export interface UpdateBreederInput {
@@ -62,14 +62,6 @@ export const useBreeder = () => {
   const breeder = useMemo<Breeder | null>(() => {
     if (!rawData) return null;
 
-    const profileUrl = rawData.profile_picture
-      ? rawData.profile_picture.url
-      : null;
-
-    const galleryUrls = rawData.images
-      ? rawData.images.map((img) => img.url)
-      : [];
-
     return {
       id: rawData.id.toString(),
       firstName: rawData.firstName,
@@ -78,8 +70,8 @@ export const useBreeder = () => {
       phone: rawData.phoneNumber,
       location: rawData.location,
       description: rawData.story,
-      profilePicture: profileUrl,
-      images: galleryUrls,
+      profilePicture: rawData.profile_picture || null,
+      images: rawData.images || [],
     };
   }, [rawData]);
 
@@ -99,7 +91,7 @@ export const useBreeder = () => {
 
     if (data.galleryFiles && data.galleryFiles.length > 0) {
       data.galleryFiles.forEach((file, index) => {
-        if (file && index < 2) {
+        if (file) {
           formData.append(`galleryImage${index}`, file);
         }
       });

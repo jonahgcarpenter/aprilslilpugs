@@ -14,7 +14,13 @@ CREATE TABLE IF NOT EXISTS puppies (
     status puppy_status DEFAULT 'Available',
     description TEXT,
     profile_picture_id INT REFERENCES images(id) ON DELETE SET NULL,
-    images_ids TEXT[],
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS puppy_gallery (
+    puppy_id INT REFERENCES puppies(id) ON DELETE CASCADE,
+    image_id INT REFERENCES images(id) ON DELETE CASCADE,
+    display_order INT DEFAULT 0,
+    PRIMARY KEY (puppy_id, image_id)
 );

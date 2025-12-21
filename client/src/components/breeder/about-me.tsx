@@ -43,7 +43,7 @@ const AboutMe = ({ breeder, isLoading, error }: AboutMeProps) => {
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl transform rotate-6 opacity-20"></div>
             {breeder.profilePicture ? (
               <img
-                src={breeder.profilePicture}
+                src={breeder.profilePicture.url}
                 alt={`${breeder.firstName} ${breeder.lastName}`}
                 className="relative w-full h-full object-cover rounded-xl border-2 border-white/10 shadow-xl"
               />
@@ -135,13 +135,13 @@ const AboutMe = ({ breeder, isLoading, error }: AboutMeProps) => {
             My Gallery
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-            {breeder.images.map((imageUrl, index) => {
-              if (!imageUrl) return null;
+            {breeder.images.map((image, index) => {
+              if (!image.url) return null;
               return (
                 <div key={index} className="relative group">
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl transform rotate-3 opacity-20"></div>
                   <img
-                    src={imageUrl}
+                    src={image.url}
                     alt={`Breeder gallery ${index + 1}`}
                     className="relative w-full h-64 sm:h-80 md:h-96 object-cover rounded-xl border-2 border-white/10 shadow-xl"
                   />

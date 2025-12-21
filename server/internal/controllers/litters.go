@@ -8,9 +8,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/internal/models"
-	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/utils"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/database"
-	"github.com/lib/pq"
+	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/utils"
 )
 
 func parseOptionalID(idStr string) *int {
@@ -23,7 +22,7 @@ func parseOptionalID(idStr string) *int {
 func GetLitters(c *gin.Context) {
 	query := `
 		SELECT 
-			l.id, l.name, l.birth_date, l.available_date, l.status, l.image_ids,
+			l.id, l.name, l.birth_date, l.available_date, l.status,
 			l.mother_id, l.father_id,
 			l.external_mother_name, l.external_father_name,
 			COALESCE(m.name, l.external_mother_name, 'Unknown') as mother_display_name,
@@ -45,14 +44,13 @@ func GetLitters(c *gin.Context) {
 	var litters []models.Litter
 	for rows.Next() {
 		var l models.Litter
-		var imageIDs []int64
 		var extMother, extFather *string
 		var mName, fName string
 		var pID *int
 		var pURL, pAlt *string
 
 		err := rows.Scan(
-			&l.ID, &l.Name, &l.BirthDate, &l.AvailableDate, &l.Status, pq.Array(&imageIDs),
+			&l.ID, &l.Name, &l.BirthDate, &l.AvailableDate, &l.Status,
 			&l.MotherID, &l.FatherID,
 			&extMother, &extFather,
 			&mName, &fName,
@@ -69,18 +67,24 @@ func GetLitters(c *gin.Context) {
 			l.ProfilePicture = &models.Image{ID: *pID, URL: *pURL, AltText: *pAlt}
 		}
 
-		if len(imageIDs) > 0 {
-			imgRows, _ := database.Pool.Query(c, "SELECT id, url, alt_text FROM images WHERE id = ANY($1)", pq.Array(imageIDs))
-			defer imgRows.Close()
-			for imgRows.Next() {
-				var img models.Image
-				if err := imgRows.Scan(&img.ID, &img.URL, &img.AltText); err == nil {
-					l.Images = append(l.Images, img)
-				}
+		galleryQuery := `
+			SELECT i.id, i.url, i.alt_text 
+			FROM images i
+			JOIN litter_gallery lg ON i.id = lg.image_id
+			WHERE lg.litter_id = $1
+			ORDER BY lg.display_order ASC`
+
+		imgRows, _ := database.Pool.Query(c, galleryQuery, l.ID)
+		
+		l.Images = []models.Image{}
+		
+		for imgRows.Next() {
+			var img models.Image
+			if err := imgRows.Scan(&img.ID, &img.URL, &img.AltText); err == nil {
+				l.Images = append(l.Images, img)
 			}
-		} else {
-			l.Images = []models.Image{}
 		}
+		imgRows.Close()
 
 		litters = append(litters, l)
 	}
@@ -90,7 +94,6 @@ func GetLitters(c *gin.Context) {
 func GetLitter(c *gin.Context) {
 	id := c.Param("id")
 	var l models.Litter
-	var imageIDs []int64
 	var extMother, extFather *string
 	var mName, fName string
 	var pID *int
@@ -98,7 +101,7 @@ func GetLitter(c *gin.Context) {
 
 	query := `
 		SELECT 
-			l.id, l.name, l.birth_date, l.available_date, l.status, l.image_ids,
+			l.id, l.name, l.birth_date, l.available_date, l.status,
 			l.mother_id, l.father_id,
 			l.external_mother_name, l.external_father_name,
 			COALESCE(m.name, l.external_mother_name, 'Unknown') as mother_display_name,
@@ -111,7 +114,7 @@ func GetLitter(c *gin.Context) {
 		WHERE l.id = $1`
 
 	err := database.Pool.QueryRow(c, query, id).Scan(
-		&l.ID, &l.Name, &l.BirthDate, &l.AvailableDate, &l.Status, pq.Array(&imageIDs),
+		&l.ID, &l.Name, &l.BirthDate, &l.AvailableDate, &l.Status,
 		&l.MotherID, &l.FatherID,
 		&extMother, &extFather,
 		&mName, &fName,
@@ -132,17 +135,22 @@ func GetLitter(c *gin.Context) {
 		l.ProfilePicture = &models.Image{ID: *pID, URL: *pURL, AltText: *pAlt}
 	}
 	
-	if len(imageIDs) > 0 {
-		imgRows, _ := database.Pool.Query(c, "SELECT id, url, alt_text FROM images WHERE id = ANY($1)", pq.Array(imageIDs))
-		defer imgRows.Close()
-		for imgRows.Next() {
-			var img models.Image
-			if err := imgRows.Scan(&img.ID, &img.URL, &img.AltText); err == nil {
-				l.Images = append(l.Images, img)
-			}
+	galleryQuery := `
+		SELECT i.id, i.url, i.alt_text 
+		FROM images i
+		JOIN litter_gallery lg ON i.id = lg.image_id
+		WHERE lg.litter_id = $1
+		ORDER BY lg.display_order ASC`
+
+	imgRows, _ := database.Pool.Query(c, galleryQuery, l.ID)
+	defer imgRows.Close()
+
+	l.Images = []models.Image{}
+	for imgRows.Next() {
+		var img models.Image
+		if err := imgRows.Scan(&img.ID, &img.URL, &img.AltText); err == nil {
+			l.Images = append(l.Images, img)
 		}
-	} else {
-		l.Images = []models.Image{}
 	}
 
 	c.JSON(http.StatusOK, l)
@@ -160,31 +168,32 @@ func CreateLitter(c *gin.Context) {
 
 	ppID, _ := utils.UploadAndCreateImage(c, "profile_picture", "litters")
 	
-	var galleryIDs []int
-	for i := 0; i < 8; i++ {
-		imgID, _ := utils.UploadAndCreateImage(c, fmt.Sprintf("gallery_image_%d", i), "litters")
-		if imgID != nil {
-			galleryIDs = append(galleryIDs, *imgID)
-		}
-	}
-
 	var newID int
 	query := `
 		INSERT INTO litters (
 			name, mother_id, father_id, external_mother_name, external_father_name,
-			birth_date, available_date, status, profile_picture_id, image_ids
+			birth_date, available_date, status, profile_picture_id
 		)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 		RETURNING id`
 
 	err := database.Pool.QueryRow(c, query, 
 		name, motherID, fatherID, extMother, extFather, 
-		birthDate, availDate, status, ppID, pq.Array(galleryIDs),
+		birthDate, availDate, status, ppID,
 	).Scan(&newID)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
+	}
+
+	for i := 0; i < 8; i++ {
+		imgID, _ := utils.UploadAndCreateImage(c, fmt.Sprintf("gallery_image_%d", i), "litters")
+		if imgID != nil {
+			_, _ = database.Pool.Exec(c, 
+				"INSERT INTO litter_gallery (litter_id, image_id, display_order) VALUES ($1, $2, $3)", 
+				newID, *imgID, i)
+		}
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"message": "Litter created", "id": newID})
@@ -194,8 +203,7 @@ func UpdateLitter(c *gin.Context) {
 	id := c.Param("id")
 
 	var currentPPID *int
-	var currentImageIDs []int64
-	err := database.Pool.QueryRow(c, "SELECT profile_picture_id, image_ids FROM litters WHERE id=$1", id).Scan(&currentPPID, pq.Array(&currentImageIDs))
+	err := database.Pool.QueryRow(c, "SELECT profile_picture_id FROM litters WHERE id=$1", id).Scan(&currentPPID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Litter not found"})
 		return
@@ -215,28 +223,30 @@ func UpdateLitter(c *gin.Context) {
 		newPPID = uploadID
 	}
 
-	newImageIDs := currentImageIDs
-	for i := 0; i < 8; i++ {
-		if uploadID, _ := utils.UploadAndCreateImage(c, fmt.Sprintf("gallery_image_%d", i), "litters"); uploadID != nil {
-			newImageIDs = append(newImageIDs, int64(*uploadID))
-		}
-	}
-
 	query := `
 		UPDATE litters 
 		SET name=$1, mother_id=$2, father_id=$3, external_mother_name=$4, external_father_name=$5,
-			birth_date=$6, available_date=$7, status=$8, profile_picture_id=$9, image_ids=$10, updated_at=NOW()
-		WHERE id=$11`
+			birth_date=$6, available_date=$7, status=$8, profile_picture_id=$9, updated_at=NOW()
+		WHERE id=$10`
 
 	_, err = database.Pool.Exec(c, query, 
 		name, motherID, fatherID, extMother, extFather,
-		birthDate, availDate, status, newPPID, pq.Array(newImageIDs), id,
+		birthDate, availDate, status, newPPID, id,
 	)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	for i := 0; i < 8; i++ {
+		if uploadID, _ := utils.UploadAndCreateImage(c, fmt.Sprintf("gallery_image_%d", i), "litters"); uploadID != nil {
+			_, _ = database.Pool.Exec(c, 
+				"INSERT INTO litter_gallery (litter_id, image_id, display_order) VALUES ($1, $2, $3)", 
+				id, *uploadID, i)
+		}
+	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "Litter updated"})
 }
 

@@ -11,7 +11,13 @@ CREATE TABLE IF NOT EXISTS dogs (
     description TEXT,
     birth_date DATE NOT NULL,
     profile_picture_id INT REFERENCES images(id) ON DELETE SET NULL,
-    images_ids TEXT[],
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS dog_gallery (
+    dog_id INT REFERENCES dogs(id) ON DELETE CASCADE,
+    image_id INT REFERENCES images(id) ON DELETE CASCADE,
+    display_order INT DEFAULT 0,
+    PRIMARY KEY (dog_id, image_id)
 );
