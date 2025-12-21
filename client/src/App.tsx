@@ -10,6 +10,8 @@ import PastLitters from "./pages/past-litters";
 import Gallery from "./pages/gallery";
 import Admin from "./pages/admin";
 import Litter from "./pages/litter";
+import Login from "./pages/login";
+import ProtectedRoute from "./components/auth/protected-route";
 
 function App() {
   return (
@@ -24,9 +26,11 @@ function App() {
 
         <Route path="/litter/:id" element={<Litter />} />
 
-        {/* NOTE: This route is not displayed on navbar */}
-        {/* TODO: Protect route with auth */}
-        <Route path="/admin" element={<Admin />} />
+        <Route path="/login" element={<Login />} />
+
+        <Route element={<ProtectedRoute />}>
+          <Route path="/admin" element={<Admin />} />
+        </Route>
       </Route>
     </Routes>
   );

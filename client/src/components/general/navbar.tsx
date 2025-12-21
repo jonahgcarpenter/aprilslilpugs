@@ -1,12 +1,18 @@
 import { NavLink } from "react-router-dom";
+import { useAuth } from "../../context/auth";
 
 export default function Navbar() {
+  const { user, logout } = useAuth();
+
   const linkStyles = (isActive: boolean) =>
     `px-4 sm:px-6 py-2 text-sm rounded-full font-semibold shadow-md hover:shadow-lg transition-all duration-200 whitespace-nowrap text-white ${
       isActive
         ? "bg-gradient-to-r from-slate-600 to-slate-400 hover:from-slate-700 hover:to-slate-500 scale-105"
         : "bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 hover:-translate-y-0.5"
     }`;
+
+  const logoutStyles =
+    "px-4 sm:px-6 py-2 text-sm rounded-full font-semibold shadow-md hover:shadow-lg transition-all duration-200 whitespace-nowrap text-white bg-gradient-to-r from-red-600 to-red-400 hover:from-red-700 hover:to-red-500 hover:-translate-y-0.5";
 
   const NavLinks = () => (
     <>
@@ -42,6 +48,16 @@ export default function Navbar() {
       <NavLink to="/gallery" className={({ isActive }) => linkStyles(isActive)}>
         Gallery
       </NavLink>
+
+      <NavLink to="/admin" className={({ isActive }) => linkStyles(isActive)}>
+        Admin
+      </NavLink>
+
+      {user && (
+        <button onClick={logout} className={logoutStyles}>
+          Logout
+        </button>
+      )}
     </>
   );
 
