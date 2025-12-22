@@ -1,15 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import type { Breeder, UpdateBreederInput } from "../../hooks/usebreeder";
-import {
-  FaSave,
-  FaImage,
-  FaSpinner,
-  FaUserEdit,
-  FaMapMarkerAlt,
-  FaPhoneAlt,
-  FaPen,
-  FaEnvelope,
-} from "react-icons/fa";
+import { FaSave, FaImage, FaSpinner, FaUserEdit, FaPen } from "react-icons/fa";
 
 interface UpdateBreederProps {
   breeder: Breeder | null;
@@ -153,10 +144,10 @@ const UpdateBreeder = ({ breeder, onSave }: UpdateBreederProps) => {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
-        <div className="flex flex-col sm:flex-row gap-8 items-center">
+        <div className="flex flex-col md:flex-row gap-8 items-center">
           {/* Profile Picture */}
-          <div className="relative group">
-            <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-slate-700 shadow-lg relative">
+          <div className="relative group flex-shrink-0">
+            <div className="relative w-48 h-48 md:w-64 md:h-64 rounded-xl overflow-hidden border-2 border-white/10 shadow-xl bg-slate-800">
               {profilePreview ? (
                 <img
                   src={profilePreview}
@@ -164,15 +155,15 @@ const UpdateBreeder = ({ breeder, onSave }: UpdateBreederProps) => {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full bg-slate-800 flex items-center justify-center">
-                  <FaImage className="text-3xl text-slate-600" />
+                <div className="w-full h-full flex items-center justify-center">
+                  <FaImage className="text-4xl text-slate-600" />
                 </div>
               )}
               <div
-                className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+                className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer z-10"
                 onClick={() => profileInputRef.current?.click()}
               >
-                <FaPen className="text-white" />
+                <FaPen className="text-white text-3xl" />
               </div>
             </div>
             <input
@@ -182,7 +173,7 @@ const UpdateBreeder = ({ breeder, onSave }: UpdateBreederProps) => {
               accept="image/*"
               className="hidden"
             />
-            <p className="text-center text-xs text-white/50 mt-2">
+            <p className="text-center text-xs text-white/50 mt-4 relative z-10">
               Tap to change
             </p>
           </div>
@@ -215,51 +206,45 @@ const UpdateBreeder = ({ breeder, onSave }: UpdateBreederProps) => {
                 placeholder="Last Name"
               />
             </div>
-          </div>
-        </div>
-
-        {/* Contact Info */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-blue-400 flex items-center gap-2">
-              <FaEnvelope /> Email Address
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              className="w-full bg-slate-950/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors"
-              placeholder="breeder@example.com"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-blue-400 flex items-center gap-2">
-              <FaPhoneAlt /> Phone Number
-            </label>
-            <input
-              type="tel"
-              name="phoneNumber"
-              value={formData.phoneNumber}
-              onChange={handleInputChange}
-              className="w-full bg-slate-950/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors"
-              placeholder="(555) 123-4567"
-            />
-          </div>
-
-          <div className="space-y-2 sm:col-span-2">
-            <label className="text-sm font-medium text-blue-400 flex items-center gap-2">
-              <FaMapMarkerAlt /> Location
-            </label>
-            <input
-              type="text"
-              name="location"
-              value={formData.location}
-              onChange={handleInputChange}
-              className="w-full bg-slate-950/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors"
-              placeholder="City, State"
-            />
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-blue-400 flex items-center gap-2">
+                Email Address
+              </label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                className="w-full bg-slate-950/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors"
+                placeholder="breeder@example.com"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-blue-400 flex items-center gap-2">
+                Phone Number
+              </label>
+              <input
+                type="tel"
+                name="phoneNumber"
+                value={formData.phoneNumber}
+                onChange={handleInputChange}
+                className="w-full bg-slate-950/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors"
+                placeholder="(555) 123-4567"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-blue-400 flex items-center gap-2">
+                Location
+              </label>
+              <input
+                type="text"
+                name="location"
+                value={formData.location}
+                onChange={handleInputChange}
+                className="w-full bg-slate-950/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors"
+                placeholder="City, State"
+              />
+            </div>
           </div>
         </div>
 
@@ -281,37 +266,30 @@ const UpdateBreeder = ({ breeder, onSave }: UpdateBreederProps) => {
         {/* Gallery Section */}
         <div>
           <label className="text-sm font-medium text-blue-400 flex items-center gap-2 mb-4">
-            <FaImage /> Gallery Images (2 Slots)
+            Gallery Images
           </label>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             {/* Slot 1 */}
             <div className="relative group">
-              <div
-                className="w-full h-48 rounded-xl border-2 border-dashed border-white/10 bg-slate-950/30 flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:border-blue-500/50 transition-colors"
-                onClick={() => galleryInput1Ref.current?.click()}
-              >
+              <div className="relative w-full h-64 sm:h-80 md:h-96 rounded-xl overflow-hidden border-2 border-white/10 bg-slate-800 shadow-xl cursor-pointer">
                 {galleryPreview1 ? (
-                  <>
-                    <img
-                      src={galleryPreview1}
-                      alt="Gallery 1"
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <span className="text-white text-sm font-medium bg-black/50 px-3 py-1 rounded-full">
-                        Change Image 1
-                      </span>
-                    </div>
-                  </>
+                  <img
+                    src={galleryPreview1}
+                    alt="Gallery 1"
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
-                  <div className="text-center p-4">
-                    <FaImage className="text-3xl text-white/20 mx-auto mb-2" />
-                    <span className="text-white/40 text-sm">
-                      Upload Image 1
-                    </span>
+                  <div className="w-full h-full flex items-center justify-center">
+                    <FaImage className="text-4xl text-slate-600" />
                   </div>
                 )}
+                <div
+                  className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer z-10"
+                  onClick={() => galleryInput1Ref.current?.click()}
+                >
+                  <FaPen className="text-white text-3xl" />
+                </div>
               </div>
               <input
                 type="file"
@@ -320,35 +298,31 @@ const UpdateBreeder = ({ breeder, onSave }: UpdateBreederProps) => {
                 accept="image/*"
                 className="hidden"
               />
+              <p className="text-center text-xs text-white/50 mt-4 relative z-10">
+                Tap to change
+              </p>
             </div>
 
             {/* Slot 2 */}
             <div className="relative group">
-              <div
-                className="w-full h-48 rounded-xl border-2 border-dashed border-white/10 bg-slate-950/30 flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:border-blue-500/50 transition-colors"
-                onClick={() => galleryInput2Ref.current?.click()}
-              >
+              <div className="relative w-full h-64 sm:h-80 md:h-96 rounded-xl overflow-hidden border-2 border-white/10 bg-slate-800 shadow-xl cursor-pointer">
                 {galleryPreview2 ? (
-                  <>
-                    <img
-                      src={galleryPreview2}
-                      alt="Gallery 2"
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <span className="text-white text-sm font-medium bg-black/50 px-3 py-1 rounded-full">
-                        Change Image 2
-                      </span>
-                    </div>
-                  </>
+                  <img
+                    src={galleryPreview2}
+                    alt="Gallery 2"
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
-                  <div className="text-center p-4">
-                    <FaImage className="text-3xl text-white/20 mx-auto mb-2" />
-                    <span className="text-white/40 text-sm">
-                      Upload Image 2
-                    </span>
+                  <div className="w-full h-full flex items-center justify-center">
+                    <FaImage className="text-4xl text-slate-600" />
                   </div>
                 )}
+                <div
+                  className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer z-10"
+                  onClick={() => galleryInput2Ref.current?.click()}
+                >
+                  <FaPen className="text-white text-3xl" />
+                </div>
               </div>
               <input
                 type="file"
@@ -357,12 +331,15 @@ const UpdateBreeder = ({ breeder, onSave }: UpdateBreederProps) => {
                 accept="image/*"
                 className="hidden"
               />
+              <p className="text-center text-xs text-white/50 mt-4 relative z-10">
+                Tap to change
+              </p>
             </div>
           </div>
         </div>
 
         {/* Feedback & Actions */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-white/10">
+        <div className="flex flex-col sm:flex-row items-center justify-between pt-6 border-t border-white/10">
           <div className="flex-1">
             {message && (
               <div

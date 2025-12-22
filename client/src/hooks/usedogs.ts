@@ -5,6 +5,7 @@ export interface Image {
   id: number;
   url: string;
   alt_text?: string;
+  description?: string;
 }
 
 interface DogResponse {
@@ -24,7 +25,7 @@ export interface Dog {
   description: string;
   birthDate: string;
   profilePicture: string;
-  gallery: string[];
+  gallery: Image[];
 }
 
 export interface DogInput {
@@ -34,6 +35,8 @@ export interface DogInput {
   birthDate: string;
   profilePictureFile?: File;
   galleryFiles?: File[];
+  galleryDescriptions?: string[];
+  existingGallery?: Image[];
 }
 
 const FALLBACK_IMAGE = "https://placehold.co/400x400/2563eb/white?text=Dog";
@@ -57,8 +60,6 @@ export const useDogs = () => {
         ? raw.profilePicture.url
         : FALLBACK_IMAGE;
 
-      const galleryUrls = raw.gallery ? raw.gallery.map((img) => img.url) : [];
-
       return {
         id: raw.id.toString(),
         name: raw.name,
@@ -66,7 +67,7 @@ export const useDogs = () => {
         description: raw.description,
         birthDate: raw.birthDate.split("T")[0],
         profilePicture: profileUrl,
-        gallery: galleryUrls,
+        gallery: raw.gallery || [],
       };
     });
   }
@@ -85,8 +86,20 @@ export const useDogs = () => {
     if (data.galleryFiles && data.galleryFiles.length > 0) {
       data.galleryFiles.forEach((file, index) => {
         formData.append(`galleryImage${index}`, file);
+
+        if (data.galleryDescriptions && data.galleryDescriptions[index]) {
+          formData.append(
+            `galleryDescription${index}`,
+            data.galleryDescriptions[index],
+          );
+        }
       });
     }
+
+    if (data.existingGallery) {
+      formData.append("existing_gallery", JSON.stringify(data.existingGallery));
+    }
+
     return formData;
   };
 

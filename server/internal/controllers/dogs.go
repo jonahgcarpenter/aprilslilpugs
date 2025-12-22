@@ -87,6 +87,9 @@ func CreateDog(c *gin.Context) {
 		img, err := utils.UploadAndCreateImage(c, formKey, "dogs")
 		
 		if err == nil && img != nil {
+			descKey := fmt.Sprintf("galleryDescription%d", i)
+			img.Description = c.PostForm(descKey)
+			
 			gallery = append(gallery, *img)
 		} 
 	}
@@ -140,15 +143,40 @@ func UpdateDog(c *gin.Context) {
 		if currentPP != nil { _ = utils.DeleteImage(currentPP.URL) }
 	}
 
+	existingGalleryJSON := c.PostForm("existing_gallery")
+	var processedExistingGallery []models.Image
+
+	if existingGalleryJSON != "" {
+		if err := json.Unmarshal([]byte(existingGalleryJSON), &processedExistingGallery); err == nil {
+			keepMap := make(map[string]bool)
+			for _, img := range processedExistingGallery {
+				keepMap[img.URL] = true
+			}
+			
+			for _, oldImg := range currentGallery {
+				if !keepMap[oldImg.URL] {
+					_ = utils.DeleteImage(oldImg.URL)
+				}
+			}
+		} else {
+			processedExistingGallery = currentGallery
+		}
+	} else {
+		processedExistingGallery = currentGallery
+	}
+
 	newGalleryItems := []models.Image{}
 	for i := 0; i < 50; i++ {
 		formKey := fmt.Sprintf("galleryImage%d", i)
 		if img, err := utils.UploadAndCreateImage(c, formKey, "dogs"); err == nil && img != nil {
+			descKey := fmt.Sprintf("galleryDescription%d", i)
+			img.Description = c.PostForm(descKey)
+
 			newGalleryItems = append(newGalleryItems, *img)
 		}
 	}
 
-	finalGallery := append(currentGallery, newGalleryItems...)
+	finalGallery := append(processedExistingGallery, newGalleryItems...)
 
 	ppJSON, _ := json.Marshal(newPP)
 	galleryJSON, _ := json.Marshal(finalGallery)
