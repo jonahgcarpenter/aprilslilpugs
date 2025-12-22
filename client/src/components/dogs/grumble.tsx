@@ -86,7 +86,13 @@ const Grumble = ({ grumbles, isLoading, error }: GrumbleProps) => {
                         {dog.name}
                       </h3>
                       <div className="flex justify-between items-center">
-                        <p className="text-blue-400 font-medium">
+                        <p
+                          className={`font-medium ${
+                            dog.gender === "Female"
+                              ? "text-pink-400"
+                              : "text-blue-400"
+                          }`}
+                        >
                           {dog.gender}
                         </p>
                         <p className="text-slate-400 text-sm">
