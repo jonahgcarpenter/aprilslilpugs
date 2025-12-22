@@ -74,7 +74,7 @@ const AboutMe = ({ breeder, isLoading, error }: AboutMeProps) => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {breeder.location && (
           <a
-            href={`https://maps.google.com/?q=${encodeURIComponent(breeder.location)}`}
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(breeder.location)}`}
             target="_blank"
             rel="noopener noreferrer"
             className="group bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10 hover:border-white/20 transition-all duration-300 flex flex-col items-center justify-center gap-2"
@@ -129,13 +129,13 @@ const AboutMe = ({ breeder, isLoading, error }: AboutMeProps) => {
       )}
 
       {/* Gallery Section */}
-      {breeder.images && breeder.images.length > 0 && (
+      {breeder.gallery && breeder.gallery.length > 0 && (
         <div className="mt-8">
           <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-6">
             My Gallery
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-            {breeder.images.map((image, index) => {
+            {breeder.gallery.map((image, index) => {
               if (!image.url) return null;
               return (
                 <div key={index} className="relative group">

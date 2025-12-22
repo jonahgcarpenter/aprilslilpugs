@@ -12,7 +12,7 @@ import {
 } from "react-icons/fa";
 
 interface UpdateBreederProps {
-  breeder: Breeder;
+  breeder: Breeder | null;
   onSave: (data: UpdateBreederInput) => Promise<boolean>;
 }
 
@@ -60,10 +60,10 @@ const UpdateBreeder = ({ breeder, onSave }: UpdateBreederProps) => {
         breeder.profilePicture ? breeder.profilePicture.url : null,
       );
 
-      if (breeder.images && breeder.images.length > 0) {
-        setGalleryPreview1(breeder.images[0]?.url || null);
-        if (breeder.images.length > 1) {
-          setGalleryPreview2(breeder.images[1]?.url || null);
+      if (breeder.gallery && breeder.gallery.length > 0) {
+        setGalleryPreview1(breeder.gallery[0]?.url || null);
+        if (breeder.gallery.length > 1) {
+          setGalleryPreview2(breeder.gallery[1]?.url || null);
         }
       }
     }
@@ -123,6 +123,7 @@ const UpdateBreeder = ({ breeder, onSave }: UpdateBreederProps) => {
       setGalleryFile1(null);
       setGalleryFile2(null);
 
+      if (profileInputRef.current) profileInputRef.current.value = "";
       if (galleryInput1Ref.current) galleryInput1Ref.current.value = "";
       if (galleryInput2Ref.current) galleryInput2Ref.current.value = "";
     } catch (err) {

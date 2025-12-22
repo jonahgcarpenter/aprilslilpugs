@@ -10,9 +10,8 @@ type Breeder struct {
 	PhoneNumber    string    `json:"phoneNumber" binding:"required" db:"phone_number"`
 	Location       string    `json:"location" binding:"required" db:"location"`
 	Story          string    `json:"story" db:"story"`
-	ProfilePictureID *int    `json:"-" db:"profile_picture_id"` 
-	ProfilePicture   *Image  `json:"profile_picture,omitempty" db:"-"`
-	Images         []Image   `json:"images,omitempty" db:"-"` 
+	ProfilePicture *Image 	 `json:"profilePicture,omitempty" db:"profile_picture"`
+	Gallery 			 []Image 	 `json:"gallery,omitempty" db:"gallery"`
 	CreatedAt      time.Time `json:"createdAt" db:"created_at"`
 	UpdatedAt      time.Time `json:"updatedAt" db:"updated_at"`
 }

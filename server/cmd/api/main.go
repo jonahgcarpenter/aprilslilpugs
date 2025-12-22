@@ -15,6 +15,7 @@ func main() {
 
 	database.Connect(cfg.DatabaseURL)
 	defer database.Close()
+	database.CreateTables()
 
 	r := gin.Default()
 
@@ -40,33 +41,33 @@ func main() {
 			api.PATCH("/breeder", middleware.RequireAuth, controllers.UpdateBreeder)
 
 			// Dogs
-			api.GET("/dogs", controllers.GetDogs)
-			api.GET("/dogs/:id", controllers.GetDog)
-			api.POST("/dogs", middleware.RequireAuth, controllers.CreateDog)
-			api.PATCH("/dogs/:id", middleware.RequireAuth, controllers.UpdateDog)
-			api.DELETE("/dogs/:id", middleware.RequireAuth, controllers.DeleteDog)
+			// api.GET("/dogs", controllers.GetDogs)
+			// api.GET("/dogs/:id", controllers.GetDog)
+			// api.POST("/dogs", middleware.RequireAuth, controllers.CreateDog)
+			// api.PATCH("/dogs/:id", middleware.RequireAuth, controllers.UpdateDog)
+			// api.DELETE("/dogs/:id", middleware.RequireAuth, controllers.DeleteDog)
 
 			// Litters
-			api.GET("/litters", controllers.GetLitters)
-			api.GET("/litters/:id", controllers.GetLitter)
-			api.POST("/litters", middleware.RequireAuth, controllers.CreateLitter)
-			api.PATCH("/litters/:id", middleware.RequireAuth, controllers.UpdateLitter)
-			api.DELETE("/litters/:id", middleware.RequireAuth, controllers.DeleteLitter)
+			// api.GET("/litters", controllers.GetLitters)
+			// api.GET("/litters/:id", controllers.GetLitter)
+			// api.POST("/litters", middleware.RequireAuth, controllers.CreateLitter)
+			// api.PATCH("/litters/:id", middleware.RequireAuth, controllers.UpdateLitter)
+			// api.DELETE("/litters/:id", middleware.RequireAuth, controllers.DeleteLitter)
 
-			//Puppies
-			api.GET("/puppies", controllers.GetPuppies)
-      api.GET("/puppies/:id", controllers.GetPuppy)
-			api.POST("/puppies", middleware.RequireAuth, controllers.CreatePuppy)
-      api.PATCH("/puppies/:id", middleware.RequireAuth, controllers.UpdatePuppy)
-      api.DELETE("/puppies/:id", middleware.RequireAuth, controllers.DeletePuppy)
+			// Puppies
+			// api.GET("/puppies", controllers.GetPuppies)
+   //    api.GET("/puppies/:id", controllers.GetPuppy)
+			// api.POST("/puppies", middleware.RequireAuth, controllers.CreatePuppy)
+   //    api.PATCH("/puppies/:id", middleware.RequireAuth, controllers.UpdatePuppy)
+   //    api.DELETE("/puppies/:id", middleware.RequireAuth, controllers.DeletePuppy)
 
-			//Waitlist
+			// Waitlist
 			api.POST("/waitlist", controllers.CreateWaitlist)
 			api.GET("/waitlist", middleware.RequireAuth, controllers.GetWaitlist)
 			api.PATCH("/waitlist/:id", middleware.RequireAuth, controllers.UpdateWaitlist)
 			api.DELETE("/waitlist/:id", middleware.RequireAuth, controllers.DeleteWaitlist)
 
-			//Settings
+			// Settings
 			api.GET("/settings", controllers.GetSettings)
 			api.PATCH("/settings/waitlist", middleware.RequireAuth, controllers.UpdateWaitlistStatus)
 			api.PATCH("/settings/stream", middleware.RequireAuth, controllers.UpdateStreamStatus)

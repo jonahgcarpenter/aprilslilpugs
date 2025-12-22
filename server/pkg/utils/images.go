@@ -6,10 +6,10 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/database"
+	"github.com/jonahgcarpenter/aprilslilpugs/server/internal/models"
 )
 
-func UploadAndCreateImage(c *gin.Context, formKey string, folder string) (*int, error) {
+func UploadAndCreateImage(c *gin.Context, formKey string, folder string) (*models.Image, error) {
 	file, err := c.FormFile(formKey)
 	if err != nil {
 		return nil, nil
@@ -17,18 +17,15 @@ func UploadAndCreateImage(c *gin.Context, formKey string, folder string) (*int, 
 
 	filename := fmt.Sprintf("%d-%s", time.Now().Unix(), file.Filename)
 	relativePath := fmt.Sprintf("/uploads/%s/%s", folder, filename)
+	
 	diskPath := filepath.Join("public", relativePath)
 
 	if err := c.SaveUploadedFile(file, diskPath); err != nil {
 		return nil, err
 	}
 
-	var newImageID int
-	query := `INSERT INTO images (url, alt_text) VALUES ($1, $2) RETURNING id`
-	err = database.Pool.QueryRow(c, query, relativePath, filename).Scan(&newImageID)
-	if err != nil {
-		return nil, err
-	}
-
-	return &newImageID, nil
+	return &models.Image{
+		URL:     relativePath,
+		AltText: file.Filename,
+	}, nil
 }

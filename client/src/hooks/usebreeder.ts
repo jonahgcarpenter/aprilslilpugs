@@ -16,8 +16,8 @@ interface BreederResponse {
   phoneNumber: string;
   location: string;
   story: string;
-  profile_picture: Image | null;
-  images: Image[];
+  profilePicture: Image | null;
+  gallery: Image[];
 }
 
 export interface Breeder {
@@ -29,7 +29,7 @@ export interface Breeder {
   location: string;
   description: string;
   profilePicture: Image | null;
-  images: Image[];
+  gallery: Image[];
 }
 
 export interface UpdateBreederInput {
@@ -70,8 +70,8 @@ export const useBreeder = () => {
       phone: rawData.phoneNumber,
       location: rawData.location,
       description: rawData.story,
-      profilePicture: rawData.profile_picture || null,
-      images: rawData.images || [],
+      profilePicture: rawData.profilePicture || null,
+      gallery: rawData.gallery || [],
     };
   }, [rawData]);
 
