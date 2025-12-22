@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"time"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/internal/models"
@@ -28,4 +29,23 @@ func UploadAndCreateImage(c *gin.Context, formKey string, folder string) (*model
 		URL:     relativePath,
 		AltText: file.Filename,
 	}, nil
+}
+
+func DeleteImage(imageURL string) error {
+	if imageURL == "" {
+		return nil
+	}
+
+	diskPath := filepath.Join("public", imageURL)
+
+	err := os.Remove(diskPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			fmt.Printf("File not found: %s\n", diskPath)
+			return nil 
+		}
+		return err
+	}
+	
+	return err
 }

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/internal/models"
@@ -85,7 +84,7 @@ func UpdateBreeder(c *gin.Context) {
 	if uploadedImg, err := utils.UploadAndCreateImage(c, "profilePicture", "breeders"); err == nil && uploadedImg != nil {
 		newPP = uploadedImg
 		if currentPP != nil && currentPP.URL != "" {
-			_ = os.Remove("public" + currentPP.URL)
+			_ = utils.DeleteImage(currentPP.URL)
 		}
 	}
 
@@ -100,7 +99,7 @@ func UpdateBreeder(c *gin.Context) {
 		if uploadedImg, err := utils.UploadAndCreateImage(c, formKey, "breeders"); err == nil && uploadedImg != nil {
 			
 			if tempGallery[i].URL != "" {
-				_ = os.Remove("public" + tempGallery[i].URL)
+				_ = utils.DeleteImage(tempGallery[i].URL)
 			}
 			
 			tempGallery[i] = *uploadedImg
