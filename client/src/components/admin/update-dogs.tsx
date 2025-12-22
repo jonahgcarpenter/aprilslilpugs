@@ -310,7 +310,7 @@ const UpdateDogs = ({
                             : "bg-slate-950 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700"
                         }`}
                       >
-                        Male
+                        M
                       </button>
                       <button
                         type="button"
@@ -323,7 +323,7 @@ const UpdateDogs = ({
                             : "bg-slate-950 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700"
                         }`}
                       >
-                        Female
+                        F
                       </button>
                     </div>
                   </div>
