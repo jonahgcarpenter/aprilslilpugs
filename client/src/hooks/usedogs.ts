@@ -1,9 +1,10 @@
 import useSWR from "swr";
+import axios from "axios";
 
-interface Image {
+export interface Image {
   id: number;
   url: string;
-  alt_text: string;
+  alt_text?: string;
 }
 
 interface DogResponse {
@@ -12,8 +13,8 @@ interface DogResponse {
   gender: "Male" | "Female";
   description: string;
   birthDate: string;
-  profile_picture: Image | null;
-  images: Image[];
+  profilePicture: Image | null;
+  gallery: Image[];
 }
 
 export interface Dog {
@@ -23,10 +24,20 @@ export interface Dog {
   description: string;
   birthDate: string;
   profilePicture: string;
-  images: string[];
+  gallery: string[];
+}
+
+export interface DogInput {
+  name: string;
+  gender: "Male" | "Female";
+  description: string;
+  birthDate: string;
+  profilePictureFile?: File;
+  galleryFiles?: File[];
 }
 
 const FALLBACK_IMAGE = "https://placehold.co/400x400/2563eb/white?text=Dog";
+const API_URL = "/api/dogs";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -35,33 +46,91 @@ export const useDogs = () => {
     data: rawDogs,
     error,
     isLoading,
-  } = useSWR<DogResponse[]>("/api/dogs", fetcher);
+    mutate,
+  } = useSWR<DogResponse[]>(API_URL, fetcher);
 
   let dogs: Dog[] = [];
 
   if (rawDogs) {
     dogs = rawDogs.map((raw) => {
-      const profileUrl = raw.profile_picture
-        ? raw.profile_picture.url
+      const profileUrl = raw.profilePicture
+        ? raw.profilePicture.url
         : FALLBACK_IMAGE;
 
-      const galleryUrls = raw.images ? raw.images.map((img) => img.url) : [];
+      const galleryUrls = raw.gallery ? raw.gallery.map((img) => img.url) : [];
 
       return {
         id: raw.id.toString(),
         name: raw.name,
         gender: raw.gender,
         description: raw.description,
-        birthDate: raw.birthDate,
+        birthDate: raw.birthDate.split("T")[0],
         profilePicture: profileUrl,
-        images: galleryUrls,
+        gallery: galleryUrls,
       };
     });
   }
+
+  const buildFormData = (data: DogInput) => {
+    const formData = new FormData();
+    formData.append("name", data.name);
+    formData.append("gender", data.gender);
+    formData.append("description", data.description);
+    formData.append("birthDate", data.birthDate);
+
+    if (data.profilePictureFile) {
+      formData.append("profilePicture", data.profilePictureFile);
+    }
+
+    if (data.galleryFiles && data.galleryFiles.length > 0) {
+      data.galleryFiles.forEach((file, index) => {
+        formData.append(`galleryImage${index}`, file);
+      });
+    }
+    return formData;
+  };
+
+  const createDog = async (data: DogInput) => {
+    try {
+      const formData = buildFormData(data);
+      await axios.post(API_URL, formData);
+      await mutate();
+      return true;
+    } catch (e) {
+      console.error("Create Dog Error:", e);
+      throw e;
+    }
+  };
+
+  const updateDog = async (id: string, data: DogInput) => {
+    try {
+      const formData = buildFormData(data);
+      await axios.patch(`${API_URL}/${id}`, formData);
+      await mutate();
+      return true;
+    } catch (e) {
+      console.error("Update Dog Error:", e);
+      throw e;
+    }
+  };
+
+  const deleteDog = async (id: string) => {
+    try {
+      await axios.delete(`${API_URL}/${id}`);
+      await mutate();
+      return true;
+    } catch (e) {
+      console.error("Delete Dog Error:", e);
+      throw e;
+    }
+  };
 
   return {
     dogs,
     isLoading,
     error,
+    createDog,
+    updateDog,
+    deleteDog,
   };
 };

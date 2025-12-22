@@ -1,4 +1,4 @@
-import Grumble from "../components/pugs/grumble";
+import Grumble from "../components/dogs/grumble";
 import { useDogs } from "../hooks/usedogs";
 
 const OurAdults = () => {

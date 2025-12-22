@@ -1,7 +1,7 @@
-import type { Pug } from "../../hooks/usepugs";
+import type { Dog } from "../../hooks/usedogs";
 
 interface GrumbleProps {
-  grumbles: Pug[];
+  grumbles: Dog[];
   isLoading: boolean;
   error: any;
 }
@@ -62,16 +62,16 @@ const Grumble = ({ grumbles, isLoading, error }: GrumbleProps) => {
               .sort(
                 (a, b) => calculateAge(b.birthDate) - calculateAge(a.birthDate),
               )
-              .map((pug) => (
+              .map((dog) => (
                 <div
-                  key={pug.id}
+                  key={dog.id}
                   className="bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700/50 shadow-lg hover:shadow-blue-500/10 transition-all duration-300"
                 >
                   <div className="aspect-square w-full overflow-hidden">
-                    {pug.profilePicture ? (
+                    {dog.profilePicture ? (
                       <img
-                        src={pug.profilePicture}
-                        alt={pug.name}
+                        src={dog.profilePicture}
+                        alt={dog.name}
                         className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500"
                       />
                     ) : (
@@ -83,19 +83,19 @@ const Grumble = ({ grumbles, isLoading, error }: GrumbleProps) => {
                   <div className="p-6 space-y-4">
                     <div className="space-y-2">
                       <h3 className="text-2xl font-semibold text-slate-100">
-                        {pug.name}
+                        {dog.name}
                       </h3>
                       <div className="flex justify-between items-center">
                         <p className="text-blue-400 font-medium">
-                          {pug.gender}
+                          {dog.gender}
                         </p>
                         <p className="text-slate-400 text-sm">
-                          {calculateAge(pug.birthDate)} years old
+                          {calculateAge(dog.birthDate)} years old
                         </p>
                       </div>
                     </div>
                     <p className="text-slate-300 leading-relaxed line-clamp-4">
-                      {pug.description}
+                      {dog.description}
                     </p>
                   </div>
                 </div>
@@ -103,7 +103,7 @@ const Grumble = ({ grumbles, isLoading, error }: GrumbleProps) => {
           </div>
         ) : (
           <div className="text-center text-slate-400 py-12">
-            No pugs found in the grumble yet!
+            No dogs found in the grumble yet!
           </div>
         )}
       </div>

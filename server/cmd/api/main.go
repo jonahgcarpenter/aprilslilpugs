@@ -41,11 +41,11 @@ func main() {
 			api.PATCH("/breeder", middleware.RequireAuth, controllers.UpdateBreeder)
 
 			// Dogs
-			// api.GET("/dogs", controllers.GetDogs)
-			// api.GET("/dogs/:id", controllers.GetDog)
-			// api.POST("/dogs", middleware.RequireAuth, controllers.CreateDog)
-			// api.PATCH("/dogs/:id", middleware.RequireAuth, controllers.UpdateDog)
-			// api.DELETE("/dogs/:id", middleware.RequireAuth, controllers.DeleteDog)
+			api.GET("/dogs", controllers.GetDogs)
+			api.GET("/dogs/:id", controllers.GetDog)
+			api.POST("/dogs", middleware.RequireAuth, controllers.CreateDog)
+			api.PATCH("/dogs/:id", middleware.RequireAuth, controllers.UpdateDog)
+			api.DELETE("/dogs/:id", middleware.RequireAuth, controllers.DeleteDog)
 
 			// Litters
 			// api.GET("/litters", controllers.GetLitters)
