@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import type { Breeder, UpdateBreederInput } from "../../hooks/usebreeder";
+import type { Breeder, UpdateBreederInput } from "../../../hooks/usebreeder";
 import { FaSave, FaImage, FaSpinner, FaUserEdit, FaPen } from "react-icons/fa";
 
 interface UpdateBreederProps {

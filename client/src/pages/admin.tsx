@@ -1,7 +1,7 @@
 import { useBreeder } from "../hooks/usebreeder";
 import { useDogs } from "../hooks/usedogs";
-import UpdateBreeder from "../components/admin/update-breeder";
-import UpdateDogs from "../components/admin/update-dogs";
+import UpdateBreeder from "../components/admin/breeder/update-breeder";
+import UpdateDogs from "../components/admin/dogs/update-dogs";
 import { FaSpinner } from "react-icons/fa";
 
 const Admin = () => {

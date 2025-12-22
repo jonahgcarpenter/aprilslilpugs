@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import type { Dog, DogInput } from "../../hooks/usedogs";
+import type { Dog, DogInput } from "../../../hooks/usedogs";
 import {
   FaPlus,
   FaEdit,
