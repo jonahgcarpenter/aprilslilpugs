@@ -1,5 +1,5 @@
 import DisplayLitters from "../components/litters/display-litters";
-import AddWaitlist from "../components/wailist/add-waitlist";
+// import AddWaitlist from "../components/wailist/add-waitlist";
 import { useLitters } from "../hooks/uselitters";
 
 const Nursery = () => {
@@ -7,7 +7,7 @@ const Nursery = () => {
 
   return (
     <div className="space-y-6">
-      <AddWaitlist />
+      {/* <AddWaitlist /> */}
 
       <DisplayLitters
         title="Current Litters"
