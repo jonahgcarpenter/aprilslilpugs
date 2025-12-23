@@ -1,8 +1,8 @@
-import type { Pug } from "../../hooks/usepugs";
+import type { Dog } from "../../hooks/usedogs";
 
 interface PuppyParentsProps {
-  mother?: Pug;
-  father?: Pug;
+  mother?: Dog;
+  father?: Dog;
   motherNameFallback: string;
   fatherNameFallback: string;
 }

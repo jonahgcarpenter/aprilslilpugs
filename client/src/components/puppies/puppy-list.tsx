@@ -1,4 +1,4 @@
-import type { Puppy } from "../../data/puppies";
+import type { Puppy } from "../../hooks/usepuppies";
 
 interface PuppyListProps {
   puppies: Puppy[];
@@ -17,7 +17,7 @@ const getStatusColor = (status: Puppy["status"]) => {
   }
 };
 
-const getGenderBadge = (gender: "Male" | "Female") => {
+const getGenderBadge = (gender: string) => {
   if (gender === "Male") {
     return (
       <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase border bg-blue-500/20 text-blue-300 border-blue-500/30">
@@ -58,7 +58,7 @@ const PuppyList = ({ puppies }: PuppyListProps) => {
             {/* Image Container */}
             <div className="aspect-square relative overflow-hidden bg-slate-900">
               <img
-                src={puppy.profile_picture}
+                src={puppy.profilePicture}
                 alt={puppy.name}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 loading="lazy"
@@ -71,7 +71,6 @@ const PuppyList = ({ puppies }: PuppyListProps) => {
                 {puppy.name}
               </h4>
 
-              {/* Attributes Grid */}
               <div className="grid grid-cols-3 gap-2 mb-4">
                 {/* Color */}
                 <div>

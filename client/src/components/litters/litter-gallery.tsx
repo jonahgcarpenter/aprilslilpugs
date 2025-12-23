@@ -1,10 +1,11 @@
 import { FaImage } from "react-icons/fa";
 
 export interface GalleryImage {
-  id: number;
+  id?: number;
   url: string;
   alt_text?: string;
   description?: string;
+  puppyName?: string;
 }
 
 interface LitterGalleryProps {

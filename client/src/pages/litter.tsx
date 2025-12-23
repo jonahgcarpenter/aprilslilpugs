@@ -1,12 +1,12 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useLitters } from "../hooks/uselitters";
-import { usePuppies, type Puppy } from "../hooks/usepuppies";
+import { usePuppies } from "../hooks/usepuppies";
 import { useDogs } from "../hooks/usedogs";
-import PuppyParents from "../components/puppies/puppy-parents";
 import LitterGallery, {
-  type GalleryItem,
+  type GalleryImage,
 } from "../components/litters/litter-gallery";
 import PuppyHero from "../components/puppies/puppy-hero";
+import PuppyParents from "../components/puppies/puppy-parents";
 import PuppyList from "../components/puppies/puppy-list";
 
 const Litter = () => {
@@ -54,28 +54,32 @@ const Litter = () => {
   const mother = dogs.find((d) => d.id === litter.motherId);
   const father = dogs.find((d) => d.id === litter.fatherId);
 
-  const galleryMap = new Map<string, GalleryItem>();
+  const galleryMap = new Map<string, GalleryImage>();
 
-  litter.images.forEach((url) => {
-    if (url === litter.profilePicture) return;
+  if (litter.images) {
+    litter.images.forEach((img) => {
+      if (img.url === litter.profilePicture) return;
 
-    galleryMap.set(url, {
-      url,
-      description: undefined,
-      puppyName: undefined,
-    });
-  });
-
-  puppies.forEach((d) => {
-    d.images.forEach((url) => {
-      if (url === d.profilePicture) return;
-
-      galleryMap.set(url, {
-        url,
-        description: undefined,
-        puppyName: d.name,
+      galleryMap.set(img.url, {
+        url: img.url,
+        description: img.description,
+        puppyName: undefined,
       });
     });
+  }
+
+  puppies.forEach((p) => {
+    if (p.images) {
+      p.images.forEach((img) => {
+        if (img.url === p.profilePicture) return;
+
+        galleryMap.set(img.url, {
+          url: img.url,
+          description: img.description,
+          puppyName: p.name,
+        });
+      });
+    }
   });
 
   const combinedGallery = Array.from(galleryMap.values());
@@ -94,7 +98,9 @@ const Litter = () => {
 
         <PuppyList puppies={puppies} />
 
-        <LitterGallery images={combinedGallery} litterName={litter.name} />
+        {combinedGallery.length > 0 && (
+          <LitterGallery images={combinedGallery} litterName={litter.name} />
+        )}
       </div>
     </div>
   );
