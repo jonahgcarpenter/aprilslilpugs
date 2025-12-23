@@ -25,7 +25,7 @@ export interface Dog {
   description: string;
   birthDate: string;
   profilePicture: string;
-  gallery: Image[];
+  images: Image[];
 }
 
 export interface DogInput {
@@ -67,7 +67,7 @@ export const useDogs = () => {
         description: raw.description,
         birthDate: raw.birthDate.split("T")[0],
         profilePicture: profileUrl,
-        gallery: raw.gallery || [],
+        images: raw.gallery || [],
       };
     });
   }

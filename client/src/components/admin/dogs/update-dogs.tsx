@@ -69,7 +69,7 @@ const UpdateDogs = ({
       birthDate: dog.birthDate,
       galleryFiles: [],
       galleryDescriptions: [],
-      existingGallery: JSON.parse(JSON.stringify(dog.gallery || [])),
+      existingGallery: JSON.parse(JSON.stringify(dog.images || [])),
     });
     setProfilePreview(dog.profilePicture);
     setEditingId(dog.id);
