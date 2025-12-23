@@ -4,35 +4,6 @@ interface PuppyListProps {
   puppies: Puppy[];
 }
 
-const getStatusColor = (status: Puppy["status"]) => {
-  switch (status) {
-    case "Available":
-      return "bg-green-500/20 text-green-300 border-green-500/30";
-    case "Reserved":
-      return "bg-yellow-500/20 text-yellow-300 border-yellow-500/30";
-    case "Sold":
-      return "bg-red-500/20 text-red-300 border-red-500/30";
-    default:
-      return "bg-slate-500/20 text-slate-300 border-slate-500/30";
-  }
-};
-
-const getGenderBadge = (gender: string) => {
-  if (gender === "Male") {
-    return (
-      <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase border bg-blue-500/20 text-blue-300 border-blue-500/30">
-        Male
-      </span>
-    );
-  }
-
-  return (
-    <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase border bg-pink-500/20 text-pink-300 border-pink-500/30">
-      Female
-    </span>
-  );
-};
-
 const PuppyList = ({ puppies }: PuppyListProps) => {
   if (!puppies || puppies.length === 0) {
     return null;
@@ -60,14 +31,14 @@ const PuppyList = ({ puppies }: PuppyListProps) => {
               <img
                 src={puppy.profilePicture}
                 alt={puppy.name}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                className="w-full h-full object-cover"
                 loading="lazy"
               />
             </div>
 
             <div className="p-5 flex-grow flex flex-col">
               {/* Name */}
-              <h4 className="text-xl font-bold text-slate-100 group-hover:text-blue-400 transition-colors mb-4">
+              <h4 className="text-xl font-bold text-slate-100 mb-4">
                 {puppy.name}
               </h4>
 
@@ -77,9 +48,7 @@ const PuppyList = ({ puppies }: PuppyListProps) => {
                   <p className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-1">
                     Color
                   </p>
-                  <p className="text-sm font-medium text-slate-200 truncate">
-                    {puppy.color}
-                  </p>
+                  <p className="font-medium text-slate-200">{puppy.color}</p>
                 </div>
 
                 {/* Gender */}
@@ -87,7 +56,15 @@ const PuppyList = ({ puppies }: PuppyListProps) => {
                   <p className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-1">
                     Gender
                   </p>
-                  <div>{getGenderBadge(puppy.gender)}</div>
+                  <p
+                    className={`font-medium ${
+                      puppy.gender === "Female"
+                        ? "text-pink-400"
+                        : "text-blue-400"
+                    }`}
+                  >
+                    {puppy.gender}
+                  </p>
                 </div>
 
                 {/* Status */}
@@ -95,13 +72,17 @@ const PuppyList = ({ puppies }: PuppyListProps) => {
                   <p className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-1">
                     Status
                   </p>
-                  <span
-                    className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${getStatusColor(
-                      puppy.status,
-                    )}`}
+                  <p
+                    className={`font-medium ${
+                      puppy.status === "Available"
+                        ? "text-green-400"
+                        : puppy.status === "Reserved"
+                          ? "text-yellow-400"
+                          : "text-red-400"
+                    }`}
                   >
                     {puppy.status}
-                  </span>
+                  </p>
                 </div>
               </div>
 
