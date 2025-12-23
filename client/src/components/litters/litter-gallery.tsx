@@ -20,7 +20,7 @@ interface LitterGalleryProps {
   litterName: string;
 }
 
-export const LitterGallery = ({ images, litterName }: LitterGalleryProps) => {
+export const LitterGallery = ({ images }: LitterGalleryProps) => {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const thumbnailsRef = useRef<HTMLDivElement>(null);
 
@@ -72,7 +72,7 @@ export const LitterGallery = ({ images, litterName }: LitterGalleryProps) => {
   }, [selectedIndex]);
 
   return (
-    <div className="lg:col-span-2">
+    <div className="lg:col-span-2 pt-12 border-t border-slate-700/50">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 flex items-center gap-2">

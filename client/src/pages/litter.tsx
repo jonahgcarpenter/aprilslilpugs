@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useLitters } from "../hooks/uselitters";
 import { usePuppies } from "../hooks/usepuppies";
@@ -24,6 +25,40 @@ const Litter = () => {
   const { puppies, isLoading: puppiesLoading } = usePuppies(id);
 
   const litter = litters.find((l) => l.id === id);
+
+  const combinedGallery = useMemo(() => {
+    if (!litter) return [];
+
+    const galleryMap = new Map<string, GalleryImage>();
+
+    if (litter.images) {
+      litter.images.forEach((img) => {
+        if (img.url === litter.profilePicture) return;
+
+        galleryMap.set(img.url, {
+          url: img.url,
+          description: img.description,
+          puppyName: undefined,
+        });
+      });
+    }
+
+    puppies.forEach((p) => {
+      if (p.images) {
+        p.images.forEach((img) => {
+          if (img.url === p.profilePicture) return;
+
+          galleryMap.set(img.url, {
+            url: img.url,
+            description: img.description,
+            puppyName: p.name,
+          });
+        });
+      }
+    });
+
+    return Array.from(galleryMap.values());
+  }, [litter, puppies]);
 
   if (littersLoading || pugsLoading || puppiesLoading) {
     return (
@@ -53,36 +88,6 @@ const Litter = () => {
 
   const mother = dogs.find((d) => d.id === litter.motherId);
   const father = dogs.find((d) => d.id === litter.fatherId);
-
-  const galleryMap = new Map<string, GalleryImage>();
-
-  if (litter.images) {
-    litter.images.forEach((img) => {
-      if (img.url === litter.profilePicture) return;
-
-      galleryMap.set(img.url, {
-        url: img.url,
-        description: img.description,
-        puppyName: undefined,
-      });
-    });
-  }
-
-  puppies.forEach((p) => {
-    if (p.images) {
-      p.images.forEach((img) => {
-        if (img.url === p.profilePicture) return;
-
-        galleryMap.set(img.url, {
-          url: img.url,
-          description: img.description,
-          puppyName: p.name,
-        });
-      });
-    }
-  });
-
-  const combinedGallery = Array.from(galleryMap.values());
 
   return (
     <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl border border-slate-800/50 shadow-xl overflow-hidden mb-12">

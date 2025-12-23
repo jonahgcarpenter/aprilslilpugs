@@ -29,11 +29,11 @@ export const PuppyParents = ({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Father Card */}
-        <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 flex items-center gap-6 transition-colors shadow-sm hover:border-blue-500/30">
+        <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 flex items-center gap-6 transition-colors shadow-sm hover:border-blue-500/30 h-full">
           <img
             src={fatherImage}
             alt={fatherName}
-            className="w-24 h-24 rounded-full object-cover border-4 border-slate-600 shadow-lg"
+            className="w-24 h-24 rounded-full object-cover border-4 border-slate-600 shadow-lg shrink-0"
           />
           <div>
             <span className="text-sm font-bold text-blue-400 uppercase tracking-wider">
@@ -49,11 +49,11 @@ export const PuppyParents = ({
         </div>
 
         {/* Mother Card */}
-        <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 flex items-center gap-6 transition-colors shadow-sm hover:border-pink-500/30">
+        <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 flex items-center gap-6 transition-colors shadow-sm hover:border-pink-500/30 h-full">
           <img
             src={motherImage}
             alt={motherName}
-            className="w-24 h-24 rounded-full object-cover border-4 border-slate-600 shadow-lg"
+            className="w-24 h-24 rounded-full object-cover border-4 border-slate-600 shadow-lg shrink-0"
           />
           <div>
             <span className="text-sm font-bold text-pink-400 uppercase tracking-wider">

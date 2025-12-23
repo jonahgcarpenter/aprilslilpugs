@@ -10,7 +10,7 @@ const PuppyList = ({ puppies }: PuppyListProps) => {
   }
 
   return (
-    <section className="mt-12 border-t border-slate-700/50 pt-12">
+    <section className="border-t border-slate-700/50 pt-12">
       <div className="flex items-center gap-3 mb-8">
         <h3 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 flex items-center gap-2">
           Meet the Puppies
@@ -24,7 +24,7 @@ const PuppyList = ({ puppies }: PuppyListProps) => {
         {puppies.map((puppy) => (
           <div
             key={puppy.id}
-            className="group bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700/50 hover:border-blue-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/10 flex flex-col"
+            className="group bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700/50 hover:border-blue-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/10 flex flex-col h-full"
           >
             {/* Image Container */}
             <div className="aspect-square relative overflow-hidden bg-slate-900">
@@ -48,7 +48,9 @@ const PuppyList = ({ puppies }: PuppyListProps) => {
                   <p className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-1">
                     Color
                   </p>
-                  <p className="font-medium text-slate-200">{puppy.color}</p>
+                  <p className="font-medium text-slate-200 truncate">
+                    {puppy.color}
+                  </p>
                 </div>
 
                 {/* Gender */}

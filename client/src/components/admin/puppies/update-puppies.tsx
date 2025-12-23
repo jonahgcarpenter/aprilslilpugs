@@ -8,7 +8,6 @@ import {
   FaPlus,
   FaEdit,
   FaTrash,
-  FaSave,
   FaTimes,
   FaImage,
   FaDog,
