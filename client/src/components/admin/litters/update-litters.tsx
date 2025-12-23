@@ -51,8 +51,14 @@ const UpdateLitters = ({
   const profileInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
 
-  const dams = useMemo(() => dogs.filter((d) => d.gender === "Female"), [dogs]);
-  const sires = useMemo(() => dogs.filter((d) => d.gender === "Male"), [dogs]);
+  const mothers = useMemo(
+    () => dogs.filter((d) => d.gender === "Female"),
+    [dogs],
+  );
+  const fathers = useMemo(
+    () => dogs.filter((d) => d.gender === "Male"),
+    [dogs],
+  );
 
   const resetForm = () => {
     setFormData({
@@ -77,7 +83,6 @@ const UpdateLitters = ({
     setFormData({
       name: litter.name,
       status: litter.status,
-      // Ensure date strings are formatted YYYY-MM-DD
       birth_date: litter.birthDate.split("T")[0],
       available_date: litter.availableDate.split("T")[0],
       external_mother_name: litter.externalMotherName || "",
@@ -235,10 +240,10 @@ const UpdateLitters = ({
                     </span>
                   </div>
                   <p className="text-xs text-white/50 truncate">
-                    Dam: {litter.motherName}
+                    Mother: {litter.motherName}
                   </p>
                   <p className="text-xs text-white/50 truncate">
-                    Sire: {litter.fatherName}
+                    Father: {litter.fatherName}
                   </p>
                 </div>
                 <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -289,7 +294,7 @@ const UpdateLitters = ({
               {/* Profile Picture */}
               <div className="md:col-span-1 flex flex-col">
                 <div className="relative group w-full aspect-square">
-                  <div className="relative w-full h-full rounded-xl overflow-hidden border-2 border-white/10 shadow-xl bg-slate-800">
+                  <div className="aspect-square w-full h-full rounded-xl overflow-hidden border-2 border-white/10 shadow-xl bg-slate-800">
                     {profilePreview ? (
                       <img
                         src={profilePreview}
@@ -349,7 +354,7 @@ const UpdateLitters = ({
                       onChange={(e) =>
                         setFormData((p) => ({ ...p, status: e.target.value }))
                       }
-                      className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none"
+                      className="cursor-pointer w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none"
                     >
                       <option value="Planned">Planned</option>
                       <option value="Available">Available</option>
@@ -417,7 +422,7 @@ const UpdateLitters = ({
                       className="cursor-pointer w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-pink-500 focus:outline-none mb-2"
                     >
                       <option value="">External / Manual Entry</option>
-                      {dams.map((dog) => (
+                      {mothers.map((dog) => (
                         <option key={dog.id} value={dog.id}>
                           {dog.name}
                         </option>
@@ -460,7 +465,7 @@ const UpdateLitters = ({
                       className="cursor-pointer w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none mb-2"
                     >
                       <option value="">External / Manual Entry</option>
-                      {sires.map((dog) => (
+                      {fathers.map((dog) => (
                         <option key={dog.id} value={dog.id}>
                           {dog.name}
                         </option>

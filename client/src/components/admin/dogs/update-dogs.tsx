@@ -241,7 +241,7 @@ const UpdateDogs = ({
               {/* Profile Picture */}
               <div className="md:col-span-1 flex flex-col">
                 <div className="relative group w-full aspect-square">
-                  <div className="relative w-full h-full rounded-xl overflow-hidden border-2 border-white/10 shadow-xl bg-slate-800">
+                  <div className="aspect-square w-full h-full rounded-xl overflow-hidden border-2 border-white/10 shadow-xl bg-slate-800">
                     {profilePreview ? (
                       <img
                         src={profilePreview}

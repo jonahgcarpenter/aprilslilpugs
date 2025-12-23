@@ -97,7 +97,7 @@ const DisplayLitters = ({
                   <img
                     src={litter.profilePicture}
                     alt={litter.name}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="w-full h-full object-cover"
                   />
                   {/* Mobile Status Badge Overlay */}
                   <div className="absolute top-4 right-4 lg:hidden">
