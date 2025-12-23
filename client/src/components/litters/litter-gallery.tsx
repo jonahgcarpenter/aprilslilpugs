@@ -1,15 +1,18 @@
-export interface GalleryItem {
+import { FaImage } from "react-icons/fa";
+
+export interface GalleryImage {
+  id: number;
   url: string;
+  alt_text?: string;
   description?: string;
-  puppyName?: string;
 }
 
-interface PuppyGalleryProps {
-  images: GalleryItem[];
+interface LitterGalleryProps {
+  images: GalleryImage[];
   litterName: string;
 }
 
-export const LitterGallery = ({ images, litterName }: PuppyGalleryProps) => {
+export const LitterGallery = ({ images, litterName }: LitterGalleryProps) => {
   return (
     <div className="lg:col-span-2">
       <div className="flex items-center justify-between mb-6">
@@ -25,37 +28,33 @@ export const LitterGallery = ({ images, litterName }: PuppyGalleryProps) => {
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           {images.map((item, index) => (
             <div
-              key={index}
+              key={item.id || index}
               className="group relative aspect-square overflow-hidden rounded-xl bg-slate-800/50 border border-slate-700/50 hover:border-blue-500/30 transition-all duration-300 shadow-sm cursor-pointer"
             >
               <img
                 src={item.url}
-                alt={item.description || `${litterName} gallery ${index + 1}`}
+                alt={
+                  item.alt_text ||
+                  item.description ||
+                  `${litterName} gallery ${index + 1}`
+                }
                 className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                 loading="lazy"
               />
 
-              {/* Overlay */}
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900 via-slate-900/90 to-transparent p-4 flex flex-col justify-end min-h-[40%]">
-                {/* Puppy Name Badge */}
-                {item.puppyName && (
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xs font-bold text-blue-300 uppercase tracking-wide truncate">
-                      {item.puppyName}
-                    </span>
-                  </div>
-                )}
-
-                {/* Description */}
-                <p className="text-xs font-medium text-slate-200 line-clamp-2 leading-relaxed">
-                  {item.description || "Litter Moment"}
-                </p>
-              </div>
+              {item.description && (
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900 via-slate-900/90 to-transparent p-4 flex flex-col justify-end min-h-[40%] translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                  <p className="text-xs font-medium text-slate-200 line-clamp-2 leading-relaxed">
+                    {item.description}
+                  </p>
+                </div>
+              )}
             </div>
           ))}
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center py-20 bg-slate-800/30 border border-slate-700/50 border-dashed rounded-2xl text-slate-500">
+          <FaImage className="w-8 h-8 mb-3 opacity-50" />
           <p>No photos uploaded yet.</p>
         </div>
       )}

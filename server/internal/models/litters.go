@@ -14,9 +14,8 @@ type Litter struct {
 	BirthDate      time.Time `json:"birth_date" form:"birth_date" db:"birth_date"`
 	AvailableDate  time.Time `json:"available_date" form:"available_date" db:"available_date"`
 	Status         string    `json:"status" form:"status" db:"status"`
-	ProfilePictureID *int    `json:"-" db:"profile_picture_id"`
-	ProfilePicture   *Image  `json:"profile_picture,omitempty" db:"-"`
-	Images         []Image   `json:"images,omitempty" db:"-"`
+	ProfilePicture *Image 	 `json:"profilePicture,omitempty" db:"profile_picture"`
+	Gallery 			 []Image 	 `json:"gallery,omitempty" db:"gallery"`
 	CreatedAt      time.Time `json:"createdAt" db:"created_at"`
 	UpdatedAt      time.Time `json:"updatedAt" db:"updated_at"`
 }

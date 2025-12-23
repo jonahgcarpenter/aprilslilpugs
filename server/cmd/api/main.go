@@ -48,11 +48,11 @@ func main() {
 			api.DELETE("/dogs/:id", middleware.RequireAuth, controllers.DeleteDog)
 
 			// Litters
-			// api.GET("/litters", controllers.GetLitters)
-			// api.GET("/litters/:id", controllers.GetLitter)
-			// api.POST("/litters", middleware.RequireAuth, controllers.CreateLitter)
-			// api.PATCH("/litters/:id", middleware.RequireAuth, controllers.UpdateLitter)
-			// api.DELETE("/litters/:id", middleware.RequireAuth, controllers.DeleteLitter)
+			api.GET("/litters", controllers.GetLitters)
+			api.GET("/litters/:id", controllers.GetLitter)
+			api.POST("/litters", middleware.RequireAuth, controllers.CreateLitter)
+			api.PATCH("/litters/:id", middleware.RequireAuth, controllers.UpdateLitter)
+			api.DELETE("/litters/:id", middleware.RequireAuth, controllers.DeleteLitter)
 
 			// Puppies
 			// api.GET("/puppies", controllers.GetPuppies)
