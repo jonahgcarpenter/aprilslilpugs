@@ -83,6 +83,41 @@ func CreateTables() {
 					updated_at TIMESTAMPTZ DEFAULT NOW()
 				);`,
 			},
+			{
+				Name: "puppy_status Enum",
+				Query: `
+				DO $$ BEGIN
+					CREATE TYPE puppy_status AS ENUM ('Available', 'Reserved', 'Sold');
+				EXCEPTION
+					WHEN duplicate_object THEN null;
+				END $$;`,
+			},
+			{
+				Name: "puppy_gender Enum",
+				Query: `
+				DO $$ BEGIN
+					CREATE TYPE puppy_gender AS ENUM ('Male', 'Female');
+				EXCEPTION
+					WHEN duplicate_object THEN null;
+				END $$;`,
+			},
+			{
+				Name: "puppies",
+				Query: `
+				CREATE TABLE IF NOT EXISTS puppies (
+					id SERIAL PRIMARY KEY,
+					litter_id INT REFERENCES litters(id) ON DELETE CASCADE,
+					name VARCHAR(100) NOT NULL,
+					color VARCHAR(50) NOT NULL,
+					gender puppy_gender NOT NULL,
+					status puppy_status DEFAULT 'Available',
+					description TEXT,
+					profile_picture JSONB DEFAULT '{}'::jsonb,
+					gallery JSONB DEFAULT '[]'::jsonb,
+					created_at TIMESTAMPTZ DEFAULT NOW(),
+					updated_at TIMESTAMPTZ DEFAULT NOW()
+				);`,
+			},
 		}
 
     for _, item := range tables {

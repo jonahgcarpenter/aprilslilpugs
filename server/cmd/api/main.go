@@ -55,11 +55,11 @@ func main() {
 			api.DELETE("/litters/:id", middleware.RequireAuth, controllers.DeleteLitter)
 
 			// Puppies
-			// api.GET("/puppies", controllers.GetPuppies)
-   //    api.GET("/puppies/:id", controllers.GetPuppy)
-			// api.POST("/puppies", middleware.RequireAuth, controllers.CreatePuppy)
-   //    api.PATCH("/puppies/:id", middleware.RequireAuth, controllers.UpdatePuppy)
-   //    api.DELETE("/puppies/:id", middleware.RequireAuth, controllers.DeletePuppy)
+			api.GET("/puppies", controllers.GetPuppies)
+      api.GET("/puppies/:id", controllers.GetPuppy)
+			api.POST("/puppies", middleware.RequireAuth, controllers.CreatePuppy)
+      api.PATCH("/puppies/:id", middleware.RequireAuth, controllers.UpdatePuppy)
+      api.DELETE("/puppies/:id", middleware.RequireAuth, controllers.DeletePuppy)
 
 			// Waitlist
 			api.POST("/waitlist", controllers.CreateWaitlist)
