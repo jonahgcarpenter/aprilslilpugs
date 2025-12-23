@@ -19,7 +19,7 @@ interface LitterResponse {
   external_father_name?: string;
   birth_date: string;
   available_date: string;
-  profile_picture: Image | null;
+  profilePicture: Image | null;
   gallery: Image[];
   status: string;
 }
@@ -72,8 +72,8 @@ export const useLitters = () => {
 
   if (rawLitters) {
     litters = rawLitters.map((raw) => {
-      const profileUrl = raw.profile_picture
-        ? raw.profile_picture.url
+      const profileUrl = raw.profilePicture
+        ? raw.profilePicture.url
         : FALLBACK_LITTER_IMAGE;
 
       return {
@@ -88,7 +88,7 @@ export const useLitters = () => {
         birthDate: raw.birth_date,
         availableDate: raw.available_date,
         profilePicture: profileUrl,
-        profilePictureObj: raw.profile_picture,
+        profilePictureObj: raw.profilePicture,
         images: raw.gallery || [],
         status: raw.status,
       };
