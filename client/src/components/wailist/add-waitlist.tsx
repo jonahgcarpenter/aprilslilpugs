@@ -4,30 +4,19 @@ import {
   FaCheckCircle,
   FaExclamationCircle,
 } from "react-icons/fa";
-
-export interface AddWaitlistInput {
-  firstname: string;
-  lastname: string;
-  email: string;
-  phone: string;
-  preferences: string;
-}
+import type { WaitlistInput } from "../../hooks/usewaitlist";
 
 interface AddWaitlistProps {
-  onSubmit: (data: AddWaitlistInput) => Promise<boolean>;
-  isSubmitting: boolean;
-  error: string | null;
-  resetError: () => void;
+  // Matches the hook signature: async function that returns void
+  onSubmit: (data: WaitlistInput) => Promise<void>;
 }
 
-const AddWaitlist = ({
-  onSubmit,
-  isSubmitting,
-  error,
-  resetError,
-}: AddWaitlistProps) => {
+const AddWaitlist = ({ onSubmit }: AddWaitlistProps) => {
   const [isSuccess, setIsSuccess] = useState(false);
-  const [formData, setFormData] = useState<AddWaitlistInput>({
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
+
+  const [formData, setFormData] = useState<WaitlistInput>({
     firstname: "",
     lastname: "",
     email: "",
@@ -38,17 +27,19 @@ const AddWaitlist = ({
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
-    if (error) resetError();
+    if (submissionError) setSubmissionError(null);
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    setSubmissionError(null);
 
-    // Call the parent's submit function
-    const success = await onSubmit(formData);
+    try {
+      // The hook throws an error if this fails, so we await it
+      await onSubmit(formData);
 
-    if (success) {
       setIsSuccess(true);
       setFormData({
         firstname: "",
@@ -57,7 +48,16 @@ const AddWaitlist = ({
         phone: "",
         preferences: "",
       });
+
+      // Clear success message after 5 seconds
       setTimeout(() => setIsSuccess(false), 5000);
+    } catch (err: any) {
+      // Capture error from the hook/axios
+      setSubmissionError(
+        err.message || "Failed to join waitlist. Please try again.",
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -86,6 +86,7 @@ const AddWaitlist = ({
                 and will contact you when a puppy becomes available.
               </p>
               <button
+                type="button"
                 onClick={() => setIsSuccess(false)}
                 className="mt-6 text-sm text-green-400 hover:text-green-300 underline underline-offset-4"
               >
@@ -191,10 +192,10 @@ const AddWaitlist = ({
               </div>
 
               {/* Error Display */}
-              {error && (
+              {submissionError && (
                 <div className="flex items-center gap-2 text-red-400 bg-red-400/10 p-3 rounded-lg border border-red-400/20 text-sm">
                   <FaExclamationCircle />
-                  <span>{error}</span>
+                  <span>{submissionError}</span>
                 </div>
               )}
 

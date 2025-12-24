@@ -5,21 +5,11 @@ import { useWaitlist } from "../hooks/usewaitlist";
 
 const Nursery = () => {
   const { currentLitters, isLoading, error } = useLitters();
-  const {
-    createWaitlist,
-    isSubmitting: isWaitlistSubmitting,
-    actionError: waitlistError,
-    resetError: resetWaitlistError,
-  } = useWaitlist(false);
+  const { createWaitlist } = useWaitlist();
 
   return (
     <div className="space-y-6">
-      <AddWaitlist
-        onSubmit={createWaitlist}
-        isSubmitting={isWaitlistSubmitting}
-        error={waitlistError}
-        resetError={resetWaitlistError}
-      />
+      <AddWaitlist onSubmit={createWaitlist} />
 
       <DisplayLitters
         title="Current Litters"
