@@ -4,6 +4,7 @@ export type { GalleryImage };
 
 interface LitterGalleryProps {
   images: GalleryImage[];
+  litterName?: string;
 }
 
 export const LitterGallery = ({ images }: LitterGalleryProps) => {

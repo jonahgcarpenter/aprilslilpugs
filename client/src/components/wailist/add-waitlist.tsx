@@ -1,13 +1,8 @@
 import { useState } from "react";
-import {
-  FaPaperPlane,
-  FaCheckCircle,
-  FaExclamationCircle,
-} from "react-icons/fa";
+import { FaCheckCircle, FaExclamationCircle } from "react-icons/fa";
 import type { WaitlistInput } from "../../hooks/usewaitlist";
 
 interface AddWaitlistProps {
-  // Matches the hook signature: async function that returns void
   onSubmit: (data: WaitlistInput) => Promise<void>;
 }
 
