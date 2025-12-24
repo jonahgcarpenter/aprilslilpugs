@@ -1,6 +1,33 @@
 import Stream from "../components/live/stream";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useSettings } from "../hooks/usesettings";
+import { FaSpinner } from "react-icons/fa";
 
 const Live = () => {
+  const navigate = useNavigate();
+  const { settings, isLoading } = useSettings();
+
+  useEffect(() => {
+    if (!isLoading && settings) {
+      if (!settings.stream_enabled) {
+        navigate("/");
+      }
+    }
+  }, [settings, isLoading, navigate]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <FaSpinner className="animate-spin text-4xl text-blue-500" />
+      </div>
+    );
+  }
+
+  if (!settings?.stream_enabled) {
+    return null;
+  }
+
   return (
     <div className="space-y-6">
       <Stream />
