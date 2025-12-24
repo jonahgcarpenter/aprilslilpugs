@@ -1,13 +1,33 @@
 import { useState } from "react";
-import axios from "axios";
 import {
   FaPaperPlane,
   FaCheckCircle,
   FaExclamationCircle,
 } from "react-icons/fa";
 
-const AddWaitlist = () => {
-  const [formData, setFormData] = useState({
+export interface AddWaitlistInput {
+  firstname: string;
+  lastname: string;
+  email: string;
+  phone: string;
+  preferences: string;
+}
+
+interface AddWaitlistProps {
+  onSubmit: (data: AddWaitlistInput) => Promise<boolean>;
+  isSubmitting: boolean;
+  error: string | null;
+  resetError: () => void;
+}
+
+const AddWaitlist = ({
+  onSubmit,
+  isSubmitting,
+  error,
+  resetError,
+}: AddWaitlistProps) => {
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [formData, setFormData] = useState<AddWaitlistInput>({
     firstname: "",
     lastname: "",
     email: "",
@@ -15,33 +35,21 @@ const AddWaitlist = () => {
     preferences: "",
   });
 
-  const [status, setStatus] = useState<
-    "idle" | "submitting" | "success" | "error"
-  >("idle");
-  const [errorMessage, setErrorMessage] = useState("");
-
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
+    if (error) resetError();
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setStatus("submitting");
-    setErrorMessage("");
 
-    try {
-      const payload = {
-        firstName: formData.firstname,
-        lastName: formData.lastname,
-        phoneNumber: formData.phone,
-        notes: formData.preferences,
-        email: formData.email,
-      };
+    // Call the parent's submit function
+    const success = await onSubmit(formData);
 
-      await axios.post("/api/waitlist", payload);
-      setStatus("success");
+    if (success) {
+      setIsSuccess(true);
       setFormData({
         firstname: "",
         lastname: "",
@@ -49,15 +57,7 @@ const AddWaitlist = () => {
         phone: "",
         preferences: "",
       });
-
-      setTimeout(() => setStatus("idle"), 5000);
-    } catch (error: any) {
-      console.error("Error adding to waitlist:", error);
-      setStatus("error");
-      setErrorMessage(
-        error.response?.data?.error ||
-          "Something went wrong. Please try again.",
-      );
+      setTimeout(() => setIsSuccess(false), 5000);
     }
   };
 
@@ -75,7 +75,7 @@ const AddWaitlist = () => {
             </p>
           </div>
 
-          {status === "success" ? (
+          {isSuccess ? (
             <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-8 text-center flex flex-col items-center animate-fade-in">
               <FaCheckCircle className="text-5xl text-green-400 mb-4" />
               <h3 className="text-xl font-semibold text-green-300 mb-2">
@@ -86,7 +86,7 @@ const AddWaitlist = () => {
                 and will contact you when a puppy becomes available.
               </p>
               <button
-                onClick={() => setStatus("idle")}
+                onClick={() => setIsSuccess(false)}
                 className="mt-6 text-sm text-green-400 hover:text-green-300 underline underline-offset-4"
               >
                 Add another entry
@@ -95,7 +95,6 @@ const AddWaitlist = () => {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {/* First Name */}
                 <div className="space-y-2">
                   <label
                     htmlFor="firstname"
@@ -114,8 +113,6 @@ const AddWaitlist = () => {
                     placeholder="Jane"
                   />
                 </div>
-
-                {/* Last Name */}
                 <div className="space-y-2">
                   <label
                     htmlFor="lastname"
@@ -137,7 +134,6 @@ const AddWaitlist = () => {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {/* Email */}
                 <div className="space-y-2">
                   <label
                     htmlFor="email"
@@ -156,8 +152,6 @@ const AddWaitlist = () => {
                     placeholder="jane@example.com"
                   />
                 </div>
-
-                {/* Phone */}
                 <div className="space-y-2">
                   <label
                     htmlFor="phone"
@@ -178,7 +172,6 @@ const AddWaitlist = () => {
                 </div>
               </div>
 
-              {/* Preferences */}
               <div className="space-y-2">
                 <label
                   htmlFor="preferences"
@@ -197,19 +190,20 @@ const AddWaitlist = () => {
                 />
               </div>
 
-              {status === "error" && (
+              {/* Error Display */}
+              {error && (
                 <div className="flex items-center gap-2 text-red-400 bg-red-400/10 p-3 rounded-lg border border-red-400/20 text-sm">
                   <FaExclamationCircle />
-                  <span>{errorMessage}</span>
+                  <span>{error}</span>
                 </div>
               )}
 
               <button
                 type="submit"
-                disabled={status === "submitting"}
-                className="w-full py-4 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                disabled={isSubmitting}
+                className="w-full py-4 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-2"
               >
-                {status === "submitting" ? (
+                {isSubmitting ? (
                   <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 ) : (
                   <>
