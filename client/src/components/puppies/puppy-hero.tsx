@@ -47,7 +47,7 @@ export const PuppyHero = ({ litter }: PuppyHeroProps) => {
           className="mb-4 flex items-center text-sm text-blue-400 hover:text-blue-300 transition-colors gap-2 group cursor-pointer"
         >
           <FaArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-          Back to Nursery
+          Back
         </button>
 
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
