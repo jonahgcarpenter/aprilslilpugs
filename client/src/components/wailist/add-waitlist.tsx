@@ -37,7 +37,6 @@ const AddWaitlist = ({ onSubmit }: AddWaitlistProps) => {
     setSubmissionError(null);
 
     try {
-      // The hook throws an error if this fails, so we await it
       await onSubmit(formData);
 
       setIsSuccess(true);
@@ -49,10 +48,8 @@ const AddWaitlist = ({ onSubmit }: AddWaitlistProps) => {
         preferences: "",
       });
 
-      // Clear success message after 5 seconds
       setTimeout(() => setIsSuccess(false), 5000);
     } catch (err: any) {
-      // Capture error from the hook/axios
       setSubmissionError(
         err.message || "Failed to join waitlist. Please try again.",
       );
@@ -207,10 +204,7 @@ const AddWaitlist = ({ onSubmit }: AddWaitlistProps) => {
                 {isSubmitting ? (
                   <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 ) : (
-                  <>
-                    <FaPaperPlane className="text-sm" />
-                    Submit Request
-                  </>
+                  <>Submit Entry</>
                 )}
               </button>
             </form>
