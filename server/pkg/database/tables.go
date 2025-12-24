@@ -15,6 +15,20 @@ func CreateTables() {
 
     tables := []Schema{
 			{
+				Name: "users",
+				Query: `
+				CREATE TABLE IF NOT EXISTS users (
+					id SERIAL PRIMARY KEY,
+					first_name VARCHAR(100) NOT NULL,
+					last_name VARCHAR(100) NOT NULL,
+					email VARCHAR(255) UNIQUE NOT NULL,
+					password_hash VARCHAR(255) NOT NULL,
+					phone_number VARCHAR(50) NOT NULL,
+					created_at TIMESTAMPTZ DEFAULT NOW(),
+					updated_at TIMESTAMPTZ DEFAULT NOW()
+				);`,
+			},
+			{
 				Name: "breeders",
 				Query: `
 				CREATE TABLE IF NOT EXISTS breeders (
@@ -115,6 +129,40 @@ func CreateTables() {
 					profile_picture JSONB DEFAULT '{}'::jsonb,
 					gallery JSONB DEFAULT '[]'::jsonb,
 					created_at TIMESTAMPTZ DEFAULT NOW(),
+					updated_at TIMESTAMPTZ DEFAULT NOW()
+				);`,
+			},
+			{
+				Name: "waitlist_status Enum",
+				Query: `
+				DO $$ BEGIN
+					CREATE TYPE waitlist_status AS ENUM ('New', 'Contacted', 'Complete');
+				EXCEPTION
+					WHEN duplicate_object THEN null;
+				END $$;`,
+			},
+			{
+				Name: "waitlist",
+				Query: `
+				CREATE TABLE IF NOT EXISTS waitlist (
+					id SERIAL PRIMARY KEY,
+					first_name VARCHAR(100) NOT NULL,
+					last_name VARCHAR(100) NOT NULL,
+					email VARCHAR(150) NOT NULL,
+					phone VARCHAR(50),
+					preferences TEXT,
+					status waitlist_status NOT NULL DEFAULT 'New',
+					created_at TIMESTAMPTZ DEFAULT NOW(),
+					updated_at TIMESTAMPTZ DEFAULT NOW()
+				);`,
+			},
+			{
+				Name: "settings",
+				Query: `
+				CREATE TABLE IF NOT EXISTS settings (
+					id SERIAL PRIMARY KEY,
+					waitlist_enabled BOOLEAN DEFAULT false,
+					stream_enabled BOOLEAN DEFAULT false,
 					updated_at TIMESTAMPTZ DEFAULT NOW()
 				);`,
 			},
