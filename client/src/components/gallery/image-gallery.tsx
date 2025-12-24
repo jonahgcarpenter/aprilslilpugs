@@ -154,7 +154,7 @@ export const ImageGallery = ({
               </button>
 
               <div
-                className="flex-1 h-full flex flex-col items-center justify-center px-2 sm:px-8 py-4 overflow-hidden"
+                className="flex-1 w-full h-full relative flex items-center justify-center px-2 sm:px-8 py-4 overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
               >
                 <img
@@ -167,28 +167,30 @@ export const ImageGallery = ({
                   images[selectedIndex].puppyName ||
                   images[selectedIndex].litterName ||
                   images[selectedIndex].description) && (
-                  <div className="mt-4 text-center max-w-2xl bg-black/60 p-4 rounded-xl backdrop-blur-md border border-white/10">
-                    <div className="flex flex-col gap-1">
-                      {images[selectedIndex].litterName && (
-                        <span className="text-xs text-slate-400 uppercase tracking-wider">
-                          {images[selectedIndex].litterName}
-                        </span>
-                      )}
-                      {images[selectedIndex].puppyName && (
-                        <h4 className="text-lg font-bold text-blue-400">
-                          {images[selectedIndex].puppyName}
-                        </h4>
-                      )}
-                      {images[selectedIndex].dogName && (
-                        <h4 className="text-lg font-bold text-blue-400">
-                          {images[selectedIndex].dogName}
-                        </h4>
-                      )}
-                      {images[selectedIndex].description && (
-                        <p className="text-slate-200 text-sm">
-                          {images[selectedIndex].description}
-                        </p>
-                      )}
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-full max-w-2xl px-4 z-20">
+                    <div className="bg-black/60 p-4 rounded-xl backdrop-blur-md border border-white/10 text-center shadow-lg">
+                      <div className="flex flex-col gap-1">
+                        {images[selectedIndex].litterName && (
+                          <span className="text-lg font-bold text-blue-400">
+                            {images[selectedIndex].litterName}
+                          </span>
+                        )}
+                        {images[selectedIndex].puppyName && (
+                          <h4 className="text-lg font-bold text-blue-400">
+                            {images[selectedIndex].puppyName}
+                          </h4>
+                        )}
+                        {images[selectedIndex].dogName && (
+                          <h4 className="text-lg font-bold text-blue-400">
+                            {images[selectedIndex].dogName}
+                          </h4>
+                        )}
+                        {images[selectedIndex].description && (
+                          <p className="text-slate-200 text-md">
+                            {images[selectedIndex].description}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}
