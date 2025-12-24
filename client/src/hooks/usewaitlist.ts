@@ -9,8 +9,8 @@ export interface WaitlistEntry {
   phone: string;
   preferences: string;
   status: "New" | "Contacted" | "Complete" | string;
-  created_at?: string;
-  updated_at?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface WaitlistInput {

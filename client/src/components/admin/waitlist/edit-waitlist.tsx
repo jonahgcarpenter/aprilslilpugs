@@ -1,14 +1,14 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, Fragment } from "react";
 import {
   FaSearch,
   FaEdit,
   FaTrash,
-  FaTimes,
-  FaCheck,
   FaEnvelope,
   FaPhone,
   FaCalendarAlt,
+  FaTimes,
   FaExclamationCircle,
+  FaSave,
 } from "react-icons/fa";
 import type {
   WaitlistEntry,
@@ -38,9 +38,12 @@ export const EditWaitlist = ({
   const [formData, setFormData] = useState<Partial<WaitlistUpdateInput>>({});
 
   const filteredWaitlist = useMemo(() => {
-    if (!searchTerm) return waitlist;
+    const activeEntries = waitlist.filter(
+      (entry) => entry.status !== "Complete",
+    );
+    if (!searchTerm) return activeEntries;
     const lower = searchTerm.toLowerCase();
-    return waitlist.filter(
+    return activeEntries.filter(
       (entry) =>
         entry.firstname.toLowerCase().includes(lower) ||
         entry.lastname.toLowerCase().includes(lower) ||
@@ -49,6 +52,11 @@ export const EditWaitlist = ({
   }, [waitlist, searchTerm]);
 
   const handleEditClick = (entry: WaitlistEntry) => {
+    if (editingId === entry.id) {
+      setEditingId(null);
+      return;
+    }
+
     setError(null);
     setEditingId(entry.id);
     setFormData({
@@ -109,9 +117,9 @@ export const EditWaitlist = ({
   };
 
   return (
-    <div className="bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 sm:p-8 border border-slate-800/50 shadow-xl">
+    <div className="bg-slate-900/80 backdrop-blur-sm rounded-xl border border-slate-800/50 shadow-xl overflow-hidden">
       {/* Header & Search */}
-      <div className="pb-6 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="p-6 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600">
             Waitlist
@@ -155,219 +163,226 @@ export const EditWaitlist = ({
               </tr>
             ) : (
               filteredWaitlist.map((entry) => (
-                <tr
-                  key={entry.id}
-                  className="hover:bg-slate-800/30 transition-colors group"
-                >
-                  <td className="p-4 text-slate-400 whitespace-nowrap text-sm">
-                    <div className="flex items-center gap-2">
-                      <FaCalendarAlt className="text-slate-600" />
-                      {entry.created_at
-                        ? new Date(entry.created_at).toLocaleDateString()
-                        : "N/A"}
-                    </div>
-                  </td>
-                  <td className="p-4">
-                    <div className="font-medium text-slate-200">
-                      {entry.firstname} {entry.lastname}
-                    </div>
-                    {entry.preferences && (
-                      <div className="text-xs text-slate-500 mt-1 max-w-[200px] truncate">
-                        {entry.preferences}
+                <Fragment key={entry.id}>
+                  {/* Standard Row */}
+                  <tr
+                    key={entry.id}
+                    className={`transition-colors group ${
+                      editingId === entry.id
+                        ? "bg-blue-500/5 border-l-2 border-l-blue-500"
+                        : "hover:bg-slate-800/30"
+                    }`}
+                  >
+                    <td className="p-4 text-slate-400 whitespace-nowrap text-sm align-top">
+                      <div className="flex items-center gap-2">
+                        <FaCalendarAlt className="text-slate-600" />
+                        {entry.createdAt
+                          ? new Date(entry.createdAt).toLocaleDateString()
+                          : "N/A"}
                       </div>
-                    )}
-                  </td>
-                  <td className="p-4">
-                    <div className="flex flex-col gap-1 text-sm">
-                      <a
-                        href={`mailto:${entry.email}`}
-                        className="flex items-center gap-2 text-blue-400 hover:underline"
-                      >
-                        <FaEnvelope className="text-xs" /> {entry.email}
-                      </a>
-                      {entry.phone && (
-                        <div className="flex items-center gap-2 text-slate-400">
-                          <FaPhone className="text-xs" /> {entry.phone}
+                    </td>
+                    <td className="p-4 align-top">
+                      <div className="font-medium text-slate-200">
+                        {entry.firstname} {entry.lastname}
+                      </div>
+                      {editingId !== entry.id && entry.preferences && (
+                        <div className="text-xs text-slate-500 mt-1 max-w-[200px] truncate">
+                          {entry.preferences}
                         </div>
                       )}
-                    </div>
-                  </td>
-                  <td className="p-4">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(
-                        entry.status,
-                      )}`}
-                    >
-                      {entry.status}
-                    </span>
-                  </td>
-                  <td className="p-4 text-right">
-                    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={() => handleEditClick(entry)}
-                        className="cursor-pointer p-2 text-slate-400 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
-                        title="Edit Entry"
-                      >
-                        <FaEdit />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(entry.id)}
-                        disabled={isDeleting === entry.id}
-                        className="cursor-pointer p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors disabled:opacity-50"
-                        title="Delete Entry"
-                      >
-                        {isDeleting === entry.id ? (
-                          <span className="block w-4 h-4 border-2 border-slate-500 border-t-red-500 rounded-full animate-spin" />
-                        ) : (
-                          <FaTrash />
+                    </td>
+                    <td className="p-4 align-top">
+                      <div className="flex flex-col gap-1 text-sm">
+                        <a
+                          href={`mailto:${entry.email}`}
+                          className="flex items-center gap-2 text-blue-400 hover:underline"
+                        >
+                          <FaEnvelope className="text-xs" /> {entry.email}
+                        </a>
+                        {entry.phone && (
+                          <div className="flex items-center gap-2 text-slate-400">
+                            <FaPhone className="text-xs" /> {entry.phone}
+                          </div>
                         )}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
+                      </div>
+                    </td>
+                    <td className="p-4 align-top">
+                      {editingId !== entry.id && (
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(
+                            entry.status,
+                          )}`}
+                        >
+                          {entry.status}
+                        </span>
+                      )}
+                    </td>
+                    <td className="p-4 text-right align-top">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => handleEditClick(entry)}
+                          className={`cursor-pointer p-2 rounded-lg transition-colors ${
+                            editingId === entry.id
+                              ? "text-blue-400 bg-blue-500/10"
+                              : "text-slate-400 hover:text-blue-400 hover:bg-blue-500/10"
+                          }`}
+                          title={
+                            editingId === entry.id ? "Close Edit" : "Edit Entry"
+                          }
+                        >
+                          {editingId === entry.id ? <FaTimes /> : <FaEdit />}
+                        </button>
+                        <button
+                          onClick={() => handleDelete(entry.id)}
+                          disabled={isDeleting === entry.id}
+                          className="cursor-pointer p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors disabled:opacity-50"
+                          title="Delete Entry"
+                        >
+                          {isDeleting === entry.id ? (
+                            <span className="block w-4 h-4 border-2 border-slate-500 border-t-red-500 rounded-full animate-spin" />
+                          ) : (
+                            <FaTrash />
+                          )}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+
+                  {/* Edit Row */}
+                  {editingId === entry.id && (
+                    <tr className="bg-slate-900/50">
+                      <td colSpan={5} className="p-0">
+                        <div className="p-6 border-y border-blue-500/20 animate-fade-in">
+                          {error && (
+                            <div className="mb-4 flex items-center gap-2 text-red-400 bg-red-400/10 p-3 rounded-lg border border-red-400/20 text-sm">
+                              <FaExclamationCircle />
+                              <span>{error}</span>
+                            </div>
+                          )}
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            {/* Read-Only Info */}
+                            <div className="space-y-4 border-r-0 md:border-r border-slate-800 pr-0 md:pr-8">
+                              <h4 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4">
+                                Contact Information
+                              </h4>
+                              <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                  <label className="text-xs text-slate-500">
+                                    Full Name
+                                  </label>
+                                  <div className="text-slate-300">
+                                    {entry.firstname} {entry.lastname}
+                                  </div>
+                                </div>
+                                <div className="space-y-1">
+                                  <label className="text-xs text-slate-500">
+                                    Joined Date
+                                  </label>
+                                  <div className="text-slate-300">
+                                    {new Date(
+                                      entry.createdAt || "",
+                                    ).toLocaleDateString()}
+                                  </div>
+                                </div>
+                                <div className="col-span-2 space-y-1">
+                                  <label className="text-xs text-slate-500">
+                                    Email
+                                  </label>
+                                  <div className="text-slate-300 font-mono text-sm">
+                                    {entry.email}
+                                  </div>
+                                </div>
+                                <div className="col-span-2 space-y-1">
+                                  <label className="text-xs text-slate-500">
+                                    Phone
+                                  </label>
+                                  <div className="text-slate-300 font-mono text-sm">
+                                    {entry.phone}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Editable Fields */}
+                            <div className="space-y-4">
+                              <h4 className="text-sm font-semibold text-blue-400 uppercase tracking-wider mb-4">
+                                Management
+                              </h4>
+                              <div className="space-y-4">
+                                <div>
+                                  <label className="block text-xs font-medium text-slate-400 mb-1">
+                                    Application Status
+                                  </label>
+                                  <select
+                                    value={formData.status || "New"}
+                                    onChange={(e) =>
+                                      setFormData({
+                                        ...formData,
+                                        status: e.target.value,
+                                      })
+                                    }
+                                    className="cursor-pointer w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-slate-200 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                  >
+                                    <option value="New">New</option>
+                                    <option value="Contacted">Contacted</option>
+                                    <option value="Complete">Complete</option>
+                                  </select>
+                                </div>
+
+                                <div>
+                                  <label className="block text-xs font-medium text-slate-400 mb-1">
+                                    Preferences / Admin Notes
+                                  </label>
+                                  <textarea
+                                    rows={4}
+                                    value={formData.preferences || ""}
+                                    onChange={(e) =>
+                                      setFormData({
+                                        ...formData,
+                                        preferences: e.target.value,
+                                      })
+                                    }
+                                    className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-slate-200 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"
+                                    placeholder="Enter preferences or internal notes here..."
+                                  />
+                                </div>
+
+                                <div className="flex items-center gap-3 pt-2">
+                                  <button
+                                    onClick={handleSave}
+                                    disabled={isSaving}
+                                    className="cursor-pointer px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg flex items-center gap-2 text-sm font-medium transition-colors disabled:opacity-50"
+                                  >
+                                    {isSaving ? (
+                                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    ) : (
+                                      <>
+                                        <FaSave /> Save Changes
+                                      </>
+                                    )}
+                                  </button>
+                                  <button
+                                    onClick={() => setEditingId(null)}
+                                    disabled={isSaving}
+                                    className="cursor-pointer px-4 py-2 text-slate-400 hover:text-white transition-colors text-sm font-medium"
+                                  >
+                                    Cancel
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </Fragment>
               ))
             )}
           </tbody>
         </table>
       </div>
-
-      {/* Edit Modal */}
-      {editingId !== null && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-slate-700 rounded-xl w-full max-w-lg shadow-2xl p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-slate-100">Edit Entry</h3>
-              <button
-                onClick={() => setEditingId(null)}
-                className="cursor-pointer text-slate-500 hover:text-white transition-colors"
-              >
-                <FaTimes />
-              </button>
-            </div>
-
-            {error && (
-              <div className="mb-4 flex items-center gap-2 text-red-400 bg-red-400/10 p-3 rounded-lg border border-red-400/20 text-sm">
-                <FaExclamationCircle />
-                <span>{error}</span>
-              </div>
-            )}
-
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1">
-                    First Name
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.firstname || ""}
-                    onChange={(e) =>
-                      setFormData({ ...formData, firstname: e.target.value })
-                    }
-                    className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-slate-200 focus:border-blue-500 focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1">
-                    Last Name
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.lastname || ""}
-                    onChange={(e) =>
-                      setFormData({ ...formData, lastname: e.target.value })
-                    }
-                    className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-slate-200 focus:border-blue-500 focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    value={formData.email || ""}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
-                    className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-slate-200 focus:border-blue-500 focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1">
-                    Phone
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.phone || ""}
-                    onChange={(e) =>
-                      setFormData({ ...formData, phone: e.target.value })
-                    }
-                    className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-slate-200 focus:border-blue-500 focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1">
-                  Status
-                </label>
-                <select
-                  value={formData.status || "New"}
-                  onChange={(e) =>
-                    setFormData({ ...formData, status: e.target.value })
-                  }
-                  className="cursor-pointer w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-slate-200 focus:border-blue-500 focus:outline-none appearance-none"
-                >
-                  <option value="New">New</option>
-                  <option value="Contacted">Contacted</option>
-                  <option value="Complete">Complete</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1">
-                  Preferences
-                </label>
-                <textarea
-                  rows={3}
-                  value={formData.preferences || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, preferences: e.target.value })
-                  }
-                  className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-slate-200 focus:border-blue-500 focus:outline-none resize-none"
-                />
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-slate-800">
-              <button
-                onClick={handleSave}
-                disabled={isSaving}
-                className="cursor-pointer px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg flex items-center gap-2 text-sm font-medium transition-colors disabled:opacity-50"
-              >
-                {isSaving ? (
-                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <>
-                    <FaCheck /> Save Changes
-                  </>
-                )}
-              </button>
-              <button
-                onClick={() => setEditingId(null)}
-                disabled={isSaving}
-                className="cursor-pointer px-4 py-2 text-slate-400 hover:text-white transition-colors text-sm font-medium"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
