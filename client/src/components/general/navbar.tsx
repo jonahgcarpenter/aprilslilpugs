@@ -1,8 +1,10 @@
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../../context/auth";
+import { useSettings } from "../../hooks/usesettings";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
+  const { settings } = useSettings();
 
   const linkStyles = (isActive: boolean) =>
     `px-4 sm:px-6 py-2 text-sm rounded-full font-semibold shadow-md hover:shadow-lg transition-all duration-200 whitespace-nowrap text-white ${
@@ -31,12 +33,14 @@ export default function Navbar() {
         Nursery
       </NavLink>
 
-      <NavLink to="/live" className={({ isActive }) => linkStyles(isActive)}>
-        <div className="flex items-center gap-2">
-          Live Puppy Cam
-          <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-        </div>
-      </NavLink>
+      {settings?.stream_enabled && (
+        <NavLink to="/live" className={({ isActive }) => linkStyles(isActive)}>
+          <div className="flex items-center gap-2">
+            Live Puppy Cam
+            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+          </div>
+        </NavLink>
+      )}
 
       <NavLink
         to="/pastlitters"
