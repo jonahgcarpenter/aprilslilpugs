@@ -41,5 +41,4 @@ A custom, full-stack website built for [April's Lil Pugs](https://aprilslilpugs.
 - [] **Document Storage:** Handling of documents/contracts.
 - [] **RTMP Server:** Rewrite the streaming server implementation in Go.
 - [] **SEO:** Optimization for search engines.
-- [] **Auth** Ensure one active session per account with TTL
 - [] **Stream** Stream down display when 404 with HAS notifications
