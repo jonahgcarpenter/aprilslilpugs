@@ -132,14 +132,19 @@ func CreatePuppy(c *gin.Context) {
 		return
 	}
 
+	if litterID != nil {
+		updateLitterStatus(c, *litterID)
+	}
+
 	c.JSON(http.StatusCreated, gin.H{"message": "Puppy created", "id": newID})
 }
 
 func UpdatePuppy(c *gin.Context) {
 	id := c.Param("id")
 
+	var oldLitterID *int
 	var oldPPRaw, oldGalleryRaw []byte
-	err := database.Pool.QueryRow(c, "SELECT profile_picture, gallery FROM puppies WHERE id=$1", id).Scan(&oldPPRaw, &oldGalleryRaw)
+	err := database.Pool.QueryRow(c, "SELECT litter_id, profile_picture, gallery FROM puppies WHERE id=$1", id).Scan(&oldLitterID, &oldPPRaw, &oldGalleryRaw)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Puppy not found"})
 		return
@@ -151,7 +156,13 @@ func UpdatePuppy(c *gin.Context) {
 	if len(oldGalleryRaw) > 0 { _ = json.Unmarshal(oldGalleryRaw, &currentGallery) }
 	if currentGallery == nil { currentGallery = []models.Image{} }
 
-	litterID := parseOptionalID(c.PostForm("litter_id"))
+	var litterID *int
+	if val, ok := c.GetPostForm("litter_id"); ok {
+		litterID = parseOptionalID(val)
+	} else {
+		litterID = oldLitterID
+	}
+
 	name := c.PostForm("name")
 	color := c.PostForm("color")
 	gender := c.PostForm("gender")
@@ -218,14 +229,25 @@ func UpdatePuppy(c *gin.Context) {
 		return
 	}
 
+	if oldLitterID != nil {
+		updateLitterStatus(c, *oldLitterID)
+	}
+	
+	if litterID != nil {
+		if oldLitterID == nil || *litterID != *oldLitterID {
+			updateLitterStatus(c, *litterID)
+		}
+	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "Puppy updated"})
 }
 
 func DeletePuppy(c *gin.Context) {
 	id := c.Param("id")
 
+	var litterID *int
 	var ppRaw, galleryRaw []byte
-	_ = database.Pool.QueryRow(c, "SELECT profile_picture, gallery FROM puppies WHERE id=$1", id).Scan(&ppRaw, &galleryRaw)
+	_ = database.Pool.QueryRow(c, "SELECT litter_id, profile_picture, gallery FROM puppies WHERE id=$1", id).Scan(&litterID, &ppRaw, &galleryRaw)
 
 	var pp *models.Image
 	var gallery []models.Image
@@ -244,5 +266,38 @@ func DeletePuppy(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete puppy"})
 		return
 	}
+
+	if litterID != nil {
+		updateLitterStatus(c, *litterID)
+	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "Puppy deleted"})
+}
+
+func updateLitterStatus(c *gin.Context, litterID int) {
+	var total, notSold int
+	query := `
+		SELECT 
+			count(*),
+			count(*) filter (where status != 'Sold')
+		FROM puppies 
+		WHERE litter_id = $1`
+	
+	err := database.Pool.QueryRow(c, query, litterID).Scan(&total, &notSold)
+	if err != nil {
+		return
+	}
+
+	if total == 0 {
+		return
+	}
+
+	var newStatus string
+	if notSold == 0 {
+		newStatus = "Sold"
+	} else {
+		newStatus = "Available"
+	}
+
+	_, _ = database.Pool.Exec(c, "UPDATE litters SET status = $1 WHERE id = $2", newStatus, litterID)
 }
