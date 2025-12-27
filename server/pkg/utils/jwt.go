@@ -12,6 +12,7 @@ func GenerateToken(sessionID int) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub": sessionID,
+		"sid": sessionID,
 		"exp": time.Now().Add(time.Hour * 24).Unix(),
 	})
 
