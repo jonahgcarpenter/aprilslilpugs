@@ -25,3 +25,10 @@ type LoginResponse struct {
 	FirstName string `json:"firstName"`
 	LastName  string `json:"lastName"`
 }
+
+type Session struct {
+	ID        int       `json:"id"`
+	UserID    int       `json:"userId"`
+	ExpiresAt time.Time `json:"expiresAt"`
+	CreatedAt time.Time `json:"createdAt"`
+}

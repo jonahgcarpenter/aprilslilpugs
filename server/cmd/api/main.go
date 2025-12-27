@@ -28,7 +28,7 @@ func main() {
 	{
 			// Auth
 			api.POST("/auth/login", controllers.LoginUser)
-			api.POST("/auth/logout", middleware.RequireAuth,controllers.LogoutUser)
+			api.POST("/auth/logout", middleware.RequireAuth, controllers.LogoutUser)
 
 			// Users
 			api.GET("/users/:id", middleware.RequireAuth, controllers.GetUser)

@@ -7,11 +7,11 @@ import (
 	"github.com/jonahgcarpenter/aprilslilpugs/server/internal/config"
 )
 
-func GenerateToken(userID int) (string, error) {
+func GenerateToken(sessionID int) (string, error) {
 	cfg := config.Load()
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub": userID,
+		"sub": sessionID,
 		"exp": time.Now().Add(time.Hour * 24).Unix(),
 	})
 

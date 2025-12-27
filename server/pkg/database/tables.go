@@ -29,6 +29,18 @@ func CreateTables() {
 				);`,
 			},
 			{
+				Name: "sessions",
+				Query: `
+				CREATE TABLE IF NOT EXISTS sessions (
+					id SERIAL PRIMARY KEY,
+					user_id INT REFERENCES users(id) ON DELETE CASCADE,
+					user_agent VARCHAR(255),
+					ip_address VARCHAR(45),
+					expires_at TIMESTAMPTZ NOT NULL,
+					created_at TIMESTAMPTZ DEFAULT NOW()
+				);`,
+			},
+			{
 				Name: "breeders",
 				Query: `
 				CREATE TABLE IF NOT EXISTS breeders (

@@ -52,18 +52,25 @@ func RequireAuth(c *gin.Context) {
 		return
 	}
 
+	sessionIDFloat, ok := claims["sid"].(float64)
+	if !ok {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token session"})
+		return
+	}
+	sessionID := int(sessionIDFloat)
+
 	var user models.User
-	userID := claims["sub"]
-	
-	query := `SELECT id, first_name, email FROM users WHERE id = $1`
-	err = database.Pool.QueryRow(c, query, userID).Scan(&user.ID, &user.FirstName, &user.Email)
+
+	query := `SELECT u.id, u.first_name, u.email FROM sessions s JOIN users u ON s.user_id = u.id WHERE s.id = $1 AND s.expires_at > NOW()`
+	err = database.Pool.QueryRow(c, query, sessionID).Scan(&user.ID, &user.FirstName, &user.Email)
 
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "User no longer exists"})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Session expired or invalid"})
 		return
 	}
 
 	c.Set("user", user)
+	c.Set("session_id", sessionID)
 
 	c.Next()
 }
