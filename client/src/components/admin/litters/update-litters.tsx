@@ -324,7 +324,7 @@ const UpdateLitters = ({
                       className="hidden"
                     />
                     <p className="text-center text-xs text-white/50 mt-2 relative z-10">
-                      Main Photo
+                      Tap to Change
                     </p>
                   </div>
                 </div>
