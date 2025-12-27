@@ -1,4 +1,4 @@
-FROM node:20-alpine AS builder
+FROM node:20-alpine AS frontend-builder
 
 WORKDIR /app
 
@@ -10,20 +10,36 @@ COPY client/ ./
 
 RUN npm run build
 
-# TODO: Switch to GO
-FROM node:20-alpine
+FROM golang:1.25-alpine AS backend-builder
 
 WORKDIR /app
 
-COPY server/package*.json ./ 
-
-RUN npm ci --only=production
+COPY server/go.mod server/go.sum ./
+RUN go mod download
 
 COPY server/ .
 
-COPY --from=builder /server/build ./build
+RUN CGO_ENABLED=0 GOOS=linux go build -o server ./cmd/api/main.go
 
-EXPOSE 3000
+FROM alpine:3.23.2
 
-CMD ["npm", "start"]
+LABEL org.opencontainers.image.source="https://github.com/jonahgcarpenter/aprilslilpugs"
 
+WORKDIR /app
+
+RUN apk --no-cache add ca-certificates \
+  && addgroup -S aprilslilpugs \
+  && adduser -S aprilslilpugs -G aprilslilpugs
+
+COPY --from=backend-builder /app/server .
+
+COPY --from=frontend-builder /app/dist ./public/dist
+
+RUN mkdir -p ./public/uploads \
+  && chown -R aprilslilpugs:aprilslilpugs /app
+
+EXPOSE 4000
+
+USER aprilslilpugs
+
+CMD ["./server"]

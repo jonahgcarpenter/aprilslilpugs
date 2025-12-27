@@ -31,5 +31,3 @@ A custom, full-stack website built for [April's Lil Pugs](https://aprilslilpugs.
 - **Live Streaming:** Integrated live stream viewer for puppy cams (HLS support).
 - **Gallery:** Dynamic image gallery for past litters and available puppies.
 - **Authentication:** Secure admin login to protect management routes.
-
----
