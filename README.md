@@ -33,12 +33,3 @@ A custom, full-stack website built for [April's Lil Pugs](https://aprilslilpugs.
 - **Authentication:** Secure admin login to protect management routes.
 
 ---
-
-## Todo & Roadmap
-
-- [] **Traffic Analytics:** Implement visitor tracking.
-- [] **Social Integration:** Add Facebook feed capabilities.
-- [] **Document Storage:** Handling of documents/contracts.
-- [] **RTMP Server:** Rewrite the streaming server implementation in Go.
-- [] **SEO:** Optimization for search engines.
-- [] **Stream** Stream down display when 404 with HAS notifications
