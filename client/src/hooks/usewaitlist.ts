@@ -39,13 +39,13 @@ const buildFormData = (data: Record<string, any>) => {
   return formData;
 };
 
-export const useWaitlist = () => {
+export const useWaitlist = (fetchData = true) => {
   const {
     data: rawData,
     error,
     isLoading,
     mutate: mutateWaitlist,
-  } = useSWR<WaitlistEntry[]>(API_URL, fetcher);
+  } = useSWR<WaitlistEntry[]>(fetchData ? API_URL : null, fetcher);
 
   const waitlist = rawData || [];
 
@@ -53,7 +53,9 @@ export const useWaitlist = () => {
     const formData = buildFormData(data);
     try {
       await axios.post(API_URL, formData);
-      await mutateWaitlist();
+      if (fetchData) {
+        await mutateWaitlist();
+      }
     } catch (err) {
       throw new Error("Failed to create waitlist entry");
     }

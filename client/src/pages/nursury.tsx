@@ -6,7 +6,7 @@ import { useSettings } from "../hooks/usesettings";
 
 const Nursery = () => {
   const { currentLitters, isLoading, error } = useLitters();
-  const { createWaitlist } = useWaitlist();
+  const { createWaitlist } = useWaitlist(false);
   const { settings } = useSettings();
 
   return (
