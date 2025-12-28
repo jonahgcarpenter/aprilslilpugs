@@ -19,13 +19,13 @@ const formatDate = (dateString: string) => {
 const getStatusColor = (status: string) => {
   switch (status) {
     case "Planned":
-      return "bg-yellow-500/20 text-yellow-300 border-yellow-500/30";
+      return "bg-yellow-950/70 text-yellow-300 border-yellow-500/50";
     case "Available":
-      return "bg-green-500/20 text-green-300 border-green-500/30";
+      return "bg-green-950/70 text-green-300 border-green-500/50";
     case "Sold":
-      return "bg-red-500/20 text-red-300 border-red-500/30";
+      return "bg-red-950/70 text-red-300 border-red-500/50";
     default:
-      return "bg-slate-500/20 text-slate-300 border-slate-500/30";
+      return "bg-slate-950/70 text-slate-300 border-slate-500/50";
   }
 };
 

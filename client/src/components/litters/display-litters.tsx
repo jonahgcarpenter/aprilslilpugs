@@ -33,13 +33,13 @@ const isFutureDate = (dateString: string) => {
 const getStatusColor = (status: string) => {
   switch (status) {
     case "Planned":
-      return "bg-yellow-500/20 text-yellow-300 border-yellow-500/30";
+      return "bg-yellow-950/70 text-yellow-300 border-yellow-500/50";
     case "Available":
-      return "bg-green-500/20 text-green-300 border-green-500/30";
+      return "bg-green-950/70 text-green-300 border-green-500/50";
     case "Sold":
-      return "bg-red-500/20 text-red-300 border-red-500/30";
+      return "bg-red-950/70 text-red-300 border-red-500/50";
     default:
-      return "bg-slate-500/20 text-slate-300 border-slate-500/30";
+      return "bg-slate-950/70 text-slate-300 border-slate-500/50";
   }
 };
 
@@ -111,7 +111,7 @@ const DisplayLitters = ({
 
                 {/* Info Section */}
                 <div className="p-8 flex flex-col justify-center">
-                  <div className="flex justify-between items-start mb-6">
+                  <div className="flex justify-between items-center mb-6">
                     <h2 className="text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600">
                       {litter.name}
                     </h2>
