@@ -35,9 +35,6 @@ COPY --from=backend-builder /app/server .
 
 COPY --from=frontend-builder /app/dist ./public/dist
 
-RUN mkdir -p ./public/uploads \
-  && chown -R aprilslilpugs:aprilslilpugs /app
-
 EXPOSE 4000
 
 USER aprilslilpugs

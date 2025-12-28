@@ -8,6 +8,7 @@ import (
 	"github.com/jonahgcarpenter/aprilslilpugs/server/internal/controllers"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/internal/middleware"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/database"
+	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/utils"
 )
 
 func main() {
@@ -16,6 +17,8 @@ func main() {
 	database.Connect(cfg.DatabaseURL)
 	defer database.Close()
 	database.CreateTables()
+
+	utils.InitMinio()
 
 	r := gin.Default()
 
@@ -73,7 +76,6 @@ func main() {
 			api.PATCH("/settings/stream", middleware.RequireAuth, controllers.UpdateStreamStatus)
 	}
 
-	r.Static("/uploads", "./public/uploads")
 	r.Static("/assets", "./public/dist/assets")
 	r.StaticFile("/logo.jpg", "./public/dist/logo.jpg")
 	r.StaticFile("/background.png", "./public/dist/background.png")
