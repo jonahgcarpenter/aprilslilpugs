@@ -4,5 +4,4 @@ dist/
 
 # BACKEND
 tmp/
-uploads/
 .env
