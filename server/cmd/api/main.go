@@ -1,7 +1,6 @@
 package main
 
 import (
-	"os"
 	"github.com/gin-gonic/gin"
 	
 	"github.com/jonahgcarpenter/aprilslilpugs/server/internal/config"
@@ -21,11 +20,6 @@ func main() {
 	utils.InitMinio()
 
 	r := gin.Default()
-
-	os.MkdirAll("public/uploads/breeders", 0755)
-	os.MkdirAll("public/uploads/dogs", 0755)
-	os.MkdirAll("public/uploads/litters", 0755)
-	os.MkdirAll("public/uploads/puppies", 0755)
 
 	api := r.Group("/api")
 	{
