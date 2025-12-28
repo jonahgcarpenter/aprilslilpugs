@@ -101,9 +101,9 @@ const Stream = () => {
           {!error && (
             <div className="absolute top-4 left-4 z-10 flex flex-col gap-3 pointer-events-none select-none">
               {/* Live Badge */}
-              <div className="flex items-center gap-2 px-3 py-1 bg-red-600/90 backdrop-blur-sm rounded-full w-fit shadow-lg">
-                <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
-                <span className="text-white text-xs font-bold uppercase tracking-wider">
+              <div className="flex items-center gap-1.5 sm:gap-2 px-2 py-0.5 sm:px-3 sm:py-1 bg-red-600/90 backdrop-blur-sm rounded-full w-fit shadow-lg">
+                <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white rounded-full animate-pulse" />
+                <span className="text-white text-[10px] sm:text-xs font-bold uppercase tracking-wider">
                   Live
                 </span>
               </div>
@@ -112,7 +112,7 @@ const Stream = () => {
               <img
                 src={LOGO_URL}
                 alt="Channel Logo"
-                className="w-15 opacity-80 ml-1"
+                className="w-10 sm:w-16 opacity-80 ml-1"
               />
             </div>
           )}
