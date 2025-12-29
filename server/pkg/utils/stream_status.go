@@ -60,15 +60,21 @@ func checkStream(url string) {
 
 	if previousState != currentlyLive {
 		go func(isLive bool) {
-			var err error
-			if !isLive {
-				err = SendNotification("Puppy Cam is down!", "DeviceShutdown.caf")
-			} else {
-				err = SendNotification("Puppy Cam is back online!", "default")
+			payload := map[string]interface{}{
+				"camera_name": "Puppy Cam",
 			}
 
+			if !isLive {
+				fmt.Println("ALERT: Stream went OFFLINE")
+				payload["status"] = "offline"
+			} else {
+				fmt.Println("NOTICE: Stream is BACK ONLINE")
+				payload["status"] = "online"
+			}
+
+			err := SendAppEvent("stream_status", payload)
 			if err != nil {
-				fmt.Printf("Error sending HA notification: %v\n", err)
+				fmt.Printf("Error firing HA event: %v\n", err)
 			}
 		}(currentlyLive)
 	}
