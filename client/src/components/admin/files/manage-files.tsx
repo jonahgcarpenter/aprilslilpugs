@@ -1,3 +1,5 @@
+// BUG: Fix live viewing on file name click
+
 import { useState, useRef } from "react";
 import {
   FaFile,
@@ -8,6 +10,7 @@ import {
   FaFileImage,
   FaFileAlt,
   FaDownload,
+  FaCloudUploadAlt,
 } from "react-icons/fa";
 import type { FileModel } from "../../../hooks/usefiles";
 
@@ -25,21 +28,45 @@ const ManageFiles = ({
   isLoading,
 }: ManageFilesProps) => {
   const [isUploading, setIsUploading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const processFiles = async (selectedFiles: File[]) => {
+    if (selectedFiles.length === 0) return;
+
+    setIsUploading(true);
+    await Promise.all(selectedFiles.map((file) => onCreate(file)));
+    setIsUploading(false);
+  };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
-
     const selectedFiles = Array.from(e.target.files);
 
-    setIsUploading(true);
-
-    await Promise.all(selectedFiles.map((file) => onCreate(file)));
-
-    setIsUploading(false);
+    await processFiles(selectedFiles);
 
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const droppedFiles = Array.from(e.dataTransfer.files);
+      await processFiles(droppedFiles);
     }
   };
 
@@ -102,64 +129,88 @@ const ManageFiles = ({
         </div>
       </div>
 
-      <div className="grid gap-4">
+      {/* Drop Zone Area */}
+      <div
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        className={`relative grid gap-4 transition-all duration-200 min-h-[100px] rounded-xl ${
+          isDragging
+            ? "border-2 border-dashed border-blue-500 bg-blue-500/10"
+            : ""
+        }`}
+      >
+        {isDragging && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center z-10 pointer-events-none">
+            <FaCloudUploadAlt className="text-5xl text-blue-400 mb-2" />
+            <p className="text-blue-200 font-bold">Drop files here to upload</p>
+          </div>
+        )}
+
         {files.length === 0 ? (
-          <div className="text-center py-12 border-2 border-dashed border-slate-800 rounded-xl bg-slate-950/50">
+          <div
+            className={`text-center py-12 border-2 border-dashed rounded-xl bg-slate-950/50 transition-colors ${
+              isDragging ? "border-transparent opacity-0" : "border-slate-800"
+            }`}
+          >
             <FaFile className="mx-auto text-4xl text-slate-700 mb-3" />
-            <p className="text-slate-500">No files uploaded yet.</p>
+            <p className="text-slate-500">
+              No files uploaded yet. Drag & Drop or Click Upload.
+            </p>
           </div>
         ) : (
-          files.map((file) => (
-            <div
-              key={file.id}
-              className="flex items-center justify-between p-4 bg-slate-950/50 border border-slate-800 rounded-lg group hover:border-blue-500/30 transition-colors"
-            >
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-slate-900 rounded-lg border border-slate-800">
-                  {getFileIcon(file.name)}
-                </div>
-                <div>
-                  <a
-                    href={file.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-bold text-slate-200 hover:text-blue-400 transition-colors"
-                    title="View File"
-                  >
-                    {file.name}
-                  </a>
-                  <div className="flex gap-4 mt-1">
-                    <p className="text-xs text-slate-500">
-                      Uploaded: {new Date(file.created_at).toLocaleDateString()}
-                    </p>
+          <div className={isDragging ? "opacity-20 blur-sm" : ""}>
+            {files.map((file) => (
+              <div
+                key={file.id}
+                className="flex items-center justify-between p-4 bg-slate-950/50 border border-slate-800 rounded-lg group hover:border-blue-500/30 transition-colors mb-2 last:mb-0"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-slate-900 rounded-lg border border-slate-800">
+                    {getFileIcon(file.name)}
+                  </div>
+                  <div>
+                    <a
+                      href={file.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-bold text-slate-200 hover:text-blue-400 transition-colors"
+                      title="View File"
+                    >
+                      {file.name}
+                    </a>
+                    <div className="flex gap-4 mt-1">
+                      <p className="text-xs text-slate-500">
+                        Uploaded:{" "}
+                        {new Date(file.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                {/* Download Button */}
-                <a
-                  href={file.url}
-                  download
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="cursor-pointer p-2 bg-slate-900 text-slate-500 hover:bg-blue-500/10 hover:text-blue-500 rounded-lg transition-all"
-                  title="Download File"
-                >
-                  <FaDownload />
-                </a>
+                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <a
+                    href={file.url}
+                    download
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="cursor-pointer p-2 bg-slate-900 text-slate-500 hover:bg-blue-500/10 hover:text-blue-500 rounded-lg transition-all"
+                    title="Download File"
+                  >
+                    <FaDownload />
+                  </a>
 
-                {/* Delete Button */}
-                <button
-                  onClick={() => handleDelete(file.id)}
-                  className="cursor-pointer p-2 bg-slate-900 text-slate-500 hover:bg-red-500/10 hover:text-red-500 rounded-lg transition-all"
-                  title="Delete File"
-                >
-                  <FaTrash />
-                </button>
+                  <button
+                    onClick={() => handleDelete(file.id)}
+                    className="cursor-pointer p-2 bg-slate-900 text-slate-500 hover:bg-red-500/10 hover:text-red-500 rounded-lg transition-all"
+                    title="Delete File"
+                  >
+                    <FaTrash />
+                  </button>
+                </div>
               </div>
-            </div>
-          ))
+            ))}
+          </div>
         )}
       </div>
     </div>
