@@ -58,6 +58,17 @@ export default function Navbar() {
       </NavLink>
 
       {user && (
+        <a
+          href="https://analytics.aprilslilpugs.com/websites/bcc8c077-9c17-4383-9b3c-5eb43c0d0c83"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={linkStyles(false)}
+        >
+          Analytics
+        </a>
+      )}
+
+      {user && (
         <button onClick={logout} className={logoutStyles}>
           Logout
         </button>
