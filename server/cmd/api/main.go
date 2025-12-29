@@ -68,6 +68,11 @@ func main() {
 			api.GET("/settings", controllers.GetSettings)
 			api.PATCH("/settings/waitlist", middleware.RequireAuth, controllers.UpdateWaitlistStatus)
 			api.PATCH("/settings/stream", middleware.RequireAuth, controllers.UpdateStreamStatus)
+
+			// Files
+			api.GET("/files", middleware.RequireAuth, controllers.GetFiles)
+			api.POST("/files", middleware.RequireAuth, controllers.CreateFile)
+			api.DELETE("/files/:id", middleware.RequireAuth, controllers.DeleteFile)
 	}
 
 	r.Static("/assets", "./public/dist/assets")

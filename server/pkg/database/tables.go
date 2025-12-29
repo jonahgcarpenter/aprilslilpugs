@@ -178,6 +178,17 @@ func CreateTables() {
 					updated_at TIMESTAMPTZ DEFAULT NOW()
 				);`,
 			},
+			{
+				Name: "files",
+				Query: `
+				CREATE TABLE IF NOT EXISTS files (
+					id SERIAL PRIMARY KEY,
+					name VARCHAR(255) NOT NULL,
+					url VARCHAR(500) NOT NULL,
+					created_at TIMESTAMPTZ DEFAULT NOW(),
+					updated_at TIMESTAMPTZ DEFAULT NOW()
+				);`,
+			},
 		}
 
     for _, item := range tables {

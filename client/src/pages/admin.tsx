@@ -3,10 +3,12 @@ import { useDogs } from "../hooks/usedogs";
 import { useLitters } from "../hooks/uselitters";
 import { useWaitlist } from "../hooks/usewaitlist";
 import { useSettings } from "../hooks/usesettings";
+import { useFiles } from "../hooks/usefiles";
 import UpdateBreeder from "../components/admin/breeder/update-breeder";
 import UpdateDogs from "../components/admin/dogs/update-dogs";
 import UpdateLitters from "../components/admin/litters/update-litters";
 import EditWaitlist from "../components/admin/waitlist/edit-waitlist";
+import ManageFiles from "../components/admin/files/manage-files";
 import {
   FaSpinner,
   FaVideo,
@@ -48,12 +50,20 @@ const Admin = () => {
     isLoading: isSettingsLoading,
   } = useSettings();
 
+  const {
+    files,
+    createFile,
+    deleteFile,
+    isLoading: isFilesLoading,
+  } = useFiles();
+
   if (
     isBreederLoading ||
     isDogsLoading ||
     isLittersLoading ||
     isWaitlistLoading ||
-    isSettingsLoading
+    isSettingsLoading ||
+    isFilesLoading
   ) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
@@ -154,6 +164,15 @@ const Admin = () => {
           waitlist={waitlist}
           onUpdate={updateWaitlist}
           onDelete={deleteWaitlist}
+        />
+      </section>
+
+      <section>
+        <ManageFiles
+          files={files}
+          onCreate={createFile}
+          onDelete={deleteFile}
+          isLoading={isFilesLoading}
         />
       </section>
     </div>
