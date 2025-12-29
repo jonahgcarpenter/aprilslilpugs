@@ -7,6 +7,7 @@ import {
   FaFilePdf,
   FaFileImage,
   FaFileAlt,
+  FaDownload,
 } from "react-icons/fa";
 import type { FileModel } from "../../../hooks/usefiles";
 
@@ -28,13 +29,16 @@ const ManageFiles = ({
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
-    const file = e.target.files[0];
+
+    const selectedFiles = Array.from(e.target.files);
 
     setIsUploading(true);
-    const success = await onCreate(file);
+
+    await Promise.all(selectedFiles.map((file) => onCreate(file)));
+
     setIsUploading(false);
 
-    if (success && fileInputRef.current) {
+    if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   };
@@ -86,12 +90,13 @@ const ManageFiles = ({
             ) : (
               <FaUpload />
             )}
-            Upload File
+            Upload Files
           </button>
           <input
             type="file"
             ref={fileInputRef}
             className="hidden"
+            multiple
             onChange={handleFileUpload}
           />
         </div>
@@ -119,6 +124,7 @@ const ManageFiles = ({
                     target="_blank"
                     rel="noopener noreferrer"
                     className="font-bold text-slate-200 hover:text-blue-400 transition-colors"
+                    title="View File"
                   >
                     {file.name}
                   </a>
@@ -130,13 +136,28 @@ const ManageFiles = ({
                 </div>
               </div>
 
-              <button
-                onClick={() => handleDelete(file.id)}
-                className="cursor-pointer p-2 bg-slate-900 text-slate-500 hover:bg-red-500/10 hover:text-red-500 rounded-lg transition-all opacity-0 group-hover:opacity-100"
-                title="Delete File"
-              >
-                <FaTrash />
-              </button>
+              <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                {/* Download Button */}
+                <a
+                  href={file.url}
+                  download
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="cursor-pointer p-2 bg-slate-900 text-slate-500 hover:bg-blue-500/10 hover:text-blue-500 rounded-lg transition-all"
+                  title="Download File"
+                >
+                  <FaDownload />
+                </a>
+
+                {/* Delete Button */}
+                <button
+                  onClick={() => handleDelete(file.id)}
+                  className="cursor-pointer p-2 bg-slate-900 text-slate-500 hover:bg-red-500/10 hover:text-red-500 rounded-lg transition-all"
+                  title="Delete File"
+                >
+                  <FaTrash />
+                </button>
+              </div>
             </div>
           ))
         )}
