@@ -8,9 +8,7 @@ A custom, full-stack website built for [April's Lil Pugs](https://aprilslilpugs.
 
 - **Framework:** [React 19](https://react.dev/)
 - **Build Tool:** [Vite](https://vitejs.dev/)
-- **Styling:** [Tailwind CSS v4](https://tailwindcss.com/)
-- **State/Data Fetching:** [SWR](https://swr.vercel.app/)
-- **Video Player:** [hls.js](https://github.com/video-dev/hls.js) (for live streaming)
+- **Styling:** [Tailwind CSS](https://tailwindcss.com/)
 - **Language:** TypeScript
 
 ### Backend
@@ -18,10 +16,6 @@ A custom, full-stack website built for [April's Lil Pugs](https://aprilslilpugs.
 - **Language:** Go (Golang 1.25+)
 - **Framework:** [Gin Gonic](https://github.com/gin-gonic/gin)
 - **Database:** PostgreSQL
-- **Authentication:** JWT
-- **Live Reloading:** [Air](https://github.com/air-verse/air)
-
----
 
 ## Features
 
