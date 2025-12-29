@@ -9,18 +9,22 @@ import (
 )
 
 type Config struct {
-	Port        		string
-	DatabaseURL 		string
-	JWTSecret				string
-	Env         		string
-	MinioEndpoint   string
-	MinioAccessKey  string
-	MinioSecretKey  string
-	MinioBucketName string
-	MinioUseSSL     bool
-	StreamURL				string
-	HASBaseURL 			string
-	HASToken 				string
+	Port        			string
+	DatabaseURL 			string
+	JWTSecret					string
+	Env         			string
+	MinioEndpoint   	string
+	MinioAccessKey  	string
+	MinioSecretKey  	string
+	MinioBucketName 	string
+	MinioUseSSL     	bool
+	StreamURL					string
+	HASBaseURL 				string
+	HASToken 					string
+	EmailUser         string
+	EmailPassword     string
+	EmailServiceHost  string
+	EmailServicePort  string
 }
 
 func Load() *Config {
@@ -29,18 +33,22 @@ func Load() *Config {
 	}
 
 	return &Config{
-		Port:        		 getEnv("PORT", "4000"),
-		DatabaseURL: 		 getEnv("DATABASE_URL", ""),
-		JWTSecret:	 		 getEnv("JWT_SECRET", "verylongsecret"),
-		Env:         		 getEnv("GO_ENV", "development"),
-		MinioEndpoint:   getEnv("MINIO_ENDPOINT", "localhost:9000"),
-		MinioAccessKey:  getEnv("MINIO_ACCESS_KEY", "minioadmin"),
-		MinioSecretKey:  getEnv("MINIO_SECRET_KEY", "minioadmin"),
-		MinioBucketName: getEnv("MINIO_BUCKET_NAME", "app-images"),
-		MinioUseSSL:     getEnvBool("MINIO_USE_SSL", false),
-		StreamURL:       getEnv("STREAM_URL", "http://localhost:8080/hls/test.m3u8"),
-		HASBaseURL: 		 getEnv("HAS_BASE_URL", "http://homeassistant.local:8123"),
-		HASToken:     	 getEnv("HAS_TOKEN", ""),
+		Port:        		 	 getEnv("PORT", "4000"),
+		DatabaseURL: 		 	 getEnv("DATABASE_URL", ""),
+		JWTSecret:	 		 	 getEnv("JWT_SECRET", "verylongsecret"),
+		Env:         		 	 getEnv("GO_ENV", "development"),
+		MinioEndpoint:   	 getEnv("MINIO_ENDPOINT", "localhost:9000"),
+		MinioAccessKey:  	 getEnv("MINIO_ACCESS_KEY", "minioadmin"),
+		MinioSecretKey:  	 getEnv("MINIO_SECRET_KEY", "minioadmin"),
+		MinioBucketName: 	 getEnv("MINIO_BUCKET_NAME", "app-images"),
+		MinioUseSSL:     	 getEnvBool("MINIO_USE_SSL", false),
+		StreamURL:       	 getEnv("STREAM_URL", "http://localhost:8080/hls/test.m3u8"),
+		HASBaseURL: 		 	 getEnv("HAS_BASE_URL", "http://homeassistant.local:8123"),
+		HASToken:     	 	 getEnv("HAS_TOKEN", ""),
+		EmailUser:         getEnv("EMAIL_USER", ""),
+		EmailPassword:     getEnv("EMAIL_PASSWORD", ""),
+		EmailServiceHost:  getEnv("EMAIL_HOST", "smtp.gmail.com"),
+		EmailServicePort:  getEnv("EMAIL_PORT", "587"),
 	}
 }
 

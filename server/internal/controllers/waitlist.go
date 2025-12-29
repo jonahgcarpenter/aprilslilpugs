@@ -1,12 +1,68 @@
 package controllers
 
 import (
+	"context"
+	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/internal/models"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/database"
+	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/utils"
 )
+
+func sendWaitlistNotification(entry *models.Waitlist) {
+	rows, err := database.Pool.Query(context.Background(), "SELECT email FROM users")
+	if err != nil {
+		fmt.Printf("Error fetching users for notification: %v\n", err)
+		return
+	}
+	defer rows.Close()
+
+	var recipients []string
+	for rows.Next() {
+		var email string
+		if err := rows.Scan(&email); err == nil {
+			recipients = append(recipients, email)
+		}
+	}
+
+	if len(recipients) == 0 {
+		fmt.Println("No users found to notify about new waitlist entry.")
+		return
+	}
+
+	subject := "New Waitlist Entry - April's Lil Pugs"
+
+	htmlBody := fmt.Sprintf(`
+		<h2>New Waitlist Entry Received</h2>
+		<p><strong>Name:</strong> %s %s</p>
+		<p><strong>Email:</strong> %s</p>
+		<p><strong>Phone Number:</strong> %s</p>
+		<p><strong>Status:</strong> %s</p>
+		<p><strong>Preferences/Notes:</strong> %s</p>
+		<p><strong>Date Added:</strong> %s</p>
+		<p>View the waitlist on the <a href="https://aprilslilpugs.com/admin">website</a>.</p>
+	`,
+		entry.FirstName,
+		entry.LastName,
+		entry.Email,
+		entry.Phone,
+		entry.Status,
+		entry.Preferences,
+		entry.CreatedAt.Format("2006-01-02 03:04 PM"),
+	)
+
+	fmt.Printf("Sending Waitlist Notification to %d users...\n", len(recipients))
+
+	for _, email := range recipients {
+		err := utils.SendEmail([]string{email}, subject, htmlBody)
+		if err != nil {
+			fmt.Printf("Error sending email to %s: %v\n", email, err)
+		}
+	}
+}
 
 func GetWaitlist(c *gin.Context) {
 	query := `
@@ -60,6 +116,18 @@ func CreateWaitlist(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create waitlist entry"})
 		return
 	}
+
+	entry := models.Waitlist{
+		FirstName:   firstName,
+		LastName:    lastName,
+		Email:       email,
+		Phone:       phone,
+		Preferences: preferences,
+		Status:      status,
+		CreatedAt:   time.Now(),
+	}
+
+	go sendWaitlistNotification(&entry)
 
 	c.JSON(http.StatusCreated, gin.H{"message": "Joined waitlist", "id": newID})
 }
