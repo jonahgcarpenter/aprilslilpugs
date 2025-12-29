@@ -5,6 +5,9 @@ import {
   FaMars,
   FaBirthdayCake,
   FaCalendarCheck,
+  FaFacebook,
+  FaPaw,
+  FaHistory,
 } from "react-icons/fa";
 
 interface DisplayLittersProps {
@@ -71,9 +74,44 @@ const DisplayLitters = ({
 
   if (litters.length === 0) {
     return (
-      <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-8 text-center border border-slate-800/50 text-slate-400">
-        <h1 className="text-2xl font-bold mb-2">{title}</h1>
-        <p>No litters currently listed.</p>
+      <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl p-12 text-center border border-slate-800/50 shadow-xl flex flex-col items-center justify-center space-y-8">
+        <div className="bg-slate-800/50 p-6 rounded-full border border-slate-700/50">
+          <FaPaw className="w-12 h-12 text-slate-500" />
+        </div>
+
+        <div className="space-y-4 max-w-2xl">
+          <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600">
+            {title}
+          </h1>
+          <p className="text-slate-300 text-lg font-medium">
+            We currently don't have any litters to display.
+          </p>
+          <p className="text-slate-400">
+            Want to be the first to know when new puppies arrive? Join our
+            waitlist to be the first to know. Follow our Facebook page for the
+            latest updates and announcements!
+          </p>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center">
+          <a
+            href="https://www.facebook.com/AprilsLilPugs"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-3 px-6 py-3 w-full sm:w-64 bg-[#1877F2] hover:bg-[#166fe5] text-white rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg shadow-blue-900/20 font-semibold tracking-wide cursor-pointer"
+          >
+            <FaFacebook className="w-5 h-5" />
+            <span>Follow our Facebook</span>
+          </a>
+
+          <button
+            onClick={() => navigate("/pastlitters")}
+            className="flex items-center justify-center gap-3 px-6 py-3 w-full sm:w-64 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white rounded-xl border border-blue-400/20 transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg shadow-blue-900/20 font-semibold tracking-wide cursor-pointer"
+          >
+            <FaHistory className="w-5 h-5" />
+            <span>View past litters</span>
+          </button>
+        </div>
       </div>
     );
   }
