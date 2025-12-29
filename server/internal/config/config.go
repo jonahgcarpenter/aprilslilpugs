@@ -19,6 +19,8 @@ type Config struct {
 	MinioBucketName string
 	MinioUseSSL     bool
 	StreamURL		string
+	HASNotifyURL string
+	HASToken string
 }
 
 func Load() *Config {
@@ -37,6 +39,8 @@ func Load() *Config {
 		MinioBucketName: getEnv("MINIO_BUCKET_NAME", "app-images"),
 		MinioUseSSL:     getEnvBool("MINIO_USE_SSL", false),
 		StreamURL:       getEnv("STREAM_URL", "http://localhost:8080/hls/test.m3u8"),
+		HASNotifyURL: getEnv("HAS_NOTIFY_URL", ""), 
+		HASToken:     getEnv("HAS_TOKEN", ""),
 	}
 }
 

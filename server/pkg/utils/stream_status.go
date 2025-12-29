@@ -49,15 +49,27 @@ func checkStream(url string) {
 
 	Monitor.mu.Lock()
 	previousState := Monitor.IsLive
+
+	if Monitor.LastChecked.IsZero() {
+		previousState = true
+	}
+
 	Monitor.IsLive = currentlyLive
 	Monitor.LastChecked = time.Now()
 	Monitor.mu.Unlock()
 
-	if previousState && !currentlyLive {
-		fmt.Println("ALERT: Stream went OFFLINE")
-		// TODO: Add HAS notify logic here
-	} else if !previousState && currentlyLive {
-		fmt.Println("NOTICE: Stream is BACK ONLINE")
-		// TODO: Add HAS notify logic here
+	if previousState != currentlyLive {
+		go func(isLive bool) {
+			var err error
+			if !isLive {
+				err = SendNotification("Puppy Cam is down!", "DeviceShutdown.caf")
+			} else {
+				err = SendNotification("Puppy Cam is back online!", "default")
+			}
+
+			if err != nil {
+				fmt.Printf("Error sending HA notification: %v\n", err)
+			}
+		}(currentlyLive)
 	}
 }
