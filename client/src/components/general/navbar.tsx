@@ -71,7 +71,6 @@ export default function Navbar() {
       <div className="sm:hidden w-full relative">
         <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-slate-900/95 to-transparent pointer-events-none z-10" />
         <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-slate-900/95 to-transparent pointer-events-none z-10" />
-        {/* BUG: Hide horizontal scrollbar */}
         <div className="overflow-x-auto scrollbar-none">
           <div className="flex gap-2 px-8 pb-2 w-max">
             <NavLinks />
