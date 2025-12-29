@@ -1,7 +1,7 @@
 # FRONTEND
 node_modules/
-build/
+dist/
 
 # BACKEND
+tmp/
 .env
-uploads/
