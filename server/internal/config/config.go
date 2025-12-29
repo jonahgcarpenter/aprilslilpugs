@@ -18,6 +18,7 @@ type Config struct {
 	MinioSecretKey  string
 	MinioBucketName string
 	MinioUseSSL     bool
+	StreamURL		string
 }
 
 func Load() *Config {
@@ -35,6 +36,7 @@ func Load() *Config {
 		MinioSecretKey:  getEnv("MINIO_SECRET_KEY", "minioadmin"),
 		MinioBucketName: getEnv("MINIO_BUCKET_NAME", "app-images"),
 		MinioUseSSL:     getEnvBool("MINIO_USE_SSL", false),
+		StreamURL:       getEnv("STREAM_URL", "http://localhost:8080/hls/test.m3u8"),
 	}
 }
 

@@ -19,6 +19,8 @@ func main() {
 
 	utils.InitMinio()
 
+	go utils.StartStreamMonitoring(cfg.StreamURL)
+
 	r := gin.Default()
 
 	api := r.Group("/api")
