@@ -1,14 +1,18 @@
 package utils
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"sync"
 	"time"
+
+	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/database"
 )
 
 type StreamMonitor struct {
 	IsLive      bool
+	IsEnabled   bool
 	LastChecked time.Time
 	mu          sync.RWMutex
 }
@@ -16,14 +20,49 @@ type StreamMonitor struct {
 var Monitor = &StreamMonitor{}
 
 func StartStreamMonitoring(streamURL string) {
+	initialState := getStreamEnabledFromDB()
+	Monitor.mu.Lock()
+	Monitor.IsEnabled = initialState
+	Monitor.mu.Unlock()
+
 	ticker := time.NewTicker(10 * time.Second)
 	defer ticker.Stop()
 
-	checkStream(streamURL)
-
-	for range ticker.C {
+	if initialState {
 		checkStream(streamURL)
 	}
+
+	for range ticker.C {
+		Monitor.mu.RLock()
+		shouldPoll := Monitor.IsEnabled
+		Monitor.mu.RUnlock()
+
+		if shouldPoll {
+			checkStream(streamURL)
+		} 
+	}
+}
+
+func SetStreamEnabled(enabled bool) {
+	Monitor.mu.Lock()
+	defer Monitor.mu.Unlock()
+	Monitor.IsEnabled = enabled
+}
+
+func getStreamEnabledFromDB() bool {
+	if database.Pool == nil {
+		return false
+	}
+	var enabled bool
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	err := database.Pool.QueryRow(ctx, "SELECT stream_enabled FROM settings WHERE id = 1").Scan(&enabled)
+	if err != nil {
+		fmt.Printf("Error fetching initial stream status: %v\n", err)
+		return false
+	}
+	return enabled
 }
 
 func GetStreamStatus() (bool, time.Time) {

@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/internal/models"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/database"
+	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/utils"
 )
 
 func GetSettings(c *gin.Context) {
@@ -79,6 +80,8 @@ func UpdateStreamStatus(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update stream setting"})
 		return
 	}
+
+	utils.SetStreamEnabled(*input.StreamEnabled)
 
 	c.JSON(http.StatusOK, gin.H{"message": "Stream setting updated", "stream_enabled": *input.StreamEnabled})
 }
