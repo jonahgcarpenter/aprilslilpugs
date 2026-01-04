@@ -12,6 +12,8 @@ import {
   FaPaw,
   FaSpinner,
   FaPen,
+  FaDog,
+  FaInfoCircle,
 } from "react-icons/fa";
 
 interface UpdateLittersProps {
@@ -32,6 +34,8 @@ const UpdateLitters = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+
+  const [activeTab, setActiveTab] = useState<"details" | "puppies">("details");
 
   const [formData, setFormData] = useState<LitterInput>({
     name: "",
@@ -78,6 +82,7 @@ const UpdateLitters = ({
     setGalleryPreviews([]);
     setEditingId(null);
     setIsEditing(false);
+    setActiveTab("details");
   };
 
   const handleEditClick = (litter: Litter) => {
@@ -96,6 +101,7 @@ const UpdateLitters = ({
     setProfilePreview(litter.profilePicture);
     setEditingId(litter.id);
     setIsEditing(true);
+    setActiveTab("details");
   };
 
   const handleDeleteClick = async (id: string) => {
@@ -264,14 +270,12 @@ const UpdateLitters = ({
           </div>
         )}
 
-        {/* Mode: Editor Form */}
+        {/* Mode: Editor */}
         {isEditing && (
           <div className="animate-in fade-in slide-in-from-bottom-4">
-            <form
-              onSubmit={handleSubmit}
-              className="bg-slate-900/50 border border-slate-800 rounded-xl p-6 space-y-6"
-            >
-              <div className="flex items-center justify-between mb-4">
+            <div className="bg-slate-900/50 border border-slate-800 rounded-xl overflow-hidden">
+              {/* Editor Header */}
+              <div className="flex items-center justify-between p-6 border-b border-slate-800 bg-slate-950/30">
                 <h3 className="text-xl font-bold text-white flex items-center gap-2">
                   {editingId ? (
                     <>
@@ -286,350 +290,414 @@ const UpdateLitters = ({
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="cursor-pointer text-white/50 hover:text-white"
+                  className="cursor-pointer text-white/50 hover:text-white transition-colors"
                 >
                   <FaTimes size={20} />
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {/* Profile Picture */}
-                <div className="md:col-span-1 flex flex-col">
-                  <div className="relative group w-full aspect-square">
-                    <div className="aspect-square w-full h-full rounded-xl overflow-hidden border-2 border-white/10 shadow-xl bg-slate-800">
-                      {profilePreview ? (
-                        <img
-                          src={profilePreview}
-                          alt="Profile Preview"
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <FaImage className="text-4xl text-slate-600" />
-                        </div>
-                      )}
-                      <div
-                        className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer z-10"
-                        onClick={() => profileInputRef.current?.click()}
-                      >
-                        <FaPen className="text-white text-3xl" />
-                      </div>
-                    </div>
+              {/* Tabs Navigation */}
+              <div className="flex border-b border-slate-800 bg-slate-950/30 px-6">
+                <button
+                  onClick={() => setActiveTab("details")}
+                  className={`cursor-pointer py-4 text-sm font-medium flex items-center gap-2 border-b-2 transition-colors mr-6 ${
+                    activeTab === "details"
+                      ? "border-blue-500 text-blue-400"
+                      : "border-transparent text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  <FaInfoCircle /> Litter Details
+                </button>
+                <button
+                  onClick={() => setActiveTab("puppies")}
+                  className={`cursor-pointer py-4 text-sm font-medium flex items-center gap-2 border-b-2 transition-colors ${
+                    activeTab === "puppies"
+                      ? "border-blue-500 text-blue-400"
+                      : "border-transparent text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  <FaDog /> Puppies
+                </button>
+              </div>
 
-                    <input
-                      type="file"
-                      ref={profileInputRef}
-                      onChange={(e) => handleFileChange(e, "profile")}
-                      accept="image/*"
-                      className="hidden"
-                    />
-                    <p className="text-center text-xs text-white/50 mt-2 relative z-10">
-                      Tap to Change
-                    </p>
-                  </div>
-                </div>
-
-                <div className="md:col-span-2 flex flex-col gap-5 justify-center">
-                  {/* Name & Status */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-blue-400">
-                        Litter Name
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={formData.name}
-                        onChange={(e) =>
-                          setFormData((p) => ({ ...p, name: e.target.value }))
-                        }
-                        className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none placeholder-white/20"
-                        placeholder="e.g. The Avengers"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-blue-400">
-                        Status
-                      </label>
-                      <select
-                        value={formData.status}
-                        onChange={(e) =>
-                          setFormData((p) => ({ ...p, status: e.target.value }))
-                        }
-                        className="cursor-pointer w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none"
-                      >
-                        <option value="Planned">Planned</option>
-                        <option value="Available">Available</option>
-                        <option value="Sold">Sold</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* Dates */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-blue-400">
-                        Date of Birth
-                      </label>
-                      <input
-                        type="date"
-                        required
-                        value={formData.birth_date}
-                        onChange={(e) =>
-                          setFormData((p) => ({
-                            ...p,
-                            birth_date: e.target.value,
-                          }))
-                        }
-                        className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-blue-400">
-                        Available Date
-                      </label>
-                      <input
-                        type="date"
-                        required
-                        value={formData.available_date}
-                        onChange={(e) =>
-                          setFormData((p) => ({
-                            ...p,
-                            available_date: e.target.value,
-                          }))
-                        }
-                        className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    {/* Mother Selection */}
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-pink-400">
-                        Mother
-                      </label>
-                      <select
-                        value={formData.mother_id || ""}
-                        onChange={(e) => {
-                          const id = e.target.value;
-                          setFormData((p) => ({
-                            ...p,
-                            mother_id: id,
-                            external_mother_name: id
-                              ? ""
-                              : p.external_mother_name,
-                          }));
-                        }}
-                        className="cursor-pointer w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-pink-500 focus:outline-none mb-2"
-                      >
-                        <option value="">External / Manual Entry</option>
-                        {mothers.map((dog) => (
-                          <option key={dog.id} value={dog.id}>
-                            {dog.name}
-                          </option>
-                        ))}
-                      </select>
-
-                      {!formData.mother_id && (
-                        <input
-                          type="text"
-                          value={formData.external_mother_name}
-                          onChange={(e) =>
-                            setFormData((p) => ({
-                              ...p,
-                              external_mother_name: e.target.value,
-                            }))
-                          }
-                          className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-pink-500 focus:outline-none mb-2"
-                          placeholder="Type external mother's name..."
-                        />
-                      )}
-                    </div>
-
-                    {/* Father Selection */}
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-blue-400">
-                        Father
-                      </label>
-                      <select
-                        value={formData.father_id || ""}
-                        onChange={(e) => {
-                          const id = e.target.value;
-                          setFormData((p) => ({
-                            ...p,
-                            father_id: id,
-                            external_father_name: id
-                              ? ""
-                              : p.external_father_name,
-                          }));
-                        }}
-                        className="cursor-pointer w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none mb-2"
-                      >
-                        <option value="">External / Manual Entry</option>
-                        {fathers.map((dog) => (
-                          <option key={dog.id} value={dog.id}>
-                            {dog.name}
-                          </option>
-                        ))}
-                      </select>
-
-                      {!formData.father_id && (
-                        <input
-                          type="text"
-                          value={formData.external_father_name}
-                          onChange={(e) =>
-                            setFormData((p) => ({
-                              ...p,
-                              external_father_name: e.target.value,
-                            }))
-                          }
-                          className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none mb-2"
-                          placeholder="Type external father's name..."
-                        />
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Gallery Editor */}
-                {formData.existing_gallery &&
-                  formData.existing_gallery.length > 0 && (
-                    <div className="md:col-span-3 space-y-4 pt-4 border-t border-slate-800">
-                      <label className="text-sm font-medium text-blue-400 block">
-                        Current Gallery
-                      </label>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {formData.existing_gallery.map((img, index) => (
-                          <div
-                            key={index}
-                            className="flex gap-4 p-3 bg-slate-950 rounded-lg border border-slate-800"
-                          >
-                            <img
-                              src={img.url}
-                              className="w-24 h-24 object-cover rounded-md flex-shrink-0"
-                              alt=""
-                            />
-                            <div className="flex flex-col flex-1 gap-2">
-                              <textarea
-                                placeholder="Image description..."
-                                value={img.description || ""}
-                                onChange={(e) =>
-                                  handleExistingDescriptionChange(
-                                    index,
-                                    e.target.value,
-                                  )
-                                }
-                                className="w-full h-full bg-slate-900 border border-slate-800 rounded p-2 text-xs text-white resize-none focus:border-blue-500 outline-none"
+              <div className="p-6">
+                {/* Tab: Details */}
+                {activeTab === "details" && (
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                      {/* Profile Picture */}
+                      <div className="md:col-span-1 flex flex-col">
+                        <div className="relative group w-full aspect-square">
+                          <div className="aspect-square w-full h-full rounded-xl overflow-hidden border-2 border-white/10 shadow-xl bg-slate-800">
+                            {profilePreview ? (
+                              <img
+                                src={profilePreview}
+                                alt="Profile Preview"
+                                className="w-full h-full object-cover"
                               />
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveExistingImage(index)}
-                                className="cursor-pointer text-xs text-red-400 hover:text-red-300 self-end flex items-center gap-1"
-                              >
-                                <FaTrash /> Remove
-                              </button>
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <FaImage className="text-4xl text-slate-600" />
+                              </div>
+                            )}
+                            <div
+                              className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer z-10"
+                              onClick={() => profileInputRef.current?.click()}
+                            >
+                              <FaPen className="text-white text-3xl" />
                             </div>
                           </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
 
-                <div className="md:col-span-3 space-y-2 pt-4 border-t border-slate-800">
-                  <label className="text-sm font-medium text-blue-400 flex justify-between">
-                    <span>Upload New Photos</span>
-                    <span className="text-xs text-white/40">
-                      {galleryPreviews.length} added
-                    </span>
-                  </label>
-
-                  <div
-                    onClick={() => galleryInputRef.current?.click()}
-                    className="cursor-pointer bg-slate-950/50 border border-dashed border-slate-800 rounded-lg p-8 flex flex-col items-center justify-center hover:border-blue-500/50 transition-colors"
-                  >
-                    <FaImage className="text-3xl text-slate-700 mb-2" />
-                    <span className="text-sm text-slate-500">
-                      Click to add photos
-                    </span>
-                  </div>
-                  <input
-                    ref={galleryInputRef}
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => handleFileChange(e, "gallery")}
-                  />
-
-                  {/* New Gallery Previews */}
-                  {galleryPreviews.length > 0 && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                      {galleryPreviews.map((src, i) => (
-                        <div
-                          key={i}
-                          className="flex gap-4 p-3 bg-slate-950 rounded-lg border border-slate-800 relative"
-                        >
-                          <div className="absolute -top-2 -right-2 bg-blue-600 text-xs px-2 py-0.5 rounded-full text-white shadow-sm">
-                            New
-                          </div>
-                          <img
-                            src={src}
-                            className="w-24 h-24 object-cover rounded-md flex-shrink-0"
-                            alt=""
+                          <input
+                            type="file"
+                            ref={profileInputRef}
+                            onChange={(e) => handleFileChange(e, "profile")}
+                            accept="image/*"
+                            className="hidden"
                           />
-                          <div className="flex flex-col flex-1 gap-2">
-                            <textarea
-                              placeholder="Add a description..."
-                              value={
-                                formData.new_gallery_images?.[i]?.description ||
-                                ""
-                              }
+                          <p className="text-center text-xs text-white/50 mt-2 relative z-10">
+                            Tap to Change
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="md:col-span-2 flex flex-col gap-5 justify-center">
+                        {/* Name & Status */}
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium text-blue-400">
+                              Litter Name
+                            </label>
+                            <input
+                              type="text"
+                              required
+                              value={formData.name}
                               onChange={(e) =>
-                                handleNewDescriptionChange(i, e.target.value)
+                                setFormData((p) => ({
+                                  ...p,
+                                  name: e.target.value,
+                                }))
                               }
-                              className="w-full h-full bg-slate-900 border border-slate-800 rounded p-2 text-xs text-white resize-none focus:border-blue-500 outline-none"
+                              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none placeholder-white/20"
+                              placeholder="e.g. The Avengers"
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <div className="flex gap-2 items-center">
+                              <label className="text-sm font-medium text-blue-400">
+                                Status
+                              </label>
+                              <span className="text-[10px] bg-slate-800 text-white px-2 py-0.5 rounded-full border border-slate-700">
+                                Auto-updates
+                              </span>
+                            </div>
+                            <select
+                              value={formData.status}
+                              onChange={(e) =>
+                                setFormData((p) => ({
+                                  ...p,
+                                  status: e.target.value,
+                                }))
+                              }
+                              className="cursor-pointer w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none"
+                            >
+                              <option value="Planned">
+                                Planned (no puppies)
+                              </option>
+                              <option value="Available">Available</option>
+                              <option value="Sold">Sold</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        {/* Dates */}
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium text-blue-400">
+                              Date of Birth
+                            </label>
+                            <input
+                              type="date"
+                              required
+                              value={formData.birth_date}
+                              onChange={(e) =>
+                                setFormData((p) => ({
+                                  ...p,
+                                  birth_date: e.target.value,
+                                }))
+                              }
+                              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium text-blue-400">
+                              Available Date
+                            </label>
+                            <input
+                              type="date"
+                              required
+                              value={formData.available_date}
+                              onChange={(e) =>
+                                setFormData((p) => ({
+                                  ...p,
+                                  available_date: e.target.value,
+                                }))
+                              }
+                              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none"
                             />
                           </div>
                         </div>
-                      ))}
+
+                        <div className="grid grid-cols-2 gap-4">
+                          {/* Mother Selection */}
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium text-pink-400">
+                              Mother
+                            </label>
+                            <select
+                              value={formData.mother_id || ""}
+                              onChange={(e) => {
+                                const id = e.target.value;
+                                setFormData((p) => ({
+                                  ...p,
+                                  mother_id: id,
+                                  external_mother_name: id
+                                    ? ""
+                                    : p.external_mother_name,
+                                }));
+                              }}
+                              className="cursor-pointer w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-pink-500 focus:outline-none mb-2"
+                            >
+                              <option value="">External / Manual Entry</option>
+                              {mothers.map((dog) => (
+                                <option key={dog.id} value={dog.id}>
+                                  {dog.name}
+                                </option>
+                              ))}
+                            </select>
+
+                            {!formData.mother_id && (
+                              <input
+                                type="text"
+                                value={formData.external_mother_name}
+                                onChange={(e) =>
+                                  setFormData((p) => ({
+                                    ...p,
+                                    external_mother_name: e.target.value,
+                                  }))
+                                }
+                                className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-pink-500 focus:outline-none mb-2"
+                                placeholder="Type external mother's name..."
+                              />
+                            )}
+                          </div>
+
+                          {/* Father Selection */}
+                          <div className="space-y-2">
+                            <label className="text-sm font-medium text-blue-400">
+                              Father
+                            </label>
+                            <select
+                              value={formData.father_id || ""}
+                              onChange={(e) => {
+                                const id = e.target.value;
+                                setFormData((p) => ({
+                                  ...p,
+                                  father_id: id,
+                                  external_father_name: id
+                                    ? ""
+                                    : p.external_father_name,
+                                }));
+                              }}
+                              className="cursor-pointer w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none mb-2"
+                            >
+                              <option value="">External / Manual Entry</option>
+                              {fathers.map((dog) => (
+                                <option key={dog.id} value={dog.id}>
+                                  {dog.name}
+                                </option>
+                              ))}
+                            </select>
+
+                            {!formData.father_id && (
+                              <input
+                                type="text"
+                                value={formData.external_father_name}
+                                onChange={(e) =>
+                                  setFormData((p) => ({
+                                    ...p,
+                                    external_father_name: e.target.value,
+                                  }))
+                                }
+                                className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none mb-2"
+                                placeholder="Type external father's name..."
+                              />
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Gallery Editor */}
+                      {formData.existing_gallery &&
+                        formData.existing_gallery.length > 0 && (
+                          <div className="md:col-span-3 space-y-4 pt-4 border-t border-slate-800">
+                            <label className="text-sm font-medium text-blue-400 block">
+                              Current Gallery
+                            </label>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {formData.existing_gallery.map((img, index) => (
+                                <div
+                                  key={index}
+                                  className="flex gap-4 p-3 bg-slate-950 rounded-lg border border-slate-800"
+                                >
+                                  <img
+                                    src={img.url}
+                                    className="w-24 h-24 object-cover rounded-md flex-shrink-0"
+                                    alt=""
+                                  />
+                                  <div className="flex flex-col flex-1 gap-2">
+                                    <textarea
+                                      placeholder="Image description..."
+                                      value={img.description || ""}
+                                      onChange={(e) =>
+                                        handleExistingDescriptionChange(
+                                          index,
+                                          e.target.value,
+                                        )
+                                      }
+                                      className="w-full h-full bg-slate-900 border border-slate-800 rounded p-2 text-xs text-white resize-none focus:border-blue-500 outline-none"
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        handleRemoveExistingImage(index)
+                                      }
+                                      className="cursor-pointer text-xs text-red-400 hover:text-red-300 self-end flex items-center gap-1"
+                                    >
+                                      <FaTrash /> Remove
+                                    </button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                      <div className="md:col-span-3 space-y-2 pt-4 border-t border-slate-800">
+                        <label className="text-sm font-medium text-blue-400 flex justify-between">
+                          <span>Upload New Photos</span>
+                          <span className="text-xs text-white/40">
+                            {galleryPreviews.length} added
+                          </span>
+                        </label>
+
+                        <div
+                          onClick={() => galleryInputRef.current?.click()}
+                          className="cursor-pointer bg-slate-950/50 border border-dashed border-slate-800 rounded-lg p-8 flex flex-col items-center justify-center hover:border-blue-500/50 transition-colors"
+                        >
+                          <FaImage className="text-3xl text-slate-700 mb-2" />
+                          <span className="text-sm text-slate-500">
+                            Click to add photos
+                          </span>
+                        </div>
+                        <input
+                          ref={galleryInputRef}
+                          type="file"
+                          multiple
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => handleFileChange(e, "gallery")}
+                        />
+
+                        {/* New Gallery Previews */}
+                        {galleryPreviews.length > 0 && (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                            {galleryPreviews.map((src, i) => (
+                              <div
+                                key={i}
+                                className="flex gap-4 p-3 bg-slate-950 rounded-lg border border-slate-800 relative"
+                              >
+                                <div className="absolute -top-2 -right-2 bg-blue-600 text-xs px-2 py-0.5 rounded-full text-white shadow-sm">
+                                  New
+                                </div>
+                                <img
+                                  src={src}
+                                  className="w-24 h-24 object-cover rounded-md flex-shrink-0"
+                                  alt=""
+                                />
+                                <div className="flex flex-col flex-1 gap-2">
+                                  <textarea
+                                    placeholder="Add a description..."
+                                    value={
+                                      formData.new_gallery_images?.[i]
+                                        ?.description || ""
+                                    }
+                                    onChange={(e) =>
+                                      handleNewDescriptionChange(
+                                        i,
+                                        e.target.value,
+                                      )
+                                    }
+                                    className="w-full h-full bg-slate-900 border border-slate-800 rounded p-2 text-xs text-white resize-none focus:border-blue-500 outline-none"
+                                  />
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  )}
-                </div>
-              </div>
 
-              {/* Footer Buttons */}
-              <div className="flex gap-4 pt-4 border-t border-white/10">
-                <button
-                  type="submit"
-                  disabled={isSaving}
-                  className="cursor-pointer flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
-                >
-                  {isSaving ? (
-                    <FaSpinner className="animate-spin" />
-                  ) : (
-                    <FaSave />
-                  )}
-                  {editingId ? "Save Changes" : "Create Litter"}
-                </button>
-                <button
-                  type="button"
-                  onClick={resetForm}
-                  className="cursor-pointer px-6 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
+                    {/* Footer Buttons */}
+                    <div className="flex gap-4 pt-4 border-t border-white/10">
+                      <button
+                        type="submit"
+                        disabled={isSaving}
+                        className="cursor-pointer flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+                      >
+                        {isSaving ? (
+                          <FaSpinner className="animate-spin" />
+                        ) : (
+                          <FaSave />
+                        )}
+                        {editingId ? "Save Changes" : "Create Litter"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={resetForm}
+                        className="cursor-pointer px-6 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                )}
 
-            {/* Update Puppies Component */}
-            {editingId ? (
-              <UpdatePuppies litterId={editingId} />
-            ) : (
-              <div className="mt-8 p-6 text-center border border-dashed border-slate-800 rounded-xl text-slate-500">
-                Save the litter first to add puppies.
+                {/* Tab: Puppies */}
+                {activeTab === "puppies" && (
+                  <div>
+                    {editingId ? (
+                      <UpdatePuppies litterId={editingId} />
+                    ) : (
+                      <div className="py-12 text-center text-slate-500 border border-dashed border-slate-800 rounded-xl">
+                        <p>
+                          Please save the litter details first to begin adding
+                          puppies.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => setActiveTab("details")}
+                          className="text-blue-400 hover:text-blue-300 text-sm mt-2 underline cursor-pointer"
+                        >
+                          Go to Litter Details
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
         )}
       </div>
