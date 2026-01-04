@@ -106,6 +106,16 @@ const UpdatePuppies = ({ litterId }: UpdatePuppiesProps) => {
     }
   };
 
+  const handleNewDescriptionChange = (index: number, text: string) => {
+    setFormData((prev) => {
+      const newImages = [...(prev.new_gallery_images || [])];
+      if (newImages[index]) {
+        newImages[index].description = text;
+      }
+      return { ...prev, new_gallery_images: newImages };
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
@@ -228,9 +238,9 @@ const UpdatePuppies = ({ litterId }: UpdatePuppiesProps) => {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-4">
               {/* Profile Pic Input */}
-              <div className="w-24 h-24 shrink-0 relative group">
+              <div className="mx-auto sm:mx-0 w-24 h-24 shrink-0 relative group">
                 <div className="w-full h-full rounded-lg overflow-hidden bg-slate-900 border border-slate-700">
                   {profilePreview ? (
                     <img
@@ -258,7 +268,7 @@ const UpdatePuppies = ({ litterId }: UpdatePuppiesProps) => {
                 />
               </div>
 
-              <div className="flex-1 grid grid-cols-2 gap-3">
+              <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <input
                   placeholder="Name"
                   value={formData.name}
@@ -283,7 +293,7 @@ const UpdatePuppies = ({ litterId }: UpdatePuppiesProps) => {
                   onChange={(e) =>
                     setFormData((p) => ({ ...p, gender: e.target.value }))
                   }
-                  className="bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white focus:border-blue-500 outline-none"
+                  className="cursor-pointer bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white focus:border-blue-500 outline-none"
                 >
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
@@ -294,7 +304,7 @@ const UpdatePuppies = ({ litterId }: UpdatePuppiesProps) => {
                   onChange={(e) =>
                     setFormData((p) => ({ ...p, status: e.target.value }))
                   }
-                  className="bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white focus:border-blue-500 outline-none"
+                  className="cursor-pointer bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white focus:border-blue-500 outline-none"
                 >
                   <option value="Available">Available</option>
                   <option value="Reserved">Reserved</option>
@@ -313,60 +323,105 @@ const UpdatePuppies = ({ litterId }: UpdatePuppiesProps) => {
             />
 
             {/* Gallery Section */}
-            <div className="border-t border-slate-800 pt-3">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-xs font-semibold text-slate-400">
-                  Puppy Gallery
-                </span>
-                <button
-                  type="button"
+            <div className="space-y-4">
+              {/* Existing Gallery Items */}
+              {formData.existing_gallery &&
+                formData.existing_gallery.length > 0 && (
+                  <div>
+                    <span className="text-xs font-semibold text-slate-400 block mb-2">
+                      Current Photos
+                    </span>
+                    <div className="flex gap-2 overflow-x-auto pb-2">
+                      {formData.existing_gallery.map((img, idx) => (
+                        <div
+                          key={`exist-${idx}`}
+                          className="w-16 h-16 shrink-0 relative group rounded-md overflow-hidden"
+                        >
+                          <img
+                            src={img.url}
+                            className="w-full h-full object-cover"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newG = [
+                                ...(formData.existing_gallery || []),
+                              ];
+                              newG.splice(idx, 1);
+                              setFormData((p) => ({
+                                ...p,
+                                existing_gallery: newG,
+                              }));
+                            }}
+                            className="cursor-pointer absolute top-0 right-0 bg-red-600/80 p-1 text-white opacity-0 group-hover:opacity-100"
+                          >
+                            <FaTimes size={10} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+              <div className="md:col-span-3 space-y-2 pt-4 border-t border-slate-800">
+                <label className="text-sm font-medium text-blue-400 flex justify-between">
+                  <span>Upload New Photos</span>
+                  <span className="text-xs text-white/40">
+                    {galleryPreviews.length} added
+                  </span>
+                </label>
+
+                <div
                   onClick={() => galleryInputRef.current?.click()}
-                  className="cursor-pointer text-xs flex items-center gap-1 text-blue-400 hover:text-blue-300"
+                  className="cursor-pointer bg-slate-950/50 border border-dashed border-slate-800 rounded-lg p-8 flex flex-col items-center justify-center hover:border-blue-500/50 transition-colors"
                 >
-                  <FaImage /> Add Photos
-                </button>
+                  <FaImage className="text-3xl text-slate-700 mb-2" />
+                  <span className="text-sm text-slate-500">
+                    Click to add photos
+                  </span>
+                </div>
                 <input
-                  type="file"
                   ref={galleryInputRef}
-                  onChange={(e) => handleFileChange(e, "gallery")}
-                  hidden
+                  type="file"
                   multiple
                   accept="image/*"
+                  className="hidden"
+                  onChange={(e) => handleFileChange(e, "gallery")}
                 />
-              </div>
 
-              <div className="flex gap-2 overflow-x-auto pb-2">
-                {/* Existing Gallery Items */}
-                {formData.existing_gallery?.map((img, idx) => (
-                  <div
-                    key={`exist-${idx}`}
-                    className="w-16 h-16 shrink-0 relative group rounded-md overflow-hidden"
-                  >
-                    <img src={img.url} className="w-full h-full object-cover" />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const newG = [...(formData.existing_gallery || [])];
-                        newG.splice(idx, 1);
-                        setFormData((p) => ({ ...p, existing_gallery: newG }));
-                      }}
-                      className="cursor-pointer absolute top-0 right-0 bg-red-600/80 p-1 text-white opacity-0 group-hover:opacity-100"
-                    >
-                      <FaTimes size={10} />
-                    </button>
+                {/* New Gallery Previews */}
+                {galleryPreviews.length > 0 && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    {galleryPreviews.map((src, i) => (
+                      <div
+                        key={i}
+                        className="flex gap-4 p-3 bg-slate-950 rounded-lg border border-slate-800 relative"
+                      >
+                        <div className="absolute -top-2 -right-2 bg-blue-600 text-xs px-2 py-0.5 rounded-full text-white shadow-sm">
+                          New
+                        </div>
+                        <img
+                          src={src}
+                          className="w-24 h-24 object-cover rounded-md flex-shrink-0"
+                          alt=""
+                        />
+                        <div className="flex flex-col flex-1 gap-2">
+                          <textarea
+                            placeholder="Add a description..."
+                            value={
+                              formData.new_gallery_images?.[i]?.description ||
+                              ""
+                            }
+                            onChange={(e) =>
+                              handleNewDescriptionChange(i, e.target.value)
+                            }
+                            className="w-full h-full bg-slate-900 border border-slate-800 rounded p-2 text-xs text-white resize-none focus:border-blue-500 outline-none"
+                          />
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-
-                {/* New Previews */}
-                {galleryPreviews.map((src, idx) => (
-                  <div
-                    key={`new-${idx}`}
-                    className="w-16 h-16 shrink-0 relative group rounded-md overflow-hidden border border-blue-500/50"
-                  >
-                    <img src={src} className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-blue-500/20 pointer-events-none" />
-                  </div>
-                ))}
+                )}
               </div>
             </div>
 
@@ -383,6 +438,13 @@ const UpdatePuppies = ({ litterId }: UpdatePuppiesProps) => {
                 ) : (
                   "Add Puppy"
                 )}
+              </button>
+              <button
+                type="button"
+                onClick={resetForm}
+                className="cursor-pointer px-6 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-colors"
+              >
+                Cancel
               </button>
             </div>
           </form>
