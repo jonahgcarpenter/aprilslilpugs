@@ -80,6 +80,8 @@ func main() {
 	r.Static("/assets", "./public/dist/assets")
 	r.StaticFile("/logo.jpg", "./public/dist/logo.jpg")
 	r.StaticFile("/background.png", "./public/dist/background.png")
+	r.StaticFile("/robots.txt", "./public/dist/robots.txt")
+	r.StaticFile("/sitemap.xml", "./public/dist/sitemap.xml")
 
 	r.NoRoute(func(c *gin.Context) {
 		c.File("./public/dist/index.html")
