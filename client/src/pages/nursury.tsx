@@ -11,6 +11,14 @@ const Nursery = () => {
 
   return (
     <div className="space-y-6">
+      <title>Available Puppies & Nursery | April's Lil Pugs</title>
+      <meta
+        name="description"
+        content="View our current Pug litters and available puppies looking for their forever homes. Join our waitlist today!"
+      />
+      <meta property="og:title" content="Current Litters | April's Lil Pugs" />
+      <meta property="og:url" content="https://aprilslilpugs.com/nursery" />
+
       {settings?.waitlist_enabled && <AddWaitlist onSubmit={createWaitlist} />}
 
       <DisplayLitters

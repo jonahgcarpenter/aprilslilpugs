@@ -89,8 +89,18 @@ const Litter = () => {
   const mother = dogs.find((d) => d.id === litter.motherId);
   const father = dogs.find((d) => d.id === litter.fatherId);
 
+  const pageTitle = litter
+    ? `${litter.name} | April's Lil Pugs`
+    : "Litter Details | April's Lil Pugs";
+  const pageDesc = litter
+    ? `View details for the ${litter.name} litter, including parents ${litter.motherName} and ${litter.fatherName}.`
+    : "View Pug litter details.";
+
   return (
     <div className="mx-2 sm:mx-4 bg-slate-900/80 backdrop-blur-sm rounded-xl border border-slate-800/50 shadow-xl overflow-hidden">
+      <title>{pageTitle}</title>
+      <meta name="description" content={pageDesc} />
+
       <PuppyHero litter={litter} />
 
       <div className="p-6 sm:p-8 space-y-12">

@@ -24,6 +24,9 @@ const Login = () => {
 
   return (
     <div className="flex flex-col items-center justify-center gap-6">
+      <title>Admin Login | April's Lil Pugs</title>
+      <meta name="robots" content="noindex, nofollow" />
+
       <div className="w-full max-w-2xl rounded-2xl bg-slate-900/80 p-12 shadow-2xl backdrop-blur-sm">
         <h2 className="text-3xl text-center font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 mb-6">
           Welcome Back

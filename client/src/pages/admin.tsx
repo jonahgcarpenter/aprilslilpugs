@@ -74,6 +74,8 @@ const Admin = () => {
 
   return (
     <div className="space-y-12">
+      <title>Admin | April's Lil Pugs</title>
+      <meta name="robots" content="noindex, nofollow" />
       <section className="bg-slate-900/80 backdrop-blur-sm rounded-xl p-6 border border-slate-800/50 shadow-xl">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Waitlist Toggle */}

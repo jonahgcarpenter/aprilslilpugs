@@ -30,6 +30,14 @@ const Live = () => {
 
   return (
     <div className="space-y-6">
+      <title>Live Puppy Cam | April's Lil Pugs</title>
+      <meta
+        name="description"
+        content="Watch our Pug puppies live! 24/7 stream of our nursery."
+      />
+      <meta property="og:title" content="Live Puppy Cam | April's Lil Pugs" />
+      <meta property="og:url" content="https://aprilslilpugs.com/live" />
+
       <Stream />
       <div className="bg-slate-900/80 border border-slate-800/50 rounded-xl p-4">
         <div className="flex gap-3">
