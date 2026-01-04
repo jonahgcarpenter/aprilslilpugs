@@ -12,6 +12,7 @@ import Admin from "./pages/admin";
 import Litter from "./pages/litter";
 import Login from "./pages/login";
 import ProtectedRoute from "./components/auth/protected-route";
+import NotFound from "./pages/notfound";
 
 function App() {
   return (
@@ -31,6 +32,8 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/admin" element={<Admin />} />
         </Route>
+
+        <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
   );
