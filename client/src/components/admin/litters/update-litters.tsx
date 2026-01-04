@@ -253,13 +253,13 @@ const UpdateLitters = ({
                     Father: {litter.fatherName}
                   </p>
                 </div>
-                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex gap-2">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       handleDeleteClick(litter.id);
                     }}
-                    className="cursor-pointer p-2 bg-slate-800 hover:bg-red-600 text-white rounded-lg transition-colors"
+                    className="cursor-pointer p-2 hover:bg-red-600 hover:text-white text-slate-400 rounded-lg transition-colors"
                     title="Delete"
                   >
                     <FaTrash />

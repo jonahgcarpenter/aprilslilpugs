@@ -185,7 +185,7 @@ const UpdateDogs = ({
                 <img
                   src={dog.profilePicture}
                   alt={dog.name}
-                  className="w-16 h-16 rounded-full object-cover border border-slate-700"
+                  className="w-20 h-20 rounded-lg object-cover border border-slate-700"
                 />
                 <div className="flex-1">
                   <h3 className="font-bold text-white">{dog.name}</h3>
@@ -193,13 +193,13 @@ const UpdateDogs = ({
                     {dog.gender} • {dog.birthDate}
                   </p>
                 </div>
-                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex gap-2">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       handleDeleteClick(dog.id);
                     }}
-                    className="cursor-pointer p-2 bg-slate-800 hover:bg-red-600 text-white rounded-lg transition-colors"
+                    className="cursor-pointer p-2 hover:bg-red-600 hover:text-white text-slate-400 rounded-lg transition-colors"
                     title="Delete"
                   >
                     <FaTrash />
