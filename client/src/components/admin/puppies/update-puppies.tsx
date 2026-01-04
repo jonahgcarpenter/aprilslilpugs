@@ -6,7 +6,6 @@ import {
 } from "../../../hooks/usepuppies";
 import {
   FaPlus,
-  FaEdit,
   FaTrash,
   FaTimes,
   FaImage,
@@ -145,7 +144,7 @@ const UpdatePuppies = ({ litterId }: UpdatePuppiesProps) => {
     );
 
   return (
-    <div className="mt-8 border-t border-slate-800 pt-8">
+    <>
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-xl font-bold text-white flex items-center gap-2">
           <FaDog className="text-blue-400" /> Puppies ({puppies.length})
@@ -167,7 +166,8 @@ const UpdatePuppies = ({ litterId }: UpdatePuppiesProps) => {
           {puppies.map((puppy) => (
             <div
               key={puppy.id}
-              className="bg-slate-950 border border-slate-800 rounded-xl p-3 flex gap-3 group hover:border-blue-500/30 transition-colors"
+              onClick={() => handleEditClick(puppy)}
+              className="cursor-pointer bg-slate-950 border border-slate-800 rounded-xl p-3 flex gap-3 group hover:border-blue-500/30 transition-colors relative"
             >
               <img
                 src={puppy.profilePicture}
@@ -179,16 +179,14 @@ const UpdatePuppies = ({ litterId }: UpdatePuppiesProps) => {
                   <h4 className="font-bold text-white truncate">
                     {puppy.name}
                   </h4>
-                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex gap-1">
                     <button
-                      onClick={() => handleEditClick(puppy)}
-                      className="cursor-pointer p-1.5 text-blue-400 hover:bg-blue-500/20 rounded"
-                    >
-                      <FaEdit size={12} />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteClick(puppy.id)}
-                      className="cursor-pointer p-1.5 text-red-400 hover:bg-red-500/20 rounded"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteClick(puppy.id);
+                      }}
+                      className="cursor-pointer p-1.5 text-red-400 hover:bg-red-500/20 rounded transition-colors"
+                      title="Delete Puppy"
                     >
                       <FaTrash size={12} />
                     </button>
@@ -390,7 +388,7 @@ const UpdatePuppies = ({ litterId }: UpdatePuppiesProps) => {
           </form>
         </div>
       )}
-    </div>
+    </>
   );
 };
 
