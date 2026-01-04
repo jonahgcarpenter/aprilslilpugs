@@ -18,7 +18,7 @@ export default function Header() {
               April's Lil Pugs
               <img
                 src="/logo.jpg"
-                alt="Logo"
+                alt="April's Lil Pugs Logo"
                 className="w-9 h-9 ml-8 transform rotate-[-10deg]"
               />
             </h1>
