@@ -31,3 +31,4 @@ A custom, full-stack website built for [April's Lil Pugs](https://aprilslilpugs.
 - [ ] RTMPS server in Go
 - [ ] Proper logging
 - [ ] Fix DEBUG mode and untrusted proxies
+- [ ] Footer
