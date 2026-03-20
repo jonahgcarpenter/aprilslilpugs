@@ -1,20 +1,18 @@
 package utils
 
 import (
-	"context"
 	"fmt"
+	"io"
+	"os"
 	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jonahgcarpenter/aprilslilpugs/server/internal/config"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/internal/models"
-	"github.com/minio/minio-go/v7"
 )
 
 func UploadAndCreateFile(c *gin.Context, formKey string, folder string) (*models.File, error) {
-	cfg := config.Load()
 	fileHeader, err := c.FormFile(formKey)
 	if err != nil {
 		return nil, nil
@@ -26,33 +24,36 @@ func UploadAndCreateFile(c *gin.Context, formKey string, folder string) (*models
 	}
 	defer srcFile.Close()
 
-	ext := filepath.Ext(fileHeader.Filename)
-	rawName := strings.TrimSuffix(fileHeader.Filename, ext)
-	cleanName := strings.ReplaceAll(rawName, " ", "_")
-	
-	objectName := fmt.Sprintf("%s/%d-%s%s", folder, time.Now().Unix(), cleanName, ext)
-
-	contentType := fileHeader.Header.Get("Content-Type")
-	if contentType == "" {
-		contentType = "application/octet-stream"
-	}
-
-	_, err = minioClient.PutObject(context.Background(), cfg.MinioBucketName, objectName, srcFile, fileHeader.Size, minio.PutObjectOptions{
-		ContentType: contentType,
-	})
+	ext := strings.ToLower(filepath.Ext(fileHeader.Filename))
+	stem := sanitizeFileStem(strings.TrimSuffix(fileHeader.Filename, ext))
+	suffix, err := randomSuffix()
 	if err != nil {
-		return nil, fmt.Errorf("failed to upload to minio: %v", err)
+		return nil, fmt.Errorf("failed to generate file name: %w", err)
 	}
 
-	relativeURL := fmt.Sprintf("/%s/%s", cfg.MinioBucketName, objectName)
-	now := time.Now()
+	fileName := fmt.Sprintf("%d-%s-%s%s", time.Now().UnixMilli(), stem, suffix, ext)
+	absPath, relPath, err := buildStoragePath(folder, fileName)
+	if err != nil {
+		return nil, err
+	}
 
+	dstFile, err := os.Create(absPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create file: %w", err)
+	}
+	defer dstFile.Close()
+
+	if _, err := io.Copy(dstFile, srcFile); err != nil {
+		return nil, fmt.Errorf("failed to write file: %w", err)
+	}
+
+	now := time.Now()
 	return &models.File{
 		Name:      fileHeader.Filename,
-		URL:       relativeURL,
+		URL:       buildPublicUploadURL(relPath),
 		CreatedAt: now,
 		UpdatedAt: now,
 	}, nil
 }
 
-var DeleteFile = DeleteImage
+var DeleteFile = deleteStoredFile

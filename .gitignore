@@ -5,3 +5,4 @@ dist/
 # BACKEND
 tmp/
 .env
+storage/

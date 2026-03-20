@@ -59,7 +59,7 @@ export default function Navbar() {
 
       {user && (
         <a
-          href="https://analytics.aprilslilpugs.com/websites/bcc8c077-9c17-4383-9b3c-5eb43c0d0c83"
+          href="https://dash.cloudflare.com/fd0f6969c107cef6a3eb88b20ee0275c/aprilslilpugs.com/analytics/web/overview"
           target="_blank"
           rel="noopener noreferrer"
           className={linkStyles(false)}
