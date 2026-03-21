@@ -72,6 +72,22 @@ const Admin = () => {
     );
   }
 
+  const handleToggleWaitlist = async () => {
+    try {
+      await toggleWaitlist(!settings?.waitlist_enabled);
+    } catch (error) {
+      window.alert("Failed to update waitlist status. Check the console for details.");
+    }
+  };
+
+  const handleToggleStream = async () => {
+    try {
+      await toggleStream(!settings?.stream_enabled);
+    } catch (error) {
+      window.alert("Failed to update stream status. Check the console for details.");
+    }
+  };
+
   return (
     <div className="space-y-12">
       <title>Admin | April's Lil Pugs</title>
@@ -97,7 +113,7 @@ const Admin = () => {
             </div>
 
             <button
-              onClick={() => toggleWaitlist(!settings?.waitlist_enabled)}
+              onClick={handleToggleWaitlist}
               className={`cursor-pointer text-3xl transition-colors ${
                 settings?.waitlist_enabled
                   ? "text-green-500 hover:text-green-400"
@@ -125,7 +141,7 @@ const Admin = () => {
             </div>
 
             <button
-              onClick={() => toggleStream(!settings?.stream_enabled)}
+              onClick={handleToggleStream}
               className={`cursor-pointer text-3xl transition-colors ${
                 settings?.stream_enabled
                   ? "text-red-500 hover:text-red-400"

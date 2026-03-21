@@ -121,6 +121,7 @@ export const usePuppies = (litterId?: string) => {
       await axios.post("/api/puppies", formData);
       await mutatePuppies();
     } catch (err) {
+      console.error("Create puppy error:", err);
       throw new Error("Failed to create puppy");
     }
   };
@@ -131,6 +132,7 @@ export const usePuppies = (litterId?: string) => {
       await axios.patch(`/api/puppies/${id}`, formData);
       await mutatePuppies();
     } catch (err) {
+      console.error("Update puppy error:", { id, err });
       throw new Error("Failed to update puppy");
     }
   };
@@ -140,6 +142,7 @@ export const usePuppies = (litterId?: string) => {
       await axios.delete(`/api/puppies/${id}`);
       await mutatePuppies();
     } catch (err) {
+      console.error("Delete puppy error:", { id, err });
       throw new Error("Failed to delete puppy");
     }
   };

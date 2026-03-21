@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/internal/models"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/database"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/utils"
@@ -122,7 +123,10 @@ func CreatePuppy(c *gin.Context) {
 	status := c.PostForm("status")
 	desc := c.PostForm("description")
 
-	profilePic, _ := utils.UploadAndCreateImage(c, "profile_picture", "puppies")
+	profilePic, err := utils.UploadAndCreateImage(c, "profile_picture", "puppies")
+	if err != nil {
+		slog.Warn("create puppy: failed to process profile picture", "error", err)
+	}
 	ppJSON, err := json.Marshal(profilePic)
 	if err != nil {
 		slog.Warn("create puppy: failed to marshal profile picture", "error", err)
@@ -135,6 +139,8 @@ func CreatePuppy(c *gin.Context) {
 			descKey := fmt.Sprintf("gallery_description_%d", i)
 			img.Description = c.PostForm(descKey)
 			gallery = append(gallery, *img)
+		} else if err != nil {
+			slog.Warn("create puppy: failed to process gallery image", "form_key", formKey, "error", err)
 		}
 	}
 	galleryJSON, err := json.Marshal(gallery)
@@ -219,6 +225,8 @@ func UpdatePuppy(c *gin.Context) {
 				slog.Warn("update puppy: failed to delete old profile picture", "url", currentPP.URL, "error", err)
 			}
 		}
+	} else if err != nil {
+		slog.Warn("update puppy: failed to process profile picture", "puppy_id", id, "error", err)
 	}
 
 	existingGalleryJSON := c.PostForm("existing_gallery")
@@ -238,6 +246,7 @@ func UpdatePuppy(c *gin.Context) {
 				}
 			}
 		} else {
+			slog.Warn("update puppy: invalid existing gallery payload", "puppy_id", id, "error", err)
 			processedExistingGallery = currentGallery
 		}
 	} else {
@@ -251,6 +260,8 @@ func UpdatePuppy(c *gin.Context) {
 			descKey := fmt.Sprintf("gallery_description_%d", i)
 			img.Description = c.PostForm(descKey)
 			newGalleryItems = append(newGalleryItems, *img)
+		} else if err != nil {
+			slog.Warn("update puppy: failed to process gallery image", "puppy_id", id, "form_key", formKey, "error", err)
 		}
 	}
 
@@ -302,7 +313,11 @@ func DeletePuppy(c *gin.Context) {
 	var litterID *int
 	var ppRaw, galleryRaw []byte
 	if err := database.Pool.QueryRow(c, "SELECT litter_id, profile_picture, gallery FROM puppies WHERE id=$1", id).Scan(&litterID, &ppRaw, &galleryRaw); err != nil {
-		slog.Warn("delete puppy: failed to fetch images before delete", "id", id, "error", err)
+		if err == pgx.ErrNoRows {
+			slog.Debug("delete puppy: not found before cleanup", "id", id)
+		} else {
+			slog.Error("delete puppy: failed to fetch images before delete", "id", id, "error", err)
+		}
 	}
 
 	var pp *models.Image
@@ -373,6 +388,6 @@ func updateLitterStatus(c *gin.Context, litterID int) {
 	if _, err := database.Pool.Exec(c, "UPDATE litters SET status = $1 WHERE id = $2", newStatus, litterID); err != nil {
 		slog.Error("update litter status: failed to update status", "litter_id", litterID, "new_status", newStatus, "error", err)
 	} else {
-		slog.Debug("update litter status: status updated", "litter_id", litterID, "new_status", newStatus)
+		slog.Info("update litter status: status updated", "litter_id", litterID, "new_status", newStatus)
 	}
 }

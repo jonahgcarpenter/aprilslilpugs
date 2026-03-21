@@ -35,8 +35,12 @@ const ManageFiles = ({
     if (selectedFiles.length === 0) return;
 
     setIsUploading(true);
-    await Promise.all(selectedFiles.map((file) => onCreate(file)));
+    const results = await Promise.all(selectedFiles.map((file) => onCreate(file)));
     setIsUploading(false);
+
+    if (results.some((result) => !result)) {
+      window.alert("One or more files could not be uploaded. Check the console for details.");
+    }
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -72,7 +76,10 @@ const ManageFiles = ({
 
   const handleDelete = async (id: number) => {
     if (window.confirm("Are you sure you want to delete this file?")) {
-      await onDelete(id);
+      const success = await onDelete(id);
+      if (!success) {
+        window.alert("Failed to delete file. Check the console for details.");
+      }
     }
   };
 

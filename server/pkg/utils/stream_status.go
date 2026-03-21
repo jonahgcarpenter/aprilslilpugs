@@ -62,7 +62,7 @@ func getStreamEnabledFromDB() bool {
 
 	err := database.Pool.QueryRow(ctx, "SELECT stream_enabled FROM settings WHERE id = 1").Scan(&enabled)
 	if err != nil {
-		slog.Error("stream monitor: failed to fetch initial stream status from DB", "error", err)
+		slog.Warn("stream monitor: failed to fetch initial stream status from DB", "error", err)
 		return false
 	}
 	return enabled
@@ -81,6 +81,12 @@ func checkStream(url string) {
 	resp, err := client.Head(url)
 
 	currentlyLive := false
+	if err != nil {
+		slog.Debug("stream: health check failed", "url", url, "error", err)
+	} else if resp.StatusCode != http.StatusOK {
+		slog.Debug("stream: health check returned non-200", "url", url, "status_code", resp.StatusCode)
+	}
+
 	if err == nil && resp.StatusCode == 200 {
 		currentlyLive = true
 	}

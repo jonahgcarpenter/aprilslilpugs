@@ -22,10 +22,14 @@ func sendWaitlistNotification(entry *models.Waitlist) {
 	defer rows.Close()
 
 	var recipients []string
+	successCount := 0
+	failureCount := 0
 	for rows.Next() {
 		var email string
 		if err := rows.Scan(&email); err == nil {
 			recipients = append(recipients, email)
+		} else {
+			slog.Warn("waitlist notification: failed to scan recipient", "error", err)
 		}
 	}
 
@@ -60,8 +64,14 @@ func sendWaitlistNotification(entry *models.Waitlist) {
 	for _, email := range recipients {
 		if err := utils.SendEmail([]string{email}, subject, htmlBody); err != nil {
 			slog.Error("waitlist notification: failed to send email", "recipient", email, "error", err)
+			failureCount++
+			continue
 		}
+
+		successCount++
 	}
+
+	slog.Info("waitlist notification: email dispatch finished", "recipient_count", len(recipients), "success_count", successCount, "failure_count", failureCount)
 }
 
 func GetWaitlist(c *gin.Context) {

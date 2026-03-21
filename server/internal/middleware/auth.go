@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/jackc/pgx/v5"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/internal/config"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/internal/models"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/database"
@@ -52,7 +53,14 @@ func RequireAuth(c *gin.Context) {
 		return
 	}
 
-	if float64(time.Now().Unix()) > claims["exp"].(float64) {
+	expValue, ok := claims["exp"].(float64)
+	if !ok {
+		slog.Warn("auth: token missing or invalid exp claim", "path", c.FullPath())
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token expiration"})
+		return
+	}
+
+	if float64(time.Now().Unix()) > expValue {
 		slog.Debug("auth: token expired", "path", c.FullPath())
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Token expired"})
 		return
@@ -72,8 +80,14 @@ func RequireAuth(c *gin.Context) {
 	err = database.Pool.QueryRow(c, query, sessionID).Scan(&user.ID, &user.FirstName, &user.Email)
 
 	if err != nil {
-		slog.Debug("auth: session not found or expired", "session_id", sessionID, "path", c.FullPath())
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Session expired or invalid"})
+		if err == pgx.ErrNoRows {
+			slog.Debug("auth: session not found or expired", "session_id", sessionID, "path", c.FullPath())
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Session expired or invalid"})
+			return
+		}
+
+		slog.Error("auth: failed to validate session", "session_id", sessionID, "path", c.FullPath(), "error", err)
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Failed to validate session"})
 		return
 	}
 

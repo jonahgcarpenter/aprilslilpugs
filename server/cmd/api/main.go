@@ -105,5 +105,8 @@ func main() {
 	})
 
 	slog.Info("server starting", "port", cfg.Port)
-	r.Run(":" + cfg.Port)
+	if err := r.Run(":" + cfg.Port); err != nil {
+		slog.Error("server failed", "port", cfg.Port, "error", err)
+		os.Exit(1)
+	}
 }

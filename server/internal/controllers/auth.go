@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/internal/models"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/database"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/utils"
@@ -24,8 +25,14 @@ func LoginUser(c *gin.Context) {
 	err := database.Pool.QueryRow(c, query, req.Email).Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.PasswordHash)
 
 	if err != nil {
-		slog.Debug("login: email not found", "email", req.Email)
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Incorrect email"})
+		if err == pgx.ErrNoRows {
+			slog.Debug("login: email not found", "email", req.Email)
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Incorrect email"})
+			return
+		}
+
+		slog.Error("login: failed to fetch user by email", "email", req.Email, "error", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to authenticate user"})
 		return
 	}
 
@@ -76,9 +83,14 @@ func LogoutUser(c *gin.Context) {
 		_, err := database.Pool.Exec(c, "DELETE FROM sessions WHERE id = $1", sessionID)
 		if err != nil {
 			slog.Error("logout: failed to delete session", "session_id", sessionID, "error", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to log out"})
+			return
 		}
+
+		slog.Info("logout: session ended", "session_id", sessionID)
+	} else {
+		slog.Warn("logout: session id missing from request context")
 	}
 
-	slog.Info("logout: session ended", "session_id", sessionID)
 	c.JSON(http.StatusOK, gin.H{"message": "Successfully logged out"})
 }

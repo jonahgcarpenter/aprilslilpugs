@@ -31,7 +31,7 @@ export const useFiles = () => {
       await mutate();
       return true;
     } catch (error) {
-      console.error(error);
+      console.error("Create file error:", { fileName: file.name, error });
       return false;
     }
   };
@@ -42,7 +42,7 @@ export const useFiles = () => {
       await mutate();
       return true;
     } catch (error) {
-      console.error(error);
+      console.error("Delete file error:", { id, error });
       return false;
     }
   };

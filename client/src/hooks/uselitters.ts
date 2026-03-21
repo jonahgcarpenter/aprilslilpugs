@@ -139,6 +139,7 @@ export const useLitters = () => {
       await axios.post("/api/litters", formData);
       await mutateLitters();
     } catch (err) {
+      console.error("Create litter error:", err);
       throw new Error("Failed to create litter");
     }
   };
@@ -149,6 +150,7 @@ export const useLitters = () => {
       await axios.patch(`/api/litters/${id}`, formData);
       await mutateLitters();
     } catch (err) {
+      console.error("Update litter error:", { id, err });
       throw new Error("Failed to update litter");
     }
   };
@@ -158,6 +160,7 @@ export const useLitters = () => {
       await axios.delete(`/api/litters/${id}`);
       await mutateLitters();
     } catch (err) {
+      console.error("Delete litter error:", { id, err });
       throw new Error("Failed to delete litter");
     }
   };

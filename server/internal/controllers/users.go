@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/internal/models"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/database"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/utils"
@@ -61,8 +62,14 @@ func GetUser(c *gin.Context) {
 	)
 
 	if err != nil {
-		slog.Debug("get user: not found", "id", id, "error", err)
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		if err == pgx.ErrNoRows {
+			slog.Debug("get user: not found", "id", id, "error", err)
+			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+			return
+		}
+
+		slog.Error("get user: database error", "id", id, "error", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch user"})
 		return
 	}
 
@@ -127,10 +134,16 @@ func DeleteUser(c *gin.Context) {
 		return
 	}
 
-	_, err := database.Pool.Exec(c, "DELETE FROM users WHERE id = $1", idParam)
+	result, err := database.Pool.Exec(c, "DELETE FROM users WHERE id = $1", idParam)
 	if err != nil {
 		slog.Error("delete user: database error", "id", idParam, "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user"})
+		return
+	}
+
+	if result.RowsAffected() == 0 {
+		slog.Debug("delete user: not found", "id", idParam)
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
 

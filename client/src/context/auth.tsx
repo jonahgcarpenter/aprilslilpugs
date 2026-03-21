@@ -28,9 +28,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const storedUser = localStorage.getItem("user");
 
     if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
-      axios.defaults.headers.common["Authorization"] = `Bearer ${storedToken}`;
+      try {
+        setToken(storedToken);
+        setUser(JSON.parse(storedUser));
+        axios.defaults.headers.common["Authorization"] = `Bearer ${storedToken}`;
+      } catch (error) {
+        console.warn("Stored auth data was invalid, clearing session:", error);
+        setToken(null);
+        setUser(null);
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        delete axios.defaults.headers.common["Authorization"];
+      }
     }
     setIsLoading(false);
   }, []);
@@ -61,7 +70,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       await axios.post("/api/auth/logout");
     } catch (error) {
-      console.error("Logout error (continuing with local cleanup):", error);
+      console.warn("Logout error (continuing with local cleanup):", error);
     } finally {
       setUser(null);
       setToken(null);

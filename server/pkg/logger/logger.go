@@ -3,6 +3,7 @@ package logger
 import (
 	"log/slog"
 	"os"
+	"strings"
 )
 
 // Init configures the default slog logger based on the LOG_LEVEL env var.
@@ -16,9 +17,11 @@ import (
 // After Init, call slog.Debug / slog.Info / slog.Warn / slog.Error directly
 // anywhere in the codebase — no logger instance needs to be threaded through.
 func Init(level string) {
+	normalizedLevel := strings.ToLower(level)
+
 	var slogLevel slog.Level
 
-	switch level {
+	switch normalizedLevel {
 	case "debug":
 		slogLevel = slog.LevelDebug
 	case "info":
@@ -34,7 +37,7 @@ func Init(level string) {
 	opts := &slog.HandlerOptions{Level: slogLevel}
 
 	var handler slog.Handler
-	if level == "debug" {
+	if normalizedLevel == "debug" {
 		handler = slog.NewTextHandler(os.Stdout, opts)
 	} else {
 		handler = slog.NewJSONHandler(os.Stdout, opts)
@@ -42,7 +45,7 @@ func Init(level string) {
 
 	slog.SetDefault(slog.New(handler))
 
-	if level != "debug" && level != "info" && level != "warn" && level != "error" {
+	if normalizedLevel != "debug" && normalizedLevel != "info" && normalizedLevel != "warn" && normalizedLevel != "error" {
 		slog.Warn("unrecognised LOG_LEVEL, defaulting to info", "provided", level)
 	}
 }

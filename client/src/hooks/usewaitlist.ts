@@ -57,6 +57,7 @@ export const useWaitlist = (fetchData = true) => {
         await mutateWaitlist();
       }
     } catch (err) {
+      console.error("Create waitlist entry error:", err);
       throw new Error("Failed to create waitlist entry");
     }
   };
@@ -70,6 +71,7 @@ export const useWaitlist = (fetchData = true) => {
       await axios.patch(`${API_URL}/${id}`, formData);
       await mutateWaitlist();
     } catch (err) {
+      console.error("Update waitlist entry error:", { id, err });
       throw new Error("Failed to update waitlist entry");
     }
   };
@@ -79,6 +81,7 @@ export const useWaitlist = (fetchData = true) => {
       await axios.delete(`${API_URL}/${id}`);
       await mutateWaitlist();
     } catch (err) {
+      console.error("Delete waitlist entry error:", { id, err });
       throw new Error("Failed to delete waitlist entry");
     }
   };

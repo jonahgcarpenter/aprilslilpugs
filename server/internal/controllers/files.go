@@ -23,7 +23,7 @@ func GetFiles(c *gin.Context) {
 	for rows.Next() {
 		var f models.File
 		if err := rows.Scan(&f.ID, &f.Name, &f.URL, &f.CreatedAt, &f.UpdatedAt); err != nil {
-			slog.Debug("get files: failed to scan row", "error", err)
+			slog.Warn("get files: failed to scan row", "error", err)
 		} else {
 			files = append(files, f)
 		}
@@ -34,8 +34,8 @@ func GetFiles(c *gin.Context) {
 func CreateFile(c *gin.Context) {
 	file, err := utils.UploadAndCreateFile(c, "file", "files")
 	if err != nil {
-		slog.Debug("create file: upload error", "error", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		slog.Error("create file: failed to upload file", "error", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to upload file"})
 		return
 	}
 	if file == nil {

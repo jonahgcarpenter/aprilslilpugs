@@ -23,7 +23,7 @@ const Stream = () => {
 
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
         video.play().catch((e) => {
-          console.log("Autoplay prevented:", e);
+          console.warn("Stream autoplay prevented:", e);
         });
       });
 
@@ -54,11 +54,12 @@ const Stream = () => {
       video.src = STREAM_URL;
       video.addEventListener("loadedmetadata", () => {
         video.play().catch((e) => {
-          console.log("Autoplay prevented:", e);
+          console.warn("Stream autoplay prevented:", e);
         });
       });
 
       video.addEventListener("error", () => {
+        console.warn("Native HLS playback failed for stream.");
         setError("Stream is currently offline.");
       });
     } else {

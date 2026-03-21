@@ -17,7 +17,7 @@ func SendAppEvent(eventType string, data map[string]interface{}) error {
 	cfg := config.Load()
 
 	if cfg.HASBaseURL == "" || cfg.HASToken == "" {
-		slog.Warn("HA integration not configured, skipping event", "event_type", eventType)
+		slog.Info("HA integration not configured, skipping event", "event_type", eventType)
 		return nil
 	}
 

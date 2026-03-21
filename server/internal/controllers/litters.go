@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/internal/models"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/database"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/utils"
@@ -155,7 +156,10 @@ func GetLitter(c *gin.Context) {
 }
 
 func CreateLitter(c *gin.Context) {
-	profilePic, _ := utils.UploadAndCreateImage(c, "profile_picture", "litters")
+	profilePic, err := utils.UploadAndCreateImage(c, "profile_picture", "litters")
+	if err != nil {
+		slog.Warn("create litter: failed to process profile picture", "error", err)
+	}
 
 	gallery := []models.Image{}
 	for i := 0; i < 50; i++ {
@@ -166,6 +170,8 @@ func CreateLitter(c *gin.Context) {
 			descKey := fmt.Sprintf("gallery_description_%d", i)
 			img.Description = c.PostForm(descKey)
 			gallery = append(gallery, *img)
+		} else if err != nil {
+			slog.Warn("create litter: failed to process gallery image", "form_key", formKey, "error", err)
 		}
 	}
 
@@ -255,6 +261,8 @@ func UpdateLitter(c *gin.Context) {
 				slog.Warn("update litter: failed to delete old profile picture", "url", currentPP.URL, "error", err)
 			}
 		}
+	} else if err != nil {
+		slog.Warn("update litter: failed to process profile picture", "litter_id", id, "error", err)
 	}
 
 	existingGalleryJSON := c.PostForm("existing_gallery")
@@ -274,6 +282,7 @@ func UpdateLitter(c *gin.Context) {
 				}
 			}
 		} else {
+			slog.Warn("update litter: invalid existing gallery payload", "litter_id", id, "error", err)
 			processedExistingGallery = currentGallery
 		}
 	} else {
@@ -287,6 +296,8 @@ func UpdateLitter(c *gin.Context) {
 			descKey := fmt.Sprintf("gallery_description_%d", i)
 			img.Description = c.PostForm(descKey)
 			newGalleryItems = append(newGalleryItems, *img)
+		} else if err != nil {
+			slog.Warn("update litter: failed to process gallery image", "litter_id", id, "form_key", formKey, "error", err)
 		}
 	}
 
@@ -327,7 +338,11 @@ func DeleteLitter(c *gin.Context) {
 
 	var ppRaw, galleryRaw []byte
 	if err := database.Pool.QueryRow(c, "SELECT profile_picture, gallery FROM litters WHERE id=$1", id).Scan(&ppRaw, &galleryRaw); err != nil {
-		slog.Warn("delete litter: failed to fetch images before delete", "id", id, "error", err)
+		if err == pgx.ErrNoRows {
+			slog.Debug("delete litter: not found before cleanup", "id", id)
+		} else {
+			slog.Error("delete litter: failed to fetch images before delete", "id", id, "error", err)
+		}
 	}
 
 	var pp *models.Image
