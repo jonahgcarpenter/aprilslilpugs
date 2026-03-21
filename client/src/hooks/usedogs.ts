@@ -42,7 +42,7 @@ export interface DogInput {
 const FALLBACK_IMAGE = "https://placehold.co/400x400/2563eb/white?text=Dog";
 const API_URL = "/api/dogs";
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+const fetcher = (url: string) => axios.get(url).then((res) => res.data);
 
 export const useDogs = () => {
   const {

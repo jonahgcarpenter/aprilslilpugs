@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import useSWR from "swr";
 import axios from "axios";
 
 export interface FileModel {
@@ -9,28 +9,26 @@ export interface FileModel {
   updated_at: string;
 }
 
-export const useFiles = () => {
-  const [files, setFiles] = useState<FileModel[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+const API_URL = "/api/files";
 
-  const fetchFiles = async () => {
-    try {
-      const { data } = await axios.get("/api/files");
-      setFiles(data || []);
-    } catch (error) {
-      console.error("Failed to fetch files", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+const fetcher = (url: string) => axios.get(url).then((res) => res.data);
+
+export const useFiles = () => {
+  const {
+    data,
+    isLoading,
+    mutate,
+  } = useSWR<FileModel[]>(API_URL, fetcher);
+
+  const files = data || [];
 
   const createFile = async (file: File) => {
     const formData = new FormData();
     formData.append("file", file);
 
     try {
-      await axios.post("/api/files", formData);
-      await fetchFiles();
+      await axios.post(API_URL, formData);
+      await mutate();
       return true;
     } catch (error) {
       console.error(error);
@@ -40,18 +38,14 @@ export const useFiles = () => {
 
   const deleteFile = async (id: number) => {
     try {
-      await axios.delete(`/api/files/${id}`);
-      setFiles((prev) => prev.filter((f) => f.id !== id));
+      await axios.delete(`${API_URL}/${id}`);
+      await mutate();
       return true;
     } catch (error) {
       console.error(error);
       return false;
     }
   };
-
-  useEffect(() => {
-    fetchFiles();
-  }, []);
 
   return { files, createFile, deleteFile, isLoading };
 };

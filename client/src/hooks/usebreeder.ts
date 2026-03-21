@@ -45,11 +45,7 @@ export interface UpdateBreederInput {
 
 const API_URL = "/api/breeder";
 
-const fetcher = async (url: string) => {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error("Failed to fetch data");
-  return res.json();
-};
+const fetcher = (url: string) => axios.get(url).then((res) => res.data);
 
 export const useBreeder = () => {
   const {

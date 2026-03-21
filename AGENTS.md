@@ -198,7 +198,3 @@ Never commit `.env` files or secrets. The `server/.env` file is gitignored.
 
 - GitHub Actions workflow (`.github/workflows/docker-image.yml`) builds and pushes a Docker image to `ghcr.io` on release publish.
 - No CI test or lint steps currently configured.
-
-## Known Quirks
-
-- Mixed fetcher patterns in hooks: some use `fetch()`, others use `axios.get()` for SWR
