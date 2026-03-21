@@ -1,5 +1,5 @@
 import DisplayLitters from "../components/litters/display-litters";
-import AddWaitlist from "../components/wailist/add-waitlist";
+import AddWaitlist from "../components/waitlist/add-waitlist";
 import { useLitters } from "../hooks/uselitters";
 import { useWaitlist } from "../hooks/usewaitlist";
 import { useSettings } from "../hooks/usesettings";

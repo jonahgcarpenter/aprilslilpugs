@@ -4,7 +4,7 @@ import Layout from "./components/general/layout";
 // Pages
 import Home from "./pages/home";
 import OurAdults from "./pages/our-adults";
-import Nursery from "./pages/nursury";
+import Nursery from "./pages/nursery";
 import Live from "./pages/live";
 import PastLitters from "./pages/past-litters";
 import Gallery from "./pages/gallery";
