@@ -29,5 +29,3 @@ A custom, full-stack website built for [April's Lil Pugs](https://aprilslilpugs.
 ## Roadmap
 
 - [ ] RTMPS server in Go
-- [ ] Footer
-- [ ] File storage on mobile
