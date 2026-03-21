@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+/* NOTE: Temp fix for footer overscolling, but I dont like it */
 html,
 body {
   overscroll-behavior-y: none;
