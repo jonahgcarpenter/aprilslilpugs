@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"time"
@@ -40,6 +41,7 @@ func GetLitters(c *gin.Context) {
 
 	rows, err := database.Pool.Query(c, query)
 	if err != nil {
+		slog.Error("get litters: database error", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch litters"})
 		return
 	}
@@ -60,17 +62,32 @@ func GetLitters(c *gin.Context) {
 			&ppRaw, &galleryRaw, &l.CreatedAt, &l.UpdatedAt,
 		)
 		if err != nil {
+			slog.Debug("get litters: failed to scan row", "error", err)
 			continue
 		}
 
-		if extMother != nil { l.ExternalMother = *extMother }
-		if extFather != nil { l.ExternalFather = *extFather }
+		if extMother != nil {
+			l.ExternalMother = *extMother
+		}
+		if extFather != nil {
+			l.ExternalFather = *extFather
+		}
 		l.MotherName = mName
 		l.FatherName = fName
 
-		if len(ppRaw) > 0 { _ = json.Unmarshal(ppRaw, &l.ProfilePicture) }
-		if len(galleryRaw) > 0 { _ = json.Unmarshal(galleryRaw, &l.Gallery) }
-		if l.Gallery == nil { l.Gallery = []models.Image{} }
+		if len(ppRaw) > 0 {
+			if err := json.Unmarshal(ppRaw, &l.ProfilePicture); err != nil {
+				slog.Debug("get litters: failed to unmarshal profile picture", "litter_id", l.ID, "error", err)
+			}
+		}
+		if len(galleryRaw) > 0 {
+			if err := json.Unmarshal(galleryRaw, &l.Gallery); err != nil {
+				slog.Debug("get litters: failed to unmarshal gallery", "litter_id", l.ID, "error", err)
+			}
+		}
+		if l.Gallery == nil {
+			l.Gallery = []models.Image{}
+		}
 
 		litters = append(litters, l)
 	}
@@ -106,18 +123,33 @@ func GetLitter(c *gin.Context) {
 	)
 
 	if err != nil {
+		slog.Debug("get litter: not found", "id", id, "error", err)
 		c.JSON(http.StatusNotFound, gin.H{"error": "Litter not found"})
 		return
 	}
 
-	if extMother != nil { l.ExternalMother = *extMother }
-	if extFather != nil { l.ExternalFather = *extFather }
+	if extMother != nil {
+		l.ExternalMother = *extMother
+	}
+	if extFather != nil {
+		l.ExternalFather = *extFather
+	}
 	l.MotherName = mName
 	l.FatherName = fName
 
-	if len(ppRaw) > 0 { _ = json.Unmarshal(ppRaw, &l.ProfilePicture) }
-	if len(galleryRaw) > 0 { _ = json.Unmarshal(galleryRaw, &l.Gallery) }
-	if l.Gallery == nil { l.Gallery = []models.Image{} }
+	if len(ppRaw) > 0 {
+		if err := json.Unmarshal(ppRaw, &l.ProfilePicture); err != nil {
+			slog.Debug("get litter: failed to unmarshal profile picture", "litter_id", id, "error", err)
+		}
+	}
+	if len(galleryRaw) > 0 {
+		if err := json.Unmarshal(galleryRaw, &l.Gallery); err != nil {
+			slog.Debug("get litter: failed to unmarshal gallery", "litter_id", id, "error", err)
+		}
+	}
+	if l.Gallery == nil {
+		l.Gallery = []models.Image{}
+	}
 
 	c.JSON(http.StatusOK, l)
 }
@@ -133,7 +165,6 @@ func CreateLitter(c *gin.Context) {
 		if err == nil && img != nil {
 			descKey := fmt.Sprintf("gallery_description_%d", i)
 			img.Description = c.PostForm(descKey)
-
 			gallery = append(gallery, *img)
 		}
 	}
@@ -147,8 +178,14 @@ func CreateLitter(c *gin.Context) {
 	birthDate, _ := time.Parse("2006-01-02", c.PostForm("birth_date"))
 	availDate, _ := time.Parse("2006-01-02", c.PostForm("available_date"))
 
-	ppJSON, _ := json.Marshal(profilePic)
-	galleryJSON, _ := json.Marshal(gallery)
+	ppJSON, err := json.Marshal(profilePic)
+	if err != nil {
+		slog.Warn("create litter: failed to marshal profile picture", "error", err)
+	}
+	galleryJSON, err := json.Marshal(gallery)
+	if err != nil {
+		slog.Warn("create litter: failed to marshal gallery", "error", err)
+	}
 
 	var newID int
 	query := `
@@ -159,16 +196,18 @@ func CreateLitter(c *gin.Context) {
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 		RETURNING id`
 
-	err := database.Pool.QueryRow(c, query,
+	err = database.Pool.QueryRow(c, query,
 		name, motherID, fatherID, extMother, extFather,
 		birthDate, availDate, status, ppJSON, galleryJSON,
 	).Scan(&newID)
 
 	if err != nil {
+		slog.Error("create litter: database error", "name", name, "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
+	slog.Info("create litter: litter created", "litter_id", newID, "name", name)
 	c.JSON(http.StatusCreated, gin.H{"message": "Litter created", "id": newID})
 }
 
@@ -178,15 +217,26 @@ func UpdateLitter(c *gin.Context) {
 	var oldPPRaw, oldGalleryRaw []byte
 	err := database.Pool.QueryRow(c, "SELECT profile_picture, gallery FROM litters WHERE id=$1", id).Scan(&oldPPRaw, &oldGalleryRaw)
 	if err != nil {
+		slog.Debug("update litter: not found", "id", id, "error", err)
 		c.JSON(http.StatusNotFound, gin.H{"error": "Litter not found"})
 		return
 	}
 
 	var currentPP *models.Image
 	var currentGallery []models.Image
-	if len(oldPPRaw) > 0 { _ = json.Unmarshal(oldPPRaw, &currentPP) }
-	if len(oldGalleryRaw) > 0 { _ = json.Unmarshal(oldGalleryRaw, &currentGallery) }
-	if currentGallery == nil { currentGallery = []models.Image{} }
+	if len(oldPPRaw) > 0 {
+		if err := json.Unmarshal(oldPPRaw, &currentPP); err != nil {
+			slog.Debug("update litter: failed to unmarshal current profile picture", "litter_id", id, "error", err)
+		}
+	}
+	if len(oldGalleryRaw) > 0 {
+		if err := json.Unmarshal(oldGalleryRaw, &currentGallery); err != nil {
+			slog.Debug("update litter: failed to unmarshal current gallery", "litter_id", id, "error", err)
+		}
+	}
+	if currentGallery == nil {
+		currentGallery = []models.Image{}
+	}
 
 	name := c.PostForm("name")
 	status := c.PostForm("status")
@@ -201,7 +251,9 @@ func UpdateLitter(c *gin.Context) {
 	if uploadedImg, err := utils.UploadAndCreateImage(c, "profile_picture", "litters"); err == nil && uploadedImg != nil {
 		newPP = uploadedImg
 		if currentPP != nil {
-			_ = utils.DeleteImage(currentPP.URL)
+			if err := utils.DeleteImage(currentPP.URL); err != nil {
+				slog.Warn("update litter: failed to delete old profile picture", "url", currentPP.URL, "error", err)
+			}
 		}
 	}
 
@@ -216,7 +268,9 @@ func UpdateLitter(c *gin.Context) {
 			}
 			for _, oldImg := range currentGallery {
 				if !keepMap[oldImg.URL] {
-					_ = utils.DeleteImage(oldImg.URL)
+					if err := utils.DeleteImage(oldImg.URL); err != nil {
+						slog.Warn("update litter: failed to delete removed gallery image", "url", oldImg.URL, "error", err)
+					}
 				}
 			}
 		} else {
@@ -232,15 +286,20 @@ func UpdateLitter(c *gin.Context) {
 		if img, err := utils.UploadAndCreateImage(c, formKey, "litters"); err == nil && img != nil {
 			descKey := fmt.Sprintf("gallery_description_%d", i)
 			img.Description = c.PostForm(descKey)
-			
 			newGalleryItems = append(newGalleryItems, *img)
 		}
 	}
 
 	finalGallery := append(processedExistingGallery, newGalleryItems...)
 
-	ppJSON, _ := json.Marshal(newPP)
-	galleryJSON, _ := json.Marshal(finalGallery)
+	ppJSON, err := json.Marshal(newPP)
+	if err != nil {
+		slog.Warn("update litter: failed to marshal profile picture", "litter_id", id, "error", err)
+	}
+	galleryJSON, err := json.Marshal(finalGallery)
+	if err != nil {
+		slog.Warn("update litter: failed to marshal gallery", "litter_id", id, "error", err)
+	}
 
 	query := `
 		UPDATE litters 
@@ -254,10 +313,12 @@ func UpdateLitter(c *gin.Context) {
 	)
 
 	if err != nil {
+		slog.Error("update litter: database error", "id", id, "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
+	slog.Info("update litter: litter updated", "litter_id", id)
 	c.JSON(http.StatusOK, gin.H{"message": "Litter updated successfully"})
 }
 
@@ -265,24 +326,41 @@ func DeleteLitter(c *gin.Context) {
 	id := c.Param("id")
 
 	var ppRaw, galleryRaw []byte
-	_ = database.Pool.QueryRow(c, "SELECT profile_picture, gallery FROM litters WHERE id=$1", id).Scan(&ppRaw, &galleryRaw)
+	if err := database.Pool.QueryRow(c, "SELECT profile_picture, gallery FROM litters WHERE id=$1", id).Scan(&ppRaw, &galleryRaw); err != nil {
+		slog.Warn("delete litter: failed to fetch images before delete", "id", id, "error", err)
+	}
 
 	var pp *models.Image
 	var gallery []models.Image
-	if len(ppRaw) > 0 { _ = json.Unmarshal(ppRaw, &pp) }
-	if len(galleryRaw) > 0 { _ = json.Unmarshal(galleryRaw, &gallery) }
+	if len(ppRaw) > 0 {
+		if err := json.Unmarshal(ppRaw, &pp); err != nil {
+			slog.Debug("delete litter: failed to unmarshal profile picture", "litter_id", id, "error", err)
+		}
+	}
+	if len(galleryRaw) > 0 {
+		if err := json.Unmarshal(galleryRaw, &gallery); err != nil {
+			slog.Debug("delete litter: failed to unmarshal gallery", "litter_id", id, "error", err)
+		}
+	}
 
 	if pp != nil {
-		_ = utils.DeleteImage(pp.URL)
+		if err := utils.DeleteImage(pp.URL); err != nil {
+			slog.Warn("delete litter: failed to delete profile picture file", "url", pp.URL, "error", err)
+		}
 	}
 	for _, img := range gallery {
-		_ = utils.DeleteImage(img.URL)
+		if err := utils.DeleteImage(img.URL); err != nil {
+			slog.Warn("delete litter: failed to delete gallery image file", "url", img.URL, "error", err)
+		}
 	}
 
 	_, err := database.Pool.Exec(c, "DELETE FROM litters WHERE id=$1", id)
 	if err != nil {
+		slog.Error("delete litter: database error", "id", id, "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete litter"})
 		return
 	}
+
+	slog.Info("delete litter: litter deleted", "litter_id", id)
 	c.JSON(http.StatusOK, gin.H{"message": "Litter deleted"})
 }

@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -13,7 +14,7 @@ import (
 
 func GetBreeder(c *gin.Context) {
 	var breeder models.Breeder
-	
+
 	var profilePictureRaw []byte
 	var galleryRaw []byte
 
@@ -32,20 +33,20 @@ func GetBreeder(c *gin.Context) {
 	)
 
 	if err != nil {
-		fmt.Println("Database error:", err)
+		slog.Error("get breeder: database error", "error", err)
 		c.JSON(http.StatusNotFound, gin.H{"error": "Breeder profile not found"})
 		return
 	}
 
 	if len(profilePictureRaw) > 0 {
 		if err := json.Unmarshal(profilePictureRaw, &breeder.ProfilePicture); err != nil {
-			fmt.Println("Error parsing profile picture JSON:", err)
+			slog.Warn("get breeder: failed to parse profile picture JSON", "error", err)
 		}
 	}
 
 	if len(galleryRaw) > 0 {
 		if err := json.Unmarshal(galleryRaw, &breeder.Gallery); err != nil {
-			fmt.Println("Error parsing gallery JSON:", err)
+			slog.Warn("get breeder: failed to parse gallery JSON", "error", err)
 		}
 	}
 
@@ -63,14 +64,23 @@ func UpdateBreeder(c *gin.Context) {
 	fetchQuery := `SELECT id, profile_picture, gallery FROM breeders ORDER BY id ASC LIMIT 1`
 	err := database.Pool.QueryRow(c, fetchQuery).Scan(&id, &oldPPRaw, &oldGalleryRaw)
 	if err != nil {
+		slog.Debug("update breeder: no breeder profile found", "error", err)
 		c.JSON(http.StatusNotFound, gin.H{"error": "No breeder profile to update"})
 		return
 	}
 
 	var currentPP *models.Image
 	var currentGallery []models.Image
-	if len(oldPPRaw) > 0 { _ = json.Unmarshal(oldPPRaw, &currentPP) }
-	if len(oldGalleryRaw) > 0 { _ = json.Unmarshal(oldGalleryRaw, &currentGallery) }
+	if len(oldPPRaw) > 0 {
+		if err := json.Unmarshal(oldPPRaw, &currentPP); err != nil {
+			slog.Debug("update breeder: failed to unmarshal current profile picture", "error", err)
+		}
+	}
+	if len(oldGalleryRaw) > 0 {
+		if err := json.Unmarshal(oldGalleryRaw, &currentGallery); err != nil {
+			slog.Debug("update breeder: failed to unmarshal current gallery", "error", err)
+		}
+	}
 
 	firstName := c.PostForm("firstName")
 	lastName := c.PostForm("lastName")
@@ -78,34 +88,38 @@ func UpdateBreeder(c *gin.Context) {
 	phone := c.PostForm("phoneNumber")
 	location := c.PostForm("location")
 	story := c.PostForm("story")
-	
+
 	newPP := currentPP
-	
+
 	if uploadedImg, err := utils.UploadAndCreateImage(c, "profilePicture", "breeders"); err == nil && uploadedImg != nil {
 		newPP = uploadedImg
 		if currentPP != nil && currentPP.URL != "" {
-			_ = utils.DeleteImage(currentPP.URL)
+			if err := utils.DeleteImage(currentPP.URL); err != nil {
+				slog.Warn("update breeder: failed to delete old profile picture", "url", currentPP.URL, "error", err)
+			}
 		}
 	}
 
 	tempGallery := make([]models.Image, 2)
 	for i, img := range currentGallery {
-		if i < 2 { tempGallery[i] = img }
+		if i < 2 {
+			tempGallery[i] = img
+		}
 	}
 
 	for i := 0; i < 2; i++ {
 		formKey := fmt.Sprintf("galleryImage%d", i)
-		
+
 		if uploadedImg, err := utils.UploadAndCreateImage(c, formKey, "breeders"); err == nil && uploadedImg != nil {
-			
 			if tempGallery[i].URL != "" {
-				_ = utils.DeleteImage(tempGallery[i].URL)
+				if err := utils.DeleteImage(tempGallery[i].URL); err != nil {
+					slog.Warn("update breeder: failed to delete old gallery image", "url", tempGallery[i].URL, "error", err)
+				}
 			}
-			
 			tempGallery[i] = *uploadedImg
 		}
 	}
-	
+
 	finalGallery := []models.Image{}
 	for _, img := range tempGallery {
 		if img.URL != "" {
@@ -113,8 +127,14 @@ func UpdateBreeder(c *gin.Context) {
 		}
 	}
 
-	ppJSON, _ := json.Marshal(newPP)
-	galleryJSON, _ := json.Marshal(finalGallery)
+	ppJSON, err := json.Marshal(newPP)
+	if err != nil {
+		slog.Warn("update breeder: failed to marshal profile picture", "error", err)
+	}
+	galleryJSON, err := json.Marshal(finalGallery)
+	if err != nil {
+		slog.Warn("update breeder: failed to marshal gallery", "error", err)
+	}
 
 	updateQuery := `
 		UPDATE breeders 
@@ -124,9 +144,11 @@ func UpdateBreeder(c *gin.Context) {
 
 	_, err = database.Pool.Exec(c, updateQuery, firstName, lastName, email, phone, location, story, ppJSON, galleryJSON, id)
 	if err != nil {
+		slog.Error("update breeder: database error", "id", id, "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
+	slog.Info("update breeder: profile updated", "id", id)
 	c.JSON(http.StatusOK, gin.H{"message": "Breeder profile updated successfully"})
 }

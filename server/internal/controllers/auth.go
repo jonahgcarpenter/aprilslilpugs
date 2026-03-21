@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"fmt"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -14,6 +14,7 @@ import (
 func LoginUser(c *gin.Context) {
 	var req models.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
+		slog.Debug("login: invalid request body", "error", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
 		return
 	}
@@ -23,38 +24,43 @@ func LoginUser(c *gin.Context) {
 	err := database.Pool.QueryRow(c, query, req.Email).Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.PasswordHash)
 
 	if err != nil {
+		slog.Debug("login: email not found", "email", req.Email)
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Incorrect email"})
 		return
 	}
 
 	if !utils.CheckPassword(req.Password, user.PasswordHash) {
+		slog.Debug("login: incorrect password", "email", req.Email)
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Incorrect password"})
 		return
 	}
 
 	var sessionID int
-	expirationTime := time.Now().Add(24 * time.Hour) 
+	expirationTime := time.Now().Add(24 * time.Hour)
 
 	clientIP := c.ClientIP()
 	userAgent := c.Request.UserAgent()
-	
+
 	insertSession := `
 		INSERT INTO sessions (user_id, user_agent, ip_address, expires_at) 
 		VALUES ($1, $2, $3, $4) 
 		RETURNING id`
-		
+
 	err = database.Pool.QueryRow(c, insertSession, user.ID, userAgent, clientIP, expirationTime).Scan(&sessionID)
 	if err != nil {
-		fmt.Println("Session create error:", err)
+		slog.Error("login: failed to create session", "user_id", user.ID, "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create session"})
 		return
 	}
 
 	tokenString, err := utils.GenerateToken(sessionID)
 	if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
-			return
+		slog.Error("login: failed to generate token", "session_id", sessionID, "error", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		return
 	}
+
+	slog.Info("login: user authenticated", "user_id", user.ID, "ip", clientIP)
 
 	c.JSON(http.StatusOK, models.LoginResponse{
 		Token:     tokenString,
@@ -65,13 +71,14 @@ func LoginUser(c *gin.Context) {
 }
 
 func LogoutUser(c *gin.Context) {
-    sessionID, exists := c.Get("session_id")
-    if exists {
-        _, err := database.Pool.Exec(c, "DELETE FROM sessions WHERE id = $1", sessionID)
-        if err != nil {
-             fmt.Println("Error deleting session:", err)
-        }
-    }
+	sessionID, exists := c.Get("session_id")
+	if exists {
+		_, err := database.Pool.Exec(c, "DELETE FROM sessions WHERE id = $1", sessionID)
+		if err != nil {
+			slog.Error("logout: failed to delete session", "session_id", sessionID, "error", err)
+		}
+	}
 
-    c.JSON(http.StatusOK, gin.H{"message": "Successfully logged out"})
+	slog.Info("logout: session ended", "session_id", sessionID)
+	c.JSON(http.StatusOK, gin.H{"message": "Successfully logged out"})
 }

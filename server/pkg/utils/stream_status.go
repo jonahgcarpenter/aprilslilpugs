@@ -2,7 +2,7 @@ package utils
 
 import (
 	"context"
-	"fmt"
+	"log/slog"
 	"net/http"
 	"sync"
 	"time"
@@ -25,6 +25,8 @@ func StartStreamMonitoring(streamURL string) {
 	Monitor.IsEnabled = initialState
 	Monitor.mu.Unlock()
 
+	slog.Info("stream monitoring started", "enabled", initialState, "url", streamURL)
+
 	ticker := time.NewTicker(10 * time.Second)
 	defer ticker.Stop()
 
@@ -39,7 +41,7 @@ func StartStreamMonitoring(streamURL string) {
 
 		if shouldPoll {
 			checkStream(streamURL)
-		} 
+		}
 	}
 }
 
@@ -47,6 +49,7 @@ func SetStreamEnabled(enabled bool) {
 	Monitor.mu.Lock()
 	defer Monitor.mu.Unlock()
 	Monitor.IsEnabled = enabled
+	slog.Info("stream monitoring toggled", "enabled", enabled)
 }
 
 func getStreamEnabledFromDB() bool {
@@ -59,7 +62,7 @@ func getStreamEnabledFromDB() bool {
 
 	err := database.Pool.QueryRow(ctx, "SELECT stream_enabled FROM settings WHERE id = 1").Scan(&enabled)
 	if err != nil {
-		fmt.Printf("Error fetching initial stream status: %v\n", err)
+		slog.Error("stream monitor: failed to fetch initial stream status from DB", "error", err)
 		return false
 	}
 	return enabled
@@ -104,16 +107,15 @@ func checkStream(url string) {
 			}
 
 			if !isLive {
-				fmt.Println("ALERT: Stream went OFFLINE")
+				slog.Warn("stream: went OFFLINE")
 				payload["status"] = "offline"
 			} else {
-				fmt.Println("NOTICE: Stream is BACK ONLINE")
+				slog.Info("stream: back ONLINE")
 				payload["status"] = "online"
 			}
 
-			err := SendAppEvent("stream_status", payload)
-			if err != nil {
-				fmt.Printf("Error firing HA event: %v\n", err)
+			if err := SendAppEvent("stream_status", payload); err != nil {
+				slog.Error("stream: failed to fire HA event", "error", err)
 			}
 		}(currentlyLive)
 	}

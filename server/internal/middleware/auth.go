@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strings"
 	"time"
@@ -16,6 +17,7 @@ import (
 func RequireAuth(c *gin.Context) {
 	authHeader := c.GetHeader("Authorization")
 	if authHeader == "" {
+		slog.Debug("auth: missing Authorization header", "path", c.FullPath())
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is required"})
 		return
 	}
@@ -24,6 +26,7 @@ func RequireAuth(c *gin.Context) {
 	if len(authHeader) > 7 && strings.ToUpper(authHeader[0:6]) == "BEARER" {
 		tokenString = authHeader[7:]
 	} else {
+		slog.Debug("auth: malformed Authorization header", "path", c.FullPath())
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token format. Format: Bearer <token>"})
 		return
 	}
@@ -37,23 +40,27 @@ func RequireAuth(c *gin.Context) {
 	})
 
 	if err != nil || !token.Valid {
+		slog.Debug("auth: invalid or expired token", "path", c.FullPath(), "error", err)
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
 		return
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
+		slog.Warn("auth: failed to extract token claims", "path", c.FullPath())
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
 		return
 	}
 
 	if float64(time.Now().Unix()) > claims["exp"].(float64) {
+		slog.Debug("auth: token expired", "path", c.FullPath())
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Token expired"})
 		return
 	}
 
 	sessionIDFloat, ok := claims["sid"].(float64)
 	if !ok {
+		slog.Warn("auth: token missing sid claim", "path", c.FullPath())
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token session"})
 		return
 	}
@@ -65,9 +72,12 @@ func RequireAuth(c *gin.Context) {
 	err = database.Pool.QueryRow(c, query, sessionID).Scan(&user.ID, &user.FirstName, &user.Email)
 
 	if err != nil {
+		slog.Debug("auth: session not found or expired", "session_id", sessionID, "path", c.FullPath())
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Session expired or invalid"})
 		return
 	}
+
+	slog.Debug("auth: request authorized", "user_id", user.ID, "session_id", sessionID, "path", c.FullPath())
 
 	c.Set("user", user)
 	c.Set("session_id", sessionID)

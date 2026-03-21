@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -16,7 +17,7 @@ func SendAppEvent(eventType string, data map[string]interface{}) error {
 	cfg := config.Load()
 
 	if cfg.HASBaseURL == "" || cfg.HASToken == "" {
-		fmt.Println("Warning: HAS_BASE_URL or HAS_TOKEN is missing")
+		slog.Warn("HA integration not configured, skipping event", "event_type", eventType)
 		return nil
 	}
 
@@ -54,6 +55,6 @@ func SendAppEvent(eventType string, data map[string]interface{}) error {
 		return fmt.Errorf("HA API returned error: %d", resp.StatusCode)
 	}
 
-	fmt.Printf("Fired Global Event '%s' (Type: %s)\n", AppGlobalEventName, eventType)
+	slog.Info("HA event fired", "event_name", AppGlobalEventName, "event_type", eventType)
 	return nil
 }

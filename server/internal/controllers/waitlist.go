@@ -3,6 +3,7 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -15,7 +16,7 @@ import (
 func sendWaitlistNotification(entry *models.Waitlist) {
 	rows, err := database.Pool.Query(context.Background(), "SELECT email FROM users")
 	if err != nil {
-		fmt.Printf("Error fetching users for notification: %v\n", err)
+		slog.Error("waitlist notification: failed to fetch recipients", "error", err)
 		return
 	}
 	defer rows.Close()
@@ -29,7 +30,7 @@ func sendWaitlistNotification(entry *models.Waitlist) {
 	}
 
 	if len(recipients) == 0 {
-		fmt.Println("No users found to notify about new waitlist entry.")
+		slog.Info("waitlist notification: no recipients found, skipping")
 		return
 	}
 
@@ -54,12 +55,11 @@ func sendWaitlistNotification(entry *models.Waitlist) {
 		entry.CreatedAt.Format("2006-01-02 03:04 PM"),
 	)
 
-	fmt.Printf("Sending Waitlist Notification to %d users...\n", len(recipients))
+	slog.Info("waitlist notification: dispatching emails", "recipient_count", len(recipients))
 
 	for _, email := range recipients {
-		err := utils.SendEmail([]string{email}, subject, htmlBody)
-		if err != nil {
-			fmt.Printf("Error sending email to %s: %v\n", email, err)
+		if err := utils.SendEmail([]string{email}, subject, htmlBody); err != nil {
+			slog.Error("waitlist notification: failed to send email", "recipient", email, "error", err)
 		}
 	}
 }
@@ -72,6 +72,7 @@ func GetWaitlist(c *gin.Context) {
 
 	rows, err := database.Pool.Query(c, query)
 	if err != nil {
+		slog.Error("get waitlist: database error", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch waitlist"})
 		return
 	}
@@ -83,6 +84,7 @@ func GetWaitlist(c *gin.Context) {
 		if err := rows.Scan(
 			&w.ID, &w.FirstName, &w.LastName, &w.Email, &w.Phone, &w.Preferences, &w.Status, &w.CreatedAt, &w.UpdatedAt,
 		); err != nil {
+			slog.Debug("get waitlist: failed to scan row", "error", err)
 			continue
 		}
 		waitlist = append(waitlist, w)
@@ -113,6 +115,7 @@ func CreateWaitlist(c *gin.Context) {
 	).Scan(&newID)
 
 	if err != nil {
+		slog.Error("create waitlist: database error", "email", email, "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create waitlist entry"})
 		return
 	}
@@ -129,6 +132,7 @@ func CreateWaitlist(c *gin.Context) {
 
 	go sendWaitlistNotification(&entry)
 
+	slog.Info("create waitlist: entry created", "id", newID, "email", email)
 	c.JSON(http.StatusCreated, gin.H{"message": "Joined waitlist", "id": newID})
 }
 
@@ -147,15 +151,17 @@ func UpdateWaitlist(c *gin.Context) {
 		SET first_name=$1, last_name=$2, email=$3, phone=$4, preferences=$5, status=$6, updated_at=NOW()
 		WHERE id=$7`
 
-	_, err := database.Pool.Exec(c, query, 
+	_, err := database.Pool.Exec(c, query,
 		firstName, lastName, email, phone, preferences, status, id,
 	)
 
 	if err != nil {
+		slog.Error("update waitlist: database error", "id", id, "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update waitlist entry"})
 		return
 	}
 
+	slog.Info("update waitlist: entry updated", "id", id, "status", status)
 	c.JSON(http.StatusOK, gin.H{"message": "Waitlist entry updated"})
 }
 
@@ -163,8 +169,11 @@ func DeleteWaitlist(c *gin.Context) {
 	id := c.Param("id")
 	_, err := database.Pool.Exec(c, "DELETE FROM waitlist WHERE id=$1", id)
 	if err != nil {
+		slog.Error("delete waitlist: database error", "id", id, "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete waitlist entry"})
 		return
 	}
+
+	slog.Info("delete waitlist: entry deleted", "id", id)
 	c.JSON(http.StatusOK, gin.H{"message": "Waitlist entry deleted"})
 }

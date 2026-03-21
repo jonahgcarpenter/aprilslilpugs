@@ -2,21 +2,22 @@ package database
 
 import (
 	"context"
-	"log"
+	"log/slog"
+	"os"
 )
 
 func CreateTables() {
-    ctx := context.Background()
+	ctx := context.Background()
 
-		type Schema struct {
-			Name  string
-			Query string
-		}
+	type Schema struct {
+		Name  string
+		Query string
+	}
 
-    tables := []Schema{
-			{
-				Name: "users",
-				Query: `
+	tables := []Schema{
+		{
+			Name: "users",
+			Query: `
 				CREATE TABLE IF NOT EXISTS users (
 					id SERIAL PRIMARY KEY,
 					first_name VARCHAR(100) NOT NULL,
@@ -27,10 +28,10 @@ func CreateTables() {
 					created_at TIMESTAMPTZ DEFAULT NOW(),
 					updated_at TIMESTAMPTZ DEFAULT NOW()
 				);`,
-			},
-			{
-				Name: "sessions",
-				Query: `
+		},
+		{
+			Name: "sessions",
+			Query: `
 				CREATE TABLE IF NOT EXISTS sessions (
 					id SERIAL PRIMARY KEY,
 					user_id INT REFERENCES users(id) ON DELETE CASCADE,
@@ -39,10 +40,10 @@ func CreateTables() {
 					expires_at TIMESTAMPTZ NOT NULL,
 					created_at TIMESTAMPTZ DEFAULT NOW()
 				);`,
-			},
-			{
-				Name: "breeders",
-				Query: `
+		},
+		{
+			Name: "breeders",
+			Query: `
 				CREATE TABLE IF NOT EXISTS breeders (
 					id SERIAL PRIMARY KEY,
 					first_name VARCHAR(100) NOT NULL,
@@ -56,19 +57,19 @@ func CreateTables() {
 					created_at TIMESTAMPTZ DEFAULT NOW(),
 					updated_at TIMESTAMPTZ DEFAULT NOW()
 				);`,
-			},
-			{
-				Name: "dog_gender Enum",
-				Query: `
+		},
+		{
+			Name: "dog_gender Enum",
+			Query: `
 				DO $$ BEGIN
 					CREATE TYPE dog_gender AS ENUM ('Male', 'Female');
 				EXCEPTION
 					WHEN duplicate_object THEN null;
 				END $$;`,
-			},
-			{
-				Name: "dogs",
-				Query: `
+		},
+		{
+			Name: "dogs",
+			Query: `
 				CREATE TABLE IF NOT EXISTS dogs (
 					id SERIAL PRIMARY KEY,
 					name VARCHAR(100) NOT NULL,
@@ -80,19 +81,19 @@ func CreateTables() {
 					created_at TIMESTAMPTZ DEFAULT NOW(),
 					updated_at TIMESTAMPTZ DEFAULT NOW()
 				);`,
-			},
-			{
-				Name: "litter_status Enum",
-				Query: `
+		},
+		{
+			Name: "litter_status Enum",
+			Query: `
 				DO $$ BEGIN
 					CREATE TYPE litter_status AS ENUM ('Planned', 'Available', 'Sold');
 				EXCEPTION
 					WHEN duplicate_object THEN null;
 				END $$;`,
-			},
-			{
-				Name: "litters",
-				Query: `
+		},
+		{
+			Name: "litters",
+			Query: `
 				CREATE TABLE IF NOT EXISTS litters (
 					id SERIAL PRIMARY KEY,
 					name VARCHAR(100) NOT NULL,
@@ -108,28 +109,28 @@ func CreateTables() {
 					created_at TIMESTAMPTZ DEFAULT NOW(),
 					updated_at TIMESTAMPTZ DEFAULT NOW()
 				);`,
-			},
-			{
-				Name: "puppy_status Enum",
-				Query: `
+		},
+		{
+			Name: "puppy_status Enum",
+			Query: `
 				DO $$ BEGIN
 					CREATE TYPE puppy_status AS ENUM ('Available', 'Reserved', 'Sold');
 				EXCEPTION
 					WHEN duplicate_object THEN null;
 				END $$;`,
-			},
-			{
-				Name: "puppy_gender Enum",
-				Query: `
+		},
+		{
+			Name: "puppy_gender Enum",
+			Query: `
 				DO $$ BEGIN
 					CREATE TYPE puppy_gender AS ENUM ('Male', 'Female');
 				EXCEPTION
 					WHEN duplicate_object THEN null;
 				END $$;`,
-			},
-			{
-				Name: "puppies",
-				Query: `
+		},
+		{
+			Name: "puppies",
+			Query: `
 				CREATE TABLE IF NOT EXISTS puppies (
 					id SERIAL PRIMARY KEY,
 					litter_id INT REFERENCES litters(id) ON DELETE CASCADE,
@@ -143,19 +144,19 @@ func CreateTables() {
 					created_at TIMESTAMPTZ DEFAULT NOW(),
 					updated_at TIMESTAMPTZ DEFAULT NOW()
 				);`,
-			},
-			{
-				Name: "waitlist_status Enum",
-				Query: `
+		},
+		{
+			Name: "waitlist_status Enum",
+			Query: `
 				DO $$ BEGIN
 					CREATE TYPE waitlist_status AS ENUM ('New', 'Contacted', 'Complete');
 				EXCEPTION
 					WHEN duplicate_object THEN null;
 				END $$;`,
-			},
-			{
-				Name: "waitlist",
-				Query: `
+		},
+		{
+			Name: "waitlist",
+			Query: `
 				CREATE TABLE IF NOT EXISTS waitlist (
 					id SERIAL PRIMARY KEY,
 					first_name VARCHAR(100) NOT NULL,
@@ -167,20 +168,20 @@ func CreateTables() {
 					created_at TIMESTAMPTZ DEFAULT NOW(),
 					updated_at TIMESTAMPTZ DEFAULT NOW()
 				);`,
-			},
-			{
-				Name: "settings",
-				Query: `
+		},
+		{
+			Name: "settings",
+			Query: `
 				CREATE TABLE IF NOT EXISTS settings (
 					id SERIAL PRIMARY KEY,
 					waitlist_enabled BOOLEAN DEFAULT false,
 					stream_enabled BOOLEAN DEFAULT false,
 					updated_at TIMESTAMPTZ DEFAULT NOW()
 				);`,
-			},
-			{
-				Name: "files",
-				Query: `
+		},
+		{
+			Name: "files",
+			Query: `
 				CREATE TABLE IF NOT EXISTS files (
 					id SERIAL PRIMARY KEY,
 					name VARCHAR(255) NOT NULL,
@@ -188,14 +189,15 @@ func CreateTables() {
 					created_at TIMESTAMPTZ DEFAULT NOW(),
 					updated_at TIMESTAMPTZ DEFAULT NOW()
 				);`,
-			},
-		}
+		},
+	}
 
-    for _, item := range tables {
-			_, err := Pool.Exec(ctx, item.Query)
-			if err != nil {
-				log.Fatalf("Unable to create '%s': %v\n", item.Name, err)
-			}
-			log.Printf("Successfully ensured '%s'\n", item.Name)
+	for _, item := range tables {
+		_, err := Pool.Exec(ctx, item.Query)
+		if err != nil {
+			slog.Error("unable to create schema object", "name", item.Name, "error", err)
+			os.Exit(1)
 		}
+		slog.Debug("schema object ensured", "name", item.Name)
+	}
 }

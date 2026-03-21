@@ -1,7 +1,8 @@
 package main
 
 import (
-	"log"
+	"log/slog"
+	"os"
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
@@ -10,19 +11,25 @@ import (
 	"github.com/jonahgcarpenter/aprilslilpugs/server/internal/controllers"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/internal/middleware"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/database"
+	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/logger"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/utils"
 )
 
 func main() {
 	cfg := config.Load()
 
+	logger.Init(cfg.Env)
+
 	database.Connect(cfg.DatabaseURL)
 	defer database.Close()
 	database.CreateTables()
 
 	if err := utils.EnsureStorageDirectories(); err != nil {
-		log.Fatalf("failed to prepare storage directories: %v", err)
+		slog.Error("failed to prepare storage directories", "error", err)
+		os.Exit(1)
 	}
+
+	slog.Info("storage directories ready")
 
 	go utils.StartStreamMonitoring(cfg.StreamURL)
 
@@ -93,5 +100,6 @@ func main() {
 		c.File("./public/dist/index.html")
 	})
 
+	slog.Info("server starting", "port", cfg.Port)
 	r.Run(":" + cfg.Port)
 }

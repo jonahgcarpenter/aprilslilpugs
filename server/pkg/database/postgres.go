@@ -2,7 +2,8 @@ package database
 
 import (
 	"context"
-	"log"
+	"log/slog"
+	"os"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -12,12 +13,14 @@ var Pool *pgxpool.Pool
 
 func Connect(connectionString string) {
 	if connectionString == "" {
-		log.Fatal("Database connection string is empty")
+		slog.Error("database connection string is empty")
+		os.Exit(1)
 	}
 
 	config, err := pgxpool.ParseConfig(connectionString)
 	if err != nil {
-		log.Fatal("Unable to parse DATABASE_URL:", err)
+		slog.Error("unable to parse DATABASE_URL", "error", err)
+		os.Exit(1)
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -25,14 +28,16 @@ func Connect(connectionString string) {
 
 	Pool, err = pgxpool.NewWithConfig(ctx, config)
 	if err != nil {
-		log.Fatal("Unable to connect to database:", err)
+		slog.Error("unable to connect to database", "error", err)
+		os.Exit(1)
 	}
 
 	if err := Pool.Ping(ctx); err != nil {
-		log.Fatal("Unable to ping database:", err)
+		slog.Error("unable to ping database", "error", err)
+		os.Exit(1)
 	}
 
-	log.Println("Connected to Database")
+	slog.Info("connected to database")
 }
 
 func Close() {
