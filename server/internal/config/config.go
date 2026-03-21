@@ -11,7 +11,7 @@ type Config struct {
 	Port             string
 	DatabaseURL      string
 	JWTSecret        string
-	Env              string
+	LogLevel         string
 	StorageRoot      string
 	UploadsURLBase   string
 	StreamURL        string
@@ -32,7 +32,7 @@ func Load() *Config {
 		Port:             getEnv("PORT", "4000"),
 		DatabaseURL:      getEnv("DATABASE_URL", ""),
 		JWTSecret:        getEnv("JWT_SECRET", "verylongsecret"),
-		Env:              getEnv("GO_ENV", "development"),
+		LogLevel:         getEnv("LOG_LEVEL", "info"),
 		StorageRoot:      getEnv("STORAGE_ROOT", "./storage"),
 		UploadsURLBase:   getEnv("UPLOADS_URL_BASE", "/uploads"),
 		StreamURL:        getEnv("STREAM_URL", "http://localhost:8080/hls/test.m3u8"),

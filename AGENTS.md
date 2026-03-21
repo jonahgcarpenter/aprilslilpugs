@@ -176,9 +176,9 @@ Follow standard Go convention with three groups separated by blank lines:
 ### Error Handling
 
 - Check `err != nil`, respond with `c.JSON(http.StatusXxx, gin.H{"error": "message"})` and `return`
-- `log.Fatal` / `log.Fatalf` for fatal startup errors
-- `fmt.Println` / `fmt.Printf` for runtime logging (no structured logger)
-- Some non-critical errors silently ignored with `_ = ...`
+- `slog.Error(...)` + `os.Exit(1)` for fatal startup errors
+- `slog.Debug/Info/Warn/Error(...)` for all runtime logging (structured key-value pairs)
+- Non-critical errors (JSONB unmarshal, file deletion) are logged at Debug/Warn rather than silently ignored
 
 ### Auth Pattern
 
@@ -189,8 +189,14 @@ Follow standard Go convention with three groups separated by blank lines:
 ## Environment Variables
 
 The server reads config from env vars (see `server/internal/config/config.go`):
-`PORT` (4000), `DATABASE_URL`, `JWT_SECRET`, `GO_ENV`, `STORAGE_ROOT`, `UPLOADS_URL_BASE`,
+`PORT` (4000), `DATABASE_URL`, `JWT_SECRET`, `LOG_LEVEL`, `STORAGE_ROOT`, `UPLOADS_URL_BASE`,
 `STREAM_URL`, `HAS_BASE_URL`, `HAS_TOKEN`, `EMAIL_USER`, `EMAIL_PASSWORD`, `EMAIL_HOST`, `EMAIL_PORT`
+
+`LOG_LEVEL` controls both the slog output level/format and the Gin mode:
+- `debug`: TextHandler (human-readable), all levels visible, Gin in debug mode
+- `info` (default): JSONHandler, Info+ visible, Gin in release mode
+- `warn`: JSONHandler, Warn+ visible, Gin in release mode
+- `error`: JSONHandler, Error only, Gin in release mode
 
 Never commit `.env` files or secrets. The `server/.env` file is gitignored.
 

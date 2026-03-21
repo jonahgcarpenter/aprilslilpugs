@@ -5,23 +5,44 @@ import (
 	"os"
 )
 
-// Init configures the default slog logger based on the environment.
-// In development: TextHandler at Debug level (human-readable, coloured-free).
-// In all other environments: JSONHandler at Info level (machine-parseable).
+// Init configures the default slog logger based on the LOG_LEVEL env var.
+//
+// Valid values: "debug", "info", "warn", "error" (case-insensitive).
+// Defaults to "info" for any unrecognised value.
+//
+// "debug" uses a human-readable TextHandler; all other levels use a
+// machine-parseable JSONHandler suitable for log aggregators.
+//
 // After Init, call slog.Debug / slog.Info / slog.Warn / slog.Error directly
 // anywhere in the codebase — no logger instance needs to be threaded through.
-func Init(env string) {
-	var handler slog.Handler
+func Init(level string) {
+	var slogLevel slog.Level
 
-	if env == "development" {
-		handler = slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
-			Level: slog.LevelDebug,
-		})
+	switch level {
+	case "debug":
+		slogLevel = slog.LevelDebug
+	case "info":
+		slogLevel = slog.LevelInfo
+	case "warn":
+		slogLevel = slog.LevelWarn
+	case "error":
+		slogLevel = slog.LevelError
+	default:
+		slogLevel = slog.LevelInfo
+	}
+
+	opts := &slog.HandlerOptions{Level: slogLevel}
+
+	var handler slog.Handler
+	if level == "debug" {
+		handler = slog.NewTextHandler(os.Stdout, opts)
 	} else {
-		handler = slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-			Level: slog.LevelInfo,
-		})
+		handler = slog.NewJSONHandler(os.Stdout, opts)
 	}
 
 	slog.SetDefault(slog.New(handler))
+
+	if level != "debug" && level != "info" && level != "warn" && level != "error" {
+		slog.Warn("unrecognised LOG_LEVEL, defaulting to info", "provided", level)
+	}
 }

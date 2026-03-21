@@ -18,7 +18,11 @@ import (
 func main() {
 	cfg := config.Load()
 
-	logger.Init(cfg.Env)
+	logger.Init(cfg.LogLevel)
+
+	if cfg.LogLevel != "debug" {
+		gin.SetMode(gin.ReleaseMode)
+	}
 
 	database.Connect(cfg.DatabaseURL)
 	defer database.Close()
