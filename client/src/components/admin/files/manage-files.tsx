@@ -35,11 +35,15 @@ const ManageFiles = ({
     if (selectedFiles.length === 0) return;
 
     setIsUploading(true);
-    const results = await Promise.all(selectedFiles.map((file) => onCreate(file)));
+    const results = await Promise.all(
+      selectedFiles.map((file) => onCreate(file)),
+    );
     setIsUploading(false);
 
     if (results.some((result) => !result)) {
-      window.alert("One or more files could not be uploaded. Check the console for details.");
+      window.alert(
+        "One or more files could not be uploaded. Check the console for details.",
+      );
     }
   };
 
@@ -117,14 +121,14 @@ const ManageFiles = ({
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={isUploading}
-            className="cursor-pointer flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors shadow-lg shadow-blue-500/20"
+            className="text-sm cursor-pointer flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors shadow-lg shadow-blue-500/20"
           >
             {isUploading ? (
               <FaSpinner className="animate-spin" />
             ) : (
               <FaUpload />
             )}
-            Upload Files
+            Upload
           </button>
           <input
             type="file"
@@ -170,9 +174,9 @@ const ManageFiles = ({
             {files.map((file) => (
               <div
                 key={file.id}
-                className="flex items-center justify-between p-4 bg-slate-950/50 border border-slate-800 rounded-lg group hover:border-blue-500/30 transition-colors mb-2 last:mb-0"
+                className="flex items-center justify-between p-3 md:p-4 bg-slate-950/50 border border-slate-800 rounded-lg group hover:border-blue-500/30 transition-colors mb-2 last:mb-0"
               >
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3 md:gap-4">
                   <div className="p-3 bg-slate-900 rounded-lg border border-slate-800">
                     {getFileIcon(file.name)}
                   </div>
@@ -181,13 +185,13 @@ const ManageFiles = ({
                       href={file.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-bold text-slate-200 hover:text-blue-400 transition-colors"
+                      className="text-sm md:text-base font-bold text-slate-200 hover:text-blue-400 transition-colors"
                       title="View File"
                     >
                       {file.name}
                     </a>
                     <div className="flex gap-4 mt-1">
-                      <p className="text-xs text-slate-500">
+                      <p className="text-[10px] md:text-xs text-slate-500">
                         Uploaded:{" "}
                         {new Date(file.created_at).toLocaleDateString()}
                       </p>
@@ -195,7 +199,7 @@ const ManageFiles = ({
                   </div>
                 </div>
 
-                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex gap-2">
                   <a
                     href={file.url}
                     download

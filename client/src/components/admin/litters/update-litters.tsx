@@ -212,7 +212,7 @@ const UpdateLitters = ({
           {!isEditing && (
             <button
               onClick={() => setIsEditing(true)}
-              className="cursor-pointer flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors"
+              className="text-sm cursor-pointer flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors"
             >
               <FaPlus /> Add Litter
             </button>
