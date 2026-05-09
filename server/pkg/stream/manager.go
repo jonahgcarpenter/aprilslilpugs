@@ -39,8 +39,12 @@ type Status struct {
 	RTMPURL            string `json:"rtmp_url"`
 	RTMPSURL           string `json:"rtmps_url"`
 	RTMPSAvailable     bool   `json:"rtmps_available"`
-	StreamKey          string `json:"stream_key"`
 	LastError          string `json:"last_error"`
+}
+
+type AdminStatus struct {
+	Status
+	StreamKey string `json:"stream_key"`
 }
 
 type Manager struct {
@@ -209,8 +213,26 @@ func (m *Manager) Status() Status {
 		RTMPURL:            ingestURL("rtmp", m.cfg.StreamHost, m.cfg.RTMPAddr, m.cfg.StreamKey),
 		RTMPSURL:           ingestURL("rtmps", m.cfg.StreamHost, m.cfg.RTMPSAddr, m.cfg.StreamKey),
 		RTMPSAvailable:     m.rtmpsAvailable,
-		StreamKey:          m.cfg.StreamKey,
 		LastError:          m.lastError,
+	}
+}
+
+func (m *Manager) AdminStatus() AdminStatus {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	return AdminStatus{
+		Status: Status{
+			Enabled:            m.enabled,
+			Live:               m.live,
+			PublisherConnected: m.publisherConnected,
+			PlaybackURL:        m.cfg.HLSPublicPath,
+			RTMPURL:            ingestURL("rtmp", m.cfg.StreamHost, m.cfg.RTMPAddr, m.cfg.StreamKey),
+			RTMPSURL:           ingestURL("rtmps", m.cfg.StreamHost, m.cfg.RTMPSAddr, m.cfg.StreamKey),
+			RTMPSAvailable:     m.rtmpsAvailable,
+			LastError:          m.lastError,
+		},
+		StreamKey: m.cfg.StreamKey,
 	}
 }
 

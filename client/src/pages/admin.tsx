@@ -4,7 +4,7 @@ import { useLitters } from "../hooks/uselitters";
 import { useWaitlist } from "../hooks/usewaitlist";
 import { useSettings } from "../hooks/usesettings";
 import { useFiles } from "../hooks/usefiles";
-import { useStreamStatus } from "../hooks/usestreamstatus";
+import { useAdminStreamStatus } from "../hooks/usestreamstatus";
 import UpdateBreeder from "../components/admin/breeder/update-breeder";
 import UpdateDogs from "../components/admin/dogs/update-dogs";
 import UpdateLitters from "../components/admin/litters/update-litters";
@@ -58,7 +58,7 @@ const Admin = () => {
     isLoading: isFilesLoading,
   } = useFiles();
 
-  const { streamStatus } = useStreamStatus();
+  const { streamStatus } = useAdminStreamStatus();
 
   if (
     isBreederLoading ||

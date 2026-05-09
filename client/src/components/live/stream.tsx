@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import Hls from "hls.js";
 import type { StreamStatus } from "../../hooks/usestreamstatus";
+import { FaExpand, FaCompress } from "react-icons/fa";
 
 const LOGO_URL = "/logo.jpg";
 
@@ -9,16 +10,38 @@ interface StreamProps {
 }
 
 const Stream = ({ streamStatus }: StreamProps) => {
+  const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const streamUrl = streamStatus?.playback_url;
+  const isLive = streamStatus?.live ?? false;
+  const isEnabled = streamStatus?.enabled ?? false;
+  const hasPublisher = streamStatus?.publisher_connected ?? false;
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(document.fullscreenElement === containerRef.current);
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+    };
+  }, []);
 
   useEffect(() => {
     const video = videoRef.current;
-    const streamUrl = streamStatus?.playback_url;
 
     setError(null);
 
-    if (!video || !streamStatus?.enabled || !streamStatus.live || !streamUrl) {
+    if (!video || !isEnabled || !isLive || !streamUrl) {
+      if (video) {
+        video.removeAttribute("src");
+        video.load();
+      }
       return;
     }
 
@@ -61,36 +84,66 @@ const Stream = ({ streamStatus }: StreamProps) => {
         hls.destroy();
       };
     } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-      video.src = streamUrl;
-      video.addEventListener("loadedmetadata", () => {
+      const handleLoadedMetadata = () => {
         video.play().catch((e) => {
           console.warn("Stream autoplay prevented:", e);
         });
-      });
+      };
 
-      video.addEventListener("error", () => {
+      const handleError = () => {
         console.warn("Native HLS playback failed for stream.");
         setError("Stream is currently offline.");
-      });
+      };
+
+      video.src = streamUrl;
+      video.addEventListener("loadedmetadata", handleLoadedMetadata);
+      video.addEventListener("error", handleError);
+
+      return () => {
+        video.removeEventListener("loadedmetadata", handleLoadedMetadata);
+        video.removeEventListener("error", handleError);
+        video.removeAttribute("src");
+        video.load();
+      };
     } else {
       setError("Your browser does not support HLS playback.");
     }
-  }, [streamStatus]);
+  }, [isEnabled, isLive, streamUrl]);
+
+  const toggleFullscreen = async () => {
+    const container = containerRef.current;
+    if (!container) {
+      return;
+    }
+
+    try {
+      if (document.fullscreenElement === container) {
+        await document.exitFullscreen();
+      } else {
+        await container.requestFullscreen();
+      }
+    } catch (fullscreenError) {
+      console.warn("Fullscreen request failed:", fullscreenError);
+    }
+  };
 
   const statusMessage = error
     ? error
-    : !streamStatus?.enabled
+    : !isEnabled
       ? "Stream is disabled."
-      : !streamStatus.publisher_connected
+      : !hasPublisher
         ? "Waiting for camera to connect."
-        : !streamStatus.live
+        : !isLive
           ? "Preparing live stream."
           : null;
 
   return (
     <div className="relative">
       <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl transform rotate-1 opacity-20"></div>
-      <div className="relative bg-slate-900/90 backdrop-blur-sm rounded-xl overflow-hidden border border-slate-700/50 shadow-2xl">
+      <div
+        ref={containerRef}
+        className="relative bg-slate-900/90 backdrop-blur-sm rounded-xl overflow-hidden border border-slate-700/50 shadow-2xl"
+      >
         <div className="aspect-video relative group">
           {statusMessage ? (
             <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 bg-slate-900">
@@ -134,6 +187,18 @@ const Stream = ({ streamStatus }: StreamProps) => {
                 className="w-10 sm:w-16 opacity-80 ml-1"
               />
             </div>
+          )}
+
+          {!statusMessage && (
+            <button
+              type="button"
+              onClick={toggleFullscreen}
+              className="absolute bottom-4 right-4 z-10 rounded-full bg-slate-950/70 p-3 text-white shadow-lg transition hover:bg-slate-900/90 cursor-pointer"
+              aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+              title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+            >
+              {isFullscreen ? <FaCompress /> : <FaExpand />}
+            </button>
           )}
         </div>
       </div>

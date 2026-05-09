@@ -96,6 +96,7 @@ func main() {
 		// Settings
 		api.GET("/settings", controllers.GetSettings)
 		api.GET("/settings/stream/status", controllers.GetStreamStatus)
+		api.GET("/settings/stream/admin-status", middleware.RequireAuth, controllers.GetAdminStreamStatus)
 		api.PATCH("/settings/waitlist", middleware.RequireAuth, controllers.UpdateWaitlistStatus)
 		api.PATCH("/settings/stream", middleware.RequireAuth, controllers.UpdateStreamStatus)
 

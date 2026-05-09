@@ -115,3 +115,7 @@ func UpdateStreamStatus(c *gin.Context) {
 func GetStreamStatus(c *gin.Context) {
 	c.JSON(http.StatusOK, stream.Global.Status())
 }
+
+func GetAdminStreamStatus(c *gin.Context) {
+	c.JSON(http.StatusOK, stream.Global.AdminStatus())
+}
