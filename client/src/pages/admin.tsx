@@ -4,6 +4,7 @@ import { useLitters } from "../hooks/uselitters";
 import { useWaitlist } from "../hooks/usewaitlist";
 import { useSettings } from "../hooks/usesettings";
 import { useFiles } from "../hooks/usefiles";
+import { useStreamStatus } from "../hooks/usestreamstatus";
 import UpdateBreeder from "../components/admin/breeder/update-breeder";
 import UpdateDogs from "../components/admin/dogs/update-dogs";
 import UpdateLitters from "../components/admin/litters/update-litters";
@@ -57,6 +58,8 @@ const Admin = () => {
     isLoading: isFilesLoading,
   } = useFiles();
 
+  const { streamStatus } = useStreamStatus();
+
   if (
     isBreederLoading ||
     isDogsLoading ||
@@ -87,6 +90,14 @@ const Admin = () => {
       window.alert("Failed to update stream status. Check the console for details.");
     }
   };
+
+  const streamStateLabel = !settings?.stream_enabled
+    ? "Disabled"
+    : streamStatus?.live
+      ? "Live"
+      : streamStatus?.publisher_connected
+        ? "Preparing"
+        : "Waiting for stream";
 
   return (
     <div className="space-y-12">
@@ -126,17 +137,44 @@ const Admin = () => {
 
           {/* Stream Toggle */}
           <div className="bg-slate-950/50 rounded-xl p-4 border border-slate-800 flex items-center justify-between group hover:border-red-500/30 transition-all">
-            <div className="flex items-center gap-4">
+            <div className="flex flex-1 items-start gap-4 pr-4">
               <div
                 className={`p-3 rounded-lg ${settings?.stream_enabled ? "bg-red-500/20 text-red-400" : "bg-slate-800 text-slate-500"}`}
               >
                 <FaVideo className="text-xl" />
               </div>
-              <div>
-                <h3 className="font-semibold text-slate-200">Live Stream</h3>
-                <p className="text-xs text-slate-500">
-                  Enable the live camera feed on the home page
-                </p>
+              <div className="space-y-3">
+                <div>
+                  <h3 className="font-semibold text-slate-200">Live Stream</h3>
+                  <p className="text-xs text-slate-500">
+                    Enable the live camera feed on the live page
+                  </p>
+                </div>
+                <div className="space-y-2 text-xs text-slate-400">
+                  <p>
+                    <span className="font-semibold text-slate-300">Status:</span>{" "}
+                    {streamStateLabel}
+                  </p>
+                  <p>
+                    <span className="font-semibold text-slate-300">RTMP:</span>{" "}
+                    <span className="break-all">{streamStatus?.rtmp_url ?? "Unavailable"}</span>
+                  </p>
+                  <p>
+                    <span className="font-semibold text-slate-300">RTMPS:</span>{" "}
+                    <span className="break-all">
+                      {streamStatus?.rtmps_available
+                        ? streamStatus.rtmps_url
+                        : "Unavailable until RTMPS cert and key are configured"}
+                    </span>
+                  </p>
+                  <p>
+                    <span className="font-semibold text-slate-300">Stream Key:</span>{" "}
+                    <span className="break-all">{streamStatus?.stream_key ?? "Unavailable"}</span>
+                  </p>
+                  {streamStatus?.last_error && (
+                    <p className="text-amber-300">{streamStatus.last_error}</p>
+                  )}
+                </div>
               </div>
             </div>
 

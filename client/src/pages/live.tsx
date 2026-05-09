@@ -2,11 +2,13 @@ import Stream from "../components/live/stream";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSettings } from "../hooks/usesettings";
+import { useStreamStatus } from "../hooks/usestreamstatus";
 import { FaSpinner } from "react-icons/fa";
 
 const Live = () => {
   const navigate = useNavigate();
   const { settings, isLoading } = useSettings();
+  const { streamStatus, isLoading: isStatusLoading } = useStreamStatus();
 
   useEffect(() => {
     if (!isLoading && settings) {
@@ -16,7 +18,7 @@ const Live = () => {
     }
   }, [settings, isLoading, navigate]);
 
-  if (isLoading) {
+  if (isLoading || isStatusLoading) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
         <FaSpinner className="animate-spin text-4xl text-blue-500" />
@@ -38,7 +40,7 @@ const Live = () => {
       <meta property="og:title" content="Live Puppy Cam | April's Lil Pugs" />
       <meta property="og:url" content="https://aprilslilpugs.com/live" />
 
-      <Stream />
+      <Stream streamStatus={streamStatus} />
       <div className="bg-slate-900/80 border border-slate-800/50 rounded-xl p-4">
         <div className="flex gap-3">
           <div className="flex-shrink-0">

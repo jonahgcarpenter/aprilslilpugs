@@ -1,16 +1,26 @@
 import { useEffect, useRef, useState } from "react";
 import Hls from "hls.js";
+import type { StreamStatus } from "../../hooks/usestreamstatus";
 
-const STREAM_URL = "/hls/test.m3u8";
 const LOGO_URL = "/logo.jpg";
 
-const Stream = () => {
+interface StreamProps {
+  streamStatus?: StreamStatus;
+}
+
+const Stream = ({ streamStatus }: StreamProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const video = videoRef.current;
-    if (!video) return;
+    const streamUrl = streamStatus?.playback_url;
+
+    setError(null);
+
+    if (!video || !streamStatus?.enabled || !streamStatus.live || !streamUrl) {
+      return;
+    }
 
     if (Hls.isSupported()) {
       const hls = new Hls({
@@ -18,7 +28,7 @@ const Stream = () => {
         enableWorker: true,
       });
 
-      hls.loadSource(STREAM_URL);
+      hls.loadSource(streamUrl);
       hls.attachMedia(video);
 
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
@@ -51,7 +61,7 @@ const Stream = () => {
         hls.destroy();
       };
     } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-      video.src = STREAM_URL;
+      video.src = streamUrl;
       video.addEventListener("loadedmetadata", () => {
         video.play().catch((e) => {
           console.warn("Stream autoplay prevented:", e);
@@ -65,14 +75,24 @@ const Stream = () => {
     } else {
       setError("Your browser does not support HLS playback.");
     }
-  }, []);
+  }, [streamStatus]);
+
+  const statusMessage = error
+    ? error
+    : !streamStatus?.enabled
+      ? "Stream is disabled."
+      : !streamStatus.publisher_connected
+        ? "Waiting for camera to connect."
+        : !streamStatus.live
+          ? "Preparing live stream."
+          : null;
 
   return (
     <div className="relative">
       <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl transform rotate-1 opacity-20"></div>
       <div className="relative bg-slate-900/90 backdrop-blur-sm rounded-xl overflow-hidden border border-slate-700/50 shadow-2xl">
         <div className="aspect-video relative group">
-          {error ? (
+          {statusMessage ? (
             <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 bg-slate-900">
               <svg
                 className="w-12 h-12 mb-4 text-slate-600"
@@ -87,21 +107,20 @@ const Stream = () => {
                   d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
                 />
               </svg>
-              <p>{error}</p>
+              <p>{statusMessage}</p>
             </div>
           ) : (
             <video
               ref={videoRef}
               className="w-full h-full object-cover"
-              controls={true}
               muted
               playsInline
+              autoPlay
             />
           )}
 
-          {!error && (
+          {!statusMessage && (
             <div className="absolute top-4 left-4 z-10 flex flex-col gap-3 pointer-events-none select-none">
-              {/* Live Badge */}
               <div className="flex items-center gap-1.5 sm:gap-2 px-2 py-0.5 sm:px-3 sm:py-1 bg-red-600/90 backdrop-blur-sm rounded-full w-fit shadow-lg">
                 <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white rounded-full animate-pulse" />
                 <span className="text-white text-[10px] sm:text-xs font-bold uppercase tracking-wider">
@@ -109,7 +128,6 @@ const Stream = () => {
                 </span>
               </div>
 
-              {/* Watermark Logo */}
               <img
                 src={LOGO_URL}
                 alt="Channel Logo"
