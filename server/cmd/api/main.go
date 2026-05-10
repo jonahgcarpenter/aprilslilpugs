@@ -110,8 +110,8 @@ func main() {
 	r.Static(cfg.UploadsURLBase, filepath.Clean(cfg.StorageRoot))
 	r.GET("/hls/*filepath", stream.Global.HandleHLS)
 	r.StaticFile("/logo.jpg", "./public/dist/logo.jpg")
-	r.StaticFile("/background.png", "./public/dist/background.png")
-	r.StaticFile("/stream-offline.png", "./public/dist/stream-offline.png")
+	r.StaticFile("/background.jpg", "./public/dist/background.jpg")
+	r.StaticFile("/stream-offline.jpg", "./public/dist/stream-offline.jpg")
 	r.StaticFile("/robots.txt", "./public/dist/robots.txt")
 	r.StaticFile("/sitemap.xml", "./public/dist/sitemap.xml")
 
