@@ -2,7 +2,9 @@ package utils
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -16,7 +18,11 @@ import (
 func UploadAndCreateImage(c *gin.Context, formKey string, folder string) (*models.Image, error) {
 	fileHeader, err := c.FormFile(formKey)
 	if err != nil {
-		return nil, nil
+		if errors.Is(err, http.ErrMissingFile) {
+			return nil, nil
+		}
+
+		return nil, fmt.Errorf("failed to read uploaded image %q: %w", formKey, err)
 	}
 
 	srcFile, err := fileHeader.Open()

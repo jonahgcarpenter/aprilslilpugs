@@ -514,14 +514,14 @@ func (m *Manager) fireStatusEvent(isLive bool) {
 
 		if isLive {
 			payload["status"] = "online"
-			slog.Info("stream: back ONLINE")
+			slog.Info("stream: back online")
 		} else {
 			payload["status"] = "offline"
-			slog.Warn("stream: went OFFLINE")
+			slog.Warn("stream: went offline")
 		}
 
 		if err := utils.SendAppEvent("stream_status", payload); err != nil {
-			slog.Error("stream: failed to fire HA event", "error", err)
+			slog.Error("stream: failed to send app event", "error", err)
 		}
 	}()
 }

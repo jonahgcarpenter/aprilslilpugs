@@ -1,8 +1,10 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -15,7 +17,11 @@ import (
 func UploadAndCreateFile(c *gin.Context, formKey string, folder string) (*models.File, error) {
 	fileHeader, err := c.FormFile(formKey)
 	if err != nil {
-		return nil, nil
+		if errors.Is(err, http.ErrMissingFile) {
+			return nil, nil
+		}
+
+		return nil, fmt.Errorf("failed to read uploaded file %q: %w", formKey, err)
 	}
 
 	srcFile, err := fileHeader.Open()

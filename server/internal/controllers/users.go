@@ -63,12 +63,12 @@ func GetUser(c *gin.Context) {
 
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			slog.Debug("get user: not found", "id", id, "error", err)
+			slog.Debug("get user: not found", "user_id", id, "error", err)
 			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 			return
 		}
 
-		slog.Error("get user: database error", "id", id, "error", err)
+		slog.Error("get user: database error", "user_id", id, "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch user"})
 		return
 	}
@@ -110,7 +110,7 @@ func UpdateUser(c *gin.Context) {
 	).Scan(&updatedUser.ID, &updatedUser.Email, &updatedUser.FirstName, &updatedUser.LastName, &updatedUser.PhoneNumber, &updatedUser.UpdatedAt)
 
 	if err != nil {
-		slog.Error("update user: database error", "id", idParam, "error", err)
+		slog.Error("update user: database error", "user_id", idParam, "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -136,13 +136,13 @@ func DeleteUser(c *gin.Context) {
 
 	result, err := database.Pool.Exec(c, "DELETE FROM users WHERE id = $1", idParam)
 	if err != nil {
-		slog.Error("delete user: database error", "id", idParam, "error", err)
+		slog.Error("delete user: database error", "user_id", idParam, "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user"})
 		return
 	}
 
 	if result.RowsAffected() == 0 {
-		slog.Debug("delete user: not found", "id", idParam)
+		slog.Debug("delete user: not found", "user_id", idParam)
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}

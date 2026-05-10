@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/internal/models"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/database"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/utils"
@@ -63,8 +64,14 @@ func DeleteFile(c *gin.Context) {
 
 	err := database.Pool.QueryRow(c, "SELECT url FROM files WHERE id=$1", id).Scan(&url)
 	if err != nil {
-		slog.Debug("delete file: not found", "id", id, "error", err)
-		c.JSON(http.StatusNotFound, gin.H{"error": "File not found"})
+		if err == pgx.ErrNoRows {
+			slog.Debug("delete file: not found", "file_id", id, "error", err)
+			c.JSON(http.StatusNotFound, gin.H{"error": "File not found"})
+			return
+		}
+
+		slog.Error("delete file: failed to fetch file before delete", "file_id", id, "error", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete file"})
 		return
 	}
 
@@ -74,7 +81,7 @@ func DeleteFile(c *gin.Context) {
 
 	_, err = database.Pool.Exec(c, "DELETE FROM files WHERE id=$1", id)
 	if err != nil {
-		slog.Error("delete file: database error", "id", id, "error", err)
+		slog.Error("delete file: database error", "file_id", id, "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete file"})
 		return
 	}

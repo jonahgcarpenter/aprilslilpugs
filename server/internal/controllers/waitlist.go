@@ -33,6 +33,10 @@ func sendWaitlistNotification(entry *models.Waitlist) {
 		}
 	}
 
+	if err := rows.Err(); err != nil {
+		slog.Warn("waitlist notification: recipient iteration failed", "error", err)
+	}
+
 	if len(recipients) == 0 {
 		slog.Info("waitlist notification: no recipients found, skipping")
 		return
@@ -142,7 +146,7 @@ func CreateWaitlist(c *gin.Context) {
 
 	go sendWaitlistNotification(&entry)
 
-	slog.Info("create waitlist: entry created", "id", newID, "email", email)
+	slog.Info("create waitlist: entry created", "waitlist_id", newID, "email", email)
 	c.JSON(http.StatusCreated, gin.H{"message": "Joined waitlist", "id": newID})
 }
 
@@ -161,29 +165,41 @@ func UpdateWaitlist(c *gin.Context) {
 		SET first_name=$1, last_name=$2, email=$3, phone=$4, preferences=$5, status=$6, updated_at=NOW()
 		WHERE id=$7`
 
-	_, err := database.Pool.Exec(c, query,
+	result, err := database.Pool.Exec(c, query,
 		firstName, lastName, email, phone, preferences, status, id,
 	)
 
 	if err != nil {
-		slog.Error("update waitlist: database error", "id", id, "error", err)
+		slog.Error("update waitlist: database error", "waitlist_id", id, "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update waitlist entry"})
 		return
 	}
 
-	slog.Info("update waitlist: entry updated", "id", id, "status", status)
+	if result.RowsAffected() == 0 {
+		slog.Debug("update waitlist: not found", "waitlist_id", id)
+		c.JSON(http.StatusNotFound, gin.H{"error": "Waitlist entry not found"})
+		return
+	}
+
+	slog.Info("update waitlist: entry updated", "waitlist_id", id, "status", status)
 	c.JSON(http.StatusOK, gin.H{"message": "Waitlist entry updated"})
 }
 
 func DeleteWaitlist(c *gin.Context) {
 	id := c.Param("id")
-	_, err := database.Pool.Exec(c, "DELETE FROM waitlist WHERE id=$1", id)
+	result, err := database.Pool.Exec(c, "DELETE FROM waitlist WHERE id=$1", id)
 	if err != nil {
-		slog.Error("delete waitlist: database error", "id", id, "error", err)
+		slog.Error("delete waitlist: database error", "waitlist_id", id, "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete waitlist entry"})
 		return
 	}
 
-	slog.Info("delete waitlist: entry deleted", "id", id)
+	if result.RowsAffected() == 0 {
+		slog.Debug("delete waitlist: not found", "waitlist_id", id)
+		c.JSON(http.StatusNotFound, gin.H{"error": "Waitlist entry not found"})
+		return
+	}
+
+	slog.Info("delete waitlist: entry deleted", "waitlist_id", id)
 	c.JSON(http.StatusOK, gin.H{"message": "Waitlist entry deleted"})
 }

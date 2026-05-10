@@ -17,7 +17,7 @@ func SendAppEvent(eventType string, data map[string]interface{}) error {
 	cfg := config.Load()
 
 	if cfg.HASBaseURL == "" || cfg.HASToken == "" {
-		slog.Info("HA integration not configured, skipping event", "event_type", eventType)
+		slog.Info("app event: skipped", "event_type", eventType, "reason", "ha integration not configured")
 		return nil
 	}
 
@@ -55,6 +55,6 @@ func SendAppEvent(eventType string, data map[string]interface{}) error {
 		return fmt.Errorf("HA API returned error: %d", resp.StatusCode)
 	}
 
-	slog.Info("HA event fired", "event_name", AppGlobalEventName, "event_type", eventType)
+	slog.Info("app event: sent", "event_name", AppGlobalEventName, "event_type", eventType)
 	return nil
 }

@@ -67,7 +67,7 @@ func LoginUser(c *gin.Context) {
 		return
 	}
 
-	slog.Info("login: user authenticated", "user_id", user.ID, "ip", clientIP)
+	slog.Info("login: user authenticated", "user_id", user.ID, "remote_addr", clientIP)
 
 	c.JSON(http.StatusOK, models.LoginResponse{
 		Token:     tokenString,

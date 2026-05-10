@@ -43,24 +43,8 @@ cd server && go run ./cmd/api/main.go
 # Hot reload with Air (requires Air CLI)
 cd server && air
 
-# Run all Go tests
-cd server && go test ./...
-
-# Run a single test file or function
-cd server && go test ./internal/controllers/ -run TestGetDogs -v
-
 # Vet and static analysis
 cd server && go vet ./...
-```
-
-### Docker
-
-```bash
-# Build the full-stack image
-docker build -t aprilslilpugs .
-
-# Run (needs DATABASE_URL and other env vars)
-docker run -p 4000:4000 --env-file server/.env aprilslilpugs
 ```
 
 ## Testing
@@ -193,6 +177,7 @@ The server reads config from env vars (see `server/internal/config/config.go`):
 `STREAM_URL`, `HAS_BASE_URL`, `HAS_TOKEN`, `EMAIL_USER`, `EMAIL_PASSWORD`, `EMAIL_HOST`, `EMAIL_PORT`
 
 `LOG_LEVEL` controls both the slog output level/format and the Gin mode:
+
 - `debug`: TextHandler (human-readable), all levels visible, Gin in debug mode
 - `info` (default): JSONHandler, Info+ visible, Gin in release mode
 - `warn`: JSONHandler, Warn+ visible, Gin in release mode

@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/internal/models"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/database"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/utils"
@@ -33,8 +34,14 @@ func GetBreeder(c *gin.Context) {
 	)
 
 	if err != nil {
+		if err == pgx.ErrNoRows {
+			slog.Debug("get breeder: not found", "error", err)
+			c.JSON(http.StatusNotFound, gin.H{"error": "Breeder profile not found"})
+			return
+		}
+
 		slog.Error("get breeder: database error", "error", err)
-		c.JSON(http.StatusNotFound, gin.H{"error": "Breeder profile not found"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch breeder profile"})
 		return
 	}
 
@@ -98,6 +105,8 @@ func UpdateBreeder(c *gin.Context) {
 				slog.Warn("update breeder: failed to delete old profile picture", "url", currentPP.URL, "error", err)
 			}
 		}
+	} else if err != nil {
+		slog.Warn("update breeder: failed to process profile picture", "breeder_id", id, "error", err)
 	}
 
 	tempGallery := make([]models.Image, 2)
@@ -117,6 +126,8 @@ func UpdateBreeder(c *gin.Context) {
 				}
 			}
 			tempGallery[i] = *uploadedImg
+		} else if err != nil {
+			slog.Warn("update breeder: failed to process gallery image", "breeder_id", id, "form_key", formKey, "error", err)
 		}
 	}
 
