@@ -4,7 +4,7 @@ import type { StreamStatus } from "../../hooks/usestreamstatus";
 import { FaExpand, FaCompress } from "react-icons/fa";
 
 const LOGO_URL = "/logo.jpg";
-const OFFLINE_IMAGE_URL = "/stream-offline.svg";
+const OFFLINE_IMAGE_URL = "/stream-offline.png";
 
 interface StreamProps {
   streamStatus?: StreamStatus;
