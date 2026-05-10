@@ -5,8 +5,9 @@
 Full-stack monorepo for a pug breeding business website (aprilslilpugs.com).
 
 - **Frontend** (`client/`): React 19 + TypeScript + Vite 7 + Tailwind CSS v4
-- **Backend** (`server/`): Go 1.25 + Gin + PostgreSQL (pgx/pgxpool, raw SQL)
-- **Deployment**: Multi-stage Docker build, served as single Go binary with embedded SPA
+- **Backend** (`server/`): Go 1.25.5 + Gin + PostgreSQL (pgx/pgxpool, raw SQL)
+- **Live Streaming**: built-in RTMP/RTMPS ingest + HLS playback endpoints managed by `server/pkg/stream`
+- **Deployment**: Multi-stage Docker build; Go server serves the built SPA from `public/dist` plus uploads/HLS
 
 No root-level package.json exists. All frontend tooling lives in `client/`.
 
@@ -43,24 +44,11 @@ cd server && go run ./cmd/api/main.go
 # Hot reload with Air (requires Air CLI)
 cd server && air
 
-# Run all Go tests
-cd server && go test ./...
-
-# Run a single test file or function
-cd server && go test ./internal/controllers/ -run TestGetDogs -v
+# Build all packages quickly
+cd server && go build ./...
 
 # Vet and static analysis
 cd server && go vet ./...
-```
-
-### Docker
-
-```bash
-# Build the full-stack image
-docker build -t aprilslilpugs .
-
-# Run (needs DATABASE_URL and other env vars)
-docker run -p 4000:4000 --env-file server/.env aprilslilpugs
 ```
 
 ## Testing
@@ -78,12 +66,13 @@ client/
     main.tsx              # Entry point (StrictMode, BrowserRouter, AuthProvider)
     App.tsx               # Route definitions
     context/auth.tsx      # JWT auth context (login/logout/token)
-    hooks/                # SWR data-fetching hooks (usedogs.ts, uselitters.ts, etc.)
+    hooks/                # SWR data hooks, including settings/files/stream status
     pages/                # Route page components
-    components/           # Organized by domain (admin/, dogs/, litters/, etc.)
+    components/           # Organized by domain (admin/, auth/, breeder/, dogs/, live/, etc.)
+    index.css             # Tailwind entry and site-wide styles
   eslint.config.js        # ESLint 9 flat config
   tsconfig.app.json       # Strict TS config
-  vite.config.ts          # Vite + Tailwind + dev proxy
+  vite.config.ts          # Vite + Tailwind + dev proxy for /api, /uploads, /hls
 
 server/
   cmd/api/main.go         # Entry point: config, DB init, routes, static file serving
@@ -94,7 +83,9 @@ server/
     models/               # Struct definitions with json/form/binding tags
   pkg/
     database/             # pgxpool connection + auto table creation
-    utils/                # JWT, bcrypt, email, image processing, file storage
+    logger/               # Central slog setup based on LOG_LEVEL
+    stream/               # RTMP/RTMPS ingest, HLS muxing, live status management
+    utils/                # JWT, bcrypt, email, image/file storage, HA app events
 ```
 
 ## Code Style: Frontend (TypeScript/React)
@@ -125,6 +116,7 @@ server/
 - Interfaces for API responses and frontend models are defined inline in hook files
 - Separate `Input` interfaces for create/update payloads
 - Auth token sent via axios interceptor (see `context/auth.tsx`)
+- Stream status is fetched from dedicated settings/stream status endpoints
 
 ### Imports
 
@@ -150,7 +142,7 @@ server/
 
 - `cmd/api/` - application entry point
 - `internal/` - private application code (controllers, middleware, models, config)
-- `pkg/` - reusable packages (database, utilities)
+- `pkg/` - reusable packages (database, logger, stream, utilities)
 
 ### Naming Conventions
 
@@ -172,6 +164,7 @@ Follow standard Go convention with three groups separated by blank lines:
 - Raw SQL with parameterized queries (`$1`, `$2`, etc.) -- no ORM
 - JSONB columns for image arrays, marshaled/unmarshaled manually
 - Auto-created tables via `pkg/database/tables.go`
+- Schema includes PostgreSQL enum types for dog/litter/puppy/waitlist statuses
 
 ### Error Handling
 
@@ -179,6 +172,14 @@ Follow standard Go convention with three groups separated by blank lines:
 - `slog.Error(...)` + `os.Exit(1)` for fatal startup errors
 - `slog.Debug/Info/Warn/Error(...)` for all runtime logging (structured key-value pairs)
 - Non-critical errors (JSONB unmarshal, file deletion) are logged at Debug/Warn rather than silently ignored
+- Distinguish expected `pgx.ErrNoRows` paths from real database errors in handlers
+
+### Logging Pattern
+
+- Logging is centralized through `server/pkg/logger` and the default `slog` logger
+- `LOG_LEVEL=debug` uses `slog.TextHandler`; all other levels use `slog.JSONHandler`
+- Prefer structured fields like `*_id`, `route_path`, `request_path`, `stream_path`, `remote_addr`, and `error`
+- Runtime and background tasks (auth, mutations, stream state, app events) are logged; successful read requests generally are not
 
 ### Auth Pattern
 
@@ -186,13 +187,23 @@ Follow standard Go convention with three groups separated by blank lines:
 - Server-side session table validated on each authenticated request
 - 24-hour token and session expiry
 
+### Streaming Pattern
+
+- RTMP ingest listens on `RTMP_ADDR` and optional RTMPS ingest on `RTMPS_ADDR`
+- HLS playback is served from `/hls/*filepath`
+- Public stream status is exposed at `/api/settings/stream/status`
+- Authenticated admin stream status is exposed at `/api/settings/stream/admin-status`
+- Stream enablement is persisted in the `settings` table and restored on startup
+
 ## Environment Variables
 
 The server reads config from env vars (see `server/internal/config/config.go`):
 `PORT` (4000), `DATABASE_URL`, `JWT_SECRET`, `LOG_LEVEL`, `STORAGE_ROOT`, `UPLOADS_URL_BASE`,
-`STREAM_URL`, `HAS_BASE_URL`, `HAS_TOKEN`, `EMAIL_USER`, `EMAIL_PASSWORD`, `EMAIL_HOST`, `EMAIL_PORT`
+`RTMP_ADDR`, `RTMPS_ADDR`, `RTMPS_CERT_FILE`, `RTMPS_KEY_FILE`, `STREAM_HOST`, `STREAM_KEY`, `HLS_PUBLIC_PATH`,
+`HAS_BASE_URL`, `HAS_TOKEN`, `EMAIL_USER`, `EMAIL_PASSWORD`, `EMAIL_HOST`, `EMAIL_PORT`
 
 `LOG_LEVEL` controls both the slog output level/format and the Gin mode:
+
 - `debug`: TextHandler (human-readable), all levels visible, Gin in debug mode
 - `info` (default): JSONHandler, Info+ visible, Gin in release mode
 - `warn`: JSONHandler, Warn+ visible, Gin in release mode

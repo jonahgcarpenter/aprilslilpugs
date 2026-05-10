@@ -81,8 +81,14 @@ func GetDog(c *gin.Context) {
 	)
 
 	if err != nil {
-		slog.Debug("get dog: not found", "id", id, "error", err)
-		c.JSON(http.StatusNotFound, gin.H{"error": "Dog not found"})
+		if err == pgx.ErrNoRows {
+			slog.Debug("get dog: not found", "dog_id", id, "error", err)
+			c.JSON(http.StatusNotFound, gin.H{"error": "Dog not found"})
+			return
+		}
+
+		slog.Error("get dog: database error", "dog_id", id, "error", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch dog"})
 		return
 	}
 
@@ -159,8 +165,14 @@ func UpdateDog(c *gin.Context) {
 	var oldPPRaw, oldGalleryRaw []byte
 	err := database.Pool.QueryRow(c, "SELECT profile_picture, gallery FROM dogs WHERE id=$1", id).Scan(&oldPPRaw, &oldGalleryRaw)
 	if err != nil {
-		slog.Debug("update dog: not found", "id", id, "error", err)
-		c.JSON(http.StatusNotFound, gin.H{"error": "Dog not found"})
+		if err == pgx.ErrNoRows {
+			slog.Debug("update dog: not found", "dog_id", id, "error", err)
+			c.JSON(http.StatusNotFound, gin.H{"error": "Dog not found"})
+			return
+		}
+
+		slog.Error("update dog: failed to fetch current dog", "dog_id", id, "error", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update dog"})
 		return
 	}
 
@@ -251,7 +263,7 @@ func UpdateDog(c *gin.Context) {
 		name, gender, desc, birthDate, ppJSON, galleryJSON, id)
 
 	if err != nil {
-		slog.Error("update dog: database error", "id", id, "error", err)
+		slog.Error("update dog: database error", "dog_id", id, "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -266,9 +278,9 @@ func DeleteDog(c *gin.Context) {
 	var ppRaw, galleryRaw []byte
 	if err := database.Pool.QueryRow(c, "SELECT profile_picture, gallery FROM dogs WHERE id=$1", id).Scan(&ppRaw, &galleryRaw); err != nil {
 		if err == pgx.ErrNoRows {
-			slog.Debug("delete dog: not found before cleanup", "id", id)
+			slog.Debug("delete dog: not found before cleanup", "dog_id", id)
 		} else {
-			slog.Error("delete dog: failed to fetch images before delete", "id", id, "error", err)
+			slog.Error("delete dog: failed to fetch images before delete", "dog_id", id, "error", err)
 		}
 	}
 
@@ -298,7 +310,7 @@ func DeleteDog(c *gin.Context) {
 
 	_, err := database.Pool.Exec(c, "DELETE FROM dogs WHERE id=$1", id)
 	if err != nil {
-		slog.Error("delete dog: database error", "id", id, "error", err)
+		slog.Error("delete dog: database error", "dog_id", id, "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete dog"})
 		return
 	}

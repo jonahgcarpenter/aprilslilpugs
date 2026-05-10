@@ -14,7 +14,13 @@ type Config struct {
 	LogLevel         string
 	StorageRoot      string
 	UploadsURLBase   string
-	StreamURL        string
+	RTMPAddr         string
+	RTMPSAddr        string
+	RTMPSCertFile    string
+	RTMPSKeyFile     string
+	StreamHost       string
+	StreamKey        string
+	HLSPublicPath    string
 	HASBaseURL       string
 	HASToken         string
 	EmailUser        string
@@ -35,7 +41,13 @@ func Load() *Config {
 		LogLevel:         getEnv("LOG_LEVEL", "info"),
 		StorageRoot:      getEnv("STORAGE_ROOT", "./storage"),
 		UploadsURLBase:   getEnv("UPLOADS_URL_BASE", "/uploads"),
-		StreamURL:        getEnv("STREAM_URL", "http://localhost:8080/hls/test.m3u8"),
+		RTMPAddr:         getEnv("RTMP_ADDR", ":1935"),
+		RTMPSAddr:        getEnv("RTMPS_ADDR", ":1936"),
+		RTMPSCertFile:    getEnv("RTMPS_CERT_FILE", ""),
+		RTMPSKeyFile:     getEnv("RTMPS_KEY_FILE", ""),
+		StreamHost:       getEnv("STREAM_HOST", "localhost"),
+		StreamKey:        getEnv("STREAM_KEY", "puppy-cam"),
+		HLSPublicPath:    getEnv("HLS_PUBLIC_PATH", "/hls/index.m3u8"),
 		HASBaseURL:       getEnv("HAS_BASE_URL", "http://homeassistant.local:8123"),
 		HASToken:         getEnv("HAS_TOKEN", ""),
 		EmailUser:        getEnv("EMAIL_USER", ""),

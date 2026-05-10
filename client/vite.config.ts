@@ -8,7 +8,7 @@ export default defineConfig({
     proxy: {
       "/api": "http://localhost:4000",
       "/uploads": "http://localhost:4000",
-      "/hls": "http://192.168.4.92:8080",
+      "/hls": "http://localhost:4000",
     },
   },
   plugins: [react(), tailwindcss()],

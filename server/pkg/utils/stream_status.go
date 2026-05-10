@@ -25,7 +25,7 @@ func StartStreamMonitoring(streamURL string) {
 	Monitor.IsEnabled = initialState
 	Monitor.mu.Unlock()
 
-	slog.Info("stream monitoring started", "enabled", initialState, "url", streamURL)
+	slog.Info("stream monitor: started", "enabled", initialState, "url", streamURL)
 
 	ticker := time.NewTicker(10 * time.Second)
 	defer ticker.Stop()
@@ -49,7 +49,7 @@ func SetStreamEnabled(enabled bool) {
 	Monitor.mu.Lock()
 	defer Monitor.mu.Unlock()
 	Monitor.IsEnabled = enabled
-	slog.Info("stream monitoring toggled", "enabled", enabled)
+	slog.Info("stream monitor: toggled", "enabled", enabled)
 }
 
 func getStreamEnabledFromDB() bool {
@@ -113,15 +113,15 @@ func checkStream(url string) {
 			}
 
 			if !isLive {
-				slog.Warn("stream: went OFFLINE")
+				slog.Warn("stream: went offline")
 				payload["status"] = "offline"
 			} else {
-				slog.Info("stream: back ONLINE")
+				slog.Info("stream: back online")
 				payload["status"] = "online"
 			}
 
 			if err := SendAppEvent("stream_status", payload); err != nil {
-				slog.Error("stream: failed to fire HA event", "error", err)
+				slog.Error("stream: failed to send app event", "error", err)
 			}
 		}(currentlyLive)
 	}

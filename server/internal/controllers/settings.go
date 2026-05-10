@@ -5,9 +5,10 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/internal/models"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/database"
-	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/utils"
+	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/stream"
 )
 
 func GetSettings(c *gin.Context) {
@@ -19,7 +20,7 @@ func GetSettings(c *gin.Context) {
 	)
 
 	if err != nil {
-		if err.Error() == "no rows in result set" {
+		if err == pgx.ErrNoRows {
 			slog.Info("get settings: no settings row found, inserting defaults")
 			_, err = database.Pool.Exec(c, "INSERT INTO settings (id, waitlist_enabled, stream_enabled) VALUES (1, true, false)")
 			if err == nil {
@@ -27,9 +28,9 @@ func GetSettings(c *gin.Context) {
 				return
 			}
 			slog.Error("get settings: failed to insert default settings", "error", err)
-		} else {
-			slog.Error("get settings: database error", "error", err)
 		}
+
+		slog.Error("get settings: database error", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch settings"})
 		return
 	}
@@ -84,17 +85,38 @@ func UpdateStreamStatus(c *gin.Context) {
 		return
 	}
 
+	if *input.StreamEnabled {
+		if err := stream.Global.Enable(); err != nil {
+			slog.Error("update stream status: failed to start listeners", "error", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start stream listeners"})
+			return
+		}
+	}
+
 	query := `UPDATE settings SET stream_enabled=$1, updated_at=NOW() WHERE id=1`
 	_, err := database.Pool.Exec(c, query, *input.StreamEnabled)
 
 	if err != nil {
+		if *input.StreamEnabled {
+			stream.Global.Disable()
+		}
 		slog.Error("update stream status: database error", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update stream setting"})
 		return
 	}
 
-	utils.SetStreamEnabled(*input.StreamEnabled)
+	if !*input.StreamEnabled {
+		stream.Global.Disable()
+	}
 
 	slog.Info("update stream status: updated", "stream_enabled", *input.StreamEnabled)
 	c.JSON(http.StatusOK, gin.H{"message": "Stream setting updated", "stream_enabled": *input.StreamEnabled})
+}
+
+func GetStreamStatus(c *gin.Context) {
+	c.JSON(http.StatusOK, stream.Global.Status())
+}
+
+func GetAdminStreamStatus(c *gin.Context) {
+	c.JSON(http.StatusOK, stream.Global.AdminStatus())
 }

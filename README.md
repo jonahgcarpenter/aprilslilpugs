@@ -22,10 +22,6 @@ A custom, full-stack website built for [April's Lil Pugs](https://aprilslilpugs.
 - **Breeder Management:** Admin tools to manage breeder profiles and "About Me" sections.
 - **Dog & Litter Tracking:** Full CRUD capabilities for managing adult dogs, litters, and individual puppies.
 - **Waitlist System:** Automated waitlist management for prospective owners.
-- **Live Streaming:** Integrated live stream viewer for puppy cams (HLS support).
+- **Live Streaming:** Integrated live stream server for puppy cams (HLS support).
 - **Gallery:** Dynamic image gallery for past litters and available puppies.
 - **Authentication:** Secure admin login to protect management routes.
-
-## Roadmap
-
-- [ ] RTMPS server in Go

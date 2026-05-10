@@ -12,6 +12,7 @@ import (
 	"github.com/jonahgcarpenter/aprilslilpugs/server/internal/middleware"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/database"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/logger"
+	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/stream"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/utils"
 )
 
@@ -35,7 +36,17 @@ func main() {
 
 	slog.Info("storage directories ready")
 
-	go utils.StartStreamMonitoring(cfg.StreamURL)
+	if err := stream.Initialize(stream.Config{
+		RTMPAddr:      cfg.RTMPAddr,
+		RTMPSAddr:     cfg.RTMPSAddr,
+		RTMPSCertFile: cfg.RTMPSCertFile,
+		RTMPSKeyFile:  cfg.RTMPSKeyFile,
+		StreamHost:    cfg.StreamHost,
+		StreamKey:     cfg.StreamKey,
+		HLSPublicPath: cfg.HLSPublicPath,
+	}); err != nil {
+		slog.Error("failed to initialize stream manager", "error", err)
+	}
 
 	r := gin.Default()
 
@@ -84,6 +95,8 @@ func main() {
 
 		// Settings
 		api.GET("/settings", controllers.GetSettings)
+		api.GET("/settings/stream/status", controllers.GetStreamStatus)
+		api.GET("/settings/stream/admin-status", middleware.RequireAuth, controllers.GetAdminStreamStatus)
 		api.PATCH("/settings/waitlist", middleware.RequireAuth, controllers.UpdateWaitlistStatus)
 		api.PATCH("/settings/stream", middleware.RequireAuth, controllers.UpdateStreamStatus)
 
@@ -95,8 +108,10 @@ func main() {
 
 	r.Static("/assets", "./public/dist/assets")
 	r.Static(cfg.UploadsURLBase, filepath.Clean(cfg.StorageRoot))
+	r.GET("/hls/*filepath", stream.Global.HandleHLS)
 	r.StaticFile("/logo.jpg", "./public/dist/logo.jpg")
-	r.StaticFile("/background.png", "./public/dist/background.png")
+	r.StaticFile("/background.jpg", "./public/dist/background.jpg")
+	r.StaticFile("/stream-offline.jpg", "./public/dist/stream-offline.jpg")
 	r.StaticFile("/robots.txt", "./public/dist/robots.txt")
 	r.StaticFile("/sitemap.xml", "./public/dist/sitemap.xml")
 
