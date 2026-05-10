@@ -79,7 +79,9 @@ const Admin = () => {
     try {
       await toggleWaitlist(!settings?.waitlist_enabled);
     } catch (error) {
-      window.alert("Failed to update waitlist status. Check the console for details.");
+      window.alert(
+        "Failed to update waitlist status. Check the console for details.",
+      );
     }
   };
 
@@ -87,17 +89,11 @@ const Admin = () => {
     try {
       await toggleStream(!settings?.stream_enabled);
     } catch (error) {
-      window.alert("Failed to update stream status. Check the console for details.");
+      window.alert(
+        "Failed to update stream status. Check the console for details.",
+      );
     }
   };
-
-  const streamStateLabel = !settings?.stream_enabled
-    ? "Disabled"
-    : streamStatus?.live
-      ? "Live"
-      : streamStatus?.publisher_connected
-        ? "Preparing"
-        : "Waiting for stream";
 
   return (
     <div className="space-y-12">
@@ -151,26 +147,6 @@ const Admin = () => {
                   </p>
                 </div>
                 <div className="space-y-2 text-xs text-slate-400">
-                  <p>
-                    <span className="font-semibold text-slate-300">Status:</span>{" "}
-                    {streamStateLabel}
-                  </p>
-                  <p>
-                    <span className="font-semibold text-slate-300">RTMP:</span>{" "}
-                    <span className="break-all">{streamStatus?.rtmp_url ?? "Unavailable"}</span>
-                  </p>
-                  <p>
-                    <span className="font-semibold text-slate-300">RTMPS:</span>{" "}
-                    <span className="break-all">
-                      {streamStatus?.rtmps_available
-                        ? streamStatus.rtmps_url
-                        : "Unavailable until RTMPS cert and key are configured"}
-                    </span>
-                  </p>
-                  <p>
-                    <span className="font-semibold text-slate-300">Stream Key:</span>{" "}
-                    <span className="break-all">{streamStatus?.stream_key ?? "Unavailable"}</span>
-                  </p>
                   {streamStatus?.last_error && (
                     <p className="text-amber-300">{streamStatus.last_error}</p>
                   )}

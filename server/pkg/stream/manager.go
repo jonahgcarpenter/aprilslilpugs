@@ -358,7 +358,6 @@ func (m *Manager) handlePublisher(protocol string, nconn net.Conn) {
 		slog.Warn("stream: failed to start HLS muxer", "error", err)
 		return
 	}
-	defer muxer.Close()
 
 	slog.Info("stream: HLS muxer started", "protocol", protocol, "remote_addr", nconn.RemoteAddr().String(), "path", conn.URL.Path)
 

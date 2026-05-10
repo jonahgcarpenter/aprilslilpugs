@@ -4,6 +4,7 @@ import type { StreamStatus } from "../../hooks/usestreamstatus";
 import { FaExpand, FaCompress } from "react-icons/fa";
 
 const LOGO_URL = "/logo.jpg";
+const OFFLINE_IMAGE_URL = "/stream-offline.svg";
 
 interface StreamProps {
   streamStatus?: StreamStatus;
@@ -146,21 +147,13 @@ const Stream = ({ streamStatus }: StreamProps) => {
       >
         <div className="aspect-video relative group">
           {statusMessage ? (
-            <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 bg-slate-900">
-              <svg
-                className="w-12 h-12 mb-4 text-slate-600"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
-                />
-              </svg>
-              <p>{statusMessage}</p>
+            <div className="w-full h-full bg-slate-950">
+              <img
+                src={OFFLINE_IMAGE_URL}
+                alt="The live puppy cam is temporarily offline."
+                className="h-full w-full object-cover"
+              />
+              <span className="sr-only">{statusMessage}</span>
             </div>
           ) : (
             <video
