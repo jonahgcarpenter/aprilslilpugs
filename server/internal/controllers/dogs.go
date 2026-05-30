@@ -17,7 +17,7 @@ import (
 func GetDogs(c *gin.Context) {
 	query := `
 		SELECT 
-			id, name, gender, description, birth_date,
+			id, name, gender, description, birth_date, death_at,
 			profile_picture, gallery, created_at, updated_at
 		FROM dogs
 		ORDER BY created_at DESC`
@@ -36,7 +36,7 @@ func GetDogs(c *gin.Context) {
 		var ppRaw, galleryRaw []byte
 
 		if err := rows.Scan(
-			&dog.ID, &dog.Name, &dog.Gender, &dog.Description, &dog.BirthDate,
+			&dog.ID, &dog.Name, &dog.Gender, &dog.Description, &dog.BirthDate, &dog.DeathAt,
 			&ppRaw, &galleryRaw, &dog.CreatedAt, &dog.UpdatedAt,
 		); err != nil {
 			slog.Debug("get dogs: failed to scan row", "error", err)
@@ -70,13 +70,13 @@ func GetDog(c *gin.Context) {
 
 	query := `
 		SELECT 
-			id, name, gender, description, birth_date,
+			id, name, gender, description, birth_date, death_at,
 			profile_picture, gallery, created_at, updated_at
 		FROM dogs
 		WHERE id=$1`
 
 	err := database.Pool.QueryRow(c, query, id).Scan(
-		&dog.ID, &dog.Name, &dog.Gender, &dog.Description, &dog.BirthDate,
+		&dog.ID, &dog.Name, &dog.Gender, &dog.Description, &dog.BirthDate, &dog.DeathAt,
 		&ppRaw, &galleryRaw, &dog.CreatedAt, &dog.UpdatedAt,
 	)
 
@@ -133,6 +133,7 @@ func CreateDog(c *gin.Context) {
 	gender := c.PostForm("gender")
 	desc := c.PostForm("description")
 	birthDate, _ := time.Parse("2006-01-02", c.PostForm("birthDate"))
+	deathAt := parseOptionalDate(c.PostForm("deathAt"))
 
 	ppJSON, err := json.Marshal(profilePic)
 	if err != nil {
@@ -145,10 +146,10 @@ func CreateDog(c *gin.Context) {
 
 	var dogID int
 	query := `
-		INSERT INTO dogs (name, gender, description, birth_date, profile_picture, gallery)
-		VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`
+		INSERT INTO dogs (name, gender, description, birth_date, death_at, profile_picture, gallery)
+		VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`
 
-	err = database.Pool.QueryRow(c, query, name, gender, desc, birthDate, ppJSON, galleryJSON).Scan(&dogID)
+	err = database.Pool.QueryRow(c, query, name, gender, desc, birthDate, deathAt, ppJSON, galleryJSON).Scan(&dogID)
 	if err != nil {
 		slog.Error("create dog: database error", "name", name, "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -196,6 +197,7 @@ func UpdateDog(c *gin.Context) {
 	gender := c.PostForm("gender")
 	desc := c.PostForm("description")
 	birthDate, _ := time.Parse("2006-01-02", c.PostForm("birthDate"))
+	deathAt := parseOptionalDate(c.PostForm("deathAt"))
 
 	newPP := currentPP
 	if uploadedImg, err := utils.UploadAndCreateImage(c, "profilePicture", "dogs"); err == nil && uploadedImg != nil {
@@ -258,9 +260,9 @@ func UpdateDog(c *gin.Context) {
 	}
 
 	_, err = database.Pool.Exec(c, `
-		UPDATE dogs SET name=$1, gender=$2, description=$3, birth_date=$4, profile_picture=$5, gallery=$6, updated_at=NOW()
-		WHERE id=$7`,
-		name, gender, desc, birthDate, ppJSON, galleryJSON, id)
+		UPDATE dogs SET name=$1, gender=$2, description=$3, birth_date=$4, death_at=$5, profile_picture=$6, gallery=$7, updated_at=NOW()
+		WHERE id=$8`,
+		name, gender, desc, birthDate, deathAt, ppJSON, galleryJSON, id)
 
 	if err != nil {
 		slog.Error("update dog: database error", "dog_id", id, "error", err)
@@ -270,6 +272,19 @@ func UpdateDog(c *gin.Context) {
 
 	slog.Info("update dog: dog updated", "dog_id", id)
 	c.JSON(http.StatusOK, gin.H{"message": "Dog updated successfully"})
+}
+
+func parseOptionalDate(value string) *time.Time {
+	if value == "" {
+		return nil
+	}
+
+	parsed, err := time.Parse("2006-01-02", value)
+	if err != nil {
+		return nil
+	}
+
+	return &parsed
 }
 
 func DeleteDog(c *gin.Context) {
