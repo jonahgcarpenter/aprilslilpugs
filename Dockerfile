@@ -38,6 +38,7 @@ COPY --from=backend-builder /app/server .
 COPY --from=frontend-builder /app/dist ./public/dist
 
 ENV STORAGE_ROOT=/app/storage
+ENV DATABASE_ROOT=/app/storage/database
 
 EXPOSE 4000
 

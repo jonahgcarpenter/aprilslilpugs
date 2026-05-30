@@ -25,7 +25,7 @@ func main() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	database.Connect(cfg.DatabaseURL)
+	database.Connect(cfg.DatabaseURL, cfg.DatabaseRoot)
 	defer database.Close()
 	database.CreateTables()
 
