@@ -76,6 +76,7 @@ func CreateTables() {
 					gender dog_gender NOT NULL,
 					description TEXT,
 					birth_date DATE NOT NULL,
+					death_at DATE,
 					profile_picture JSONB DEFAULT '{}'::jsonb,
 					gallery JSONB DEFAULT '[]'::jsonb,
 					created_at TIMESTAMPTZ DEFAULT NOW(),

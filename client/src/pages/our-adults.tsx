@@ -3,6 +3,7 @@ import { useDogs } from "../hooks/usedogs";
 
 const OurAdults = () => {
   const { dogs, isLoading, error } = useDogs();
+  const livingDogs = dogs.filter((dog) => !dog.deathAt);
 
   return (
     <>
@@ -14,7 +15,7 @@ const OurAdults = () => {
       <meta property="og:title" content="Our Adult Pugs | April's Lil Pugs" />
       <meta property="og:url" content="https://aprilslilpugs.com/ouradults" />
 
-      <Grumble grumbles={dogs} isLoading={isLoading} error={error} />
+      <Grumble grumbles={livingDogs} isLoading={isLoading} error={error} />
     </>
   );
 };

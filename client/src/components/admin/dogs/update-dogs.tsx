@@ -34,6 +34,7 @@ const UpdateDogs = ({
     gender: "Male",
     description: "",
     birthDate: "",
+    deathAt: "",
     galleryFiles: [],
     galleryDescriptions: [],
     existingGallery: [],
@@ -51,6 +52,7 @@ const UpdateDogs = ({
       gender: "Male",
       description: "",
       birthDate: "",
+      deathAt: "",
       galleryFiles: [],
       galleryDescriptions: [],
       existingGallery: [],
@@ -67,6 +69,7 @@ const UpdateDogs = ({
       gender: dog.gender,
       description: dog.description,
       birthDate: dog.birthDate,
+      deathAt: dog.deathAt || "",
       galleryFiles: [],
       galleryDescriptions: [],
       existingGallery: JSON.parse(JSON.stringify(dog.images || [])),
@@ -192,6 +195,11 @@ const UpdateDogs = ({
                   <p className="text-sm text-white/50">
                     {dog.gender} • {dog.birthDate}
                   </p>
+                  {dog.deathAt && (
+                    <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-red-300">
+                      Deceased: {dog.deathAt}
+                    </p>
+                  )}
                 </div>
                 <div className="flex gap-2">
                   <button
@@ -344,6 +352,26 @@ const UpdateDogs = ({
                       }
                       className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none"
                     />
+                  </div>
+
+                  <div className="space-y-2 col-span-2 sm:col-span-1">
+                    <label className="text-sm font-medium text-blue-400">
+                      Death Date
+                    </label>
+                    <input
+                      type="date"
+                      value={formData.deathAt || ""}
+                      onChange={(e) =>
+                        setFormData((p) => ({
+                          ...p,
+                          deathAt: e.target.value,
+                        }))
+                      }
+                      className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none"
+                    />
+                    <p className="text-xs text-white/40">
+                      Leave blank for living dogs.
+                    </p>
                   </div>
                 </div>
                 <div className="space-y-2">

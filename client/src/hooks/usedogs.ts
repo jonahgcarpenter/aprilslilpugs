@@ -14,6 +14,7 @@ interface DogResponse {
   gender: "Male" | "Female";
   description: string;
   birthDate: string;
+  deathAt?: string | null;
   profilePicture: Image | null;
   gallery: Image[];
 }
@@ -24,6 +25,7 @@ export interface Dog {
   gender: "Male" | "Female";
   description: string;
   birthDate: string;
+  deathAt?: string | null;
   profilePicture: string;
   images: Image[];
 }
@@ -33,6 +35,7 @@ export interface DogInput {
   gender: "Male" | "Female";
   description: string;
   birthDate: string;
+  deathAt?: string;
   profilePictureFile?: File;
   galleryFiles?: File[];
   galleryDescriptions?: string[];
@@ -66,6 +69,7 @@ export const useDogs = () => {
         gender: raw.gender,
         description: raw.description,
         birthDate: raw.birthDate.split("T")[0],
+        deathAt: raw.deathAt ? raw.deathAt.split("T")[0] : null,
         profilePicture: profileUrl,
         images: raw.gallery || [],
       };
@@ -78,6 +82,7 @@ export const useDogs = () => {
     formData.append("gender", data.gender);
     formData.append("description", data.description);
     formData.append("birthDate", data.birthDate);
+    formData.append("deathAt", data.deathAt || "");
 
     if (data.profilePictureFile) {
       formData.append("profilePicture", data.profilePictureFile);
