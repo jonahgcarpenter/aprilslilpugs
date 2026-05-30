@@ -30,7 +30,7 @@ WORKDIR /app
 RUN apk --no-cache add ca-certificates \
   && addgroup -S aprilslilpugs \
   && adduser -S aprilslilpugs -G aprilslilpugs \
-  && mkdir -p /app/storage /app/database \
+  && mkdir -p /app/storage \
   && chown -R aprilslilpugs:aprilslilpugs /app
 
 COPY --from=backend-builder /app/server .
@@ -38,7 +38,7 @@ COPY --from=backend-builder /app/server .
 COPY --from=frontend-builder /app/dist ./public/dist
 
 ENV STORAGE_ROOT=/app/storage
-ENV DATABASE_ROOT=/app/database
+ENV DATABASE_ROOT=/app/storage/database
 
 EXPOSE 4000
 

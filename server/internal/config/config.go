@@ -38,7 +38,7 @@ func Load() *Config {
 	return &Config{
 		Port:             getEnv("PORT", "4000"),
 		DatabaseURL:      getEnv("DATABASE_URL", ""),
-		DatabaseRoot:     getEnv("DATABASE_ROOT", "./database"),
+		DatabaseRoot:     getEnv("DATABASE_ROOT", "./storage/database"),
 		JWTSecret:        getEnv("JWT_SECRET", "verylongsecret"),
 		LogLevel:         getEnv("LOG_LEVEL", "info"),
 		StorageRoot:      getEnv("STORAGE_ROOT", "./storage"),

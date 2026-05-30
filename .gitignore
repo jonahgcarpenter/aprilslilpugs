@@ -6,4 +6,3 @@ dist/
 tmp/
 .env
 storage/
-database/
