@@ -10,6 +10,7 @@ import (
 type Config struct {
 	Port             string
 	DatabaseURL      string
+	DatabaseRoot     string
 	JWTSecret        string
 	LogLevel         string
 	StorageRoot      string
@@ -37,6 +38,7 @@ func Load() *Config {
 	return &Config{
 		Port:             getEnv("PORT", "4000"),
 		DatabaseURL:      getEnv("DATABASE_URL", ""),
+		DatabaseRoot:     getEnv("DATABASE_ROOT", "./database"),
 		JWTSecret:        getEnv("JWT_SECRET", "verylongsecret"),
 		LogLevel:         getEnv("LOG_LEVEL", "info"),
 		StorageRoot:      getEnv("STORAGE_ROOT", "./storage"),
