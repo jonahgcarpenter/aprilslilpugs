@@ -15,7 +15,7 @@ A custom, full-stack website built for [April's Lil Pugs](https://aprilslilpugs.
 
 - **Language:** Go (Golang 1.25+)
 - **Framework:** [Gin Gonic](https://github.com/gin-gonic/gin)
-- **Database:** PostgreSQL
+- **Database:** PostgreSQL or SQLite
 
 ## Features
 
