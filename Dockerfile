@@ -30,15 +30,22 @@ WORKDIR /app
 RUN apk --no-cache add ca-certificates \
   && addgroup -S aprilslilpugs \
   && adduser -S aprilslilpugs -G aprilslilpugs \
-  && mkdir -p /app/storage \
-  && chown -R aprilslilpugs:aprilslilpugs /app
+  && mkdir -p /app/data/public/images \
+  && mkdir -p /app/data/public/hls \
+  && mkdir -p /app/data/private/files \
+  && mkdir -p /app/data/private/database \
+  && chown -R aprilslilpugs:aprilslilpugs /app \
+  && chmod 700 /app/data/private /app/data/private/files /app/data/private/database
 
 COPY --from=backend-builder /app/server .
 
 COPY --from=frontend-builder /app/dist ./public/dist
 
-ENV STORAGE_ROOT=/app/storage
-ENV DATABASE_ROOT=/app/storage/database
+ENV PUBLIC_STORAGE_ROOT=/app/data/public/images
+ENV PRIVATE_STORAGE_ROOT=/app/data/private/files
+ENV HLS_STORAGE_ROOT=/app/data/public/hls
+ENV DATABASE_ROOT=/app/data/private/database
+ENV UPLOADS_URL_BASE=/uploads
 
 EXPOSE 4000
 

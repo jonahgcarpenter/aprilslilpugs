@@ -14,7 +14,7 @@ import (
 	"github.com/jonahgcarpenter/aprilslilpugs/server/internal/models"
 )
 
-func UploadAndCreateFile(c *gin.Context, formKey string, folder string) (*models.File, error) {
+func UploadAndCreateFile(c *gin.Context, formKey string, _ string) (*models.File, error) {
 	fileHeader, err := c.FormFile(formKey)
 	if err != nil {
 		if errors.Is(err, http.ErrMissingFile) {
@@ -38,7 +38,7 @@ func UploadAndCreateFile(c *gin.Context, formKey string, folder string) (*models
 	}
 
 	fileName := fmt.Sprintf("%d-%s-%s%s", time.Now().UnixMilli(), stem, suffix, ext)
-	absPath, relPath, err := buildStoragePath(folder, fileName)
+	absPath, relPath, err := buildPrivateFileStoragePath(fileName)
 	if err != nil {
 		return nil, err
 	}
@@ -56,10 +56,14 @@ func UploadAndCreateFile(c *gin.Context, formKey string, folder string) (*models
 	now := time.Now()
 	return &models.File{
 		Name:      fileHeader.Filename,
-		URL:       buildPublicUploadURL(relPath),
+		URL:       relPath,
 		CreatedAt: now,
 		UpdatedAt: now,
 	}, nil
 }
 
-var DeleteFile = deleteStoredFile
+var DeleteFile = deletePrivateStoredFile
+
+func PrivateFilePath(value string) (string, error) {
+	return privateStoragePathFromValue(value)
+}

@@ -103,11 +103,12 @@ func main() {
 		// Files
 		api.GET("/files", middleware.RequireAuth, controllers.GetFiles)
 		api.POST("/files", middleware.RequireAuth, controllers.CreateFile)
+		api.GET("/files/:id/download", middleware.RequireAuth, controllers.DownloadFile)
 		api.DELETE("/files/:id", middleware.RequireAuth, controllers.DeleteFile)
 	}
 
 	r.Static("/assets", "./public/dist/assets")
-	r.Static(cfg.UploadsURLBase, filepath.Clean(cfg.StorageRoot))
+	r.Static(cfg.UploadsURLBase, filepath.Clean(cfg.PublicStorageRoot))
 	r.GET("/hls/*filepath", stream.Global.HandleHLS)
 	r.StaticFile("/logo.jpg", "./public/dist/logo.jpg")
 	r.StaticFile("/background.jpg", "./public/dist/background.jpg")

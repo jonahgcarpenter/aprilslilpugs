@@ -3,6 +3,7 @@ package controllers
 import (
 	"log/slog"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
@@ -88,4 +89,42 @@ func DeleteFile(c *gin.Context) {
 
 	slog.Info("delete file: file deleted", "file_id", id)
 	c.JSON(http.StatusOK, gin.H{"message": "File deleted"})
+}
+
+func DownloadFile(c *gin.Context) {
+	id := c.Param("id")
+	var file models.File
+
+	err := database.Pool.QueryRow(c, "SELECT id, name, url, created_at, updated_at FROM files WHERE id=$1", id).Scan(&file.ID, &file.Name, &file.URL, &file.CreatedAt, &file.UpdatedAt)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			slog.Debug("download file: not found", "file_id", id, "error", err)
+			c.JSON(http.StatusNotFound, gin.H{"error": "File not found"})
+			return
+		}
+
+		slog.Error("download file: database error", "file_id", id, "error", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to download file"})
+		return
+	}
+
+	absPath, err := utils.PrivateFilePath(file.URL)
+	if err != nil || absPath == "" {
+		slog.Warn("download file: invalid storage path", "file_id", id, "error", err)
+		c.JSON(http.StatusNotFound, gin.H{"error": "File not found"})
+		return
+	}
+
+	if _, err := os.Stat(absPath); err != nil {
+		if os.IsNotExist(err) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "File not found"})
+			return
+		}
+
+		slog.Error("download file: failed to stat file", "file_id", id, "path", absPath, "error", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to download file"})
+		return
+	}
+
+	c.FileAttachment(absPath, file.Name)
 }

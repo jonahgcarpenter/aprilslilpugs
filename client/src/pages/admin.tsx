@@ -55,6 +55,7 @@ const Admin = () => {
     files,
     createFile,
     deleteFile,
+    downloadFile,
     isLoading: isFilesLoading,
   } = useFiles();
 
@@ -204,6 +205,7 @@ const Admin = () => {
           files={files}
           onCreate={createFile}
           onDelete={deleteFile}
+          onDownload={downloadFile}
           isLoading={isFilesLoading}
         />
       </section>

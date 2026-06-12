@@ -14,19 +14,50 @@ import (
 	"github.com/jonahgcarpenter/aprilslilpugs/server/internal/config"
 )
 
-var uploadFolders = []string{"breeders", "dogs", "litters", "puppies", "files"}
+var publicUploadFolders = []string{"breeders", "dogs", "litters", "puppies"}
 
 func EnsureStorageDirectories() error {
-	root := config.Load().StorageRoot
-	for _, folder := range uploadFolders {
-		if err := os.MkdirAll(filepath.Join(root, folder), 0o755); err != nil {
+	cfg := config.Load()
+	for _, folder := range publicUploadFolders {
+		if err := os.MkdirAll(filepath.Join(cfg.PublicStorageRoot, folder), 0o755); err != nil {
 			return err
 		}
+	}
+
+	if err := os.MkdirAll(cfg.PrivateStorageRoot, 0o700); err != nil {
+		return err
+	}
+	if err := os.MkdirAll(cfg.HLSStorageRoot, 0o755); err != nil {
+		return err
 	}
 	return nil
 }
 
-func buildStoragePath(folder, fileName string) (string, string, error) {
+func buildPublicStoragePath(folder, fileName string) (string, string, error) {
+	return buildStoragePath(config.Load().PublicStorageRoot, folder, fileName)
+}
+
+func buildPrivateFileStoragePath(fileName string) (string, string, error) {
+	cleanFileName := sanitizePathSegment(fileName)
+	if cleanFileName == "" {
+		return "", "", fmt.Errorf("invalid file name")
+	}
+
+	root := config.Load().PrivateStorageRoot
+	absRoot, err := filepath.Abs(root)
+	if err != nil {
+		return "", "", err
+	}
+
+	absPath := filepath.Join(absRoot, cleanFileName)
+	if !strings.HasPrefix(absPath, absRoot+string(os.PathSeparator)) {
+		return "", "", fmt.Errorf("invalid storage path")
+	}
+
+	return absPath, cleanFileName, nil
+}
+
+func buildStoragePath(root, folder, fileName string) (string, string, error) {
 	cleanFolder := sanitizePathSegment(folder)
 	if cleanFolder == "" {
 		return "", "", fmt.Errorf("invalid storage folder")
@@ -37,7 +68,6 @@ func buildStoragePath(folder, fileName string) (string, string, error) {
 		return "", "", fmt.Errorf("invalid file name")
 	}
 
-	root := config.Load().StorageRoot
 	absRoot, err := filepath.Abs(root)
 	if err != nil {
 		return "", "", err
@@ -78,7 +108,38 @@ func storagePathFromURL(fileURL string) (string, error) {
 	relURLPath := strings.TrimPrefix(cleanPath, base+"/")
 	relFSPath := filepath.FromSlash(relURLPath)
 
-	root := config.Load().StorageRoot
+	root := config.Load().PublicStorageRoot
+	absRoot, err := filepath.Abs(root)
+	if err != nil {
+		return "", err
+	}
+
+	absPath := filepath.Join(absRoot, relFSPath)
+	if !strings.HasPrefix(absPath, absRoot+string(os.PathSeparator)) {
+		return "", fmt.Errorf("invalid storage path")
+	}
+
+	return absPath, nil
+}
+
+func privateStoragePathFromValue(value string) (string, error) {
+	if value == "" {
+		return "", nil
+	}
+
+	relFSPath := filepath.FromSlash(strings.TrimLeft(value, "/"))
+	base := strings.TrimSuffix(config.Load().UploadsURLBase, "/")
+	if u, err := url.Parse(value); err == nil {
+		cleanPath := path.Clean(u.Path)
+		if strings.HasPrefix(cleanPath, base+"/") {
+			relFSPath = filepath.FromSlash(strings.TrimPrefix(cleanPath, base+"/"))
+		}
+	}
+	if relFSPath == "files" || strings.HasPrefix(relFSPath, "files"+string(os.PathSeparator)) {
+		relFSPath = strings.TrimPrefix(relFSPath, "files"+string(os.PathSeparator))
+	}
+
+	root := config.Load().PrivateStorageRoot
 	absRoot, err := filepath.Abs(root)
 	if err != nil {
 		return "", err
@@ -94,6 +155,19 @@ func storagePathFromURL(fileURL string) (string, error) {
 
 func deleteStoredFile(fileURL string) error {
 	absPath, err := storagePathFromURL(fileURL)
+	if err != nil || absPath == "" {
+		return err
+	}
+
+	if err := os.Remove(absPath); err != nil && !os.IsNotExist(err) {
+		return err
+	}
+
+	return nil
+}
+
+func deletePrivateStoredFile(value string) error {
+	absPath, err := privateStoragePathFromValue(value)
 	if err != nil || absPath == "" {
 		return err
 	}

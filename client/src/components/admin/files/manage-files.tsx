@@ -18,6 +18,7 @@ interface ManageFilesProps {
   files: FileModel[];
   onCreate: (file: File) => Promise<boolean>;
   onDelete: (id: number) => Promise<boolean>;
+  onDownload: (file: FileModel) => Promise<boolean>;
   isLoading: boolean;
 }
 
@@ -25,6 +26,7 @@ const ManageFiles = ({
   files,
   onCreate,
   onDelete,
+  onDownload,
   isLoading,
 }: ManageFilesProps) => {
   const [isUploading, setIsUploading] = useState(false);
@@ -84,6 +86,13 @@ const ManageFiles = ({
       if (!success) {
         window.alert("Failed to delete file. Check the console for details.");
       }
+    }
+  };
+
+  const handleDownload = async (file: FileModel) => {
+    const success = await onDownload(file);
+    if (!success) {
+      window.alert("Failed to download file. Check the console for details.");
     }
   };
 
@@ -181,15 +190,13 @@ const ManageFiles = ({
                     {getFileIcon(file.name)}
                   </div>
                   <div>
-                    <a
-                      href={file.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <button
+                      onClick={() => handleDownload(file)}
                       className="text-sm md:text-base font-bold text-slate-200 hover:text-blue-400 transition-colors"
-                      title="View File"
+                      title="Download File"
                     >
                       {file.name}
-                    </a>
+                    </button>
                     <div className="flex gap-4 mt-1">
                       <p className="text-[10px] md:text-xs text-slate-500">
                         Uploaded:{" "}
@@ -200,16 +207,13 @@ const ManageFiles = ({
                 </div>
 
                 <div className="flex gap-2">
-                  <a
-                    href={file.url}
-                    download
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
+                    onClick={() => handleDownload(file)}
                     className="cursor-pointer p-2 bg-slate-900 text-slate-500 hover:bg-blue-500/10 hover:text-blue-500 rounded-lg transition-all"
                     title="Download File"
                   >
                     <FaDownload />
-                  </a>
+                  </button>
 
                   <button
                     onClick={() => handleDelete(file.id)}

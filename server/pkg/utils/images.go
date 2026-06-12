@@ -52,7 +52,7 @@ func UploadAndCreateImage(c *gin.Context, formKey string, folder string) (*model
 	}
 
 	fileName := fmt.Sprintf("%d-%s-%s.jpg", time.Now().UnixMilli(), stem, suffix)
-	absPath, relPath, err := buildStoragePath(folder, fileName)
+	absPath, relPath, err := buildPublicStoragePath(folder, fileName)
 	if err != nil {
 		return nil, err
 	}

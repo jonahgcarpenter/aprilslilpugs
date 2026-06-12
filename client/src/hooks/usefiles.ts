@@ -47,5 +47,25 @@ export const useFiles = () => {
     }
   };
 
-  return { files, createFile, deleteFile, isLoading };
+  const downloadFile = async (file: FileModel) => {
+    try {
+      const response = await axios.get(`${API_URL}/${file.id}/download`, {
+        responseType: "blob",
+      });
+      const url = URL.createObjectURL(response.data);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = file.name;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      return true;
+    } catch (error) {
+      console.error("Download file error:", { id: file.id, error });
+      return false;
+    }
+  };
+
+  return { files, createFile, deleteFile, downloadFile, isLoading };
 };

@@ -101,7 +101,7 @@ func connectSQLite(databaseRoot string) {
 		databaseRoot = "./database"
 	}
 
-	if err := os.MkdirAll(databaseRoot, 0o755); err != nil {
+	if err := os.MkdirAll(databaseRoot, 0o700); err != nil {
 		slog.Error("unable to create sqlite database directory", "path", databaseRoot, "error", err)
 		os.Exit(1)
 	}
