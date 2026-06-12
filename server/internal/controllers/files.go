@@ -36,6 +36,10 @@ func GetFiles(c *gin.Context) {
 func CreateFile(c *gin.Context) {
 	file, err := utils.UploadAndCreateFile(c, "file", "files")
 	if err != nil {
+		if abortIfUploadTooLarge(c, err) {
+			return
+		}
+
 		slog.Error("create file: failed to upload file", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to upload file"})
 		return

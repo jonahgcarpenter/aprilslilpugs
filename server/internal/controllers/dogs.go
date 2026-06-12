@@ -112,6 +112,9 @@ func GetDog(c *gin.Context) {
 func CreateDog(c *gin.Context) {
 	profilePic, err := utils.UploadAndCreateImage(c, "profilePicture", "dogs")
 	if err != nil {
+		if abortIfUploadTooLarge(c, err) {
+			return
+		}
 		slog.Warn("create dog: failed to process profile picture", "error", err)
 	}
 
@@ -125,6 +128,9 @@ func CreateDog(c *gin.Context) {
 			img.Description = c.PostForm(descKey)
 			gallery = append(gallery, *img)
 		} else if err != nil {
+			if abortIfUploadTooLarge(c, err) {
+				return
+			}
 			slog.Warn("create dog: failed to process gallery image", "form_key", formKey, "error", err)
 		}
 	}
@@ -208,6 +214,9 @@ func UpdateDog(c *gin.Context) {
 			}
 		}
 	} else if err != nil {
+		if abortIfUploadTooLarge(c, err) {
+			return
+		}
 		slog.Warn("update dog: failed to process profile picture", "dog_id", id, "error", err)
 	}
 
@@ -244,6 +253,9 @@ func UpdateDog(c *gin.Context) {
 			img.Description = c.PostForm(descKey)
 			newGalleryItems = append(newGalleryItems, *img)
 		} else if err != nil {
+			if abortIfUploadTooLarge(c, err) {
+				return
+			}
 			slog.Warn("update dog: failed to process gallery image", "dog_id", id, "form_key", formKey, "error", err)
 		}
 	}

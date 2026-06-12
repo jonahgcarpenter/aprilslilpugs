@@ -164,6 +164,9 @@ func GetLitter(c *gin.Context) {
 func CreateLitter(c *gin.Context) {
 	profilePic, err := utils.UploadAndCreateImage(c, "profile_picture", "litters")
 	if err != nil {
+		if abortIfUploadTooLarge(c, err) {
+			return
+		}
 		slog.Warn("create litter: failed to process profile picture", "error", err)
 	}
 
@@ -177,6 +180,9 @@ func CreateLitter(c *gin.Context) {
 			img.Description = c.PostForm(descKey)
 			gallery = append(gallery, *img)
 		} else if err != nil {
+			if abortIfUploadTooLarge(c, err) {
+				return
+			}
 			slog.Warn("create litter: failed to process gallery image", "form_key", formKey, "error", err)
 		}
 	}
@@ -274,6 +280,9 @@ func UpdateLitter(c *gin.Context) {
 			}
 		}
 	} else if err != nil {
+		if abortIfUploadTooLarge(c, err) {
+			return
+		}
 		slog.Warn("update litter: failed to process profile picture", "litter_id", id, "error", err)
 	}
 
@@ -309,6 +318,9 @@ func UpdateLitter(c *gin.Context) {
 			img.Description = c.PostForm(descKey)
 			newGalleryItems = append(newGalleryItems, *img)
 		} else if err != nil {
+			if abortIfUploadTooLarge(c, err) {
+				return
+			}
 			slog.Warn("update litter: failed to process gallery image", "litter_id", id, "form_key", formKey, "error", err)
 		}
 	}

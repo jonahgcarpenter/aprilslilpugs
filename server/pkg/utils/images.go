@@ -21,8 +21,15 @@ func UploadAndCreateImage(c *gin.Context, formKey string, folder string) (*model
 		if errors.Is(err, http.ErrMissingFile) {
 			return nil, nil
 		}
+		var maxBytesErr *http.MaxBytesError
+		if errors.As(err, &maxBytesErr) {
+			return nil, ErrUploadTooLarge
+		}
 
 		return nil, fmt.Errorf("failed to read uploaded image %q: %w", formKey, err)
+	}
+	if fileHeader.Size > MaxImageUploadBytes {
+		return nil, ErrUploadTooLarge
 	}
 
 	srcFile, err := fileHeader.Open()
@@ -34,6 +41,9 @@ func UploadAndCreateImage(c *gin.Context, formKey string, folder string) (*model
 	img, err := imaging.Decode(srcFile)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode image: %w", err)
+	}
+	if img.Bounds().Dx()*img.Bounds().Dy() > MaxImagePixels {
+		return nil, ErrUploadTooLarge
 	}
 
 	if img.Bounds().Dx() > 1920 {

@@ -106,6 +106,9 @@ func UpdateBreeder(c *gin.Context) {
 			}
 		}
 	} else if err != nil {
+		if abortIfUploadTooLarge(c, err) {
+			return
+		}
 		slog.Warn("update breeder: failed to process profile picture", "breeder_id", id, "error", err)
 	}
 
@@ -127,6 +130,9 @@ func UpdateBreeder(c *gin.Context) {
 			}
 			tempGallery[i] = *uploadedImg
 		} else if err != nil {
+			if abortIfUploadTooLarge(c, err) {
+				return
+			}
 			slog.Warn("update breeder: failed to process gallery image", "breeder_id", id, "form_key", formKey, "error", err)
 		}
 	}

@@ -2,6 +2,7 @@ package main
 
 import (
 	"log/slog"
+	"net/http"
 	"os"
 	"path/filepath"
 
@@ -49,6 +50,11 @@ func main() {
 	}
 
 	r := gin.Default()
+	r.MaxMultipartMemory = 32 << 20
+	r.Use(func(c *gin.Context) {
+		c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, 32<<20)
+		c.Next()
+	})
 
 	api := r.Group("/api")
 	{

@@ -27,7 +27,7 @@ func LoginUser(c *gin.Context) {
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			slog.Debug("login: email not found", "email", req.Email)
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Incorrect email"})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
 			return
 		}
 
@@ -38,7 +38,7 @@ func LoginUser(c *gin.Context) {
 
 	if !utils.CheckPassword(req.Password, user.PasswordHash) {
 		slog.Debug("login: incorrect password", "email", req.Email)
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Incorrect password"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
 		return
 	}
 

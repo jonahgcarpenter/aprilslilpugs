@@ -3,11 +3,13 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"html"
 	"log/slog"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/internal/models"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/database"
 	"github.com/jonahgcarpenter/aprilslilpugs/server/pkg/utils"
@@ -54,12 +56,12 @@ func sendWaitlistNotification(entry *models.Waitlist) {
 		<p><strong>Date Added:</strong> %s</p>
 		<p>View the waitlist on the <a href="https://aprilslilpugs.com/admin">website</a>.</p>
 	`,
-		entry.FirstName,
-		entry.LastName,
-		entry.Email,
-		entry.Phone,
-		entry.Status,
-		entry.Preferences,
+		html.EscapeString(entry.FirstName),
+		html.EscapeString(entry.LastName),
+		html.EscapeString(entry.Email),
+		html.EscapeString(entry.Phone),
+		html.EscapeString(entry.Status),
+		html.EscapeString(entry.Preferences),
 		entry.CreatedAt.Format("2006-01-02 03:04 PM"),
 	)
 
@@ -111,6 +113,24 @@ func GetWaitlist(c *gin.Context) {
 }
 
 func CreateWaitlist(c *gin.Context) {
+	var waitlistEnabled bool
+	err := database.Pool.QueryRow(c, "SELECT waitlist_enabled FROM settings WHERE id = 1").Scan(&waitlistEnabled)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			waitlistEnabled = true
+		} else {
+			slog.Error("create waitlist: failed to check waitlist setting", "error", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create waitlist entry"})
+			return
+		}
+	}
+
+	if !waitlistEnabled {
+		slog.Debug("create waitlist: rejected while waitlist is disabled")
+		c.JSON(http.StatusForbidden, gin.H{"error": "Waitlist is currently closed"})
+		return
+	}
+
 	firstName := c.PostForm("firstname")
 	lastName := c.PostForm("lastname")
 	email := c.PostForm("email")
@@ -124,7 +144,7 @@ func CreateWaitlist(c *gin.Context) {
 		VALUES ($1, $2, $3, $4, $5, $6)
 		RETURNING id`
 
-	err := database.Pool.QueryRow(c, query,
+	err = database.Pool.QueryRow(c, query,
 		firstName, lastName, email, phone, preferences, status,
 	).Scan(&newID)
 

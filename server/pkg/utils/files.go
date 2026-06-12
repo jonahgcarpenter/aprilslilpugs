@@ -20,8 +20,15 @@ func UploadAndCreateFile(c *gin.Context, formKey string, _ string) (*models.File
 		if errors.Is(err, http.ErrMissingFile) {
 			return nil, nil
 		}
+		var maxBytesErr *http.MaxBytesError
+		if errors.As(err, &maxBytesErr) {
+			return nil, ErrUploadTooLarge
+		}
 
 		return nil, fmt.Errorf("failed to read uploaded file %q: %w", formKey, err)
+	}
+	if fileHeader.Size > MaxPrivateFileUploadBytes {
+		return nil, ErrUploadTooLarge
 	}
 
 	srcFile, err := fileHeader.Open()
